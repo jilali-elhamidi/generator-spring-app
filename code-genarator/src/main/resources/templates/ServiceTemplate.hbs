@@ -1,0 +1,17 @@
+package com.example.modules.{{module}}.service;
+
+import com.example.core.service.BaseService;
+import com.example.modules.{{module}}.model.{{entityName}};
+import com.example.modules.{{module}}.repository.{{entityName}}Repository;
+import org.springframework.stereotype.Service;
+
+@Service
+public class {{entityName}}Service extends BaseService<{{entityName}}> {
+
+protected final {{entityName}}Repository {{entityNameLowercase}}Repository;
+
+public {{entityName}}Service({{entityName}}Repository repository) {
+super(repository);
+this.{{entityNameLowercase}}Repository = repository;
+}
+}

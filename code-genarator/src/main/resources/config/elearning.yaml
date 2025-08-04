@@ -1,0 +1,47 @@
+module: elearning
+entities:
+  - name: Course
+    fields:
+      - name: title
+        type: String
+      - name: description
+        type: String
+    relationships:
+      - name: lessons
+        type: Lesson
+        relationType: OneToMany
+        mappedBy: course
+        fetch: LAZY
+      - name: instructor
+        type: Instructor
+        relationType: ManyToOne
+        joinColumn: instructor_id
+        fetch: EAGER
+
+  - name: Instructor
+    fields:
+      - name: firstName
+        type: String
+      - name: lastName
+        type: String
+      - name: email
+        type: String
+    relationships:
+      - name: courses
+        type: Course
+        relationType: OneToMany
+        mappedBy: instructor
+        fetch: LAZY
+
+  - name: Lesson
+    fields:
+      - name: title
+        type: String
+      - name: content
+        type: String
+    relationships:
+      - name: course
+        type: Course
+        relationType: ManyToOne
+        joinColumn: course_id
+        fetch: EAGER

@@ -1,0 +1,58 @@
+package com.example.modules.{{module}}.model;
+
+import com.example.core.module.BaseEntity;
+import jakarta.persistence.*;
+{{#each relationships}}
+    {{#if (eq relationType "ManyToOne")}}
+        import com.example.modules.{{../module}}.model.{{type}};
+    {{/if}}
+{{/each}}
+{{#if hasListRelationship}}
+    import java.util.List;
+{{/if}}
+{{#if hasDate}}
+    import java.util.Date;
+{{/if}}
+
+@Entity
+@Table(name = "{{entityNameLowercase}}_tbl")
+public class {{entityName}} extends BaseEntity {
+
+{{#each fields}}
+    private {{type}} {{name}};
+{{/each}}
+
+{{#each relationships}}
+    {{#if (eq relationType "OneToMany")}}
+        @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.{{fetch}})
+        private List<{{{type}}}> {{name}};
+    {{/if}}
+    {{#if (eq relationType "ManyToOne")}}
+        @ManyToOne(fetch = FetchType.{{fetch}})
+        @JoinColumn(name = "{{joinColumn}}")
+        private {{type}} {{name}};
+    {{/if}}
+{{/each}}
+
+// Getters et Setters
+{{#each fields}}
+    public {{type}} get{{capitalize name}}() {
+    return {{name}};
+    }
+
+    public void set{{capitalize name}}({{type}} {{name}}) {
+    this.{{name}} = {{name}};
+    }
+{{/each}}
+
+{{#each relationships}}
+    public {{#if (eq relationType "OneToMany")}}List<{{{type}}}>{{else}}{{type}}{{/if}} get{{capitalize name}}() {
+    return {{name}};
+    }
+
+    public void set{{capitalize name}}({{#if (eq relationType "OneToMany")}}List<{{{type}}}>{{else}}{{type}}{{/if}} {{name}}) {
+    this.{{name}} = {{name}};
+    }
+{{/each}}
+
+}

@@ -1,0 +1,23 @@
+# src/main/resources/config/ecommerce.yaml
+module: ecommerce
+entities:
+  - name: Product
+    fields:
+      - name: name
+        type: String
+      - name: stock
+        type: Integer
+      - name: price
+        type: Double
+  - name: Order
+    fields:
+      - name: orderDate
+        type: Date
+      - name: status
+        type: String
+    relationships:
+      - name: product
+        type: Product
+        joinColumn: product_id
+        fetch: EAGER
+

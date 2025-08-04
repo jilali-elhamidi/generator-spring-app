@@ -1,0 +1,46 @@
+package com.example.modules.{{module}}.controller;
+
+import com.example.modules.{{module}}.model.{{entityName}};
+import com.example.modules.{{module}}.service.{{entityName}}Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/{{entityNameLowercase}}s")
+public class {{entityName}}Controller {
+
+private final {{entityName}}Service {{entityNameLowercase}}Service;
+
+public {{entityName}}Controller({{entityName}}Service {{entityNameLowercase}}Service) {
+this.{{entityNameLowercase}}Service = {{entityNameLowercase}}Service;
+}
+
+@GetMapping
+public ResponseEntity<List<{{entityName}}>> getAll{{entityName}}s() {
+return ResponseEntity.ok({{entityNameLowercase}}Service.findAll());
+}
+
+@GetMapping("/{id}")
+public ResponseEntity<{{entityName}}> get{{entityName}}ById(@PathVariable Long id) {
+return {{entityNameLowercase}}Service.findById(id)
+.map(ResponseEntity::ok)
+.orElse(ResponseEntity.notFound().build());
+}
+
+@PostMapping
+public ResponseEntity<{{entityName}}> create{{entityName}}(@RequestBody {{entityName}} {{entityNameLowercase}}) {
+return ResponseEntity.ok({{entityNameLowercase}}Service.save({{entityNameLowercase}}));
+}
+
+@PutMapping("/{id}")
+public ResponseEntity<{{entityName}}> update{{entityName}}(@PathVariable Long id, @RequestBody {{entityName}} {{entityNameLowercase}}) {
+return ResponseEntity.ok({{entityNameLowercase}}Service.save({{entityNameLowercase}}));
+}
+
+@DeleteMapping("/{id}")
+public ResponseEntity<Void> delete{{entityName}}(@PathVariable Long id) {
+    {{entityNameLowercase}}Service.deleteById(id);
+    return ResponseEntity.noContent().build();
+    }
+    }
