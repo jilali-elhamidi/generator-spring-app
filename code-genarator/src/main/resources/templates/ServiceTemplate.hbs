@@ -3,15 +3,69 @@ package com.example.modules.{{module}}.service;
 import com.example.core.service.BaseService;
 import com.example.modules.{{module}}.model.{{entityName}};
 import com.example.modules.{{module}}.repository.{{entityName}}Repository;
+{{#each relationships}}
+    {{#if (eq relationType "ManyToOne")}}
+        import com.example.modules.{{../module}}.model.{{type}};
+        import com.example.modules.{{../module}}.repository.{{type}}Repository;
+    {{/if}}
+    {{#if (eq relationType "OneToMany")}}
+        import com.example.modules.{{../module}}.model.{{type}};
+    {{/if}}
+{{/each}}
+
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 @Service
 public class {{entityName}}Service extends BaseService<{{entityName}}> {
 
 protected final {{entityName}}Repository {{entityNameLowercase}}Repository;
 
-public {{entityName}}Service({{entityName}}Repository repository) {
+{{#each relationships}}
+    {{#if (eq relationType "ManyToOne")}}
+        private final {{type}}Repository {{name}}Repository;
+    {{/if}}
+{{/each}}
+
+public {{entityName}}Service(
+{{entityName}}Repository repository
+{{#each relationships}}
+    {{#if (eq relationType "ManyToOne")}}, {{type}}Repository {{name}}Repository{{/if}}
+{{/each}}
+) {
 super(repository);
 this.{{entityNameLowercase}}Repository = repository;
+{{#each relationships}}
+    {{#if (eq relationType "ManyToOne")}}this.{{name}}Repository = {{name}}Repository;{{/if}}
+{{/each}}
+}
+
+@Override
+public {{entityName}} save({{entityName}} {{entityNameLowercase}}) {
+
+{{!-- Attach ManyToOne entities --}}
+{{#each relationships}}
+    {{#if (eq relationType "ManyToOne")}}
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null &&
+        {{../entityNameLowercase}}.get{{capitalize name}}().getId() != null) {
+        {{type}} {{name}} = {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
+        .orElseThrow(() -> new RuntimeException("{{type}} not found"));
+        {{../entityNameLowercase}}.set{{capitalize name}}({{name}});
+        }
+    {{/if}}
+{{/each}}
+
+{{!-- Set parent in OneToMany items --}}
+{{#each relationships}}
+    {{#if (eq relationType "OneToMany")}}
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
+        for ({{type}} item : {{../entityNameLowercase}}.get{{capitalize name}}()) {
+        item.set{{capitalize mappedBy}}({{../entityNameLowercase}});
+        }
+        }
+    {{/if}}
+{{/each}}
+
+return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
 }
 }

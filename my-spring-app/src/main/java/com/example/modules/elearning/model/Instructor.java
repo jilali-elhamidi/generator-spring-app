@@ -2,12 +2,17 @@ package com.example.modules.elearning.model;
 
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+
+    import com.example.modules.elearning.model.Course;
 
 import java.util.List;
 
 
 @Entity
 @Table(name = "instructor_tbl")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Instructor extends BaseEntity {
 
 
@@ -20,13 +25,18 @@ public class Instructor extends BaseEntity {
 
 
     
-    @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Course> courses;
+        @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("instructor") // éviter boucle infinie
+        private List<Course> courses;
     
+
+    
+
     
 
 
 // Getters et Setters
+
 
     public String getFirstName() {
     return firstName;
@@ -61,6 +71,5 @@ public class Instructor extends BaseEntity {
     public void setCourses(List<Course> courses) {
     this.courses = courses;
     }
-
 
 }

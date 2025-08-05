@@ -1,6 +1,19 @@
-# src/main/resources/config/ecommerce.yaml
 module: ecommerce
+
 entities:
+  - name: Category
+    fields:
+      - name: name
+        type: String
+      - name: description
+        type: String
+    relationships:
+      - name: products
+        type: Product
+        relationType: OneToMany
+        mappedBy: category
+        fetch: LAZY
+
   - name: Product
     fields:
       - name: name
@@ -9,6 +22,52 @@ entities:
         type: Integer
       - name: price
         type: Double
+      - name: description
+        type: String
+    relationships:
+      - name: category
+        type: Category
+        relationType: ManyToOne
+        joinColumn: category_id
+        fetch: EAGER
+
+  - name: User
+    fields:
+      - name: username
+        type: String
+      - name: email
+        type: String
+      - name: phone
+        type: String
+    relationships:
+      - name: addresses
+        type: Address
+        relationType: OneToMany
+        mappedBy: user
+        fetch: LAZY
+      - name: orders
+        type: Order
+        relationType: OneToMany
+        mappedBy: user
+        fetch: LAZY
+
+  - name: Address
+    fields:
+      - name: street
+        type: String
+      - name: city
+        type: String
+      - name: postalCode
+        type: String
+      - name: country
+        type: String
+    relationships:
+      - name: user
+        type: User
+        relationType: ManyToOne
+        joinColumn: user_id
+        fetch: LAZY
+
   - name: Order
     fields:
       - name: orderDate
@@ -16,8 +75,61 @@ entities:
       - name: status
         type: String
     relationships:
-      - name: product
-        type: Product
-        joinColumn: product_id
+      - name: user
+        type: User
+        relationType: ManyToOne
+        joinColumn: user_id
+        fetch: LAZY
+      - name: orderItems
+        type: OrderItem
+        relationType: OneToMany
+        mappedBy: order
+        fetch: EAGER
+      - name: payment
+        type: Payment
+        relationType: OneToOne
+        joinColumn: payment_id
+        fetch: EAGER
+      - name: shipment
+        type: Shipment
+        relationType: OneToOne
+        joinColumn: shipment_id
         fetch: EAGER
 
+  - name: OrderItem
+    fields:
+      - name: quantity
+        type: Integer
+      - name: price
+        type: Double
+    relationships:
+      - name: product
+        type: Product
+        relationType: ManyToOne
+        joinColumn: product_id
+        fetch: EAGER
+      - name: order
+        type: Order
+        relationType: ManyToOne
+        joinColumn: order_id
+        fetch: EAGER
+
+  - name: Payment
+    fields:
+      - name: method
+        type: String
+      - name: paymentDate
+        type: Date
+      - name: amount
+        type: Double
+    relationships: []
+
+  - name: Shipment
+    fields:
+      - name: shipmentDate
+        type: Date
+      - name: carrier
+        type: String
+      - name: trackingNumber
+        type: String
+    relationships: []

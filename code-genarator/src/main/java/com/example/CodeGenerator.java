@@ -31,24 +31,17 @@ public class CodeGenerator {
         // Helpers standards
         this.handlebars.registerHelper("capitalize", StringHelpers.capitalize);
 
-        // Helper eq pour comparer des chaînes dans les templates
-        this.handlebars.registerHelper("eq", new Helper<Object>() {
-            @Override
-            public Object apply(Object a, Options options) {
-                if (a == null || options.param(0) == null) {
-                    return false;
-                }
-                return a.toString().equals(options.param(0).toString());
-            }
+        // Helper de comparaison
+        this.handlebars.registerHelper("eq", (Helper<Object>) (a, options) -> {
+            Object b = options.param(0);
+            return a != null && a.toString().equals(b != null ? b.toString() : null);
         });
 
-        // Helpers personnalisés pour la génération des relations
+        // Helpers relation
         this.handlebars.registerHelper("isOneToMany", (context, options) -> {
             if (context instanceof Map) {
                 Object typeObj = ((Map<?, ?>) context).get("type");
-                if (typeObj instanceof String) {
-                    return ((String) typeObj).startsWith("List<");
-                }
+                return typeObj instanceof String && ((String) typeObj).startsWith("List<");
             }
             return false;
         });
@@ -56,11 +49,27 @@ public class CodeGenerator {
         this.handlebars.registerHelper("isManyToOne", (context, options) -> {
             if (context instanceof Map) {
                 Object typeObj = ((Map<?, ?>) context).get("type");
-                if (typeObj instanceof String) {
-                    return !((String) typeObj).startsWith("List<");
-                }
+                return typeObj instanceof String && !((String) typeObj).startsWith("List<");
             }
             return false;
+        });
+
+        // ✅ Helper pour générer les propriétés à ignorer dans @JsonIgnoreProperties
+        this.handlebars.registerHelper("jsonIgnorePropsFor", (Helper<Object>) (entityNameObj, options) -> {
+            String entityName = entityNameObj.toString();
+            // Exemples personnalisés — ajoute ici tes règles
+            switch (entityName) {
+                case "Category":
+                    return "\"products\"";
+                case "User":
+                    return "\"orders\"";
+                case "Product":
+                    return "\"category\"";
+                case "Order":
+                    return "\"user\", \"orderItems\"";
+                default:
+                    return "\"unknown\"";
+            }
         });
     }
 
@@ -73,28 +82,25 @@ public class CodeGenerator {
             List<Map<String, Object>> entities = (List<Map<String, Object>>) data.get("entities");
 
             for (Map<String, Object> entity : entities) {
-                if (entity instanceof Map) {
-                    String entityName = (String) entity.get("name");
-                    String entityNameLowercase = entityName.toLowerCase();
-                    List<Map<String, String>> fields = (List<Map<String, String>>) entity.get("fields");
-                    List<Map<String, Object>> relationships = (List<Map<String, Object>>) entity.get("relationships");
+                String entityName = (String) entity.get("name");
+                String entityNameLowercase = entityName.toLowerCase();
+                List<Map<String, String>> fields = (List<Map<String, String>>) entity.get("fields");
+                List<Map<String, Object>> relationships = (List<Map<String, Object>>) entity.get("relationships");
 
-                    Map<String, Object> context = new HashMap<>();
-                    context.put("module", moduleName);
-                    context.put("entityName", entityName);
-                    context.put("entityNameLowercase", entityNameLowercase);
-                    context.put("fields", fields);
-                    context.put("relationships", relationships);
-                    context.put("hasListRelationship", relationships != null && relationships.stream().anyMatch(rel -> ((String) rel.get("type")).startsWith("List<")));
-                    context.put("hasDate", hasType(fields, "Date"));
+                Map<String, Object> context = new HashMap<>();
+                context.put("module", moduleName);
+                context.put("entityName", entityName);
+                context.put("entityNameLowercase", entityNameLowercase);
+                context.put("fields", fields);
+                context.put("relationships", relationships);
+                context.put("hasListRelationship", relationships != null &&
+                        relationships.stream().anyMatch(rel -> ((String) rel.get("type")).startsWith("List<")));
+                context.put("hasDate", hasType(fields, "Date"));
 
-                    generateJavaFile("EntityTemplate", outputDir, moduleName, entityName, "model", context);
-                    generateJavaFile("RepositoryTemplate", outputDir, moduleName, entityName, "repository", context);
-                    generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
-                    generateJavaFile("ControllerTemplate", outputDir, moduleName, entityName, "controller", context);
-                } else {
-                    System.err.println("Avertissement : Entité mal formée dans le fichier YAML. Ignorée.");
-                }
+                generateJavaFile("EntityTemplate", outputDir, moduleName, entityName, "model", context);
+                generateJavaFile("RepositoryTemplate", outputDir, moduleName, entityName, "repository", context);
+                generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
+                generateJavaFile("ControllerTemplate", outputDir, moduleName, entityName, "controller", context);
             }
         }
     }
@@ -104,18 +110,17 @@ public class CodeGenerator {
         return fields.stream().anyMatch(field -> type.equals(field.get("type")));
     }
 
-    private void generateJavaFile(String templateName, String outputDir, String moduleName, String entityName, String subPackage, Map<String, Object> context) throws IOException {
+    private void generateJavaFile(String templateName, String outputDir, String moduleName, String entityName,
+                                  String subPackage, Map<String, Object> context) throws IOException {
         Template template = handlebars.compile(templateName);
         String outputContent = template.apply(context);
 
-        String fileName = entityName;
-        if (subPackage.equals("repository")) {
-            fileName += "Repository";
-        } else if (subPackage.equals("service")) {
-            fileName += "Service";
-        } else if (subPackage.equals("controller")) {
-            fileName += "Controller";
-        }
+        String fileName = switch (subPackage) {
+            case "repository" -> entityName + "Repository";
+            case "service" -> entityName + "Service";
+            case "controller" -> entityName + "Controller";
+            default -> entityName;
+        };
 
         String relativePath = String.format("com/example/modules/%s/%s/%s.java", moduleName, subPackage, fileName);
         Path outputPath = Paths.get(outputDir, relativePath);
@@ -123,13 +128,13 @@ public class CodeGenerator {
         Files.createDirectories(outputPath.getParent());
         try (FileWriter writer = new FileWriter(outputPath.toFile())) {
             writer.write(outputContent);
-            System.out.println("Généré : " + outputPath);
+            System.out.println("✅ Généré : " + outputPath);
         }
     }
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
-            System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <repertoire-de-sortie>");
+            System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <répertoire-de-sortie>");
             return;
         }
 

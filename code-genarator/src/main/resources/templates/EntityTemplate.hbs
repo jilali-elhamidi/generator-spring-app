@@ -2,20 +2,23 @@ package com.example.modules.{{module}}.model;
 
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 {{#each relationships}}
-    {{#if (eq relationType "ManyToOne")}}
-        import com.example.modules.{{../module}}.model.{{type}};
-    {{/if}}
+    import com.example.modules.{{../module}}.model.{{type}};
 {{/each}}
+
 {{#if hasListRelationship}}
     import java.util.List;
 {{/if}}
+
 {{#if hasDate}}
     import java.util.Date;
 {{/if}}
 
 @Entity
 @Table(name = "{{entityNameLowercase}}_tbl")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class {{entityName}} extends BaseEntity {
 
 {{#each fields}}
@@ -25,16 +28,27 @@ public class {{entityName}} extends BaseEntity {
 {{#each relationships}}
     {{#if (eq relationType "OneToMany")}}
         @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.{{fetch}})
-        private List<{{{type}}}> {{name}};
+        @JsonIgnoreProperties("{{mappedBy}}") // éviter boucle infinie
+        private List<{{type}}> {{name}};
     {{/if}}
+
     {{#if (eq relationType "ManyToOne")}}
-        @ManyToOne(fetch = FetchType.{{fetch}})
+        @ManyToOne(fetch = FetchType.{{fetch}}, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "{{joinColumn}}")
+        @JsonIgnoreProperties("{{../entityNameLowercase}}") // éviter boucle
+        private {{type}} {{name}};
+    {{/if}}
+
+    {{#if (eq relationType "OneToOne")}}
+        @OneToOne(fetch = FetchType.{{fetch}}, cascade = CascadeType.ALL)
+        @JoinColumn(name = "{{joinColumn}}")
+        @JsonIgnoreProperties("{{../entityNameLowercase}}") // éviter boucle
         private {{type}} {{name}};
     {{/if}}
 {{/each}}
 
 // Getters et Setters
+
 {{#each fields}}
     public {{type}} get{{capitalize name}}() {
     return {{name}};
@@ -46,13 +60,12 @@ public class {{entityName}} extends BaseEntity {
 {{/each}}
 
 {{#each relationships}}
-    public {{#if (eq relationType "OneToMany")}}List<{{{type}}}>{{else}}{{type}}{{/if}} get{{capitalize name}}() {
+    public {{#if (eq relationType "OneToMany")}}List<{{type}}>{{else}}{{type}}{{/if}} get{{capitalize name}}() {
     return {{name}};
     }
 
-    public void set{{capitalize name}}({{#if (eq relationType "OneToMany")}}List<{{{type}}}>{{else}}{{type}}{{/if}} {{name}}) {
+    public void set{{capitalize name}}({{#if (eq relationType "OneToMany")}}List<{{type}}>{{else}}{{type}}{{/if}} {{name}}) {
     this.{{name}} = {{name}};
     }
 {{/each}}
-
 }
