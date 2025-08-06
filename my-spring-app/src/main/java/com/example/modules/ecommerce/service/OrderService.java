@@ -107,4 +107,55 @@ public Order save(Order order) {
 
 return orderRepository.save(order);
 }
+public Order update(Long id, Order orderRequest) {
+Order existing = orderRepository.findById(id)
+.orElseThrow(() -> new RuntimeException("Order not found"));
+
+// Copier les champs simples
+
+    existing.setOrderDate(orderRequest.getOrderDate());
+
+    existing.setStatus(orderRequest.getStatus());
+
+
+// Relations ManyToOne : mise à jour conditionnelle
+
+    
+        if (orderRequest.getUser() != null &&
+        orderRequest.getUser().getId() != null) {
+        User user = userRepository.findById(orderRequest.getUser().getId())
+        .orElseThrow(() -> new RuntimeException("User not found"));
+        existing.setUser(user);
+        }
+        // Sinon on garde la relation existante
+    
+
+    
+
+    
+
+    
+
+
+// Relations OneToMany : synchronisation sécurisée
+
+    
+
+    
+        existing.getOrderItems().clear();
+        if (orderRequest.getOrderItems() != null) {
+        for (var item : orderRequest.getOrderItems()) {
+        item.setOrder(existing); // remettre lien inverse
+        existing.getOrderItems().add(item);
+        }
+        }
+    
+
+    
+
+    
+
+
+return orderRepository.save(existing);
+}
 }

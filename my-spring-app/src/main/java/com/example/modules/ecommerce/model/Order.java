@@ -3,50 +3,66 @@ package com.example.modules.ecommerce.model;
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-
-    import com.example.modules.ecommerce.model.User;
-
-    import com.example.modules.ecommerce.model.OrderItem;
-
-    import com.example.modules.ecommerce.model.Payment;
-
-    import com.example.modules.ecommerce.model.Shipment;
-
-
-
-
-
-    import java.util.Date;
+import jakarta.validation.constraints.*;
 import java.util.List;
-
+import java.util.Date;
+import com.example.modules.ecommerce.model.User;import com.example.modules.ecommerce.model.OrderItem;import com.example.modules.ecommerce.model.Payment;import com.example.modules.ecommerce.model.Shipment;
 
 @Entity
 @Table(name = "order_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order extends BaseEntity {
 
+// === Attributs simples ===
 
+    
+        
+        @NotNull
+        
+            
+                
+            
+        
+        
+        
+        
+        
+    
     private Date orderDate;
 
+    
+        
+        @NotNull
+        
+            
+                
+            
+        
+        
+        
+        
+        
+    
     private String status;
 
 
+// === Relations ===
 
     
 
     
         @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "user_id")
-        @JsonIgnoreProperties("order") // éviter boucle
+        @JsonIgnoreProperties("orders")
+        
         private User user;
     
 
     
 
     
-        @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-        @JsonIgnoreProperties("order") // éviter boucle infinie
+        @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.EAGER)
+        @JsonIgnoreProperties("order")
         private List<OrderItem> orderItems;
     
 
@@ -61,7 +77,7 @@ public class Order extends BaseEntity {
     
         @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
         @JoinColumn(name = "payment_id")
-        @JsonIgnoreProperties("order") // éviter boucle
+        @JsonIgnoreProperties(value = "order", allowSetters = true)
         private Payment payment;
     
 
@@ -72,13 +88,12 @@ public class Order extends BaseEntity {
     
         @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
         @JoinColumn(name = "shipment_id")
-        @JsonIgnoreProperties("order") // éviter boucle
+        @JsonIgnoreProperties(value = "order", allowSetters = true)
         private Shipment shipment;
     
 
 
-// Getters et Setters
-
+// === Getters & Setters ===
 
     public Date getOrderDate() {
     return orderDate;

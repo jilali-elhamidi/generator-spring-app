@@ -60,4 +60,39 @@ public Address save(Address address) {
 
 return addressRepository.save(address);
 }
+public Address update(Long id, Address addressRequest) {
+Address existing = addressRepository.findById(id)
+.orElseThrow(() -> new RuntimeException("Address not found"));
+
+// Copier les champs simples
+
+    existing.setStreet(addressRequest.getStreet());
+
+    existing.setCity(addressRequest.getCity());
+
+    existing.setPostalCode(addressRequest.getPostalCode());
+
+    existing.setCountry(addressRequest.getCountry());
+
+
+// Relations ManyToOne : mise à jour conditionnelle
+
+    
+        if (addressRequest.getUser() != null &&
+        addressRequest.getUser().getId() != null) {
+        User user = userRepository.findById(addressRequest.getUser().getId())
+        .orElseThrow(() -> new RuntimeException("User not found"));
+        existing.setUser(user);
+        }
+        // Sinon on garde la relation existante
+    
+
+
+// Relations OneToMany : synchronisation sécurisée
+
+    
+
+
+return addressRepository.save(existing);
+}
 }

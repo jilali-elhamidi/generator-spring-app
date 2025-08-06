@@ -81,4 +81,47 @@ public Course save(Course course) {
 
 return courseRepository.save(course);
 }
+public Course update(Long id, Course courseRequest) {
+Course existing = courseRepository.findById(id)
+.orElseThrow(() -> new RuntimeException("Course not found"));
+
+// Copier les champs simples
+
+    existing.setTitle(courseRequest.getTitle());
+
+    existing.setDescription(courseRequest.getDescription());
+
+
+// Relations ManyToOne : mise à jour conditionnelle
+
+    
+
+    
+        if (courseRequest.getInstructor() != null &&
+        courseRequest.getInstructor().getId() != null) {
+        Instructor instructor = instructorRepository.findById(courseRequest.getInstructor().getId())
+        .orElseThrow(() -> new RuntimeException("Instructor not found"));
+        existing.setInstructor(instructor);
+        }
+        // Sinon on garde la relation existante
+    
+
+
+// Relations OneToMany : synchronisation sécurisée
+
+    
+        existing.getLessons().clear();
+        if (courseRequest.getLessons() != null) {
+        for (var item : courseRequest.getLessons()) {
+        item.setCourse(existing); // remettre lien inverse
+        existing.getLessons().add(item);
+        }
+        }
+    
+
+    
+
+
+return courseRepository.save(existing);
+}
 }

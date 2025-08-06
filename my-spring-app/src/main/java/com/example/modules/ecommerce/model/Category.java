@@ -3,28 +3,60 @@ package com.example.modules.ecommerce.model;
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-
-    import com.example.modules.ecommerce.model.Product;
-
+import jakarta.validation.constraints.*;
 import java.util.List;
 
+import com.example.modules.ecommerce.model.Product;
 
 @Entity
 @Table(name = "category_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Category extends BaseEntity {
 
+// === Attributs simples ===
 
+    
+        
+        @NotNull
+        
+            
+            
+            
+                
+                    @Size(min = 2, max = 100)
+                
+            
+        
+        
+        
+        
+        
+    
     private String name;
 
+    
+        
+        
+        
+            
+                
+                    @Size(max = 255)
+                
+            
+        
+        
+        
+        
+        
+    
     private String description;
 
 
+// === Relations ===
 
     
-        @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("category") // éviter boucle infinie
+        @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("category")
         private List<Product> products;
     
 
@@ -33,8 +65,7 @@ public class Category extends BaseEntity {
     
 
 
-// Getters et Setters
-
+// === Getters & Setters ===
 
     public String getName() {
     return name;

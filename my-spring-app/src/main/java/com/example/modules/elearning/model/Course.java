@@ -3,30 +3,30 @@ package com.example.modules.elearning.model;
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-
-    import com.example.modules.elearning.model.Lesson;
-
-    import com.example.modules.elearning.model.Instructor;
-
+import jakarta.validation.constraints.*;
 import java.util.List;
 
+import com.example.modules.elearning.model.Lesson;import com.example.modules.elearning.model.Instructor;
 
 @Entity
 @Table(name = "course_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Course extends BaseEntity {
 
+// === Attributs simples ===
 
+    
     private String title;
 
+    
     private String description;
 
 
+// === Relations ===
 
     
-        @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("course") // éviter boucle infinie
+        @OneToMany(mappedBy = "course", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("course")
         private List<Lesson> lessons;
     
 
@@ -39,15 +39,15 @@ public class Course extends BaseEntity {
     
         @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "instructor_id")
-        @JsonIgnoreProperties("course") // éviter boucle
+        @JsonIgnoreProperties("courses")
+        
         private Instructor instructor;
     
 
     
 
 
-// Getters et Setters
-
+// === Getters & Setters ===
 
     public String getTitle() {
     return title;

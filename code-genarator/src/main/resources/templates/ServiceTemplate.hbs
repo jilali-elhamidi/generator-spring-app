@@ -68,4 +68,41 @@ public {{entityName}} save({{entityName}} {{entityNameLowercase}}) {
 
 return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
 }
+public {{entityName}} update(Long id, {{entityName}} {{entityNameLowercase}}Request) {
+{{entityName}} existing = {{entityNameLowercase}}Repository.findById(id)
+.orElseThrow(() -> new RuntimeException("{{entityName}} not found"));
+
+// Copier les champs simples
+{{#each fields}}
+    existing.set{{capitalize name}}({{entityNameLowercase}}Request.get{{capitalize name}}());
+{{/each}}
+
+// Relations ManyToOne : mise à jour conditionnelle
+{{#each relationships}}
+    {{#if (eq relationType "ManyToOne")}}
+        if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null &&
+        {{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
+        {{type}} {{name}} = {{name}}Repository.findById({{entityNameLowercase}}Request.get{{capitalize name}}().getId())
+        .orElseThrow(() -> new RuntimeException("{{type}} not found"));
+        existing.set{{capitalize name}}({{name}});
+        }
+        // Sinon on garde la relation existante
+    {{/if}}
+{{/each}}
+
+// Relations OneToMany : synchronisation sécurisée
+{{#each relationships}}
+    {{#if (eq relationType "OneToMany")}}
+        existing.get{{capitalize name}}().clear();
+        if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
+        for (var item : {{entityNameLowercase}}Request.get{{capitalize name}}()) {
+        item.set{{capitalize mappedBy}}(existing); // remettre lien inverse
+        existing.get{{capitalize name}}().add(item);
+        }
+        }
+    {{/if}}
+{{/each}}
+
+return {{entityNameLowercase}}Repository.save(existing);
+}
 }

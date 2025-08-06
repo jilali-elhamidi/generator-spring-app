@@ -5,131 +5,236 @@ entities:
     fields:
       - name: name
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
       - name: description
         type: String
+        validation:
+          size:
+            max: 255
     relationships:
       - name: products
         type: Product
         relationType: OneToMany
         mappedBy: category
+        inverseField: category
         fetch: LAZY
 
   - name: Product
     fields:
       - name: name
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
       - name: stock
         type: Integer
+        validation:
+          notNull: true
+          min: 0
       - name: price
         type: Double
+        validation:
+          notNull: true
+          min: 2
       - name: description
         type: String
+        validation:
+          size:
+            max: 500
     relationships:
       - name: category
         type: Category
         relationType: ManyToOne
         joinColumn: category_id
+        inverseField: products
         fetch: EAGER
 
   - name: User
     fields:
       - name: username
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 50
       - name: email
         type: String
+        validation:
+          notNull: true
+          email: true
       - name: phone
         type: String
+        validation:
+          size:
+            max: 20
     relationships:
       - name: addresses
         type: Address
         relationType: OneToMany
         mappedBy: user
+        inverseField: user
         fetch: LAZY
       - name: orders
         type: Order
         relationType: OneToMany
         mappedBy: user
+        inverseField: user
         fetch: LAZY
 
   - name: Address
     fields:
       - name: street
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 5
+            max: 100
       - name: city
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
       - name: postalCode
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 4
+            max: 10
       - name: country
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
     relationships:
       - name: user
         type: User
         relationType: ManyToOne
         joinColumn: user_id
+        inverseField: addresses
         fetch: LAZY
 
   - name: Order
     fields:
       - name: orderDate
         type: Date
+        validation:
+          notNull: true
       - name: status
         type: String
+        validation:
+          notNull: true
     relationships:
       - name: user
         type: User
         relationType: ManyToOne
         joinColumn: user_id
+        inverseField: orders
         fetch: LAZY
       - name: orderItems
         type: OrderItem
         relationType: OneToMany
         mappedBy: order
+        inverseField: order
         fetch: EAGER
       - name: payment
         type: Payment
         relationType: OneToOne
         joinColumn: payment_id
+        inverseField: order
         fetch: EAGER
       - name: shipment
         type: Shipment
         relationType: OneToOne
         joinColumn: shipment_id
+        inverseField: order
         fetch: EAGER
 
   - name: OrderItem
     fields:
       - name: quantity
         type: Integer
+        validation:
+          notNull: true
+          min: 1
       - name: price
         type: Double
+        validation:
+          notNull: true
+          min: 2
     relationships:
       - name: product
         type: Product
         relationType: ManyToOne
         joinColumn: product_id
+        inverseField: orderItems
         fetch: EAGER
       - name: order
         type: Order
         relationType: ManyToOne
         joinColumn: order_id
+        inverseField: orderItems
         fetch: EAGER
 
   - name: Payment
     fields:
       - name: method
         type: String
+        validation:
+          notNull: true
+          size:
+            max: 50
       - name: paymentDate
         type: Date
+        validation:
+          notNull: true
       - name: amount
         type: Double
-    relationships: []
+        validation:
+          notNull: true
+          min: 2
+    relationships:
+      - name: order
+        type: Order
+        relationType: OneToOne
+        mappedBy: payment
+        inverseField: payment
+        fetch: LAZY
 
   - name: Shipment
     fields:
       - name: shipmentDate
         type: Date
+        validation:
+          notNull: true
       - name: carrier
         type: String
+        validation:
+          notNull: true
+          size:
+            max: 100
       - name: trackingNumber
         type: String
-    relationships: []
+        validation:
+          notNull: true
+          size:
+            max: 100
+    relationships:
+      - name: order
+        type: Order
+        relationType: OneToOne
+        mappedBy: shipment
+        inverseField: shipment
+        fetch: LAZY

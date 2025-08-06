@@ -3,30 +3,33 @@ package com.example.modules.elearning.model;
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-
-    import com.example.modules.elearning.model.Course;
-
+import jakarta.validation.constraints.*;
 import java.util.List;
 
+import com.example.modules.elearning.model.Course;
 
 @Entity
 @Table(name = "instructor_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Instructor extends BaseEntity {
 
+// === Attributs simples ===
 
+    
     private String firstName;
 
+    
     private String lastName;
 
+    
     private String email;
 
 
+// === Relations ===
 
     
-        @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("instructor") // éviter boucle infinie
+        @OneToMany(mappedBy = "instructor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("instructor")
         private List<Course> courses;
     
 
@@ -35,8 +38,7 @@ public class Instructor extends BaseEntity {
     
 
 
-// Getters et Setters
-
+// === Getters & Setters ===
 
     public String getFirstName() {
     return firstName;

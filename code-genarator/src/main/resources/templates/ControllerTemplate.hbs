@@ -2,8 +2,12 @@ package com.example.modules.{{module}}.controller;
 
 import com.example.modules.{{module}}.model.{{entityName}};
 import com.example.modules.{{module}}.service.{{entityName}}Service;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -29,13 +33,28 @@ return {{entityNameLowercase}}Service.findById(id)
 }
 
 @PostMapping
-public ResponseEntity<{{entityName}}> create{{entityName}}(@RequestBody {{entityName}} {{entityNameLowercase}}) {
-return ResponseEntity.ok({{entityNameLowercase}}Service.save({{entityNameLowercase}}));
+public ResponseEntity<{{entityName}}> create{{entityName}}(
+@Valid @RequestBody {{entityName}} {{entityNameLowercase}},
+UriComponentsBuilder uriBuilder) {
+
+{{entityName}} saved = {{entityNameLowercase}}Service.save({{entityNameLowercase}});
+URI location = uriBuilder.path("/api/{{entityNameLowercase}}s/{id}")
+.buildAndExpand(saved.getId()).toUri();
+
+return ResponseEntity.created(location).body(saved);
 }
 
 @PutMapping("/{id}")
-public ResponseEntity<{{entityName}}> update{{entityName}}(@PathVariable Long id, @RequestBody {{entityName}} {{entityNameLowercase}}) {
-return ResponseEntity.ok({{entityNameLowercase}}Service.save({{entityNameLowercase}}));
+public ResponseEntity<{{entityName}}> update{{entityName}}(
+@PathVariable Long id,
+@Valid @RequestBody {{entityName}} {{entityNameLowercase}}Request) {
+
+try {
+{{entityName}} updated = {{entityNameLowercase}}Service.update(id, {{entityNameLowercase}}Request);
+return ResponseEntity.ok(updated);
+} catch (RuntimeException e) {
+return ResponseEntity.notFound().build();
+}
 }
 
 @DeleteMapping("/{id}")

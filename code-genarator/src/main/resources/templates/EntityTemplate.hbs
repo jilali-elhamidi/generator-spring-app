@@ -3,52 +3,69 @@ package com.example.modules.{{module}}.model;
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-{{#each relationships}}
-    import com.example.modules.{{../module}}.model.{{type}};
-{{/each}}
-
-{{#if hasListRelationship}}
-    import java.util.List;
-{{/if}}
-
-{{#if hasDate}}
-    import java.util.Date;
-{{/if}}
+import jakarta.validation.constraints.*;
+import java.util.List;
+{{#if hasDate}}import java.util.Date;{{/if}}
+{{#each relationships}}import com.example.modules.{{../module}}.model.{{type}};{{/each}}
 
 @Entity
 @Table(name = "{{entityNameLowercase}}_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class {{entityName}} extends BaseEntity {
 
+// === Attributs simples ===
 {{#each fields}}
+    {{#if validation}}
+        {{#if validation.notBlank}}@NotBlank{{/if}}
+        {{#if validation.notNull}}@NotNull{{/if}}
+        {{#if validation.size}}
+            {{#if validation.size.min}}
+            {{!-- min existe, on génère min --}}
+            {{!-- mais on attend max aussi pour générer le @Size complet --}}
+                {{#if validation.size.max}}
+                    @Size(min = {{validation.size.min}}, max = {{validation.size.max}})
+                {{else}}
+                    @Size(min = {{validation.size.min}})
+                {{/if}}
+            {{else}}
+                {{#if validation.size.max}}
+                    @Size(max = {{validation.size.max}})
+                {{/if}}
+            {{/if}}
+        {{/if}}
+        {{#if validation.min}}@Min({{validation.min}}){{/if}}
+        {{#if validation.max}}@Max({{validation.max}}){{/if}}
+        {{#if validation.positive}}@Positive{{/if}}
+        {{#if validation.email}}@Email{{/if}}
+    {{/if}}
     private {{type}} {{name}};
 {{/each}}
 
+// === Relations ===
 {{#each relationships}}
     {{#if (eq relationType "OneToMany")}}
-        @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.{{fetch}})
-        @JsonIgnoreProperties("{{mappedBy}}") // éviter boucle infinie
+        @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.{{fetch}})
+        @JsonIgnoreProperties("{{mappedBy}}")
         private List<{{type}}> {{name}};
     {{/if}}
 
     {{#if (eq relationType "ManyToOne")}}
         @ManyToOne(fetch = FetchType.{{fetch}}, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "{{joinColumn}}")
-        @JsonIgnoreProperties("{{../entityNameLowercase}}") // éviter boucle
+        @JsonIgnoreProperties("{{inverseField}}")
+        {{#if (eq ../validation true)}}@NotNull{{/if}}
         private {{type}} {{name}};
     {{/if}}
 
     {{#if (eq relationType "OneToOne")}}
         @OneToOne(fetch = FetchType.{{fetch}}, cascade = CascadeType.ALL)
         @JoinColumn(name = "{{joinColumn}}")
-        @JsonIgnoreProperties("{{../entityNameLowercase}}") // éviter boucle
+        @JsonIgnoreProperties("{{inverseField}}")
         private {{type}} {{name}};
     {{/if}}
 {{/each}}
 
-// Getters et Setters
-
+// === Getters & Setters ===
 {{#each fields}}
     public {{type}} get{{capitalize name}}() {
     return {{name}};

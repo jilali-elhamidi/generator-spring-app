@@ -56,4 +56,35 @@ public Category save(Category category) {
 
 return categoryRepository.save(category);
 }
+public Category update(Long id, Category categoryRequest) {
+Category existing = categoryRepository.findById(id)
+.orElseThrow(() -> new RuntimeException("Category not found"));
+
+// Copier les champs simples
+
+    existing.setName(categoryRequest.getName());
+
+    existing.setDescription(categoryRequest.getDescription());
+
+
+// Relations ManyToOne : mise à jour conditionnelle
+
+    
+
+
+// Relations OneToMany : synchronisation sécurisée
+
+    
+        existing.getProducts().clear();
+        if (categoryRequest.getProducts() != null) {
+        for (var item : categoryRequest.getProducts()) {
+        item.setCategory(existing); // remettre lien inverse
+        existing.getProducts().add(item);
+        }
+        }
+    
+
+
+return categoryRepository.save(existing);
+}
 }

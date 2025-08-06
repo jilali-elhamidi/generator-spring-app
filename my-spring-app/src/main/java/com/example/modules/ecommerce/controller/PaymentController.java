@@ -2,8 +2,12 @@ package com.example.modules.ecommerce.controller;
 
 import com.example.modules.ecommerce.model.Payment;
 import com.example.modules.ecommerce.service.PaymentService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -29,13 +33,28 @@ return paymentService.findById(id)
 }
 
 @PostMapping
-public ResponseEntity<Payment> createPayment(@RequestBody Payment payment) {
-return ResponseEntity.ok(paymentService.save(payment));
+public ResponseEntity<Payment> createPayment(
+@Valid @RequestBody Payment payment,
+UriComponentsBuilder uriBuilder) {
+
+Payment saved = paymentService.save(payment);
+URI location = uriBuilder.path("/api/payments/{id}")
+.buildAndExpand(saved.getId()).toUri();
+
+return ResponseEntity.created(location).body(saved);
 }
 
 @PutMapping("/{id}")
-public ResponseEntity<Payment> updatePayment(@PathVariable Long id, @RequestBody Payment payment) {
-return ResponseEntity.ok(paymentService.save(payment));
+public ResponseEntity<Payment> updatePayment(
+@PathVariable Long id,
+@Valid @RequestBody Payment paymentRequest) {
+
+try {
+Payment updated = paymentService.update(id, paymentRequest);
+return ResponseEntity.ok(updated);
+} catch (RuntimeException e) {
+return ResponseEntity.notFound().build();
+}
 }
 
 @DeleteMapping("/{id}")

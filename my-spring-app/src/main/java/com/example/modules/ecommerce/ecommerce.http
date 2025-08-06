@@ -12,3 +12,84 @@ Accept: application/json
   "username": "testuser",
   "email": "test@example.com"
 }
+
+### PUT un nouvel utilisateur
+PUT http://localhost:8080/api/users/1
+Content-Type: application/json
+Accept: application/json
+
+{
+"username": "updatedUser",
+"email": "updated@example.com"
+}
+
+### Get products
+GET http://localhost:8080/api/products
+Accept: application/json
+
+
+###Create New Produit
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "Ordinateur Portable",
+  "stock": 15,
+  "price": 899.99
+}
+###get order
+GET http://localhost:8080/api/orders
+Accept: application/json
+
+
+###order withot item
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+
+{
+  "userId": 2
+}
+
+###orderitem
+POST http://localhost:8080/api/orderitems
+Content-Type: application/json
+
+{
+  "orderId": 1,
+  "productId": 1,
+  "quantity": 2
+}
+###creer instructor
+POST http://localhost:8080/api/instructors
+Content-Type: application/json
+
+{
+  "firstName": "Ahmed",
+  "lastName": "El Idrissi",
+  "email": "ahmed@example.com"
+}
+
+###creer cour
+POST http://localhost:8080/api/courses
+Content-Type: application/json
+
+{
+  "title": "Programmation Java",
+  "description": "Introduction à la programmation Java.",
+  "instructor": {
+    "id": 1
+  }
+}
+
+###lesson
+POST http://localhost:8080/api/lessons
+Content-Type: application/json
+Accept: application/json
+
+{
+  "title": "Introduction au HTML",
+  "content": "Dans cette leçon, nous allons découvrir les bases du HTML.",
+  "course": {
+    "id": 1
+  }
+}

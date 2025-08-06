@@ -2,8 +2,12 @@ package com.example.modules.ecommerce.controller;
 
 import com.example.modules.ecommerce.model.Shipment;
 import com.example.modules.ecommerce.service.ShipmentService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -29,13 +33,28 @@ return shipmentService.findById(id)
 }
 
 @PostMapping
-public ResponseEntity<Shipment> createShipment(@RequestBody Shipment shipment) {
-return ResponseEntity.ok(shipmentService.save(shipment));
+public ResponseEntity<Shipment> createShipment(
+@Valid @RequestBody Shipment shipment,
+UriComponentsBuilder uriBuilder) {
+
+Shipment saved = shipmentService.save(shipment);
+URI location = uriBuilder.path("/api/shipments/{id}")
+.buildAndExpand(saved.getId()).toUri();
+
+return ResponseEntity.created(location).body(saved);
 }
 
 @PutMapping("/{id}")
-public ResponseEntity<Shipment> updateShipment(@PathVariable Long id, @RequestBody Shipment shipment) {
-return ResponseEntity.ok(shipmentService.save(shipment));
+public ResponseEntity<Shipment> updateShipment(
+@PathVariable Long id,
+@Valid @RequestBody Shipment shipmentRequest) {
+
+try {
+Shipment updated = shipmentService.update(id, shipmentRequest);
+return ResponseEntity.ok(updated);
+} catch (RuntimeException e) {
+return ResponseEntity.notFound().build();
+}
 }
 
 @DeleteMapping("/{id}")

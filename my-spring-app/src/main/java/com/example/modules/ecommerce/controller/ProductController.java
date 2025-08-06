@@ -2,8 +2,12 @@ package com.example.modules.ecommerce.controller;
 
 import com.example.modules.ecommerce.model.Product;
 import com.example.modules.ecommerce.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -29,13 +33,28 @@ return productService.findById(id)
 }
 
 @PostMapping
-public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-return ResponseEntity.ok(productService.save(product));
+public ResponseEntity<Product> createProduct(
+@Valid @RequestBody Product product,
+UriComponentsBuilder uriBuilder) {
+
+Product saved = productService.save(product);
+URI location = uriBuilder.path("/api/products/{id}")
+.buildAndExpand(saved.getId()).toUri();
+
+return ResponseEntity.created(location).body(saved);
 }
 
 @PutMapping("/{id}")
-public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
-return ResponseEntity.ok(productService.save(product));
+public ResponseEntity<Product> updateProduct(
+@PathVariable Long id,
+@Valid @RequestBody Product productRequest) {
+
+try {
+Product updated = productService.update(id, productRequest);
+return ResponseEntity.ok(updated);
+} catch (RuntimeException e) {
+return ResponseEntity.notFound().build();
+}
 }
 
 @DeleteMapping("/{id}")

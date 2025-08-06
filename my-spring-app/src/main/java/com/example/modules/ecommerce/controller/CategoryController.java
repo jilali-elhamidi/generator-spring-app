@@ -2,8 +2,12 @@ package com.example.modules.ecommerce.controller;
 
 import com.example.modules.ecommerce.model.Category;
 import com.example.modules.ecommerce.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -29,13 +33,28 @@ return categoryService.findById(id)
 }
 
 @PostMapping
-public ResponseEntity<Category> createCategory(@RequestBody Category category) {
-return ResponseEntity.ok(categoryService.save(category));
+public ResponseEntity<Category> createCategory(
+@Valid @RequestBody Category category,
+UriComponentsBuilder uriBuilder) {
+
+Category saved = categoryService.save(category);
+URI location = uriBuilder.path("/api/categorys/{id}")
+.buildAndExpand(saved.getId()).toUri();
+
+return ResponseEntity.created(location).body(saved);
 }
 
 @PutMapping("/{id}")
-public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category category) {
-return ResponseEntity.ok(categoryService.save(category));
+public ResponseEntity<Category> updateCategory(
+@PathVariable Long id,
+@Valid @RequestBody Category categoryRequest) {
+
+try {
+Category updated = categoryService.update(id, categoryRequest);
+return ResponseEntity.ok(updated);
+} catch (RuntimeException e) {
+return ResponseEntity.notFound().build();
+}
 }
 
 @DeleteMapping("/{id}")

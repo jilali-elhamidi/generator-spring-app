@@ -2,8 +2,12 @@ package com.example.modules.elearning.controller;
 
 import com.example.modules.elearning.model.Course;
 import com.example.modules.elearning.service.CourseService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -29,13 +33,28 @@ return courseService.findById(id)
 }
 
 @PostMapping
-public ResponseEntity<Course> createCourse(@RequestBody Course course) {
-return ResponseEntity.ok(courseService.save(course));
+public ResponseEntity<Course> createCourse(
+@Valid @RequestBody Course course,
+UriComponentsBuilder uriBuilder) {
+
+Course saved = courseService.save(course);
+URI location = uriBuilder.path("/api/courses/{id}")
+.buildAndExpand(saved.getId()).toUri();
+
+return ResponseEntity.created(location).body(saved);
 }
 
 @PutMapping("/{id}")
-public ResponseEntity<Course> updateCourse(@PathVariable Long id, @RequestBody Course course) {
-return ResponseEntity.ok(courseService.save(course));
+public ResponseEntity<Course> updateCourse(
+@PathVariable Long id,
+@Valid @RequestBody Course courseRequest) {
+
+try {
+Course updated = courseService.update(id, courseRequest);
+return ResponseEntity.ok(updated);
+} catch (RuntimeException e) {
+return ResponseEntity.notFound().build();
+}
 }
 
 @DeleteMapping("/{id}")

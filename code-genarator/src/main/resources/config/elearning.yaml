@@ -11,11 +11,13 @@ entities:
         type: Lesson
         relationType: OneToMany
         mappedBy: course
+        inverseField: course
         fetch: LAZY
       - name: instructor
         type: Instructor
         relationType: ManyToOne
         joinColumn: instructor_id
+        inverseField: courses
         fetch: EAGER
 
   - name: Instructor
@@ -31,6 +33,7 @@ entities:
         type: Course
         relationType: OneToMany
         mappedBy: instructor
+        inverseField: instructor
         fetch: LAZY
 
   - name: Lesson
@@ -44,4 +47,5 @@ entities:
         type: Course
         relationType: ManyToOne
         joinColumn: course_id
+        inverseField: lessons
         fetch: EAGER

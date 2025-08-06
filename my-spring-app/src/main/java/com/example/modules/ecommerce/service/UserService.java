@@ -77,4 +77,49 @@ public User save(User user) {
 
 return userRepository.save(user);
 }
+public User update(Long id, User userRequest) {
+User existing = userRepository.findById(id)
+.orElseThrow(() -> new RuntimeException("User not found"));
+
+// Copier les champs simples
+
+    existing.setUsername(userRequest.getUsername());
+
+    existing.setEmail(userRequest.getEmail());
+
+    existing.setPhone(userRequest.getPhone());
+
+
+// Relations ManyToOne : mise à jour conditionnelle
+
+    
+
+    
+
+
+// Relations OneToMany : synchronisation sécurisée
+
+    
+        existing.getAddresses().clear();
+        if (userRequest.getAddresses() != null) {
+        for (var item : userRequest.getAddresses()) {
+        item.setUser(existing); // remettre lien inverse
+        existing.getAddresses().add(item);
+        }
+        }
+    
+
+    
+        existing.getOrders().clear();
+        if (userRequest.getOrders() != null) {
+        for (var item : userRequest.getOrders()) {
+        item.setUser(existing); // remettre lien inverse
+        existing.getOrders().add(item);
+        }
+        }
+    
+
+
+return userRepository.save(existing);
+}
 }

@@ -60,4 +60,35 @@ public Lesson save(Lesson lesson) {
 
 return lessonRepository.save(lesson);
 }
+public Lesson update(Long id, Lesson lessonRequest) {
+Lesson existing = lessonRepository.findById(id)
+.orElseThrow(() -> new RuntimeException("Lesson not found"));
+
+// Copier les champs simples
+
+    existing.setTitle(lessonRequest.getTitle());
+
+    existing.setContent(lessonRequest.getContent());
+
+
+// Relations ManyToOne : mise à jour conditionnelle
+
+    
+        if (lessonRequest.getCourse() != null &&
+        lessonRequest.getCourse().getId() != null) {
+        Course course = courseRepository.findById(lessonRequest.getCourse().getId())
+        .orElseThrow(() -> new RuntimeException("Course not found"));
+        existing.setCourse(course);
+        }
+        // Sinon on garde la relation existante
+    
+
+
+// Relations OneToMany : synchronisation sécurisée
+
+    
+
+
+return lessonRepository.save(existing);
+}
 }
