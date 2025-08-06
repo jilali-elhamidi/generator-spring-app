@@ -7,82 +7,55 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 {{#if hasDate}}import java.util.Date;{{/if}}
 {{#each relationships}}import com.example.modules.{{../module}}.model.{{type}};{{/each}}
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "{{entityNameLowercase}}_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class {{entityName}} extends BaseEntity {
 
 // === Attributs simples ===
-{{#each fields}}
-    {{#if validation}}
-        {{#if validation.notBlank}}@NotBlank{{/if}}
-        {{#if validation.notNull}}@NotNull{{/if}}
-        {{#if validation.size}}
-            {{#if validation.size.min}}
-            {{!-- min existe, on génère min --}}
-            {{!-- mais on attend max aussi pour générer le @Size complet --}}
-                {{#if validation.size.max}}
-                    @Size(min = {{validation.size.min}}, max = {{validation.size.max}})
-                {{else}}
-                    @Size(min = {{validation.size.min}})
-                {{/if}}
-            {{else}}
-                {{#if validation.size.max}}
-                    @Size(max = {{validation.size.max}})
-                {{/if}}
-            {{/if}}
-        {{/if}}
-        {{#if validation.min}}@Min({{validation.min}}){{/if}}
-        {{#if validation.max}}@Max({{validation.max}}){{/if}}
-        {{#if validation.positive}}@Positive{{/if}}
-        {{#if validation.email}}@Email{{/if}}
-    {{/if}}
+{{#each fields~}}
+{{#if validation}}
+    {{#if validation.notBlank}}@NotBlank{{/if~}}
+    {{#if validation.notNull}}@NotNull{{/if~}}
+    {{#if validation.size~}}
+        {{#if validation.size.min~}}
+            {{#if validation.size.max}}@Size(min = {{validation.size.min}}, max = {{validation.size.max}}){{else}}@Size(min = {{validation.size.min}}){{/if~}}
+            {{else~}}
+            {{#if validation.size.max}}@Size(max = {{validation.size.max}}){{/if~}}
+        {{/if~}}
+    {{/if~}}
+    {{#if validation.min}}@Min({{validation.min}}){{/if~}}
+    {{#if validation.max}}@Max({{validation.max}}){{/if~}}
+    {{#if validation.positive}}@Positive{{/if~}}
+    {{#if validation.email}}@Email{{/if~}}
+{{/if}}
     private {{type}} {{name}};
 {{/each}}
 
 // === Relations ===
-{{#each relationships}}
-    {{#if (eq relationType "OneToMany")}}
-        @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.{{fetch}})
-        @JsonIgnoreProperties("{{mappedBy}}")
-        private List<{{type}}> {{name}};
-    {{/if}}
+{{#each relationships~}}
+{{#if (eq relationType "ManyToOne")}}
+    @ManyToOne(fetch = FetchType.{{fetch}}, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "{{joinColumn}}")
+    @JsonIgnoreProperties("{{inverseField}}")
+    private {{type}} {{name}};
+{{/if~}}
+{{#if (eq relationType "OneToMany")}}
+    @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.{{fetch}})
+    @JsonIgnoreProperties("{{mappedBy}}")
+    private List<{{type}}> {{name}};
+{{/if~}}
+{{#if (eq relationType "OneToOne")}}
+    @OneToOne(fetch = FetchType.{{fetch}}, cascade = CascadeType.ALL)
+    @JoinColumn(name = "{{joinColumn}}")
+    @JsonIgnoreProperties("{{inverseField}}")
+    private {{type}} {{name}};
+{{/if~}}
 
-    {{#if (eq relationType "ManyToOne")}}
-        @ManyToOne(fetch = FetchType.{{fetch}}, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "{{joinColumn}}")
-        @JsonIgnoreProperties("{{inverseField}}")
-        {{#if (eq ../validation true)}}@NotNull{{/if}}
-        private {{type}} {{name}};
-    {{/if}}
-
-    {{#if (eq relationType "OneToOne")}}
-        @OneToOne(fetch = FetchType.{{fetch}}, cascade = CascadeType.ALL)
-        @JoinColumn(name = "{{joinColumn}}")
-        @JsonIgnoreProperties("{{inverseField}}")
-        private {{type}} {{name}};
-    {{/if}}
-{{/each}}
-
-// === Getters & Setters ===
-{{#each fields}}
-    public {{type}} get{{capitalize name}}() {
-    return {{name}};
-    }
-
-    public void set{{capitalize name}}({{type}} {{name}}) {
-    this.{{name}} = {{name}};
-    }
-{{/each}}
-
-{{#each relationships}}
-    public {{#if (eq relationType "OneToMany")}}List<{{type}}>{{else}}{{type}}{{/if}} get{{capitalize name}}() {
-    return {{name}};
-    }
-
-    public void set{{capitalize name}}({{#if (eq relationType "OneToMany")}}List<{{type}}>{{else}}{{type}}{{/if}} {{name}}) {
-    this.{{name}} = {{name}};
-    }
 {{/each}}
 }
