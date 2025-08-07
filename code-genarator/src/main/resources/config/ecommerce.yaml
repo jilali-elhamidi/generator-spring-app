@@ -152,15 +152,17 @@ entities:
       - name: payment
         type: Payment
         relationType: OneToOne
-        joinColumn: payment_id
-        inverseField: order
+        mappedBy: order # Corrigé : le champ "payment" de l'entité "Payment" est l'owner
+        inverseField: payment
         fetch: EAGER
+        owner: false # Corrigé : Order est non-owner
       - name: shipment
         type: Shipment
         relationType: OneToOne
-        joinColumn: shipment_id
-        inverseField: order
+        mappedBy: order # Corrigé : le champ "shipment" de l'entité "Shipment" est l'owner
+        inverseField: shipment
         fetch: EAGER
+        owner: false # Corrigé : Order est non-owner
 
   - name: OrderItem
     fields:
@@ -209,9 +211,10 @@ entities:
       - name: order
         type: Order
         relationType: OneToOne
-        mappedBy: payment
-        inverseField: payment
+        joinColumn: order_id # Corrigé : Payment est propriétaire de la clé étrangère
+        inverseField: order
         fetch: LAZY
+        owner: true # Corrigé : Payment est l'owner
 
   - name: Shipment
     fields:
@@ -230,11 +233,13 @@ entities:
         validation:
           notNull: true
           size:
+            min: 2
             max: 100
     relationships:
       - name: order
         type: Order
         relationType: OneToOne
-        mappedBy: shipment
-        inverseField: shipment
+        joinColumn: order_id
+        inverseField: order
         fetch: LAZY
+        owner: true

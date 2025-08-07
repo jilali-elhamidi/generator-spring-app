@@ -3,6 +3,8 @@ package com.example.modules.{{module}}.model;
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.validation.constraints.*;
 import java.util.List;
 {{#if hasDate}}import java.util.Date;{{/if}}
@@ -15,6 +17,7 @@ import lombok.EqualsAndHashCode;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Data
 @EqualsAndHashCode(callSuper = true)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class {{entityName}} extends BaseEntity {
 
 // === Attributs simples ===
@@ -38,24 +41,30 @@ public class {{entityName}} extends BaseEntity {
 {{/each}}
 
 // === Relations ===
-{{#each relationships~}}
-{{#if (eq relationType "ManyToOne")}}
-    @ManyToOne(fetch = FetchType.{{fetch}}, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+{{#each relationships}}
+    {{#if (eq relationType "ManyToOne")~}}
+        @ManyToOne(fetch = FetchType.{{fetch}}, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "{{joinColumn}}")
     @JsonIgnoreProperties("{{inverseField}}")
     private {{type}} {{name}};
-{{/if~}}
-{{#if (eq relationType "OneToMany")}}
-    @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.{{fetch}})
+    {{/if~}}
+    {{#if (eq relationType "OneToMany")~}}
+        @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.{{fetch}})
     @JsonIgnoreProperties("{{mappedBy}}")
     private List<{{type}}> {{name}};
-{{/if~}}
-{{#if (eq relationType "OneToOne")}}
-    @OneToOne(fetch = FetchType.{{fetch}}, cascade = CascadeType.ALL)
+    {{/if~}}
+    {{#if (eq relationType "OneToOne")~}}
+        {{#if owner~}}
+            @OneToOne
     @JoinColumn(name = "{{joinColumn}}")
     @JsonIgnoreProperties("{{inverseField}}")
     private {{type}} {{name}};
-{{/if~}}
-
+            {{else~}}
+            @OneToOne(mappedBy = "{{mappedBy}}", fetch = FetchType.{{fetch}}, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("{{inverseField}}")
+    private {{type}} {{name}};
+        {{/if~}}
+    {{/if~}}
 {{/each}}
+
 }
