@@ -14,52 +14,52 @@ import java.util.List;
 @RequestMapping("/api/{{entityNameLowercase}}s")
 public class {{entityName}}Controller {
 
-private final {{entityName}}Service {{entityNameLowercase}}Service;
+    private final {{entityName}}Service {{entityNameLowercase}}Service;
 
-public {{entityName}}Controller({{entityName}}Service {{entityNameLowercase}}Service) {
-this.{{entityNameLowercase}}Service = {{entityNameLowercase}}Service;
-}
-
-@GetMapping
-public ResponseEntity<List<{{entityName}}>> getAll{{entityName}}s() {
-return ResponseEntity.ok({{entityNameLowercase}}Service.findAll());
-}
-
-@GetMapping("/{id}")
-public ResponseEntity<{{entityName}}> get{{entityName}}ById(@PathVariable Long id) {
-return {{entityNameLowercase}}Service.findById(id)
-.map(ResponseEntity::ok)
-.orElse(ResponseEntity.notFound().build());
-}
-
-@PostMapping
-public ResponseEntity<{{entityName}}> create{{entityName}}(
-@Valid @RequestBody {{entityName}} {{entityNameLowercase}},
-UriComponentsBuilder uriBuilder) {
-
-{{entityName}} saved = {{entityNameLowercase}}Service.save({{entityNameLowercase}});
-URI location = uriBuilder.path("/api/{{entityNameLowercase}}s/{id}")
-.buildAndExpand(saved.getId()).toUri();
-
-return ResponseEntity.created(location).body(saved);
-}
-
-@PutMapping("/{id}")
-public ResponseEntity<{{entityName}}> update{{entityName}}(
-@PathVariable Long id,
-@Valid @RequestBody {{entityName}} {{entityNameLowercase}}Request) {
-
-try {
-{{entityName}} updated = {{entityNameLowercase}}Service.update(id, {{entityNameLowercase}}Request);
-return ResponseEntity.ok(updated);
-} catch (RuntimeException e) {
-return ResponseEntity.notFound().build();
-}
-}
-
-@DeleteMapping("/{id}")
-public ResponseEntity<Void> delete{{entityName}}(@PathVariable Long id) {
-    {{entityNameLowercase}}Service.deleteById(id);
-    return ResponseEntity.noContent().build();
+    public {{entityName}}Controller({{entityName}}Service {{entityNameLowercase}}Service) {
+        this.{{entityNameLowercase}}Service = {{entityNameLowercase}}Service;
     }
+
+    @GetMapping
+    public ResponseEntity<List<{{entityName}}>> getAll{{entityName}}s() {
+        return ResponseEntity.ok({{entityNameLowercase}}Service.findAll());
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<{{entityName}}> get{{entityName}}ById(@PathVariable Long id) {
+        return {{entityNameLowercase}}Service.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<{{entityName}}> create{{entityName}}(
+            @Valid @RequestBody {{entityName}} {{entityNameLowercase}},
+            UriComponentsBuilder uriBuilder) {
+
+        {{entityName}} saved = {{entityNameLowercase}}Service.save({{entityNameLowercase}});
+        URI location = uriBuilder.path("/api/{{entityNameLowercase}}s/{id}")
+                .buildAndExpand(saved.getId()).toUri();
+
+        return ResponseEntity.created(location).body(saved);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<{{entityName}}> update{{entityName}}(
+            @PathVariable Long id,
+            @Valid @RequestBody {{entityName}} {{entityNameLowercase}}Request) {
+
+        try {
+            {{entityName}} updated = {{entityNameLowercase}}Service.update(id, {{entityNameLowercase}}Request);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete{{entityName}}(@PathVariable Long id) {
+        {{entityNameLowercase}}Service.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}
