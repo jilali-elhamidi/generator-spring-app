@@ -1,13 +1,13 @@
 package com.example;
 
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import org.yaml.snakeyaml.Yaml;
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Options;
 
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -28,17 +28,32 @@ public class CodeGenerator {
         TemplateLoader loader = new ClassPathTemplateLoader("/templates", ".hbs");
         this.handlebars = new Handlebars(loader);
 
-        // Helpers standards
+        // Helper standard
         this.handlebars.registerHelper("capitalize", StringHelpers.capitalize);
 
-        // Helper de comparaison
+        // Helper eq (égalité simple)
         this.handlebars.registerHelper("eq", (Helper<Object>) (a, options) -> {
             Object b = options.param(0);
-            return a != null && a.toString().equals(b != null ? b.toString() : null);
+            if (a == null && b == null) return true;
+            if (a == null) return false;
+            return a.toString().equals(b != null ? b.toString() : null);
         });
 
-        // Helpers relation
-        this.handlebars.registerHelper("isOneToMany", (context, options) -> {
+        // ✅ Helper OR corrigé
+        this.handlebars.registerHelper("or", (Helper<Object>) (context, options) -> {
+            if (isTruthy(context)) {
+                return options.fn();
+            }
+            for (Object param : options.params) {
+                if (isTruthy(param)) {
+                    return options.fn();
+                }
+            }
+            return options.inverse();
+        });
+
+        // Helper relation OneToMany
+        this.handlebars.registerHelper("isOneToMany", (Helper<Object>) (context, options) -> {
             if (context instanceof Map) {
                 Object typeObj = ((Map<?, ?>) context).get("type");
                 return typeObj instanceof String && ((String) typeObj).startsWith("List<");
@@ -46,7 +61,8 @@ public class CodeGenerator {
             return false;
         });
 
-        this.handlebars.registerHelper("isManyToOne", (context, options) -> {
+        // Helper relation ManyToOne
+        this.handlebars.registerHelper("isManyToOne", (Helper<Object>) (context, options) -> {
             if (context instanceof Map) {
                 Object typeObj = ((Map<?, ?>) context).get("type");
                 return typeObj instanceof String && !((String) typeObj).startsWith("List<");
@@ -54,10 +70,9 @@ public class CodeGenerator {
             return false;
         });
 
-        // ✅ Helper pour générer les propriétés à ignorer dans @JsonIgnoreProperties
+        // Helper pour générer les propriétés ignorées dans @JsonIgnoreProperties
         this.handlebars.registerHelper("jsonIgnorePropsFor", (Helper<Object>) (entityNameObj, options) -> {
             String entityName = entityNameObj.toString();
-            // Exemples personnalisés — ajoute ici tes règles
             switch (entityName) {
                 case "Category":
                     return "\"products\"";
@@ -73,6 +88,14 @@ public class CodeGenerator {
         });
     }
 
+    private static boolean isTruthy(Object value) {
+        if (value == null) return false;
+        if (value instanceof Boolean) return (Boolean) value;
+        if (value instanceof Number) return ((Number) value).doubleValue() != 0;
+        if (value instanceof String) return !((String) value).isEmpty();
+        return true;
+    }
+
     public void generateCode(String yamlFilePath, String outputDir) throws IOException {
         Yaml yaml = new Yaml();
         try (InputStream inputStream = new FileInputStream(yamlFilePath)) {
@@ -80,6 +103,11 @@ public class CodeGenerator {
 
             String moduleName = (String) data.get("module");
             List<Map<String, Object>> entities = (List<Map<String, Object>>) data.get("entities");
+
+            if (entities == null) {
+                System.err.println("❌ Aucune entité définie dans le YAML");
+                return;
+            }
 
             for (Map<String, Object> entity : entities) {
                 String entityName = (String) entity.get("name");
@@ -110,8 +138,8 @@ public class CodeGenerator {
         return fields.stream().anyMatch(field -> type.equals(field.get("type")));
     }
 
-    private void generateJavaFile(String templateName, String outputDir, String moduleName, String entityName,
-                                  String subPackage, Map<String, Object> context) throws IOException {
+    private void generateJavaFile(String templateName, String outputDir, String moduleName,
+                                  String entityName, String subPackage, Map<String, Object> context) throws IOException {
         Template template = handlebars.compile(templateName);
         String outputContent = template.apply(context);
 
@@ -122,7 +150,8 @@ public class CodeGenerator {
             default -> entityName;
         };
 
-        String relativePath = String.format("com/example/modules/%s/%s/%s.java", moduleName, subPackage, fileName);
+        String relativePath = String.format("com/example/modules/%s/%s/%s.java",
+                moduleName, subPackage, fileName);
         Path outputPath = Paths.get(outputDir, relativePath);
 
         Files.createDirectories(outputPath.getParent());
@@ -137,10 +166,6 @@ public class CodeGenerator {
             System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <répertoire-de-sortie>");
             return;
         }
-
-        String yamlPath = args[0];
-        String outputDir = args[1];
-
-        new CodeGenerator().generateCode(yamlPath, outputDir);
+        new CodeGenerator().generateCode(args[0], args[1]);
     }
 }
