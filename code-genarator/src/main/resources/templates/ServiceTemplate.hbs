@@ -41,24 +41,39 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
     public {{entityName}} save({{entityName}} {{entityNameLowercase}}) {
 {{~#each relationships}}
     {{~#if (eq relationType "ManyToOne")}}
+
         if ({{../entityNameLowercase}}.get{{capitalize name}}() != null && {{../entityNameLowercase}}.get{{capitalize name}}().getId() != null) {
         {{type}} {{name}} = {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
             .orElseThrow(() -> new RuntimeException("{{type}} not found"));
         {{../entityNameLowercase}}.set{{capitalize name}}({{name}});
-    }
+        }
+
     {{~/if}}
 {{~/each}}
 
-
 {{~#each relationships}}
     {{~#if (eq relationType "OneToMany")}}
+
         if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
             for ({{type}} item : {{../entityNameLowercase}}.get{{capitalize name}}()) {
                 item.set{{capitalize mappedBy}}({{../entityNameLowercase}});
             }
-    }
+        }
+
     {{~/if}}
 {{~/each}}
+
+{{~#each relationships}}
+
+    {{~#if (eq relationType "OneToOne")}}
+
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
+        {{../entityNameLowercase}}.get{{capitalize name}}().set{{capitalize ../entityName}}({{../entityNameLowercase}});
+        }
+
+    {{~/if}}
+{{~/each}}
+
     return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
     }
 
@@ -73,6 +88,7 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 
 // Relations ManyToOne : mise à jour conditionnelle
 {{~#each relationships}}
+
 {{~#if (eq relationType "ManyToOne")}}
     if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null &&{{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
     {{type}} {{name}} = {{name}}Repository.findById({{entityNameLowercase}}Request.get{{capitalize name}}().getId())
@@ -86,6 +102,7 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 // Relations OneToMany : synchronisation sécurisée
 {{~#each relationships}}
 {{~#if (eq relationType "OneToMany")}}
+
     existing.get{{capitalize name}}().clear();
     if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
         for (var item : {{entityNameLowercase}}Request.get{{capitalize name}}()) {
@@ -97,5 +114,6 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 {{~/each}}
 
     return {{entityNameLowercase}}Repository.save(existing);
+
     }
 }
