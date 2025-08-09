@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CodeGenerator {
 
@@ -31,60 +32,39 @@ public class CodeGenerator {
         // Helper standard
         this.handlebars.registerHelper("capitalize", StringHelpers.capitalize);
 
-        // Helper eq (égalité simple)
+        // Helper logiques
         this.handlebars.registerHelper("eq", (Helper<Object>) (a, options) -> {
             Object b = options.param(0);
-            if (a == null && b == null) return true;
-            if (a == null) return false;
-            return a.toString().equals(b != null ? b.toString() : null);
+            return (a == null && b == null) || (a != null && a.equals(b));
         });
 
-        // ✅ Helper OR corrigé
+        this.handlebars.registerHelper("and", (Helper<Object>) (context, options) -> {
+            boolean result = isTruthy(context);
+            if (result) {
+                for (Object param : options.params) {
+                    if (!isTruthy(param)) {
+                        result = false;
+                        break;
+                    }
+                }
+            }
+            if (result) {
+                return options.fn(options.context);
+            } else {
+                return options.inverse();
+            }
+        });
+
         this.handlebars.registerHelper("or", (Helper<Object>) (context, options) -> {
             if (isTruthy(context)) {
-                return options.fn();
+                return options.fn(options.context);
             }
             for (Object param : options.params) {
                 if (isTruthy(param)) {
-                    return options.fn();
+                    return options.fn(options.context);
                 }
             }
             return options.inverse();
-        });
-
-        // Helper relation OneToMany
-        this.handlebars.registerHelper("isOneToMany", (Helper<Object>) (context, options) -> {
-            if (context instanceof Map) {
-                Object typeObj = ((Map<?, ?>) context).get("type");
-                return typeObj instanceof String && ((String) typeObj).startsWith("List<");
-            }
-            return false;
-        });
-
-        // Helper relation ManyToOne
-        this.handlebars.registerHelper("isManyToOne", (Helper<Object>) (context, options) -> {
-            if (context instanceof Map) {
-                Object typeObj = ((Map<?, ?>) context).get("type");
-                return typeObj instanceof String && !((String) typeObj).startsWith("List<");
-            }
-            return false;
-        });
-
-        // Helper pour générer les propriétés ignorées dans @JsonIgnoreProperties
-        this.handlebars.registerHelper("jsonIgnorePropsFor", (Helper<Object>) (entityNameObj, options) -> {
-            String entityName = entityNameObj.toString();
-            switch (entityName) {
-                case "Category":
-                    return "\"products\"";
-                case "User":
-                    return "\"orders\"";
-                case "Product":
-                    return "\"category\"";
-                case "Order":
-                    return "\"user\", \"orderItems\"";
-                default:
-                    return "\"unknown\"";
-            }
         });
     }
 
@@ -93,6 +73,8 @@ public class CodeGenerator {
         if (value instanceof Boolean) return (Boolean) value;
         if (value instanceof Number) return ((Number) value).doubleValue() != 0;
         if (value instanceof String) return !((String) value).isEmpty();
+        if (value instanceof List) return !((List) value).isEmpty();
+        if (value instanceof Map) return !((Map) value).isEmpty();
         return true;
     }
 
@@ -112,7 +94,7 @@ public class CodeGenerator {
             for (Map<String, Object> entity : entities) {
                 String entityName = (String) entity.get("name");
                 String entityNameLowercase = entityName.toLowerCase();
-                List<Map<String, String>> fields = (List<Map<String, String>>) entity.get("fields");
+                List<Map<String, Object>> fields = (List<Map<String, Object>>) entity.get("fields");
                 List<Map<String, Object>> relationships = (List<Map<String, Object>>) entity.get("relationships");
 
                 Map<String, Object> context = new HashMap<>();
@@ -121,8 +103,6 @@ public class CodeGenerator {
                 context.put("entityNameLowercase", entityNameLowercase);
                 context.put("fields", fields);
                 context.put("relationships", relationships);
-                context.put("hasListRelationship", relationships != null &&
-                        relationships.stream().anyMatch(rel -> ((String) rel.get("type")).startsWith("List<")));
                 context.put("hasDate", hasType(fields, "Date"));
 
                 generateJavaFile("EntityTemplate", outputDir, moduleName, entityName, "model", context);
@@ -133,7 +113,7 @@ public class CodeGenerator {
         }
     }
 
-    private boolean hasType(List<Map<String, String>> fields, String type) {
+    private boolean hasType(List<Map<String, Object>> fields, String type) {
         if (fields == null) return false;
         return fields.stream().anyMatch(field -> type.equals(field.get("type")));
     }

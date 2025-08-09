@@ -65,6 +65,20 @@ public class {{entityName}} extends BaseEntity {
     private {{type}} {{name}};
         {{/if~}}
     {{/if~}}
+    {{#if (eq relationType "ManyToMany")~}}
+        {{#if owner~}}
+            @ManyToMany(fetch = FetchType.{{fetch}})
+            @JoinTable(name = "{{joinTable}}",
+            joinColumns = @JoinColumn(name = "{{joinColumns}}"),
+            inverseJoinColumns = @JoinColumn(name = "{{inverseJoinColumns}}"))
+            @JsonIgnoreProperties("{{inverseField}}")
+            private List<{{type}}> {{name}};
+            {{else~}}
+            @ManyToMany(mappedBy = "{{mappedBy}}", fetch = FetchType.{{fetch}})
+            @JsonIgnoreProperties("{{inverseField}}")
+            private List<{{type}}> {{name}};
+        {{/if~}}
+    {{/if~}}
 {{/each}}
 
 }
