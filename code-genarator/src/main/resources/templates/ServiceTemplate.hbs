@@ -9,6 +9,9 @@ import com.example.modules.{{../module}}.model.{{type}};
 import com.example.modules.{{../module}}.repository.{{type}}Repository;
 {{~else if (eq relationType "OneToMany")}}
 import com.example.modules.{{../module}}.model.{{type}};
+{{~else if (eq relationType "ManyToMany")}}
+import com.example.modules.{{../module}}.model.{{type}};
+import com.example.modules.{{../module}}.repository.{{type}}Repository;
 {{~/if}}
 {{~/each}}
 
@@ -25,95 +28,118 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 {{~#if (eq relationType "ManyToOne")}}
     private final {{type}}Repository {{name}}Repository;
 {{~/if}}
+{{~#if (eq relationType "ManyToMany")}}
+    private final {{type}}Repository {{name}}Repository;
+{{~/if}}
 {{~/each}}
 
-    public {{entityName}}Service({{entityName}}Repository repository{{~#each relationships}}{{~#if (eq relationType "ManyToOne")}}, {{type}}Repository {{name}}Repository{{~/if}}{{~/each}}) {
-    super(repository);
-    this.{{entityNameLowercase}}Repository = repository;
-{{~#each relationships}}
-    {{~#if (eq relationType "ManyToOne")}}
-    this.{{name}}Repository = {{name}}Repository;
-    {{~/if}}
-{{~/each}}
-}
+    public {{entityName}}Service({{entityName}}Repository repository{{~#each relationships}}{{~#if (eq relationType "ManyToOne")}},{{type}}Repository {{name}}Repository{{~/if}}{{~#if (eq relationType "ManyToMany")}},{{type}}Repository {{name}}Repository{{~/if}}{{~/each}})
+    {
+        super(repository);
+        this.{{entityNameLowercase}}Repository = repository;
+        {{~#each relationships}}
+        {{~#if (eq relationType "ManyToOne")}}
+        this.{{name}}Repository = {{name}}Repository;
+        {{~/if}}
+        {{~#if (eq relationType "ManyToMany")}}
+        this.{{name}}Repository = {{name}}Repository;
+        {{~/if}}
+    {{~/each}}
+    }
 
     @Override
     public {{entityName}} save({{entityName}} {{entityNameLowercase}}) {
-{{~#each relationships}}
-    {{~#if (eq relationType "ManyToOne")}}
 
-        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null && {{../entityNameLowercase}}.get{{capitalize name}}().getId() != null) {
-        {{type}} {{name}} = {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
-            .orElseThrow(() -> new RuntimeException("{{type}} not found"));
-        {{../entityNameLowercase}}.set{{capitalize name}}({{name}});
-        }
-
-    {{~/if}}
-{{~/each}}
-
-{{~#each relationships}}
-    {{~#if (eq relationType "OneToMany")}}
-
-        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
-            for ({{type}} item : {{../entityNameLowercase}}.get{{capitalize name}}()) {
-                item.set{{capitalize mappedBy}}({{../entityNameLowercase}});
-            }
-        }
-
-    {{~/if}}
-{{~/each}}
-
-{{~#each relationships}}
-
-    {{~#if (eq relationType "OneToOne")}}
-
-        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
-        {{../entityNameLowercase}}.get{{capitalize name}}().set{{capitalize ../entityName}}({{../entityNameLowercase}});
-        }
-
-    {{~/if}}
-{{~/each}}
-
-    return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
-    }
-
-    public {{entityName}} update(Long id, {{entityName}} {{entityNameLowercase}}Request) {
-    {{entityName}} existing = {{entityNameLowercase}}Repository.findById(id)
-        .orElseThrow(() -> new RuntimeException("{{entityName}} not found"));
-
-// Copier les champs simples
-{{~#each fields}}
-    existing.set{{capitalize name}}({{entityNameLowercase}}Request.get{{capitalize name}}());
-{{~/each}}
-
-// Relations ManyToOne : mise à jour conditionnelle
 {{~#each relationships}}
 
 {{~#if (eq relationType "ManyToOne")}}
-    if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null &&{{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
-    {{type}} {{name}} = {{name}}Repository.findById({{entityNameLowercase}}Request.get{{capitalize name}}().getId())
-        .orElseThrow(() -> new RuntimeException("{{type}} not found"));
-    existing.set{{capitalize name}}({{name}});
+
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null && {{../entityNameLowercase}}.get{{capitalize name}}().getId() != null) {
+        {{type}} {{name}} = {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
+                .orElseThrow(() -> new RuntimeException("{{type}} not found"));
+        {{../entityNameLowercase}}.set{{capitalize name}}({{name}});
+        }
+{{~/if}}
+{{~/each}}
+
+
+{{~#each relationships}}
+{{~#if (eq relationType "OneToMany")}}
+
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
+            for ({{type}} item : {{../entityNameLowercase}}.get{{capitalize name}}()) {
+            item.set{{capitalize mappedBy}}({{../entityNameLowercase}});
+            }
+        }
+{{~/if}}
+{{~/each}}
+
+{{~#each relationships}}
+{{~#if (eq relationType "OneToOne")}}
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
+        {{../entityNameLowercase}}.get{{capitalize name}}().set{{capitalize ../entityName}}({{../entityNameLowercase}});
+        }
+{{~/if}}
+{{~/each}}
+
+        return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
     }
-    // Sinon on garde la relation existante
+
+
+    public {{entityName}} update(Long id, {{entityName}} {{entityNameLowercase}}Request) {
+        {{entityName}} existing = {{entityNameLowercase}}Repository.findById(id)
+            .orElseThrow(() -> new RuntimeException("{{entityName}} not found"));
+
+    // Copier les champs simples
+    {{~#each fields}}
+        existing.set{{capitalize name}}({{entityNameLowercase}}Request.get{{capitalize name}}());
+    {{~/each}}
+
+// Relations ManyToOne : mise à jour conditionnelle
+{{~#each relationships}}
+    {{~#if (eq relationType "ManyToOne")}}
+
+        if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null && {{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
+        {{type}} {{name}} = {{name}}Repository.findById({{entityNameLowercase}}Request.get{{capitalize name}}().getId())
+                .orElseThrow(() -> new RuntimeException("{{type}} not found"));
+        existing.set{{capitalize name}}({{name}});
+        }
+
+    {{~/if}}
+{{~/each}}
+
+// Relations ManyToMany : synchronisation sécurisée
+{{~#each relationships}}
+
+{{~#if (eq relationType "ManyToMany")}}
+
+        if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
+            existing.get{{capitalize name}}().clear();
+            List<{{type}}> {{name}}List = {{entityNameLowercase}}Request.get{{capitalize name}}().stream()
+                .map(item -> {{name}}Repository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("{{type}} not found")))
+                .collect(Collectors.toList());
+        existing.get{{capitalize name}}().addAll({{name}}List);
+        }
 {{~/if}}
 {{~/each}}
 
 // Relations OneToMany : synchronisation sécurisée
 {{~#each relationships}}
+
 {{~#if (eq relationType "OneToMany")}}
 
-    existing.get{{capitalize name}}().clear();
-    if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
-        for (var item : {{entityNameLowercase}}Request.get{{capitalize name}}()) {
-        item.set{{capitalize mappedBy}}(existing); // remettre lien inverse
-        existing.get{{capitalize name}}().add(item);
+        existing.get{{capitalize name}}().clear();
+        if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
+            for (var item : {{entityNameLowercase}}Request.get{{capitalize name}}()) {
+            item.set{{capitalize mappedBy}}(existing);
+            existing.get{{capitalize name}}().add(item);
+            }
         }
-    }
+
 {{~/if}}
 {{~/each}}
 
-    return {{entityNameLowercase}}Repository.save(existing);
-
+        return {{entityNameLowercase}}Repository.save(existing);
     }
 }
