@@ -4,29 +4,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-
-
-    
-        import com.example.modules.social_media.dto.PostSimpleDto;
-    
+    import java.util.Date;
 
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MediaFileDto {
-
+public class NotificationSimpleDto {
 private Long id;
-
-
-    private String url;
 
     private String type;
 
+    private String content;
 
+    private Date creationDate;
 
-    
-            private PostSimpleDto post;
-    
+    private Boolean isRead;
 
-    }
+}

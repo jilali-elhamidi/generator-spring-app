@@ -9,21 +9,21 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import java.util.List;
 
-@Mapper(componentModel = "spring") // L'attribut 'uses' est supprimé
+
+@Mapper(componentModel = "spring")
 public interface ProfileMapper {
 
-    ProfileMapper INSTANCE = Mappers.getMapper(ProfileMapper.class);
+ProfileMapper INSTANCE = Mappers.getMapper(ProfileMapper.class);
 
 
+ProfileDto toDto(Profile profile);
 
-    ProfileDto toDto(Profile profile);
+ProfileSimpleDto toSimpleDto(Profile profile);
 
-    ProfileSimpleDto toSimpleDto(Profile profile);
+@InheritInverseConfiguration
+Profile toEntity(ProfileDto profileDto);
 
-    @InheritInverseConfiguration
-    Profile toEntity(ProfileDto profileDto);
-
-    List<ProfileDto> toDtoList(List<Profile> profileList);
+List<ProfileDto> toDtoList(List<Profile> profileList);
 
     List<Profile> toEntityList(List<ProfileDto> profileDtoList);
-}
+        }

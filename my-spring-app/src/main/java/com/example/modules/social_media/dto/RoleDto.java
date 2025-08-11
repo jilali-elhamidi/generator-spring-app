@@ -5,9 +5,12 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 
-    import com.example.modules.social_media.dto.ProfileDto;
 
-import java.util.List;
+    
+        import java.util.List;
+        import com.example.modules.social_media.dto.ProfileSimpleDto;
+    
+
 
 @Data
 @NoArgsConstructor
@@ -16,8 +19,13 @@ public class RoleDto {
 
 private Long id;
 
+
     private String name;
 
-    private List<ProfileSimpleDto> profiles;
 
-}
+
+    
+            private List<ProfileSimpleDto> profiles;
+    
+
+    }

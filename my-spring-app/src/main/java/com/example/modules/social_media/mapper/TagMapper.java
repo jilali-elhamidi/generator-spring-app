@@ -2,6 +2,8 @@ package com.example.modules.social_media.mapper;
 
 import com.example.modules.social_media.model.Tag;
 import com.example.modules.social_media.dto.TagDto;
+import com.example.modules.social_media.dto.TagSimpleDto;
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -14,10 +16,11 @@ public interface TagMapper {
 TagMapper INSTANCE = Mappers.getMapper(TagMapper.class);
 
 
-    
-
 TagDto toDto(Tag tag);
 
+TagSimpleDto toSimpleDto(Tag tag);
+
+@InheritInverseConfiguration
 Tag toEntity(TagDto tagDto);
 
 List<TagDto> toDtoList(List<Tag> tagList);

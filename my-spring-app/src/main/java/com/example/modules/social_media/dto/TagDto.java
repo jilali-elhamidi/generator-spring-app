@@ -5,9 +5,12 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 
-    import com.example.modules.social_media.dto.PostDto;
 
-import java.util.List;
+    
+        import java.util.List;
+        import com.example.modules.social_media.dto.PostSimpleDto;
+    
+
 
 @Data
 @NoArgsConstructor
@@ -16,8 +19,13 @@ public class TagDto {
 
 private Long id;
 
+
     private String name;
 
-    private List<PostDto> posts;
+
+
     
-}
+            private List<PostSimpleDto> posts;
+    
+
+    }

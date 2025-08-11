@@ -7,9 +7,11 @@ import lombok.AllArgsConstructor;
     import java.util.Date;
 
 
-    import com.example.modules.social_media.dto.ProfileDto;
 
-import java.util.List;
+    
+        import com.example.modules.social_media.dto.ProfileSimpleDto;
+    
+
 
 @Data
 @NoArgsConstructor
@@ -30,8 +32,7 @@ private Long id;
 
 
     
-            private ProfileDto recipient;
+            private ProfileSimpleDto recipient;
     
-
 
     }

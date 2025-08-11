@@ -5,28 +5,14 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 
-
-    
-        import com.example.modules.social_media.dto.PostSimpleDto;
-    
-
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MediaFileDto {
-
+public class MediaFileSimpleDto {
 private Long id;
-
 
     private String url;
 
     private String type;
 
-
-
-    
-            private PostSimpleDto post;
-    
-
-    }
+}
