@@ -1,0 +1,39 @@
+package com.example.modules.{{module}}.dto;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+{{#if hasDate}}
+    import java.util.Date;
+{{/if}}
+{{#each relationships}}
+    import com.example.modules.{{../module}}.dto.{{type}}Dto;
+{{/each}}
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class {{entityName}}Dto {
+
+private Long id;
+
+{{#each fields}}
+    private {{type}} {{name}};
+{{/each}}
+
+{{#each relationships}}
+    {{#if (eq relationType "OneToMany")}}
+        private List<{{type}}Dto> {{name}};
+    {{else if (eq relationType "ManyToMany")}}
+            private List<{{type}}Dto> {{name}};
+    {{else if (eq relationType "OneToOne" owner)}}
+            private {{type}}Dto {{name}};
+    {{else if (eq relationType "ManyToOne")}}
+            private {{type}}Dto {{name}};
+    {{else if (eq relationType "OneToOne" (not owner))}}
+            private Long {{name}};
+    {{/if}}
+{{/each}}
+
+    }

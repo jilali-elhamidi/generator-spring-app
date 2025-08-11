@@ -6,6 +6,8 @@ import com.example.modules.ecommerce.repository.ShipmentRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class ShipmentService extends BaseService<Shipment> {
@@ -19,6 +21,11 @@ public class ShipmentService extends BaseService<Shipment> {
 
     @Override
     public Shipment save(Shipment shipment) {
+
+        if (shipment.getOrder() != null) {
+        shipment.getOrder().setShipment(shipment);
+        }
+
     return shipmentRepository.save(shipment);
     }
 
@@ -33,8 +40,10 @@ public class ShipmentService extends BaseService<Shipment> {
 
 // Relations ManyToOne : mise à jour conditionnelle
 
+// Relations ManyToMany : synchronisation sécurisée
 // Relations OneToMany : synchronisation sécurisée
 
     return shipmentRepository.save(existing);
+
     }
 }

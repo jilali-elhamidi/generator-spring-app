@@ -1,0 +1,344 @@
+module: social_media
+
+entities:
+  - name: Profile
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 50
+      - name: bio
+        type: String
+        validation:
+          size:
+            max: 255
+      - name: handle
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 30
+      - name: email
+        type: String
+        validation:
+          notNull: true
+          email: true
+      - name: registrationDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: posts
+        type: Post
+        relationType: OneToMany
+        mappedBy: author
+        inverseField: author
+        fetch: LAZY
+      - name: comments
+        type: Comment
+        relationType: OneToMany
+        mappedBy: author
+        inverseField: author
+        fetch: LAZY
+      - name: receivedMessages
+        type: Message
+        relationType: OneToMany
+        mappedBy: recipient
+        inverseField: recipient
+        fetch: LAZY
+      - name: sentMessages
+        type: Message
+        relationType: OneToMany
+        mappedBy: sender
+        inverseField: sender
+        fetch: LAZY
+      - name: followers
+        type: Profile
+        relationType: ManyToMany
+        joinTable: profile_followers
+        joinColumns: followed_id
+        inverseJoinColumns: follower_id
+        fetch: LAZY
+        owner: false
+        mappedBy: following
+        inverseField: following
+      - name: following
+        type: Profile
+        relationType: ManyToMany
+        joinTable: profile_followers
+        joinColumns: follower_id
+        inverseJoinColumns: followed_id
+        fetch: LAZY
+        owner: true
+        inverseField: follower
+      - name: roles
+        type: Role
+        relationType: ManyToMany
+        joinTable: profile_roles
+        joinColumns: profile_id
+        inverseJoinColumns: role_id
+        fetch: EAGER
+        owner: true
+      - name: groups
+        type: Group
+        relationType: ManyToMany
+        joinTable: group_members
+        joinColumns: profile_id
+        inverseJoinColumns: group_id
+        fetch: LAZY
+        owner: false
+        mappedBy: members
+        inverseField: members
+      - name: notifications
+        type: Notification
+        relationType: OneToMany
+        mappedBy: recipient
+        inverseField: recipient
+        fetch: LAZY
+
+  - name: Post
+    fields:
+      - name: content
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 1
+            max: 500
+      - name: postDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: author
+        type: Profile
+        relationType: ManyToOne
+        joinColumn: profile_id
+        inverseField: posts
+        fetch: EAGER
+      - name: comments
+        type: Comment
+        relationType: OneToMany
+        mappedBy: post
+        inverseField: post
+        fetch: LAZY
+      - name: tags
+        type: Tag
+        relationType: ManyToMany
+        joinTable: post_tags
+        joinColumns: post_id
+        inverseJoinColumns: tag_id
+        fetch: LAZY
+        owner: true
+      - name: media
+        type: MediaFile
+        relationType: OneToMany
+        mappedBy: post
+        inverseField: post
+        fetch: EAGER
+      - name: group
+        type: Group
+        relationType: ManyToOne
+        joinColumn: group_id
+        inverseField: posts
+        fetch: LAZY
+
+  - name: Comment
+    fields:
+      - name: content
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 1
+            max: 255
+      - name: commentDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: author
+        type: Profile
+        relationType: ManyToOne
+        joinColumn: profile_id
+        inverseField: comments
+        fetch: EAGER
+      - name: post
+        type: Post
+        relationType: ManyToOne
+        joinColumn: post_id
+        inverseField: comments
+        fetch: EAGER
+      - name: parentComment
+        type: Comment
+        relationType: ManyToOne
+        joinColumn: parent_comment_id
+        inverseField: replies
+        fetch: LAZY
+      - name: replies
+        type: Comment
+        relationType: OneToMany
+        mappedBy: parentComment
+        inverseField: parentComment
+        fetch: LAZY
+
+  - name: Tag
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 1
+            max: 50
+    relationships:
+      - name: posts
+        type: Post
+        relationType: ManyToMany
+        mappedBy: tags
+        inverseField: tags
+        fetch: LAZY
+        owner: false
+
+  - name: Message
+    fields:
+      - name: content
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 1
+            max: 500
+      - name: sentDate
+        type: Date
+        validation:
+          notNull: true
+      - name: read
+        type: Boolean
+        validation:
+          notNull: true
+    relationships:
+      - name: sender
+        type: Profile
+        relationType: ManyToOne
+        joinColumn: sender_id
+        inverseField: sentMessages
+        fetch: EAGER
+      - name: recipient
+        type: Profile
+        relationType: ManyToOne
+        joinColumn: recipient_id
+        inverseField: receivedMessages
+        fetch: EAGER
+
+  - name: Notification
+    fields:
+      - name: type
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 30
+      - name: content
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 1
+            max: 255
+      - name: creationDate
+        type: Date
+        validation:
+          notNull: true
+      - name: isRead
+        type: Boolean
+        validation:
+          notNull: true
+    relationships:
+      - name: recipient
+        type: Profile
+        relationType: ManyToOne
+        joinColumn: profile_id
+        inverseField: notifications
+        fetch: EAGER
+
+  - name: Group
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 50
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 255
+    relationships:
+      - name: members
+        type: Profile
+        relationType: ManyToMany
+        joinTable: group_members
+        joinColumns: group_id
+        inverseJoinColumns: profile_id
+        fetch: LAZY
+        owner: true
+      - name: posts
+        type: Post
+        relationType: OneToMany
+        mappedBy: group
+        inverseField: group
+        fetch: LAZY
+      - name: owner
+        type: Profile
+        relationType: ManyToOne
+        joinColumn: owner_id
+        inverseField: ownedGroups
+        fetch: EAGER
+
+  - name: Role
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: profiles
+        type: Profile
+        relationType: ManyToMany
+        mappedBy: roles
+        inverseField: roles
+        fetch: LAZY
+        owner: false
+
+  - name: MediaFile
+    fields:
+      - name: url
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 255
+      - name: type
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 50
+    relationships:
+      - name: post
+        type: Post
+        relationType: ManyToOne
+        joinColumn: post_id
+        inverseField: media
+        fetch: LAZY

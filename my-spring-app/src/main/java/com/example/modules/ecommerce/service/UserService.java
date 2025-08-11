@@ -8,6 +8,8 @@ import com.example.modules.ecommerce.model.Order;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class UserService extends BaseService<User> {
@@ -21,16 +23,19 @@ public class UserService extends BaseService<User> {
 
     @Override
     public User save(User user) {
+
         if (user.getAddresses() != null) {
             for (Address item : user.getAddresses()) {
                 item.setUser(user);
             }
-    }
+        }
+
         if (user.getOrders() != null) {
             for (Order item : user.getOrders()) {
                 item.setUser(user);
             }
-    }
+        }
+
     return userRepository.save(user);
     }
 
@@ -45,7 +50,9 @@ public class UserService extends BaseService<User> {
 
 // Relations ManyToOne : mise à jour conditionnelle
 
+// Relations ManyToMany : synchronisation sécurisée
 // Relations OneToMany : synchronisation sécurisée
+
     existing.getAddresses().clear();
     if (userRequest.getAddresses() != null) {
         for (var item : userRequest.getAddresses()) {
@@ -53,6 +60,7 @@ public class UserService extends BaseService<User> {
         existing.getAddresses().add(item);
         }
     }
+
     existing.getOrders().clear();
     if (userRequest.getOrders() != null) {
         for (var item : userRequest.getOrders()) {
@@ -62,5 +70,6 @@ public class UserService extends BaseService<User> {
     }
 
     return userRepository.save(existing);
+
     }
 }

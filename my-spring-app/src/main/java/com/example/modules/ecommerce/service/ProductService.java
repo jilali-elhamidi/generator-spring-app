@@ -8,6 +8,8 @@ import com.example.modules.ecommerce.repository.CategoryRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class ProductService extends BaseService<Product> {
@@ -23,11 +25,13 @@ public class ProductService extends BaseService<Product> {
 
     @Override
     public Product save(Product product) {
+
         if (product.getCategory() != null && product.getCategory().getId() != null) {
         Category category = categoryRepository.findById(product.getCategory().getId())
             .orElseThrow(() -> new RuntimeException("Category not found"));
         product.setCategory(category);
-    }
+        }
+
     return productRepository.save(product);
     }
 
@@ -49,8 +53,10 @@ public class ProductService extends BaseService<Product> {
     }
     // Sinon on garde la relation existante
 
+// Relations ManyToMany : synchronisation sécurisée
 // Relations OneToMany : synchronisation sécurisée
 
     return productRepository.save(existing);
+
     }
 }

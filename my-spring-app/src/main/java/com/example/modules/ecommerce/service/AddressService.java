@@ -8,6 +8,8 @@ import com.example.modules.ecommerce.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class AddressService extends BaseService<Address> {
@@ -23,11 +25,13 @@ public class AddressService extends BaseService<Address> {
 
     @Override
     public Address save(Address address) {
+
         if (address.getUser() != null && address.getUser().getId() != null) {
         User user = userRepository.findById(address.getUser().getId())
             .orElseThrow(() -> new RuntimeException("User not found"));
         address.setUser(user);
-    }
+        }
+
     return addressRepository.save(address);
     }
 
@@ -49,8 +53,10 @@ public class AddressService extends BaseService<Address> {
     }
     // Sinon on garde la relation existante
 
+// Relations ManyToMany : synchronisation sécurisée
 // Relations OneToMany : synchronisation sécurisée
 
     return addressRepository.save(existing);
+
     }
 }

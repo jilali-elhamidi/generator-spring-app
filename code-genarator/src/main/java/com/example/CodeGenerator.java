@@ -66,6 +66,9 @@ public class CodeGenerator {
             }
             return options.inverse();
         });
+
+        // Helper 'not' ajouté pour le DTO
+        this.handlebars.registerHelper("not", (Helper<Object>) (a, options) -> !isTruthy(a));
     }
 
     private static boolean isTruthy(Object value) {
@@ -109,6 +112,8 @@ public class CodeGenerator {
                 generateJavaFile("RepositoryTemplate", outputDir, moduleName, entityName, "repository", context);
                 generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
                 generateJavaFile("ControllerTemplate", outputDir, moduleName, entityName, "controller", context);
+                generateJavaFile("DtoTemplate", outputDir, moduleName, entityName, "dto", context);
+                generateJavaFile("MapperTemplate", outputDir, moduleName, entityName, "mapper", context);
             }
         }
     }
@@ -127,6 +132,8 @@ public class CodeGenerator {
             case "repository" -> entityName + "Repository";
             case "service" -> entityName + "Service";
             case "controller" -> entityName + "Controller";
+            case "dto" -> entityName + "Dto";
+            case "mapper" -> entityName + "Mapper";
             default -> entityName;
         };
 

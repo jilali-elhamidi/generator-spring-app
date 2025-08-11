@@ -7,6 +7,8 @@ import com.example.modules.ecommerce.model.Product;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class CategoryService extends BaseService<Category> {
@@ -20,11 +22,13 @@ public class CategoryService extends BaseService<Category> {
 
     @Override
     public Category save(Category category) {
+
         if (category.getProducts() != null) {
             for (Product item : category.getProducts()) {
                 item.setCategory(category);
             }
-    }
+        }
+
     return categoryRepository.save(category);
     }
 
@@ -38,7 +42,9 @@ public class CategoryService extends BaseService<Category> {
 
 // Relations ManyToOne : mise à jour conditionnelle
 
+// Relations ManyToMany : synchronisation sécurisée
 // Relations OneToMany : synchronisation sécurisée
+
     existing.getProducts().clear();
     if (categoryRequest.getProducts() != null) {
         for (var item : categoryRequest.getProducts()) {
@@ -48,5 +54,6 @@ public class CategoryService extends BaseService<Category> {
     }
 
     return categoryRepository.save(existing);
+
     }
 }

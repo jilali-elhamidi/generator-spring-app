@@ -6,6 +6,8 @@ import com.example.modules.ecommerce.repository.PaymentRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class PaymentService extends BaseService<Payment> {
@@ -19,6 +21,11 @@ public class PaymentService extends BaseService<Payment> {
 
     @Override
     public Payment save(Payment payment) {
+
+        if (payment.getOrder() != null) {
+        payment.getOrder().setPayment(payment);
+        }
+
     return paymentRepository.save(payment);
     }
 
@@ -33,8 +40,10 @@ public class PaymentService extends BaseService<Payment> {
 
 // Relations ManyToOne : mise à jour conditionnelle
 
+// Relations ManyToMany : synchronisation sécurisée
 // Relations OneToMany : synchronisation sécurisée
 
     return paymentRepository.save(existing);
+
     }
 }

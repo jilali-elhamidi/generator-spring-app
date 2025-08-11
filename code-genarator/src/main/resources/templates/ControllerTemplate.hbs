@@ -1,6 +1,8 @@
 package com.example.modules.{{module}}.controller;
 
+import com.example.modules.{{module}}.dto.{{entityName}}Dto;
 import com.example.modules.{{module}}.model.{{entityName}};
+import com.example.modules.{{module}}.mapper.{{entityName}}Mapper;
 import com.example.modules.{{module}}.service.{{entityName}}Service;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -14,52 +16,56 @@ import java.util.List;
 @RequestMapping("/api/{{entityNameLowercase}}s")
 public class {{entityName}}Controller {
 
-    private final {{entityName}}Service {{entityNameLowercase}}Service;
+private final {{entityName}}Service {{entityNameLowercase}}Service;
+private final {{entityName}}Mapper {{entityNameLowercase}}Mapper;
 
-    public {{entityName}}Controller({{entityName}}Service {{entityNameLowercase}}Service) {
-        this.{{entityNameLowercase}}Service = {{entityNameLowercase}}Service;
-    }
+public {{entityName}}Controller({{entityName}}Service {{entityNameLowercase}}Service, {{entityName}}Mapper {{entityNameLowercase}}Mapper) {
+this.{{entityNameLowercase}}Service = {{entityNameLowercase}}Service;
+this.{{entityNameLowercase}}Mapper = {{entityNameLowercase}}Mapper;
+}
 
-    @GetMapping
-    public ResponseEntity<List<{{entityName}}>> getAll{{entityName}}s() {
-        return ResponseEntity.ok({{entityNameLowercase}}Service.findAll());
+@GetMapping
+public ResponseEntity<List<{{entityName}}Dto>> getAll{{entityName}}s() {
+    List<{{entityName}}> entities = {{entityNameLowercase}}Service.findAll();
+    return ResponseEntity.ok({{entityNameLowercase}}Mapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<{{entityName}}> get{{entityName}}ById(@PathVariable Long id) {
+    public ResponseEntity<{{entityName}}Dto> get{{entityName}}ById(@PathVariable Long id) {
         return {{entityNameLowercase}}Service.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+        .map({{entityNameLowercase}}Mapper::toDto)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+        }
 
-    @PostMapping
-    public ResponseEntity<{{entityName}}> create{{entityName}}(
-            @Valid @RequestBody {{entityName}} {{entityNameLowercase}},
+        @PostMapping
+        public ResponseEntity<{{entityName}}Dto> create{{entityName}}(
+            @Valid @RequestBody {{entityName}}Dto {{entityNameLowercase}}Dto,
             UriComponentsBuilder uriBuilder) {
 
-        {{entityName}} saved = {{entityNameLowercase}}Service.save({{entityNameLowercase}});
-        URI location = uriBuilder.path("/api/{{entityNameLowercase}}s/{id}")
-                .buildAndExpand(saved.getId()).toUri();
+            {{entityName}} entity = {{entityNameLowercase}}Mapper.toEntity({{entityNameLowercase}}Dto);
+            {{entityName}} saved = {{entityNameLowercase}}Service.save(entity);
+            URI location = uriBuilder.path("/api/{{entityNameLowercase}}s/{id}")
+            .buildAndExpand(saved.getId()).toUri();
+            return ResponseEntity.created(location).body({{entityNameLowercase}}Mapper.toDto(saved));
+            }
 
-        return ResponseEntity.created(location).body(saved);
-    }
+            @PutMapping("/{id}")
+            public ResponseEntity<{{entityName}}Dto> update{{entityName}}(
+                @PathVariable Long id,
+                @Valid @RequestBody {{entityName}}Dto {{entityNameLowercase}}Dto) {
 
-    @PutMapping("/{id}")
-    public ResponseEntity<{{entityName}}> update{{entityName}}(
-            @PathVariable Long id,
-            @Valid @RequestBody {{entityName}} {{entityNameLowercase}}Request) {
+                try {
+                {{entityName}} updatedEntity = {{entityNameLowercase}}Service.update(id, {{entityNameLowercase}}Mapper.toEntity({{entityNameLowercase}}Dto));
+                return ResponseEntity.ok({{entityNameLowercase}}Mapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
 
-        try {
-            {{entityName}} updated = {{entityNameLowercase}}Service.update(id, {{entityNameLowercase}}Request);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete{{entityName}}(@PathVariable Long id) {
-        {{entityNameLowercase}}Service.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-}
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> delete{{entityName}}(@PathVariable Long id) {
+                    {{entityNameLowercase}}Service.deleteById(id);
+                    return ResponseEntity.noContent().build();
+                    }
+                    }

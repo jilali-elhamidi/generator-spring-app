@@ -10,6 +10,8 @@ import com.example.modules.ecommerce.repository.OrderRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class OrderItemService extends BaseService<OrderItem> {
@@ -27,16 +29,19 @@ public class OrderItemService extends BaseService<OrderItem> {
 
     @Override
     public OrderItem save(OrderItem orderitem) {
+
         if (orderitem.getProduct() != null && orderitem.getProduct().getId() != null) {
         Product product = productRepository.findById(orderitem.getProduct().getId())
             .orElseThrow(() -> new RuntimeException("Product not found"));
         orderitem.setProduct(product);
-    }
+        }
+
         if (orderitem.getOrder() != null && orderitem.getOrder().getId() != null) {
         Order order = orderRepository.findById(orderitem.getOrder().getId())
             .orElseThrow(() -> new RuntimeException("Order not found"));
         orderitem.setOrder(order);
-    }
+        }
+
     return orderitemRepository.save(orderitem);
     }
 
@@ -62,8 +67,10 @@ public class OrderItemService extends BaseService<OrderItem> {
     }
     // Sinon on garde la relation existante
 
+// Relations ManyToMany : synchronisation sécurisée
 // Relations OneToMany : synchronisation sécurisée
 
     return orderitemRepository.save(existing);
+
     }
 }

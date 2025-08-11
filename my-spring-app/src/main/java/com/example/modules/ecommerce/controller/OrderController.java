@@ -14,52 +14,52 @@ import java.util.List;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-private final OrderService orderService;
+    private final OrderService orderService;
 
-public OrderController(OrderService orderService) {
-this.orderService = orderService;
-}
-
-@GetMapping
-public ResponseEntity<List<Order>> getAllOrders() {
-return ResponseEntity.ok(orderService.findAll());
-}
-
-@GetMapping("/{id}")
-public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
-return orderService.findById(id)
-.map(ResponseEntity::ok)
-.orElse(ResponseEntity.notFound().build());
-}
-
-@PostMapping
-public ResponseEntity<Order> createOrder(
-@Valid @RequestBody Order order,
-UriComponentsBuilder uriBuilder) {
-
-Order saved = orderService.save(order);
-URI location = uriBuilder.path("/api/orders/{id}")
-.buildAndExpand(saved.getId()).toUri();
-
-return ResponseEntity.created(location).body(saved);
-}
-
-@PutMapping("/{id}")
-public ResponseEntity<Order> updateOrder(
-@PathVariable Long id,
-@Valid @RequestBody Order orderRequest) {
-
-try {
-Order updated = orderService.update(id, orderRequest);
-return ResponseEntity.ok(updated);
-} catch (RuntimeException e) {
-return ResponseEntity.notFound().build();
-}
-}
-
-@DeleteMapping("/{id}")
-public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-    orderService.deleteById(id);
-    return ResponseEntity.noContent().build();
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
+
+    @GetMapping
+    public ResponseEntity<List<Order>> getAllOrders() {
+        return ResponseEntity.ok(orderService.findAll());
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+        return orderService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<Order> createOrder(
+            @Valid @RequestBody Order order,
+            UriComponentsBuilder uriBuilder) {
+
+        Order saved = orderService.save(order);
+        URI location = uriBuilder.path("/api/orders/{id}")
+                .buildAndExpand(saved.getId()).toUri();
+
+        return ResponseEntity.created(location).body(saved);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Order> updateOrder(
+            @PathVariable Long id,
+            @Valid @RequestBody Order orderRequest) {
+
+        try {
+            Order updated = orderService.update(id, orderRequest);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+        orderService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

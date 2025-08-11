@@ -3,92 +3,54 @@ package com.example.modules.elearning.service;
 import com.example.core.service.BaseService;
 import com.example.modules.elearning.model.Lesson;
 import com.example.modules.elearning.repository.LessonRepository;
-
-    
-        import com.example.modules.elearning.model.Course;
-        import com.example.modules.elearning.repository.CourseRepository;
-    
-    
-
+import com.example.modules.elearning.model.Course;
+import com.example.modules.elearning.repository.CourseRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class LessonService extends BaseService<Lesson> {
 
-protected final LessonRepository lessonRepository;
+    protected final LessonRepository lessonRepository;
+    private final CourseRepository courseRepository;
 
-
-    
-        private final CourseRepository courseRepository;
-    
-
-
-public LessonService(
-LessonRepository repository
-
-    , CourseRepository courseRepository
-
-) {
-super(repository);
-this.lessonRepository = repository;
-
+    public LessonService(LessonRepository repository, CourseRepository courseRepository) {
+    super(repository);
+    this.lessonRepository = repository;
     this.courseRepository = courseRepository;
-
 }
 
-@Override
-public Lesson save(Lesson lesson) {
-
-
-
-    
-        if (lesson.getCourse() != null &&
-        lesson.getCourse().getId() != null) {
+    @Override
+    public Lesson save(Lesson lesson) {
+        if (lesson.getCourse() != null && lesson.getCourse().getId() != null) {
         Course course = courseRepository.findById(lesson.getCourse().getId())
-        .orElseThrow(() -> new RuntimeException("Course not found"));
+            .orElseThrow(() -> new RuntimeException("Course not found"));
         lesson.setCourse(course);
-        }
-    
+    }
+    return lessonRepository.save(lesson);
+    }
 
-
-
-
-    
-
-
-return lessonRepository.save(lesson);
-}
-public Lesson update(Long id, Lesson lessonRequest) {
-Lesson existing = lessonRepository.findById(id)
-.orElseThrow(() -> new RuntimeException("Lesson not found"));
+    public Lesson update(Long id, Lesson lessonRequest) {
+    Lesson existing = lessonRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Lesson not found"));
 
 // Copier les champs simples
-
     existing.setTitle(lessonRequest.getTitle());
-
     existing.setContent(lessonRequest.getContent());
 
-
 // Relations ManyToOne : mise à jour conditionnelle
-
-    
-        if (lessonRequest.getCourse() != null &&
-        lessonRequest.getCourse().getId() != null) {
-        Course course = courseRepository.findById(lessonRequest.getCourse().getId())
+    if (lessonRequest.getCourse() != null &&lessonRequest.getCourse().getId() != null) {
+    Course course = courseRepository.findById(lessonRequest.getCourse().getId())
         .orElseThrow(() -> new RuntimeException("Course not found"));
-        existing.setCourse(course);
-        }
-        // Sinon on garde la relation existante
-    
-
+    existing.setCourse(course);
+    }
+    // Sinon on garde la relation existante
 
 // Relations OneToMany : synchronisation sécurisée
 
-    
-
-
-return lessonRepository.save(existing);
-}
+    return lessonRepository.save(existing);
+    }
 }

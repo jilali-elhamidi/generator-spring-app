@@ -1,0 +1,17 @@
+# Ignorer les fichiers log de la JVM
+*.log
+
+# Ignorer le dossier cible de Maven
+target/
+
+# Ignorer les fichiers de configuration de votre IDE (IntelliJ IDEA)
+.idea/
+
+# Ignorer le dossier de build Gradle
+build/
+
+# Ignorer les fichiers générés par MapStruct (si non inclus dans target)
+my-spring-app/src/main/java/com/example/modules/social_media/mapper/*MapperImpl.java
+
+# Ignorer les fichiers de configuration spécifiques (si vous en avez)
+# config.properties
