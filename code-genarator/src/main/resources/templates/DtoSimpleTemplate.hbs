@@ -1,0 +1,18 @@
+package com.example.modules.{{module}}.dto;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+{{#if hasDate}}
+    import java.util.Date;
+{{/if}}
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class {{entityName}}SimpleDto {
+private Long id;
+{{#each fields}}
+    private {{type}} {{name}};
+{{/each}}
+}

@@ -2,7 +2,6 @@ package com.example;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
@@ -29,10 +28,8 @@ public class CodeGenerator {
         TemplateLoader loader = new ClassPathTemplateLoader("/templates", ".hbs");
         this.handlebars = new Handlebars(loader);
 
-        // Helper standard
         this.handlebars.registerHelper("capitalize", StringHelpers.capitalize);
 
-        // Helper logiques
         this.handlebars.registerHelper("eq", (Helper<Object>) (a, options) -> {
             Object b = options.param(0);
             return (a == null && b == null) || (a != null && a.equals(b));
@@ -67,7 +64,6 @@ public class CodeGenerator {
             return options.inverse();
         });
 
-        // Helper 'not' ajouté pour le DTO
         this.handlebars.registerHelper("not", (Helper<Object>) (a, options) -> !isTruthy(a));
     }
 
@@ -108,11 +104,16 @@ public class CodeGenerator {
                 context.put("relationships", relationships);
                 context.put("hasDate", hasType(fields, "Date"));
 
+                // Génération des templates principaux
                 generateJavaFile("EntityTemplate", outputDir, moduleName, entityName, "model", context);
                 generateJavaFile("RepositoryTemplate", outputDir, moduleName, entityName, "repository", context);
                 generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
                 generateJavaFile("ControllerTemplate", outputDir, moduleName, entityName, "controller", context);
+
+                // Génération systématique du DTO complet et du DTO simple
                 generateJavaFile("DtoTemplate", outputDir, moduleName, entityName, "dto", context);
+                generateJavaFile("DtoSimpleTemplate", outputDir, moduleName, entityName, "dto", context);
+
                 generateJavaFile("MapperTemplate", outputDir, moduleName, entityName, "mapper", context);
             }
         }
@@ -128,12 +129,13 @@ public class CodeGenerator {
         Template template = handlebars.compile(templateName);
         String outputContent = template.apply(context);
 
-        String fileName = switch (subPackage) {
-            case "repository" -> entityName + "Repository";
-            case "service" -> entityName + "Service";
-            case "controller" -> entityName + "Controller";
-            case "dto" -> entityName + "Dto";
-            case "mapper" -> entityName + "Mapper";
+        String fileName = switch (templateName) {
+            case "RepositoryTemplate" -> entityName + "Repository";
+            case "ServiceTemplate" -> entityName + "Service";
+            case "ControllerTemplate" -> entityName + "Controller";
+            case "DtoTemplate" -> entityName + "Dto";
+            case "DtoSimpleTemplate" -> entityName + "SimpleDto";
+            case "MapperTemplate" -> entityName + "Mapper";
             default -> entityName;
         };
 

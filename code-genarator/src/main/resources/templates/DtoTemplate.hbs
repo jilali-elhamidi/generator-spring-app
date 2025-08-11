@@ -6,10 +6,20 @@ import lombok.AllArgsConstructor;
 {{#if hasDate}}
     import java.util.Date;
 {{/if}}
+
 {{#each relationships}}
-    import com.example.modules.{{../module}}.dto.{{type}}Dto;
+    {{#if (eq relationType "OneToMany")}}
+        import java.util.List;
+        import com.example.modules.{{../module}}.dto.{{type}}SimpleDto;
+    {{else if (eq relationType "ManyToMany")}}
+        import java.util.List;
+        import com.example.modules.{{../module}}.dto.{{type}}SimpleDto;
+    {{else if (eq relationType "OneToOne" owner)}}
+        import com.example.modules.{{../module}}.dto.{{type}}Dto;
+    {{else if (eq relationType "ManyToOne")}}
+        import com.example.modules.{{../module}}.dto.{{type}}SimpleDto;
+    {{/if}}
 {{/each}}
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,16 +34,15 @@ private Long id;
 
 {{#each relationships}}
     {{#if (eq relationType "OneToMany")}}
-        private List<{{type}}Dto> {{name}};
+        private List<{{type}}SimpleDto> {{name}};
     {{else if (eq relationType "ManyToMany")}}
-            private List<{{type}}Dto> {{name}};
+            private List<{{type}}SimpleDto> {{name}};
     {{else if (eq relationType "OneToOne" owner)}}
             private {{type}}Dto {{name}};
     {{else if (eq relationType "ManyToOne")}}
-            private {{type}}Dto {{name}};
+            private {{type}}SimpleDto {{name}};
     {{else if (eq relationType "OneToOne" (not owner))}}
             private Long {{name}};
     {{/if}}
 {{/each}}
-
     }

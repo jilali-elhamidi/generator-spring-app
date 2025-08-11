@@ -2,27 +2,25 @@ package com.example.modules.{{module}}.mapper;
 
 import com.example.modules.{{module}}.model.{{entityName}};
 import com.example.modules.{{module}}.dto.{{entityName}}Dto;
+import com.example.modules.{{module}}.dto.{{entityName}}SimpleDto;
+import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import java.util.List;
-{{#each uniqueImports}}
-    import com.example.modules.{{../module}}.model.{{this}};
-    import com.example.modules.{{../module}}.dto.{{this}}Dto;
-{{/each}}
+
 
 @Mapper(componentModel = "spring")
 public interface {{entityName}}Mapper {
 
 {{entityName}}Mapper INSTANCE = Mappers.getMapper({{entityName}}Mapper.class);
 
-{{#each relationships}}
-    {{#if (and (eq relationType "ManyToMany") (not owner))}}
-        @Mapping(target = "{{name}}", ignore = true)
-    {{/if}}
-{{/each}}
+
 {{entityName}}Dto toDto({{entityName}} {{entityNameLowercase}});
 
+{{entityName}}SimpleDto toSimpleDto({{entityName}} {{entityNameLowercase}});
+
+@InheritInverseConfiguration
 {{entityName}} toEntity({{entityName}}Dto {{entityNameLowercase}}Dto);
 
 List<{{entityName}}Dto> toDtoList(List<{{entityName}}> {{entityNameLowercase}}List);
