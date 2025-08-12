@@ -1,0 +1,32 @@
+package com.example.modules.entertainment_ecosystem.dto;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Date;
+import com.example.modules.entertainment_ecosystem.dtosimple.PodcastSimpleDto;
+
+
+
+
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class PodcastEpisodeDto {
+
+    private Long id;
+
+    private String title;
+
+    private Date releaseDate;
+
+    private Integer durationMinutes;
+
+    private PodcastSimpleDto podcast;
+
+    
+
+}

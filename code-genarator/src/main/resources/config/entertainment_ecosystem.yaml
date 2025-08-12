@@ -1,0 +1,2013 @@
+module: entertainment_ecosystem
+
+entities:
+  - name: UserProfile
+    fields:
+      - name: username
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 50
+      - name: email
+        type: String
+        validation:
+          notNull: true
+          email: true
+      - name: password
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 8
+            max: 255
+      - name: registrationDate
+        type: Date
+        validation:
+          notNull: true
+      - name: country
+        type: String
+        validation:
+          size:
+            max: 50
+      - name: profilePictureUrl
+        type: String
+        validation:
+          size:
+            max: 255
+      - name: lastActiveDate
+        type: Date
+      - name: userStatus
+        type: String
+        validation:
+          pattern: "^(Online|Offline|Away)$"
+      - name: bio
+        type: String
+        validation:
+          size:
+            max: 500
+    relationships:
+      - name: reviews
+        type: Review
+        relationType: OneToMany
+        mappedBy: user
+        inverseField: user
+        fetch: LAZY
+      - name: watchlistMovies
+        type: Movie
+        relationType: ManyToMany
+        joinTable: user_movie_watchlist
+        joinColumns: user_id
+        inverseJoinColumns: movie_id
+        fetch: LAZY
+        owner: true
+      - name: favoriteArtists
+        type: Artist
+        relationType: ManyToMany
+        joinTable: user_favorite_artists
+        joinColumns: user_id
+        inverseJoinColumns: artist_id
+        fetch: LAZY
+        owner: true
+      - name: followedUsers
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_followers
+        joinColumns: followed_id
+        inverseJoinColumns: follower_id
+        fetch: LAZY
+        owner: false
+      - name: followingUsers
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_followers
+        joinColumns: follower_id
+        inverseJoinColumns: followed_id
+        fetch: LAZY
+        owner: true
+      - name: favoriteGenres
+        type: Genre
+        relationType: ManyToMany
+        joinTable: user_favorite_genres
+        joinColumns: user_id
+        inverseJoinColumns: genre_id
+        fetch: EAGER
+        owner: true
+      - name: subscriptions
+        type: Subscription
+        relationType: OneToMany
+        mappedBy: user
+        inverseField: user
+        fetch: LAZY
+      - name: watchedEpisodes
+        type: Episode
+        relationType: ManyToMany
+        joinTable: user_watched_episodes
+        joinColumns: user_id
+        inverseJoinColumns: episode_id
+        fetch: LAZY
+        owner: true
+      - name: playedGames
+        type: VideoGame
+        relationType: ManyToMany
+        joinTable: user_games
+        joinColumns: user_id
+        inverseJoinColumns: game_id
+        fetch: LAZY
+        owner: true
+      - name: forumThreads
+        type: ForumThread
+        relationType: OneToMany
+        mappedBy: author
+        inverseField: author
+        fetch: LAZY
+      - name: forumPosts
+        type: ForumPost
+        relationType: OneToMany
+        mappedBy: author
+        inverseField: author
+        fetch: LAZY
+      - name: achievements
+        type: Achievement
+        relationType: OneToMany
+        mappedBy: user
+        inverseField: user
+        fetch: LAZY
+      - name: hostedOnlineEvents
+        type: OnlineEvent
+        relationType: OneToMany
+        mappedBy: host
+        inverseField: host
+        fetch: LAZY
+      - name: attendedOnlineEvents
+        type: OnlineEvent
+        relationType: ManyToMany
+        joinTable: online_event_attendees
+        joinColumns: user_id
+        inverseJoinColumns: event_id
+        fetch: LAZY
+        owner: false
+      - name: ownedMerchandise
+        type: Merchandise
+        relationType: ManyToMany
+        joinTable: user_merchandise
+        joinColumns: user_id
+        inverseJoinColumns: merchandise_id
+        fetch: LAZY
+        owner: true
+      - name: libraryPodcasts
+        type: Podcast
+        relationType: ManyToMany
+        joinTable: user_podcast_library
+        joinColumns: user_id
+        inverseJoinColumns: podcast_id
+        fetch: LAZY
+        owner: true
+      - name: listenedMusic
+        type: MusicTrack
+        relationType: ManyToMany
+        joinTable: user_music_history
+        joinColumns: user_id
+        inverseJoinColumns: track_id
+        fetch: LAZY
+        owner: true
+      - name: playlists
+        type: Playlist
+        relationType: OneToMany
+        mappedBy: owner
+        inverseField: owner
+        fetch: LAZY
+
+  - name: Artist
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: bio
+        type: String
+        validation:
+          size:
+            max: 1000
+      - name: birthDate
+        type: Date
+        validation:
+          notNull: true
+      - name: nationality
+        type: String
+        validation:
+          size:
+            max: 50
+    relationships:
+      - name: actedInMovies
+        type: Movie
+        relationType: ManyToMany
+        joinTable: movie_cast
+        joinColumns: artist_id
+        inverseJoinColumns: movie_id
+        fetch: LAZY
+        owner: false
+      - name: directedMovies
+        type: Movie
+        relationType: OneToMany
+        mappedBy: director
+        inverseField: director
+        fetch: LAZY
+      - name: directedShows
+        type: TVShow
+        relationType: OneToMany
+        mappedBy: director
+        inverseField: director
+        fetch: LAZY
+      - name: favoriteArtists
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_favorite_artists
+        joinColumns: artist_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+      - name: composedMusic
+        type: MusicTrack
+        relationType: OneToMany
+        mappedBy: artist
+        inverseField: artist
+        fetch: LAZY
+      - name: albums
+        type: Album
+        relationType: OneToMany
+        mappedBy: artist
+        inverseField: artist
+        fetch: LAZY
+      - name: booksAuthored
+        type: Book
+        relationType: OneToMany
+        mappedBy: author
+        inverseField: author
+        fetch: LAZY
+      - name: participatedInEvents
+        type: LiveEvent
+        relationType: ManyToMany
+        joinTable: event_performers
+        joinColumns: artist_id
+        inverseJoinColumns: event_id
+        fetch: LAZY
+        owner: false
+      - name: hostedPodcasts
+        type: Podcast
+        relationType: OneToMany
+        mappedBy: host
+        inverseField: host
+        fetch: EAGER
+      - name: managedMerchandise
+        type: Merchandise
+        relationType: OneToMany
+        mappedBy: artist
+        inverseField: artist
+        fetch: LAZY
+      - name: managedGames
+        type: VideoGame
+        relationType: OneToMany
+        mappedBy: developer
+        inverseField: developer
+        fetch: LAZY
+      - name: manager
+        type: Manager
+        relationType: ManyToOne
+        joinColumn: manager_id
+        inverseField: artists
+        fetch: LAZY
+
+  - name: Manager
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: email
+        type: String
+        validation:
+          notNull: true
+          email: true
+    relationships:
+      - name: artists
+        type: Artist
+        relationType: OneToMany
+        mappedBy: manager
+        inverseField: manager
+        fetch: LAZY
+
+  - name: Movie
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: releaseDate
+        type: Date
+        validation:
+          notNull: true
+      - name: durationMinutes
+        type: Integer
+        validation:
+          notNull: true
+          min: 1
+      - name: synopsis
+        type: String
+        validation:
+          size:
+            max: 2000
+      - name: boxOfficeRevenue
+        type: Double
+        validation:
+          min: 0
+    relationships:
+      - name: cast
+        type: Artist
+        relationType: ManyToMany
+        joinTable: movie_cast
+        joinColumns: movie_id
+        inverseJoinColumns: artist_id
+        fetch: LAZY
+        owner: true
+      - name: director
+        type: Artist
+        relationType: ManyToOne
+        joinColumn: director_id
+        inverseField: directedMovies
+        fetch: EAGER
+      - name: reviews
+        type: Review
+        relationType: OneToMany
+        mappedBy: movie
+        inverseField: movie
+        fetch: LAZY
+      - name: genres
+        type: Genre
+        relationType: ManyToMany
+        joinTable: movie_genres
+        joinColumns: movie_id
+        inverseJoinColumns: genre_id
+        fetch: EAGER
+        owner: true
+      - name: watchlistUsers
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_movie_watchlist
+        joinColumns: movie_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+      - name: relatedMerchandise
+        type: Merchandise
+        relationType: ManyToMany
+        joinTable: merchandise_movies
+        joinColumns: movie_id
+        inverseJoinColumns: merchandise_id
+        fetch: LAZY
+        owner: false
+      - name: productionCompany
+        type: ProductionCompany
+        relationType: ManyToOne
+        joinColumn: company_id
+        inverseField: movies
+        fetch: EAGER
+
+  - name: TVShow
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: releaseYear
+        type: Integer
+        validation:
+          notNull: true
+          min: 1900
+      - name: totalSeasons
+        type: Integer
+        validation:
+          notNull: true
+          min: 1
+      - name: synopsis
+        type: String
+        validation:
+          size:
+            max: 1000
+    relationships:
+      - name: seasons
+        type: Season
+        relationType: OneToMany
+        mappedBy: show
+        inverseField: show
+        fetch: LAZY
+      - name: director
+        type: Artist
+        relationType: ManyToOne
+        joinColumn: director_id
+        inverseField: directedShows
+        fetch: EAGER
+      - name: genres
+        type: Genre
+        relationType: ManyToMany
+        joinTable: tvshow_genres
+        joinColumns: tvshow_id
+        inverseJoinColumns: genre_id
+        fetch: EAGER
+        owner: true
+      - name: relatedMerchandise
+        type: Merchandise
+        relationType: ManyToMany
+        joinTable: merchandise_shows
+        joinColumns: tvshow_id
+        inverseJoinColumns: merchandise_id
+        fetch: LAZY
+        owner: false
+      - name: productionCompany
+        type: ProductionCompany
+        relationType: ManyToOne
+        joinColumn: company_id
+        inverseField: tvShows
+        fetch: EAGER
+
+  - name: ProductionCompany
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: foundedDate
+        type: Date
+      - name: location
+        type: String
+        validation:
+          size:
+            max: 255
+    relationships:
+      - name: movies
+        type: Movie
+        relationType: OneToMany
+        mappedBy: productionCompany
+        inverseField: productionCompany
+        fetch: LAZY
+      - name: tvShows
+        type: TVShow
+        relationType: OneToMany
+        mappedBy: productionCompany
+        inverseField: productionCompany
+        fetch: LAZY
+      - name: staff
+        type: Employee
+        relationType: OneToMany
+        mappedBy: productionCompany
+        inverseField: productionCompany
+        fetch: LAZY
+
+  - name: Season
+    fields:
+      - name: seasonNumber
+        type: Integer
+        validation:
+          notNull: true
+          min: 1
+    relationships:
+      - name: show
+        type: TVShow
+        relationType: ManyToOne
+        joinColumn: tvshow_id
+        inverseField: seasons
+        fetch: EAGER
+      - name: episodes
+        type: Episode
+        relationType: OneToMany
+        mappedBy: season
+        inverseField: season
+        fetch: LAZY
+
+  - name: Episode
+    fields:
+      - name: episodeNumber
+        type: Integer
+        validation:
+          notNull: true
+          min: 1
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 500
+      - name: durationMinutes
+        type: Integer
+        validation:
+          min: 1
+    relationships:
+      - name: season
+        type: Season
+        relationType: ManyToOne
+        joinColumn: season_id
+        inverseField: episodes
+        fetch: EAGER
+      - name: watchedByUsers
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_watched_episodes
+        joinColumns: episode_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+      - name: relatedPodcastEpisode
+        type: PodcastEpisode
+        relationType: OneToOne
+        mappedBy: relatedEpisode
+        inverseField: relatedPodcastEpisode
+        fetch: EAGER
+        owner: true
+
+  - name: MusicTrack
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: durationSeconds
+        type: Integer
+        validation:
+          notNull: true
+          min: 1
+      - name: releaseDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: album
+        type: Album
+        relationType: ManyToOne
+        joinColumn: album_id
+        inverseField: tracks
+        fetch: EAGER
+      - name: artist
+        type: Artist
+        relationType: ManyToOne
+        joinColumn: artist_id
+        inverseField: composedMusic
+        fetch: EAGER
+      - name: genre
+        type: Genre
+        relationType: ManyToOne
+        joinColumn: genre_id
+        inverseField: musicTracks
+        fetch: EAGER
+      - name: listenedByUsers
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_music_history
+        joinColumns: track_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+      - name: playlistItems
+        type: PlaylistItem
+        relationType: OneToMany
+        mappedBy: track
+        inverseField: track
+        fetch: LAZY
+
+  - name: Album
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: releaseDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: artist
+        type: Artist
+        relationType: ManyToOne
+        joinColumn: artist_id
+        inverseField: albums
+        fetch: EAGER
+      - name: tracks
+        type: MusicTrack
+        relationType: OneToMany
+        mappedBy: album
+        inverseField: album
+        fetch: LAZY
+      - name: genres
+        type: Genre
+        relationType: ManyToMany
+        joinTable: album_genres
+        joinColumns: album_id
+        inverseJoinColumns: genre_id
+        fetch: EAGER
+        owner: true
+
+  - name: Book
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: publishedDate
+        type: Date
+        validation:
+          notNull: true
+      - name: isbn
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 10
+            max: 13
+      - name: synopsis
+        type: String
+        validation:
+          size:
+            max: 1000
+    relationships:
+      - name: author
+        type: Artist
+        relationType: ManyToOne
+        joinColumn: author_id
+        inverseField: booksAuthored
+        fetch: EAGER
+      - name: publisher
+        type: Publisher
+        relationType: ManyToOne
+        joinColumn: publisher_id
+        inverseField: books
+        fetch: EAGER
+      - name: reviews
+        type: Review
+        relationType: OneToMany
+        mappedBy: book
+        inverseField: book
+        fetch: LAZY
+      - name: genres
+        type: Genre
+        relationType: ManyToMany
+        joinTable: book_genres
+        joinColumns: book_id
+        inverseJoinColumns: genre_id
+        fetch: EAGER
+        owner: true
+
+  - name: Publisher
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: website
+        type: String
+        validation:
+          size:
+            max: 255
+    relationships:
+      - name: books
+        type: Book
+        relationType: OneToMany
+        mappedBy: publisher
+        inverseField: publisher
+        fetch: LAZY
+      - name: podcasts
+        type: Podcast
+        relationType: OneToMany
+        mappedBy: publisher
+        inverseField: publisher
+        fetch: LAZY
+      - name: videoGames
+        type: VideoGame
+        relationType: OneToMany
+        mappedBy: publisher
+        inverseField: publisher
+        fetch: LAZY
+
+  - name: LiveEvent
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: eventDate
+        type: Date
+        validation:
+          notNull: true
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 1000
+    relationships:
+      - name: performers
+        type: Artist
+        relationType: ManyToMany
+        joinTable: event_performers
+        joinColumns: event_id
+        inverseJoinColumns: artist_id
+        fetch: LAZY
+        owner: true
+      - name: tickets
+        type: Ticket
+        relationType: OneToMany
+        mappedBy: event
+        inverseField: event
+        fetch: LAZY
+      - name: eventType
+        type: EventType
+        relationType: ManyToOne
+        joinColumn: event_type_id
+        inverseField: events
+        fetch: EAGER
+      - name: location
+        type: EventLocation
+        relationType: ManyToOne
+        joinColumn: location_id
+        inverseField: liveEvents
+        fetch: EAGER
+      - name: sponsor
+        type: Sponsor
+        relationType: ManyToOne
+        joinColumn: sponsor_id
+        inverseField: sponsoredEvents
+        fetch: EAGER
+
+  - name: EventType
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: events
+        type: LiveEvent
+        relationType: OneToMany
+        mappedBy: eventType
+        inverseField: eventType
+        fetch: LAZY
+
+  - name: Ticket
+    fields:
+      - name: ticketNumber
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 5
+            max: 20
+      - name: price
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+      - name: seatInfo
+        type: String
+        validation:
+          size:
+            max: 50
+    relationships:
+      - name: user
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: user_id
+        inverseField: tickets
+        fetch: EAGER
+      - name: event
+        type: LiveEvent
+        relationType: ManyToOne
+        joinColumn: event_id
+        inverseField: tickets
+        fetch: EAGER
+      - name: status
+        type: TicketStatus
+        relationType: ManyToOne
+        joinColumn: status_id
+        inverseField: tickets
+        fetch: EAGER
+      - name: booking
+        type: Booking
+        relationType: ManyToOne
+        joinColumn: booking_id
+        inverseField: tickets
+        fetch: EAGER
+
+  - name: TicketStatus
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Available|Sold|Used|Cancelled)$"
+    relationships:
+      - name: tickets
+        type: Ticket
+        relationType: OneToMany
+        mappedBy: status
+        inverseField: status
+        fetch: LAZY
+
+  - name: Review
+    fields:
+      - name: rating
+        type: Integer
+        validation:
+          notNull: true
+          min: 1
+          max: 10
+      - name: comment
+        type: String
+        validation:
+          size:
+            max: 500
+      - name: reviewDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: user
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: user_id
+        inverseField: reviews
+        fetch: EAGER
+      - name: movie
+        type: Movie
+        relationType: ManyToOne
+        joinColumn: movie_id
+        inverseField: reviews
+        fetch: LAZY
+      - name: book
+        type: Book
+        relationType: ManyToOne
+        joinColumn: book_id
+        inverseField: reviews
+        fetch: LAZY
+      - name: videoGame
+        type: VideoGame
+        relationType: ManyToOne
+        joinColumn: video_game_id
+        inverseField: reviews
+        fetch: LAZY
+
+  - name: StreamingPlatform
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: website
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 255
+    relationships:
+      - name: movies
+        type: Movie
+        relationType: ManyToMany
+        joinTable: movie_platforms
+        joinColumns: platform_id
+        inverseJoinColumns: movie_id
+        fetch: LAZY
+        owner: false
+      - name: tvShows
+        type: TVShow
+        relationType: ManyToMany
+        joinTable: tvshow_platforms
+        joinColumns: platform_id
+        inverseJoinColumns: tvshow_id
+        fetch: LAZY
+        owner: false
+      - name: subscriptions
+        type: Subscription
+        relationType: OneToMany
+        mappedBy: platform
+        inverseField: platform
+        fetch: LAZY
+
+  - name: Subscription
+    fields:
+      - name: startDate
+        type: Date
+        validation:
+          notNull: true
+      - name: endDate
+        type: Date
+        validation:
+          notNull: true
+      - name: status
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Active|Expired|Cancelled)$"
+    relationships:
+      - name: user
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: user_id
+        inverseField: subscriptions
+        fetch: EAGER
+      - name: platform
+        type: StreamingPlatform
+        relationType: ManyToOne
+        joinColumn: platform_id
+        inverseField: subscriptions
+        fetch: EAGER
+
+  - name: Genre
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: movies
+        type: Movie
+        relationType: ManyToMany
+        joinTable: movie_genres
+        joinColumns: genre_id
+        inverseJoinColumns: movie_id
+        fetch: LAZY
+        owner: false
+      - name: tvShows
+        type: TVShow
+        relationType: ManyToMany
+        joinTable: tvshow_genres
+        joinColumns: genre_id
+        inverseJoinColumns: tvshow_id
+        fetch: LAZY
+        owner: false
+      - name: bookGenres
+        type: Book
+        relationType: ManyToMany
+        joinTable: book_genres
+        joinColumns: genre_id
+        inverseJoinColumns: book_id
+        fetch: LAZY
+        owner: false
+      - name: musicTracks
+        type: MusicTrack
+        relationType: ManyToMany
+        joinTable: genre_music_tracks
+        joinColumns: genre_id
+        inverseJoinColumns: track_id
+        fetch: LAZY
+        owner: true
+      - name: favoriteUsers
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_favorite_genres
+        joinColumns: genre_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+      - name: videoGames
+        type: VideoGame
+        relationType: ManyToMany
+        joinTable: video_game_genres
+        joinColumns: genre_id
+        inverseJoinColumns: video_game_id
+        fetch: LAZY
+        owner: false
+      - name: podcasts
+        type: Podcast
+        relationType: ManyToMany
+        joinTable: podcast_genres
+        joinColumns: genre_id
+        inverseJoinColumns: podcast_id
+        fetch: LAZY
+        owner: true
+
+  - name: VideoGame
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: releaseDate
+        type: Date
+        validation:
+          notNull: true
+      - name: developer
+        type: Artist
+        relationType: ManyToOne
+        joinColumn: developer_id
+        inverseField: managedGames
+        fetch: EAGER
+      - name: publisher
+        type: Publisher
+        relationType: ManyToOne
+        joinColumn: publisher_id
+        inverseField: videoGames
+        fetch: EAGER
+      - name: platform
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(PC|PlayStation|Xbox|Nintendo)$"
+    relationships:
+      - name: genres
+        type: Genre
+        relationType: ManyToMany
+        joinTable: video_game_genres
+        joinColumns: video_game_id
+        inverseJoinColumns: genre_id
+        fetch: EAGER
+        owner: true
+      - name: reviews
+        type: Review
+        relationType: OneToMany
+        mappedBy: videoGame
+        inverseField: videoGame
+        fetch: LAZY
+      - name: playedBy
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_games
+        joinColumns: game_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+      - name: achievements
+        type: GameAchievement
+        relationType: OneToMany
+        mappedBy: game
+        inverseField: game
+        fetch: LAZY
+
+  - name: GameAchievement
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: description
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 5
+            max: 255
+      - name: achievementDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: game
+        type: VideoGame
+        relationType: ManyToOne
+        joinColumn: game_id
+        inverseField: achievements
+        fetch: EAGER
+      - name: earnedBy
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_achievements
+        joinColumns: achievement_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+
+  - name: Podcast
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 1000
+      - name: totalEpisodes
+        type: Integer
+        validation:
+          min: 1
+    relationships:
+      - name: host
+        type: Artist
+        relationType: ManyToOne
+        joinColumn: host_id
+        inverseField: hostedPodcasts
+        fetch: EAGER
+      - name: episodes
+        type: PodcastEpisode
+        relationType: OneToMany
+        mappedBy: podcast
+        inverseField: podcast
+        fetch: LAZY
+      - name: genres
+        type: Genre
+        relationType: ManyToMany
+        joinTable: podcast_genres
+        joinColumns: podcast_id
+        inverseJoinColumns: genre_id
+        fetch: LAZY
+        owner: false
+      - name: listeners
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_podcast_library
+        joinColumns: podcast_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+      - name: publisher
+        type: Publisher
+        relationType: ManyToOne
+        joinColumn: publisher_id
+        inverseField: podcasts
+        fetch: EAGER
+
+  - name: PodcastEpisode
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: releaseDate
+        type: Date
+        validation:
+          notNull: true
+      - name: durationMinutes
+        type: Integer
+        validation:
+          min: 1
+    relationships:
+      - name: podcast
+        type: Podcast
+        relationType: ManyToOne
+        joinColumn: podcast_id
+        inverseField: episodes
+        fetch: EAGER
+      - name: relatedEpisode
+        type: Episode
+        relationType: OneToOne
+        mappedBy: relatedPodcastEpisode
+        inverseField: relatedPodcastEpisode
+        fetch: EAGER
+        owner: true
+
+  - name: OnlineEvent
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: eventDate
+        type: Date
+        validation:
+          notNull: true
+      - name: platformUrl
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 255
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 1000
+    relationships:
+      - name: host
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: host_id
+        inverseField: hostedOnlineEvents
+        fetch: EAGER
+      - name: attendees
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: online_event_attendees
+        joinColumns: event_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: true
+      - name: type
+        type: OnlineEventType
+        relationType: ManyToOne
+        joinColumn: type_id
+        inverseField: events
+        fetch: EAGER
+
+  - name: OnlineEventType
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: events
+        type: OnlineEvent
+        relationType: OneToMany
+        mappedBy: type
+        inverseField: type
+        fetch: LAZY
+
+  - name: EventLocation
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: address
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 5
+            max: 255
+    relationships:
+      - name: liveEvents
+        type: LiveEvent
+        relationType: OneToMany
+        mappedBy: location
+        inverseField: location
+        fetch: LAZY
+
+  - name: Merchandise
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 500
+      - name: price
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+    relationships:
+      - name: artist
+        type: Artist
+        relationType: ManyToOne
+        joinColumn: artist_id
+        inverseField: managedMerchandise
+        fetch: EAGER
+      - name: relatedMovies
+        type: Movie
+        relationType: ManyToMany
+        joinTable: merchandise_movies
+        joinColumns: merchandise_id
+        inverseJoinColumns: movie_id
+        fetch: LAZY
+        owner: true
+      - name: relatedShows
+        type: TVShow
+        relationType: ManyToMany
+        joinTable: merchandise_shows
+        joinColumns: merchandise_id
+        inverseJoinColumns: tvshow_id
+        fetch: LAZY
+        owner: true
+      - name: ownedByUsers
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_merchandise
+        joinColumns: merchandise_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+
+  - name: ForumThread
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 5
+            max: 255
+      - name: creationDate
+        type: Date
+        validation:
+          notNull: true
+      - name: lastPostDate
+        type: Date
+    relationships:
+      - name: author
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: author_id
+        inverseField: forumThreads
+        fetch: EAGER
+      - name: forumPosts
+        type: ForumPost
+        relationType: OneToMany
+        mappedBy: thread
+        inverseField: thread
+        fetch: LAZY
+
+  - name: ForumPost
+    fields:
+      - name: content
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 1
+            max: 2000
+      - name: postDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: author
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: author_id
+        inverseField: forumPosts
+        fetch: EAGER
+      - name: thread
+        type: ForumThread
+        relationType: ManyToOne
+        joinColumn: thread_id
+        inverseField: forumPosts
+        fetch: EAGER
+      - name: replies
+        type: ForumPost
+        relationType: OneToMany
+        mappedBy: parentPost
+        inverseField: parentPost
+        fetch: LAZY
+      - name: parentPost
+        type: ForumPost
+        relationType: ManyToOne
+        joinColumn: parent_post_id
+        inverseField: replies
+        fetch: LAZY
+
+  - name: Sponsor
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: contactEmail
+        type: String
+        validation:
+          notNull: true
+          email: true
+    relationships:
+      - name: sponsoredEvents
+        type: LiveEvent
+        relationType: OneToMany
+        mappedBy: sponsor
+        inverseField: sponsor
+        fetch: LAZY
+
+  - name: Booking
+    fields:
+      - name: bookingDate
+        type: Date
+        validation:
+          notNull: true
+      - name: totalAmount
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+    relationships:
+      - name: tickets
+        type: Ticket
+        relationType: OneToMany
+        mappedBy: booking
+        inverseField: booking
+        fetch: LAZY
+      - name: payment
+        type: Payment
+        relationType: OneToOne
+        joinColumn: payment_id
+        inverseField: booking
+        fetch: EAGER
+        owner: true
+
+  - name: Payment
+    fields:
+      - name: amount
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+      - name: paymentDate
+        type: Date
+        validation:
+          notNull: true
+      - name: method
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: booking
+        type: Booking
+        relationType: OneToOne
+        mappedBy: payment
+        inverseField: payment
+        fetch: LAZY
+        owner: false
+
+  - name: Playlist
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: creationDate
+        type: Date
+        validation:
+          notNull: true
+      - name: isPublic
+        type: Boolean
+        validation:
+          notNull: true
+    relationships:
+      - name: owner
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: owner_id
+        inverseField: playlists
+        fetch: EAGER
+      - name: items
+        type: PlaylistItem
+        relationType: OneToMany
+        mappedBy: playlist
+        inverseField: playlist
+        fetch: LAZY
+
+  - name: PlaylistItem
+    fields:
+      - name: position
+        type: Integer
+        validation:
+          notNull: true
+          min: 1
+    relationships:
+      - name: playlist
+        type: Playlist
+        relationType: ManyToOne
+        joinColumn: playlist_id
+        inverseField: items
+        fetch: EAGER
+      - name: track
+        type: MusicTrack
+        relationType: ManyToOne
+        joinColumn: track_id
+        inverseField: playlistItems
+        fetch: EAGER
+      - name: addedBy
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: user_id
+        inverseField: playlistItems
+        fetch: EAGER
+
+  - name: Achievement
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: description
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 5
+            max: 255
+      - name: achievementDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: user
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: user_id
+        inverseField: achievements
+        fetch: EAGER
+
+  - name: Employee
+    fields:
+      - name: firstName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+      - name: lastName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+      - name: email
+        type: String
+        validation:
+          notNull: true
+          email: true
+      - name: position
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: productionCompany
+        type: ProductionCompany
+        relationType: ManyToOne
+        joinColumn: company_id
+        inverseField: staff
+        fetch: EAGER
+      - name: shifts
+        type: Shift
+        relationType: OneToMany
+        mappedBy: employee
+        inverseField: employee
+        fetch: LAZY
+
+  - name: Shift
+    fields:
+      - name: shiftDate
+        type: Date
+        validation:
+          notNull: true
+      - name: startTime
+        type: Date
+        validation:
+          notNull: true
+      - name: endTime
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: employee
+        type: Employee
+        relationType: ManyToOne
+        joinColumn: employee_id
+        inverseField: shifts
+        fetch: EAGER
+
+  - name: ReviewableContent
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: contentType
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Movie|TVShow|Book|VideoGame)$"
+    relationships:
+      - name: reviews
+        type: Review
+        relationType: OneToMany
+        mappedBy: reviewableContent
+        inverseField: reviewableContent
+        fetch: LAZY
+      - name: tags
+        type: Tag
+        relationType: ManyToMany
+        joinTable: content_tags
+        joinColumns: content_id
+        inverseJoinColumns: tag_id
+        fetch: LAZY
+        owner: true
+
+  - name: Tag
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: content
+        type: ReviewableContent
+        relationType: ManyToMany
+        joinTable: content_tags
+        joinColumns: tag_id
+        inverseJoinColumns: content_id
+        fetch: LAZY
+        owner: false
+
+  - name: EventAudience
+    fields:
+      - name: count
+        type: Integer
+        validation:
+          min: 0
+      - name: audienceType
+        type: String
+        validation:
+          pattern: "^(Live|Online)$"
+    relationships:
+      - name: event
+        type: LiveEvent
+        relationType: OneToOne
+        mappedBy: audience
+        inverseField: audience
+        fetch: EAGER
+        owner: false
+
+  - name: EventLocation
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: address
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 5
+            max: 255
+    relationships:
+      - name: liveEvents
+        type: LiveEvent
+        relationType: OneToMany
+        mappedBy: location
+        inverseField: location
+        fetch: LAZY
+      - name: contactPerson
+        type: Employee
+        relationType: ManyToOne
+        joinColumn: employee_id
+        inverseField: managedLocations
+        fetch: EAGER
+
+  - name: OnlinePlatform
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: url
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 255
+    relationships:
+      - name: liveEvents
+        type: OnlineEvent
+        relationType: OneToMany
+        mappedBy: platform
+        inverseField: platform
+        fetch: LAZY
+      - name: streams
+        type: StreamingPlatform
+        relationType: OneToMany
+        mappedBy: onlinePlatform
+        inverseField: onlinePlatform
+        fetch: LAZY
+
+  - name: StreamingPlatform
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: website
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 255
+    relationships:
+      - name: movies
+        type: Movie
+        relationType: ManyToMany
+        joinTable: movie_platforms
+        joinColumns: platform_id
+        inverseJoinColumns: movie_id
+        fetch: LAZY
+        owner: false
+      - name: tvShows
+        type: TVShow
+        relationType: ManyToMany
+        joinTable: tvshow_platforms
+        joinColumns: platform_id
+        inverseJoinColumns: tvshow_id
+        fetch: LAZY
+        owner: false
+      - name: subscriptions
+        type: Subscription
+        relationType: OneToMany
+        mappedBy: platform
+        inverseField: platform
+        fetch: LAZY
+      - name: onlinePlatform
+        type: OnlinePlatform
+        relationType: ManyToOne
+        joinColumn: online_platform_id
+        inverseField: streams
+        fetch: EAGER
+
+  - name: Sponsor
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: contactEmail
+        type: String
+        validation:
+          notNull: true
+          email: true
+    relationships:
+      - name: sponsoredEvents
+        type: LiveEvent
+        relationType: OneToMany
+        mappedBy: sponsor
+        inverseField: sponsor
+        fetch: LAZY
+      - name: sponsoredMovies
+        type: Movie
+        relationType: ManyToMany
+        joinTable: movie_sponsors
+        joinColumns: sponsor_id
+        inverseJoinColumns: movie_id
+        fetch: LAZY
+        owner: true
+      - name: sponsoredShows
+        type: TVShow
+        relationType: ManyToMany
+        joinTable: tvshow_sponsors
+        joinColumns: sponsor_id
+        inverseJoinColumns: tvshow_id
+        fetch: LAZY
+        owner: true
+
+  - name: Booking
+    fields:
+      - name: bookingDate
+        type: Date
+        validation:
+          notNull: true
+      - name: totalAmount
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+    relationships:
+      - name: tickets
+        type: Ticket
+        relationType: OneToMany
+        mappedBy: booking
+        inverseField: booking
+        fetch: LAZY
+      - name: payment
+        type: Payment
+        relationType: OneToOne
+        joinColumn: payment_id
+        inverseField: booking
+        fetch: EAGER
+        owner: true
+
+  - name: Payment
+    fields:
+      - name: amount
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+      - name: paymentDate
+        type: Date
+        validation:
+          notNull: true
+      - name: method
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: booking
+        type: Booking
+        relationType: OneToOne
+        mappedBy: payment
+        inverseField: payment
+        fetch: LAZY
+        owner: false
+
+  - name: Merchandise
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 500
+      - name: price
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+    relationships:
+      - name: artist
+        type: Artist
+        relationType: ManyToOne
+        joinColumn: artist_id
+        inverseField: managedMerchandise
+        fetch: EAGER
+      - name: relatedMovies
+        type: Movie
+        relationType: ManyToMany
+        joinTable: merchandise_movies
+        joinColumns: merchandise_id
+        inverseJoinColumns: movie_id
+        fetch: LAZY
+        owner: true
+      - name: relatedShows
+        type: TVShow
+        relationType: ManyToMany
+        joinTable: merchandise_shows
+        joinColumns: merchandise_id
+        inverseJoinColumns: tvshow_id
+        fetch: LAZY
+        owner: true
+      - name: ownedByUsers
+        type: UserProfile
+        relationType: ManyToMany
+        joinTable: user_merchandise
+        joinColumns: merchandise_id
+        inverseJoinColumns: user_id
+        fetch: LAZY
+        owner: false
+
+  - name: Playlist
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: creationDate
+        type: Date
+        validation:
+          notNull: true
+      - name: isPublic
+        type: Boolean
+        validation:
+          notNull: true
+    relationships:
+      - name: owner
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: owner_id
+        inverseField: playlists
+        fetch: EAGER
+      - name: items
+        type: PlaylistItem
+        relationType: OneToMany
+        mappedBy: playlist
+        inverseField: playlist
+        fetch: LAZY
+
+  - name: PlaylistItem
+    fields:
+      - name: position
+        type: Integer
+        validation:
+          notNull: true
+          min: 1
+    relationships:
+      - name: playlist
+        type: Playlist
+        relationType: ManyToOne
+        joinColumn: playlist_id
+        inverseField: items
+        fetch: EAGER
+      - name: track
+        type: MusicTrack
+        relationType: ManyToOne
+        joinColumn: track_id
+        inverseField: playlistItems
+        fetch: EAGER
+      - name: addedBy
+        type: UserProfile
+        relationType: ManyToOne
+        joinColumn: user_id
+        inverseField: playlistItems
+        fetch: EAGER
