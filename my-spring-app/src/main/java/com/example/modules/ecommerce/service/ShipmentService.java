@@ -14,36 +14,37 @@ public class ShipmentService extends BaseService<Shipment> {
 
     protected final ShipmentRepository shipmentRepository;
 
-    public ShipmentService(ShipmentRepository repository) {
-    super(repository);
-    this.shipmentRepository = repository;
-}
+    public ShipmentService(ShipmentRepository repository)
+    {
+        super(repository);
+        this.shipmentRepository = repository;
+    }
 
     @Override
     public Shipment save(Shipment shipment) {
-
         if (shipment.getOrder() != null) {
         shipment.getOrder().setShipment(shipment);
         }
 
-    return shipmentRepository.save(shipment);
+        return shipmentRepository.save(shipment);
     }
 
-    public Shipment update(Long id, Shipment shipmentRequest) {
-    Shipment existing = shipmentRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Shipment not found"));
 
-// Copier les champs simples
-    existing.setShipmentDate(shipmentRequest.getShipmentDate());
-    existing.setCarrier(shipmentRequest.getCarrier());
-    existing.setTrackingNumber(shipmentRequest.getTrackingNumber());
+    public Shipment update(Long id, Shipment shipmentRequest) {
+        Shipment existing = shipmentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Shipment not found"));
+
+    // Copier les champs simples
+        existing.setShipmentDate(shipmentRequest.getShipmentDate());
+        existing.setCarrier(shipmentRequest.getCarrier());
+        existing.setTrackingNumber(shipmentRequest.getTrackingNumber());
 
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
+
 // Relations OneToMany : synchronisation sécurisée
 
-    return shipmentRepository.save(existing);
-
+        return shipmentRepository.save(existing);
     }
 }

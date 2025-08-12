@@ -1,6 +1,8 @@
 package com.example.modules.ecommerce.controller;
 
+import com.example.modules.ecommerce.dto.CategoryDto;
 import com.example.modules.ecommerce.model.Category;
+import com.example.modules.ecommerce.mapper.CategoryMapper;
 import com.example.modules.ecommerce.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -14,52 +16,56 @@ import java.util.List;
 @RequestMapping("/api/categorys")
 public class CategoryController {
 
-    private final CategoryService categoryService;
+private final CategoryService categoryService;
+private final CategoryMapper categoryMapper;
 
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
+public CategoryController(CategoryService categoryService, CategoryMapper categoryMapper) {
+this.categoryService = categoryService;
+this.categoryMapper = categoryMapper;
+}
 
-    @GetMapping
-    public ResponseEntity<List<Category>> getAllCategorys() {
-        return ResponseEntity.ok(categoryService.findAll());
+@GetMapping
+public ResponseEntity<List<CategoryDto>> getAllCategorys() {
+    List<Category> entities = categoryService.findAll();
+    return ResponseEntity.ok(categoryMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Long id) {
         return categoryService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+        .map(categoryMapper::toDto)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+        }
 
-    @PostMapping
-    public ResponseEntity<Category> createCategory(
-            @Valid @RequestBody Category category,
+        @PostMapping
+        public ResponseEntity<CategoryDto> createCategory(
+            @Valid @RequestBody CategoryDto categoryDto,
             UriComponentsBuilder uriBuilder) {
 
-        Category saved = categoryService.save(category);
-        URI location = uriBuilder.path("/api/categorys/{id}")
-                .buildAndExpand(saved.getId()).toUri();
+            Category entity = categoryMapper.toEntity(categoryDto);
+            Category saved = categoryService.save(entity);
+            URI location = uriBuilder.path("/api/categorys/{id}")
+            .buildAndExpand(saved.getId()).toUri();
+            return ResponseEntity.created(location).body(categoryMapper.toDto(saved));
+            }
 
-        return ResponseEntity.created(location).body(saved);
-    }
+            @PutMapping("/{id}")
+            public ResponseEntity<CategoryDto> updateCategory(
+                @PathVariable Long id,
+                @Valid @RequestBody CategoryDto categoryDto) {
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(
-            @PathVariable Long id,
-            @Valid @RequestBody Category categoryRequest) {
+                try {
+                Category updatedEntity = categoryService.update(id, categoryMapper.toEntity(categoryDto));
+                return ResponseEntity.ok(categoryMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
 
-        try {
-            Category updated = categoryService.update(id, categoryRequest);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        categoryService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-}
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+                    categoryService.deleteById(id);
+                    return ResponseEntity.noContent().build();
+                    }
+                    }

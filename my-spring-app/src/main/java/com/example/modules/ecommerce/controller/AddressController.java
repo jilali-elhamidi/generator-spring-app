@@ -1,6 +1,8 @@
 package com.example.modules.ecommerce.controller;
 
+import com.example.modules.ecommerce.dto.AddressDto;
 import com.example.modules.ecommerce.model.Address;
+import com.example.modules.ecommerce.mapper.AddressMapper;
 import com.example.modules.ecommerce.service.AddressService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -14,52 +16,56 @@ import java.util.List;
 @RequestMapping("/api/addresss")
 public class AddressController {
 
-    private final AddressService addressService;
+private final AddressService addressService;
+private final AddressMapper addressMapper;
 
-    public AddressController(AddressService addressService) {
-        this.addressService = addressService;
-    }
+public AddressController(AddressService addressService, AddressMapper addressMapper) {
+this.addressService = addressService;
+this.addressMapper = addressMapper;
+}
 
-    @GetMapping
-    public ResponseEntity<List<Address>> getAllAddresss() {
-        return ResponseEntity.ok(addressService.findAll());
+@GetMapping
+public ResponseEntity<List<AddressDto>> getAllAddresss() {
+    List<Address> entities = addressService.findAll();
+    return ResponseEntity.ok(addressMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Address> getAddressById(@PathVariable Long id) {
+    public ResponseEntity<AddressDto> getAddressById(@PathVariable Long id) {
         return addressService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+        .map(addressMapper::toDto)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+        }
 
-    @PostMapping
-    public ResponseEntity<Address> createAddress(
-            @Valid @RequestBody Address address,
+        @PostMapping
+        public ResponseEntity<AddressDto> createAddress(
+            @Valid @RequestBody AddressDto addressDto,
             UriComponentsBuilder uriBuilder) {
 
-        Address saved = addressService.save(address);
-        URI location = uriBuilder.path("/api/addresss/{id}")
-                .buildAndExpand(saved.getId()).toUri();
+            Address entity = addressMapper.toEntity(addressDto);
+            Address saved = addressService.save(entity);
+            URI location = uriBuilder.path("/api/addresss/{id}")
+            .buildAndExpand(saved.getId()).toUri();
+            return ResponseEntity.created(location).body(addressMapper.toDto(saved));
+            }
 
-        return ResponseEntity.created(location).body(saved);
-    }
+            @PutMapping("/{id}")
+            public ResponseEntity<AddressDto> updateAddress(
+                @PathVariable Long id,
+                @Valid @RequestBody AddressDto addressDto) {
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Address> updateAddress(
-            @PathVariable Long id,
-            @Valid @RequestBody Address addressRequest) {
+                try {
+                Address updatedEntity = addressService.update(id, addressMapper.toEntity(addressDto));
+                return ResponseEntity.ok(addressMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
 
-        try {
-            Address updated = addressService.update(id, addressRequest);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAddress(@PathVariable Long id) {
-        addressService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-}
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteAddress(@PathVariable Long id) {
+                    addressService.deleteById(id);
+                    return ResponseEntity.noContent().build();
+                    }
+                    }

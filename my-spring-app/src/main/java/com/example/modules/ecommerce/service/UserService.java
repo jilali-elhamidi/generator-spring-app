@@ -16,60 +16,62 @@ public class UserService extends BaseService<User> {
 
     protected final UserRepository userRepository;
 
-    public UserService(UserRepository repository) {
-    super(repository);
-    this.userRepository = repository;
-}
+    public UserService(UserRepository repository)
+    {
+        super(repository);
+        this.userRepository = repository;
+    }
 
     @Override
     public User save(User user) {
 
         if (user.getAddresses() != null) {
             for (Address item : user.getAddresses()) {
-                item.setUser(user);
+            item.setUser(user);
             }
         }
 
         if (user.getOrders() != null) {
             for (Order item : user.getOrders()) {
-                item.setUser(user);
+            item.setUser(user);
             }
         }
 
-    return userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    public User update(Long id, User userRequest) {
-    User existing = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found"));
 
-// Copier les champs simples
-    existing.setUsername(userRequest.getUsername());
-    existing.setEmail(userRequest.getEmail());
-    existing.setPhone(userRequest.getPhone());
+    public User update(Long id, User userRequest) {
+        User existing = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    // Copier les champs simples
+        existing.setUsername(userRequest.getUsername());
+        existing.setEmail(userRequest.getEmail());
+        existing.setPhone(userRequest.getPhone());
 
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
+
 // Relations OneToMany : synchronisation sécurisée
 
-    existing.getAddresses().clear();
-    if (userRequest.getAddresses() != null) {
-        for (var item : userRequest.getAddresses()) {
-        item.setUser(existing); // remettre lien inverse
-        existing.getAddresses().add(item);
+        existing.getAddresses().clear();
+        if (userRequest.getAddresses() != null) {
+            for (var item : userRequest.getAddresses()) {
+            item.setUser(existing);
+            existing.getAddresses().add(item);
+            }
         }
-    }
 
-    existing.getOrders().clear();
-    if (userRequest.getOrders() != null) {
-        for (var item : userRequest.getOrders()) {
-        item.setUser(existing); // remettre lien inverse
-        existing.getOrders().add(item);
+        existing.getOrders().clear();
+        if (userRequest.getOrders() != null) {
+            for (var item : userRequest.getOrders()) {
+            item.setUser(existing);
+            existing.getOrders().add(item);
+            }
         }
-    }
 
-    return userRepository.save(existing);
-
+        return userRepository.save(existing);
     }
 }

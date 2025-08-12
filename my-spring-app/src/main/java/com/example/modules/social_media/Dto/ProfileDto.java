@@ -108,6 +108,6 @@ private Long id;
 
     
         private List<NotificationSimpleDto> notifications;
-    
+
 
     }

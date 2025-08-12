@@ -1,0 +1,369 @@
+module: healthcare_management
+
+entities:
+  - name: Patient
+    fields:
+      - name: firstName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+      - name: lastName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+      - name: dateOfBirth
+        type: Date
+        validation:
+          notNull: true
+      - name: gender
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Male|Female|Other)$"
+      - name: email
+        type: String
+        validation:
+          email: true
+      - name: phoneNumber
+        type: String
+        validation:
+          size:
+            max: 20
+    relationships:
+      - name: medicalRecords
+        type: MedicalRecord
+        relationType: OneToMany
+        mappedBy: patient
+        inverseField: patient
+        fetch: LAZY
+      - name: appointments
+        type: Appointment
+        relationType: OneToMany
+        mappedBy: patient
+        inverseField: patient
+        fetch: LAZY
+      - name: prescriptions
+        type: Prescription
+        relationType: OneToMany
+        mappedBy: patient
+        inverseField: patient
+        fetch: LAZY
+      - name: invoices
+        type: Invoice
+        relationType: OneToMany
+        mappedBy: patient
+        inverseField: patient
+        fetch: LAZY
+
+  - name: Doctor
+    fields:
+      - name: firstName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+      - name: lastName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+      - name: specialty
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 100
+      - name: email
+        type: String
+        validation:
+          email: true
+      - name: phoneNumber
+        type: String
+        validation:
+          size:
+            max: 20
+    relationships:
+      - name: appointments
+        type: Appointment
+        relationType: OneToMany
+        mappedBy: doctor
+        inverseField: doctor
+        fetch: LAZY
+      - name: prescriptions
+        type: Prescription
+        relationType: OneToMany
+        mappedBy: doctor
+        inverseField: doctor
+        fetch: LAZY
+      - name: department
+        type: Department
+        relationType: ManyToOne
+        joinColumn: department_id
+        inverseField: doctors
+        fetch: EAGER
+
+  - name: Department
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 100
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 255
+    relationships:
+      - name: doctors
+        type: Doctor
+        relationType: OneToMany
+        mappedBy: department
+        inverseField: department
+        fetch: LAZY
+      - name: head
+        type: Doctor
+        relationType: OneToOne
+        joinColumn: head_id
+        fetch: EAGER
+
+  - name: Appointment
+    fields:
+      - name: appointmentDate
+        type: LocalDateTime
+        validation:
+          notNull: true
+      - name: status
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Scheduled|Completed|Cancelled)$"
+    relationships:
+      - name: patient
+        type: Patient
+        relationType: ManyToOne
+        joinColumn: patient_id
+        inverseField: appointments
+        fetch: EAGER
+      - name: doctor
+        type: Doctor
+        relationType: ManyToOne
+        joinColumn: doctor_id
+        inverseField: appointments
+        fetch: EAGER
+      - name: room
+        type: Room
+        relationType: ManyToOne
+        joinColumn: room_id
+        inverseField: appointments
+        fetch: LAZY
+
+  - name: Room
+    fields:
+      - name: roomNumber
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 10
+      - name: type
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Consultation|Surgery|ICU|General)$"
+      - name: capacity
+        type: Integer
+        validation:
+          min: 1
+    relationships:
+      - name: appointments
+        type: Appointment
+        relationType: OneToMany
+        mappedBy: room
+        inverseField: room
+        fetch: LAZY
+
+  - name: MedicalRecord
+    fields:
+      - name: recordDate
+        type: Date
+        validation:
+          notNull: true
+      - name: diagnosis
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 255
+      - name: notes
+        type: String
+        validation:
+          size:
+            max: 500
+    relationships:
+      - name: patient
+        type: Patient
+        relationType: ManyToOne
+        joinColumn: patient_id
+        inverseField: medicalRecords
+        fetch: EAGER
+      - name: doctor
+        type: Doctor
+        relationType: ManyToOne
+        joinColumn: doctor_id
+        fetch: EAGER
+      - name: attachments
+        type: MedicalFile
+        relationType: OneToMany
+        mappedBy: record
+        inverseField: record
+        fetch: LAZY
+
+  - name: MedicalFile
+    fields:
+      - name: fileUrl
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 255
+      - name: fileType
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 50
+    relationships:
+      - name: record
+        type: MedicalRecord
+        relationType: ManyToOne
+        joinColumn: record_id
+        inverseField: attachments
+        fetch: LAZY
+
+  - name: Prescription
+    fields:
+      - name: prescriptionDate
+        type: Date
+        validation:
+          notNull: true
+      - name: dosageInstructions
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 255
+    relationships:
+      - name: patient
+        type: Patient
+        relationType: ManyToOne
+        joinColumn: patient_id
+        inverseField: prescriptions
+        fetch: EAGER
+      - name: doctor
+        type: Doctor
+        relationType: ManyToOne
+        joinColumn: doctor_id
+        inverseField: prescriptions
+        fetch: EAGER
+      - name: medications
+        type: Medication
+        relationType: ManyToMany
+        joinTable: prescription_medications
+        joinColumns: prescription_id
+        inverseJoinColumns: medication_id
+        fetch: EAGER
+        owner: true
+
+  - name: Medication
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 100
+      - name: type
+        type: String
+        validation:
+          size:
+            max: 50
+      - name: manufacturer
+        type: String
+        validation:
+          size:
+            max: 100
+    relationships:
+      - name: prescriptions
+        type: Prescription
+        relationType: ManyToMany
+        mappedBy: medications
+        inverseField: medications
+        fetch: LAZY
+        owner: false
+
+  - name: Invoice
+    fields:
+      - name: invoiceDate
+        type: Date
+        validation:
+          notNull: true
+      - name: totalAmount
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+      - name: status
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Paid|Pending|Cancelled)$"
+    relationships:
+      - name: patient
+        type: Patient
+        relationType: ManyToOne
+        joinColumn: patient_id
+        inverseField: invoices
+        fetch: EAGER
+      - name: Reimbursements
+        type: Reimbursement
+        relationType: OneToMany
+        mappedBy: invoice
+        inverseField: invoice
+        fetch: LAZY
+
+  - name: Reimbursement
+    fields:
+      - name: ReimbursementDate
+        type: Date
+        validation:
+          notNull: true
+      - name: amount
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+      - name: method
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Cash|CreditCard|BankTransfer)$"
+    relationships:
+      - name: invoice
+        type: Invoice
+        relationType: ManyToOne
+        joinColumn: invoice_id
+        inverseField: Reimbursements
+        fetch: EAGER

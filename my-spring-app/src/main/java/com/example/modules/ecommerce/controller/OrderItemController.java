@@ -1,6 +1,8 @@
 package com.example.modules.ecommerce.controller;
 
+import com.example.modules.ecommerce.dto.OrderItemDto;
 import com.example.modules.ecommerce.model.OrderItem;
+import com.example.modules.ecommerce.mapper.OrderItemMapper;
 import com.example.modules.ecommerce.service.OrderItemService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -14,52 +16,56 @@ import java.util.List;
 @RequestMapping("/api/orderitems")
 public class OrderItemController {
 
-    private final OrderItemService orderitemService;
+private final OrderItemService orderitemService;
+private final OrderItemMapper orderitemMapper;
 
-    public OrderItemController(OrderItemService orderitemService) {
-        this.orderitemService = orderitemService;
-    }
+public OrderItemController(OrderItemService orderitemService, OrderItemMapper orderitemMapper) {
+this.orderitemService = orderitemService;
+this.orderitemMapper = orderitemMapper;
+}
 
-    @GetMapping
-    public ResponseEntity<List<OrderItem>> getAllOrderItems() {
-        return ResponseEntity.ok(orderitemService.findAll());
+@GetMapping
+public ResponseEntity<List<OrderItemDto>> getAllOrderItems() {
+    List<OrderItem> entities = orderitemService.findAll();
+    return ResponseEntity.ok(orderitemMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderItem> getOrderItemById(@PathVariable Long id) {
+    public ResponseEntity<OrderItemDto> getOrderItemById(@PathVariable Long id) {
         return orderitemService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+        .map(orderitemMapper::toDto)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+        }
 
-    @PostMapping
-    public ResponseEntity<OrderItem> createOrderItem(
-            @Valid @RequestBody OrderItem orderitem,
+        @PostMapping
+        public ResponseEntity<OrderItemDto> createOrderItem(
+            @Valid @RequestBody OrderItemDto orderitemDto,
             UriComponentsBuilder uriBuilder) {
 
-        OrderItem saved = orderitemService.save(orderitem);
-        URI location = uriBuilder.path("/api/orderitems/{id}")
-                .buildAndExpand(saved.getId()).toUri();
+            OrderItem entity = orderitemMapper.toEntity(orderitemDto);
+            OrderItem saved = orderitemService.save(entity);
+            URI location = uriBuilder.path("/api/orderitems/{id}")
+            .buildAndExpand(saved.getId()).toUri();
+            return ResponseEntity.created(location).body(orderitemMapper.toDto(saved));
+            }
 
-        return ResponseEntity.created(location).body(saved);
-    }
+            @PutMapping("/{id}")
+            public ResponseEntity<OrderItemDto> updateOrderItem(
+                @PathVariable Long id,
+                @Valid @RequestBody OrderItemDto orderitemDto) {
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OrderItem> updateOrderItem(
-            @PathVariable Long id,
-            @Valid @RequestBody OrderItem orderitemRequest) {
+                try {
+                OrderItem updatedEntity = orderitemService.update(id, orderitemMapper.toEntity(orderitemDto));
+                return ResponseEntity.ok(orderitemMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
 
-        try {
-            OrderItem updated = orderitemService.update(id, orderitemRequest);
-            return ResponseEntity.ok(updated);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
-        orderitemService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
-}
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
+                    orderitemService.deleteById(id);
+                    return ResponseEntity.noContent().build();
+                    }
+                    }

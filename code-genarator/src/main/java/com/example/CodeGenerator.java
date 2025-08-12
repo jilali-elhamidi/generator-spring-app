@@ -105,18 +105,18 @@ public class CodeGenerator {
                 context.put("hasDate", hasType(fields, "Date"));
 
                 // Génération des templates principaux
-                generateJavaFile("EntityTemplate", outputDir, moduleName, entityName, "Model", context);
-                generateJavaFile("RepositoryTemplate", outputDir, moduleName, entityName, "Repository", context);
-                generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "Service", context);
-                generateJavaFile("ControllerTemplate", outputDir, moduleName, entityName, "Controller", context);
+                generateJavaFile("EntityTemplate", outputDir, moduleName, entityName, "model", context);
+                generateJavaFile("RepositoryTemplate", outputDir, moduleName, entityName, "repository", context);
+                generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
+                generateJavaFile("ControllerTemplate", outputDir, moduleName, entityName, "controller", context);
 
                 // Génération du DTO complet dans le dossier 'dto'
-                generateJavaFile("DtoTemplate", outputDir, moduleName, entityName, "Dto", context);
+                generateJavaFile("DtoTemplate", outputDir, moduleName, entityName, "dto", context);
 
                 // Génération systématique du DTO simple dans le dossier 'simpledto'
-                generateJavaFile("DtoSimpleTemplate", outputDir, moduleName, entityName, "DtoSimple", context);
+                generateJavaFile("DtoSimpleTemplate", outputDir, moduleName, entityName, "dtosimple", context);
 
-                generateJavaFile("MapperTemplate", outputDir, moduleName, entityName, "Mapper", context);
+                generateJavaFile("MapperTemplate", outputDir, moduleName, entityName, "mapper", context);
             }
         }
     }

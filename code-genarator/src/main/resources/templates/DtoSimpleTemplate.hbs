@@ -1,8 +1,9 @@
-package com.example.modules.{{module}}.dto;
+package com.example.modules.{{module}}.dtosimple;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
 {{#if hasDate}}
     import java.util.Date;
 {{/if}}
@@ -11,7 +12,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class {{entityName}}SimpleDto {
-private Long id;
+    private Long id;
 {{#each fields}}
     private {{type}} {{name}};
 {{/each}}
