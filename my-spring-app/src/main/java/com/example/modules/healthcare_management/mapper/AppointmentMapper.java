@@ -25,4 +25,5 @@ public interface AppointmentMapper {
     List<AppointmentDto> toDtoList(List<Appointment> appointmentList);
 
     List<Appointment> toEntityList(List<AppointmentDto> appointmentDtoList);
+
 }

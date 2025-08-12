@@ -25,4 +25,5 @@ public interface MedicalFileMapper {
     List<MedicalFileDto> toDtoList(List<MedicalFile> medicalfileList);
 
     List<MedicalFile> toEntityList(List<MedicalFileDto> medicalfileDtoList);
+
 }

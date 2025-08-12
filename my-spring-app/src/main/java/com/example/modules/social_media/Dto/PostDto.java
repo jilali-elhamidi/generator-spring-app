@@ -3,33 +3,19 @@ package com.example.modules.social_media.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Date;
+import com.example.modules.social_media.dtosimple.ProfileSimpleDto;
 
-    import java.util.Date;
+import com.example.modules.social_media.dtosimple.CommentSimpleDto;
 
+import com.example.modules.social_media.dtosimple.TagSimpleDto;
 
+import com.example.modules.social_media.dtosimple.MediaFileSimpleDto;
 
-    
-        import com.example.modules.social_media.dto.ProfileSimpleDto;
-    
+import com.example.modules.social_media.dtosimple.GroupSimpleDto;
 
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.CommentSimpleDto;
-    
-
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.TagSimpleDto;
-    
-
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.MediaFileSimpleDto;
-    
-
-    
-        import com.example.modules.social_media.dto.GroupSimpleDto;
-    
 
 
 @Data
@@ -37,33 +23,20 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class PostDto {
 
-private Long id;
-
+    private Long id;
 
     private String content;
 
     private Date postDate;
 
+    private ProfileSimpleDto author;
 
+    private List<CommentSimpleDto> comments;
 
-    
-            private ProfileSimpleDto author;
-    
+    private List<TagSimpleDto> tags;
 
-    
-        private List<CommentSimpleDto> comments;
-    
+    private List<MediaFileSimpleDto> media;
 
-    
-            private List<TagSimpleDto> tags;
-    
+    private GroupSimpleDto group;
 
-    
-        private List<MediaFileSimpleDto> media;
-    
-
-    
-            private GroupSimpleDto group;
-    
-
-    }
+}

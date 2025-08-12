@@ -16,56 +16,60 @@ import java.util.List;
 @RequestMapping("/api/messages")
 public class MessageController {
 
-private final MessageService messageService;
-private final MessageMapper messageMapper;
+    private final MessageService messageService;
+    private final MessageMapper messageMapper;
 
-public MessageController(MessageService messageService, MessageMapper messageMapper) {
-this.messageService = messageService;
-this.messageMapper = messageMapper;
-}
+    public MessageController(MessageService messageService,
+                                    MessageMapper messageMapper) {
+        this.messageService = messageService;
+        this.messageMapper = messageMapper;
+    }
 
-@GetMapping
-public ResponseEntity<List<MessageDto>> getAllMessages() {
-    List<Message> entities = messageService.findAll();
-    return ResponseEntity.ok(messageMapper.toDtoList(entities));
+    @GetMapping
+    public ResponseEntity<List<MessageDto>> getAllMessages() {
+        List<Message> entities = messageService.findAll();
+        return ResponseEntity.ok(messageMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MessageDto> getMessageById(@PathVariable Long id) {
         return messageService.findById(id)
-        .map(messageMapper::toDto)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-        }
+                .map(messageMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        @PostMapping
-        public ResponseEntity<MessageDto> createMessage(
+    @PostMapping
+    public ResponseEntity<MessageDto> createMessage(
             @Valid @RequestBody MessageDto messageDto,
             UriComponentsBuilder uriBuilder) {
 
-            Message entity = messageMapper.toEntity(messageDto);
-            Message saved = messageService.save(entity);
-            URI location = uriBuilder.path("/api/messages/{id}")
-            .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(messageMapper.toDto(saved));
-            }
+        Message entity = messageMapper.toEntity(messageDto);
+        Message saved = messageService.save(entity);
+        URI location = uriBuilder.path("/api/messages/{id}")
+                                 .buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location).body(messageMapper.toDto(saved));
+    }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MessageDto> updateMessage(
-                @PathVariable Long id,
-                @Valid @RequestBody MessageDto messageDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MessageDto> updateMessage(
+            @PathVariable Long id,
+            @Valid @RequestBody MessageDto messageDto) {
 
-                try {
-                Message updatedEntity = messageService.update(id, messageMapper.toEntity(messageDto));
-                return ResponseEntity.ok(messageMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
-                }
+        try {
+            Message updatedEntity = messageService.update(
+                    id,
+                    messageMapper.toEntity(messageDto)
+            );
+            return ResponseEntity.ok(messageMapper.toDto(updatedEntity));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMessage(@PathVariable Long id) {
-                    messageService.deleteById(id);
-                    return ResponseEntity.noContent().build();
-                    }
-                    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMessage(@PathVariable Long id) {
+        messageService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

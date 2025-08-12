@@ -3,14 +3,11 @@ package com.example.modules.ecommerce.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Date;
 
-    import java.util.Date;
 
-
-
-    
-        import com.example.modules.ecommerce.dto.OrderSimpleDto;
-    
 
 
 @Data
@@ -18,8 +15,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ShipmentDto {
 
-private Long id;
-
+    private Long id;
 
     private Date shipmentDate;
 
@@ -27,10 +23,6 @@ private Long id;
 
     private String trackingNumber;
 
-
-
-    
-            private OrderSimpleDto order;
     
 
-    }
+}

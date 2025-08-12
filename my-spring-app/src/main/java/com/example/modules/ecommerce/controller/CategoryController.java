@@ -16,56 +16,60 @@ import java.util.List;
 @RequestMapping("/api/categorys")
 public class CategoryController {
 
-private final CategoryService categoryService;
-private final CategoryMapper categoryMapper;
+    private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
 
-public CategoryController(CategoryService categoryService, CategoryMapper categoryMapper) {
-this.categoryService = categoryService;
-this.categoryMapper = categoryMapper;
-}
+    public CategoryController(CategoryService categoryService,
+                                    CategoryMapper categoryMapper) {
+        this.categoryService = categoryService;
+        this.categoryMapper = categoryMapper;
+    }
 
-@GetMapping
-public ResponseEntity<List<CategoryDto>> getAllCategorys() {
-    List<Category> entities = categoryService.findAll();
-    return ResponseEntity.ok(categoryMapper.toDtoList(entities));
+    @GetMapping
+    public ResponseEntity<List<CategoryDto>> getAllCategorys() {
+        List<Category> entities = categoryService.findAll();
+        return ResponseEntity.ok(categoryMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Long id) {
         return categoryService.findById(id)
-        .map(categoryMapper::toDto)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-        }
+                .map(categoryMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        @PostMapping
-        public ResponseEntity<CategoryDto> createCategory(
+    @PostMapping
+    public ResponseEntity<CategoryDto> createCategory(
             @Valid @RequestBody CategoryDto categoryDto,
             UriComponentsBuilder uriBuilder) {
 
-            Category entity = categoryMapper.toEntity(categoryDto);
-            Category saved = categoryService.save(entity);
-            URI location = uriBuilder.path("/api/categorys/{id}")
-            .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(categoryMapper.toDto(saved));
-            }
+        Category entity = categoryMapper.toEntity(categoryDto);
+        Category saved = categoryService.save(entity);
+        URI location = uriBuilder.path("/api/categorys/{id}")
+                                 .buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location).body(categoryMapper.toDto(saved));
+    }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<CategoryDto> updateCategory(
-                @PathVariable Long id,
-                @Valid @RequestBody CategoryDto categoryDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryDto> updateCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoryDto categoryDto) {
 
-                try {
-                Category updatedEntity = categoryService.update(id, categoryMapper.toEntity(categoryDto));
-                return ResponseEntity.ok(categoryMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
-                }
+        try {
+            Category updatedEntity = categoryService.update(
+                    id,
+                    categoryMapper.toEntity(categoryDto)
+            );
+            return ResponseEntity.ok(categoryMapper.toDto(updatedEntity));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-                    categoryService.deleteById(id);
-                    return ResponseEntity.noContent().build();
-                    }
-                    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        categoryService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

@@ -25,4 +25,5 @@ public interface RoomMapper {
     List<RoomDto> toDtoList(List<Room> roomList);
 
     List<Room> toEntityList(List<RoomDto> roomDtoList);
+
 }

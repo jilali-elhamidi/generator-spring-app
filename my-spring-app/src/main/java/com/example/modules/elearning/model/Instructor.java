@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.validation.constraints.*;
 import java.util.List;
+import java.time.LocalDateTime;
 
 import com.example.modules.elearning.model.Course;
 import lombok.Data;
@@ -22,10 +23,13 @@ public class Instructor extends BaseEntity {
 
 // === Attributs simples ===
 
+    @NotNull@Size(min = 2, max = 50)
     private String firstName;
 
+    @NotNull@Size(min = 2, max = 50)
     private String lastName;
 
+    @NotNull@Email
     private String email;
 
 

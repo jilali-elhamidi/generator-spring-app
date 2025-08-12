@@ -16,56 +16,60 @@ import java.util.List;
 @RequestMapping("/api/orders")
 public class OrderController {
 
-private final OrderService orderService;
-private final OrderMapper orderMapper;
+    private final OrderService orderService;
+    private final OrderMapper orderMapper;
 
-public OrderController(OrderService orderService, OrderMapper orderMapper) {
-this.orderService = orderService;
-this.orderMapper = orderMapper;
-}
+    public OrderController(OrderService orderService,
+                                    OrderMapper orderMapper) {
+        this.orderService = orderService;
+        this.orderMapper = orderMapper;
+    }
 
-@GetMapping
-public ResponseEntity<List<OrderDto>> getAllOrders() {
-    List<Order> entities = orderService.findAll();
-    return ResponseEntity.ok(orderMapper.toDtoList(entities));
+    @GetMapping
+    public ResponseEntity<List<OrderDto>> getAllOrders() {
+        List<Order> entities = orderService.findAll();
+        return ResponseEntity.ok(orderMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
         return orderService.findById(id)
-        .map(orderMapper::toDto)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-        }
+                .map(orderMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        @PostMapping
-        public ResponseEntity<OrderDto> createOrder(
+    @PostMapping
+    public ResponseEntity<OrderDto> createOrder(
             @Valid @RequestBody OrderDto orderDto,
             UriComponentsBuilder uriBuilder) {
 
-            Order entity = orderMapper.toEntity(orderDto);
-            Order saved = orderService.save(entity);
-            URI location = uriBuilder.path("/api/orders/{id}")
-            .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(orderMapper.toDto(saved));
-            }
+        Order entity = orderMapper.toEntity(orderDto);
+        Order saved = orderService.save(entity);
+        URI location = uriBuilder.path("/api/orders/{id}")
+                                 .buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location).body(orderMapper.toDto(saved));
+    }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<OrderDto> updateOrder(
-                @PathVariable Long id,
-                @Valid @RequestBody OrderDto orderDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderDto> updateOrder(
+            @PathVariable Long id,
+            @Valid @RequestBody OrderDto orderDto) {
 
-                try {
-                Order updatedEntity = orderService.update(id, orderMapper.toEntity(orderDto));
-                return ResponseEntity.ok(orderMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
-                }
+        try {
+            Order updatedEntity = orderService.update(
+                    id,
+                    orderMapper.toEntity(orderDto)
+            );
+            return ResponseEntity.ok(orderMapper.toDto(updatedEntity));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-                    orderService.deleteById(id);
-                    return ResponseEntity.noContent().build();
-                    }
-                    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+        orderService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

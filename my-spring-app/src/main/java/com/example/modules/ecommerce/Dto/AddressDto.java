@@ -3,12 +3,11 @@ package com.example.modules.ecommerce.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
 
+import com.example.modules.ecommerce.dtosimple.UserSimpleDto;
 
-
-    
-        import com.example.modules.ecommerce.dto.UserSimpleDto;
-    
 
 
 @Data
@@ -16,8 +15,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class AddressDto {
 
-private Long id;
-
+    private Long id;
 
     private String street;
 
@@ -27,10 +25,6 @@ private Long id;
 
     private String country;
 
+    private UserSimpleDto user;
 
-
-    
-            private UserSimpleDto user;
-    
-
-    }
+}

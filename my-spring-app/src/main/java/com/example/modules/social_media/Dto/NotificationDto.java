@@ -3,14 +3,11 @@ package com.example.modules.social_media.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Date;
+import com.example.modules.social_media.dtosimple.ProfileSimpleDto;
 
-    import java.util.Date;
-
-
-
-    
-        import com.example.modules.social_media.dto.ProfileSimpleDto;
-    
 
 
 @Data
@@ -18,8 +15,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class NotificationDto {
 
-private Long id;
-
+    private Long id;
 
     private String type;
 
@@ -29,10 +25,6 @@ private Long id;
 
     private Boolean isRead;
 
+    private ProfileSimpleDto recipient;
 
-
-    
-            private ProfileSimpleDto recipient;
-    
-
-    }
+}

@@ -16,56 +16,60 @@ import java.util.List;
 @RequestMapping("/api/mediafiles")
 public class MediaFileController {
 
-private final MediaFileService mediafileService;
-private final MediaFileMapper mediafileMapper;
+    private final MediaFileService mediafileService;
+    private final MediaFileMapper mediafileMapper;
 
-public MediaFileController(MediaFileService mediafileService, MediaFileMapper mediafileMapper) {
-this.mediafileService = mediafileService;
-this.mediafileMapper = mediafileMapper;
-}
+    public MediaFileController(MediaFileService mediafileService,
+                                    MediaFileMapper mediafileMapper) {
+        this.mediafileService = mediafileService;
+        this.mediafileMapper = mediafileMapper;
+    }
 
-@GetMapping
-public ResponseEntity<List<MediaFileDto>> getAllMediaFiles() {
-    List<MediaFile> entities = mediafileService.findAll();
-    return ResponseEntity.ok(mediafileMapper.toDtoList(entities));
+    @GetMapping
+    public ResponseEntity<List<MediaFileDto>> getAllMediaFiles() {
+        List<MediaFile> entities = mediafileService.findAll();
+        return ResponseEntity.ok(mediafileMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MediaFileDto> getMediaFileById(@PathVariable Long id) {
         return mediafileService.findById(id)
-        .map(mediafileMapper::toDto)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-        }
+                .map(mediafileMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        @PostMapping
-        public ResponseEntity<MediaFileDto> createMediaFile(
+    @PostMapping
+    public ResponseEntity<MediaFileDto> createMediaFile(
             @Valid @RequestBody MediaFileDto mediafileDto,
             UriComponentsBuilder uriBuilder) {
 
-            MediaFile entity = mediafileMapper.toEntity(mediafileDto);
-            MediaFile saved = mediafileService.save(entity);
-            URI location = uriBuilder.path("/api/mediafiles/{id}")
-            .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(mediafileMapper.toDto(saved));
-            }
+        MediaFile entity = mediafileMapper.toEntity(mediafileDto);
+        MediaFile saved = mediafileService.save(entity);
+        URI location = uriBuilder.path("/api/mediafiles/{id}")
+                                 .buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location).body(mediafileMapper.toDto(saved));
+    }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MediaFileDto> updateMediaFile(
-                @PathVariable Long id,
-                @Valid @RequestBody MediaFileDto mediafileDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MediaFileDto> updateMediaFile(
+            @PathVariable Long id,
+            @Valid @RequestBody MediaFileDto mediafileDto) {
 
-                try {
-                MediaFile updatedEntity = mediafileService.update(id, mediafileMapper.toEntity(mediafileDto));
-                return ResponseEntity.ok(mediafileMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
-                }
+        try {
+            MediaFile updatedEntity = mediafileService.update(
+                    id,
+                    mediafileMapper.toEntity(mediafileDto)
+            );
+            return ResponseEntity.ok(mediafileMapper.toDto(updatedEntity));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMediaFile(@PathVariable Long id) {
-                    mediafileService.deleteById(id);
-                    return ResponseEntity.noContent().build();
-                    }
-                    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMediaFile(@PathVariable Long id) {
+        mediafileService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

@@ -15,41 +15,48 @@ public class InstructorService extends BaseService<Instructor> {
 
     protected final InstructorRepository instructorRepository;
 
-    public InstructorService(InstructorRepository repository) {
-    super(repository);
-    this.instructorRepository = repository;
-}
+    public InstructorService(InstructorRepository repository)
+    {
+        super(repository);
+        this.instructorRepository = repository;
+    }
 
     @Override
     public Instructor save(Instructor instructor) {
+
         if (instructor.getCourses() != null) {
             for (Course item : instructor.getCourses()) {
-                item.setInstructor(instructor);
+            item.setInstructor(instructor);
             }
+        }
+
+        return instructorRepository.save(instructor);
     }
-    return instructorRepository.save(instructor);
-    }
+
 
     public Instructor update(Long id, Instructor instructorRequest) {
-    Instructor existing = instructorRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Instructor not found"));
+        Instructor existing = instructorRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Instructor not found"));
 
-// Copier les champs simples
-    existing.setFirstName(instructorRequest.getFirstName());
-    existing.setLastName(instructorRequest.getLastName());
-    existing.setEmail(instructorRequest.getEmail());
+    // Copier les champs simples
+        existing.setFirstName(instructorRequest.getFirstName());
+        existing.setLastName(instructorRequest.getLastName());
+        existing.setEmail(instructorRequest.getEmail());
 
 // Relations ManyToOne : mise à jour conditionnelle
 
-// Relations OneToMany : synchronisation sécurisée
-    existing.getCourses().clear();
-    if (instructorRequest.getCourses() != null) {
-        for (var item : instructorRequest.getCourses()) {
-        item.setInstructor(existing); // remettre lien inverse
-        existing.getCourses().add(item);
-        }
-    }
+// Relations ManyToMany : synchronisation sécurisée
 
-    return instructorRepository.save(existing);
+// Relations OneToMany : synchronisation sécurisée
+
+        existing.getCourses().clear();
+        if (instructorRequest.getCourses() != null) {
+            for (var item : instructorRequest.getCourses()) {
+            item.setInstructor(existing);
+            existing.getCourses().add(item);
+            }
+        }
+
+        return instructorRepository.save(existing);
     }
 }

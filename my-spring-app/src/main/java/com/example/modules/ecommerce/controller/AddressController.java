@@ -16,56 +16,60 @@ import java.util.List;
 @RequestMapping("/api/addresss")
 public class AddressController {
 
-private final AddressService addressService;
-private final AddressMapper addressMapper;
+    private final AddressService addressService;
+    private final AddressMapper addressMapper;
 
-public AddressController(AddressService addressService, AddressMapper addressMapper) {
-this.addressService = addressService;
-this.addressMapper = addressMapper;
-}
+    public AddressController(AddressService addressService,
+                                    AddressMapper addressMapper) {
+        this.addressService = addressService;
+        this.addressMapper = addressMapper;
+    }
 
-@GetMapping
-public ResponseEntity<List<AddressDto>> getAllAddresss() {
-    List<Address> entities = addressService.findAll();
-    return ResponseEntity.ok(addressMapper.toDtoList(entities));
+    @GetMapping
+    public ResponseEntity<List<AddressDto>> getAllAddresss() {
+        List<Address> entities = addressService.findAll();
+        return ResponseEntity.ok(addressMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AddressDto> getAddressById(@PathVariable Long id) {
         return addressService.findById(id)
-        .map(addressMapper::toDto)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-        }
+                .map(addressMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        @PostMapping
-        public ResponseEntity<AddressDto> createAddress(
+    @PostMapping
+    public ResponseEntity<AddressDto> createAddress(
             @Valid @RequestBody AddressDto addressDto,
             UriComponentsBuilder uriBuilder) {
 
-            Address entity = addressMapper.toEntity(addressDto);
-            Address saved = addressService.save(entity);
-            URI location = uriBuilder.path("/api/addresss/{id}")
-            .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(addressMapper.toDto(saved));
-            }
+        Address entity = addressMapper.toEntity(addressDto);
+        Address saved = addressService.save(entity);
+        URI location = uriBuilder.path("/api/addresss/{id}")
+                                 .buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location).body(addressMapper.toDto(saved));
+    }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<AddressDto> updateAddress(
-                @PathVariable Long id,
-                @Valid @RequestBody AddressDto addressDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<AddressDto> updateAddress(
+            @PathVariable Long id,
+            @Valid @RequestBody AddressDto addressDto) {
 
-                try {
-                Address updatedEntity = addressService.update(id, addressMapper.toEntity(addressDto));
-                return ResponseEntity.ok(addressMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
-                }
+        try {
+            Address updatedEntity = addressService.update(
+                    id,
+                    addressMapper.toEntity(addressDto)
+            );
+            return ResponseEntity.ok(addressMapper.toDto(updatedEntity));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteAddress(@PathVariable Long id) {
-                    addressService.deleteById(id);
-                    return ResponseEntity.noContent().build();
-                    }
-                    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAddress(@PathVariable Long id) {
+        addressService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

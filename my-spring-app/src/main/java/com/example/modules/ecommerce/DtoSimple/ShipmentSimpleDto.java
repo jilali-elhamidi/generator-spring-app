@@ -1,8 +1,9 @@
-package com.example.modules.ecommerce.dto;
+package com.example.modules.ecommerce.dtosimple;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
 
     import java.util.Date;
 
@@ -11,7 +12,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShipmentSimpleDto {
-private Long id;
+    private Long id;
 
     private Date shipmentDate;
 

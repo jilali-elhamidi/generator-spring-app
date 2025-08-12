@@ -3,12 +3,11 @@ package com.example.modules.ecommerce.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
 
+import com.example.modules.ecommerce.dtosimple.CategorySimpleDto;
 
-
-    
-        import com.example.modules.ecommerce.dto.CategorySimpleDto;
-    
 
 
 @Data
@@ -16,8 +15,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ProductDto {
 
-private Long id;
-
+    private Long id;
 
     private String name;
 
@@ -27,10 +25,6 @@ private Long id;
 
     private String description;
 
+    private CategorySimpleDto category;
 
-
-    
-            private CategorySimpleDto category;
-    
-
-    }
+}

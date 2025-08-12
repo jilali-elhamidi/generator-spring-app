@@ -25,4 +25,5 @@ public interface MedicalRecordMapper {
     List<MedicalRecordDto> toDtoList(List<MedicalRecord> medicalrecordList);
 
     List<MedicalRecord> toEntityList(List<MedicalRecordDto> medicalrecordDtoList);
+
 }

@@ -2,7 +2,7 @@ package com.example.modules.social_media.mapper;
 
 import com.example.modules.social_media.model.Tag;
 import com.example.modules.social_media.dto.TagDto;
-import com.example.modules.social_media.dto.TagSimpleDto;
+import com.example.modules.social_media.dtosimple.TagSimpleDto;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,17 +13,17 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface TagMapper {
 
-TagMapper INSTANCE = Mappers.getMapper(TagMapper.class);
+    TagMapper INSTANCE = Mappers.getMapper(TagMapper.class);
 
+    TagDto toDto(Tag tag);
 
-TagDto toDto(Tag tag);
+    TagSimpleDto toSimpleDto(Tag tag);
 
-TagSimpleDto toSimpleDto(Tag tag);
+    @InheritInverseConfiguration
+    Tag toEntity(TagDto tagDto);
 
-@InheritInverseConfiguration
-Tag toEntity(TagDto tagDto);
-
-List<TagDto> toDtoList(List<Tag> tagList);
+    List<TagDto> toDtoList(List<Tag> tagList);
 
     List<Tag> toEntityList(List<TagDto> tagDtoList);
-        }
+
+}

@@ -3,55 +3,27 @@ package com.example.modules.social_media.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Date;
+import com.example.modules.social_media.dtosimple.PostSimpleDto;
 
-    import java.util.Date;
+import com.example.modules.social_media.dtosimple.CommentSimpleDto;
 
+import com.example.modules.social_media.dtosimple.MessageSimpleDto;
 
+import com.example.modules.social_media.dtosimple.MessageSimpleDto;
 
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.PostSimpleDto;
-    
+import com.example.modules.social_media.dtosimple.ProfileSimpleDto;
 
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.CommentSimpleDto;
-    
+import com.example.modules.social_media.dtosimple.ProfileSimpleDto;
 
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.MessageSimpleDto;
-    
+import com.example.modules.social_media.dtosimple.RoleSimpleDto;
 
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.MessageSimpleDto;
-    
+import com.example.modules.social_media.dtosimple.GroupSimpleDto;
 
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.ProfileSimpleDto;
-    
+import com.example.modules.social_media.dtosimple.NotificationSimpleDto;
 
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.ProfileSimpleDto;
-    
-
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.RoleSimpleDto;
-    
-
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.GroupSimpleDto;
-    
-
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.NotificationSimpleDto;
-    
 
 
 @Data
@@ -59,8 +31,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ProfileDto {
 
-private Long id;
-
+    private Long id;
 
     private String name;
 
@@ -72,42 +43,22 @@ private Long id;
 
     private Date registrationDate;
 
+    private List<PostSimpleDto> posts;
 
+    private List<CommentSimpleDto> comments;
 
-    
-        private List<PostSimpleDto> posts;
-    
+    private List<MessageSimpleDto> receivedMessages;
 
-    
-        private List<CommentSimpleDto> comments;
-    
+    private List<MessageSimpleDto> sentMessages;
 
-    
-        private List<MessageSimpleDto> receivedMessages;
-    
+    private List<ProfileSimpleDto> followers;
 
-    
-        private List<MessageSimpleDto> sentMessages;
-    
+    private List<ProfileSimpleDto> following;
 
-    
-            private List<ProfileSimpleDto> followers;
-    
+    private List<RoleSimpleDto> roles;
 
-    
-            private List<ProfileSimpleDto> following;
-    
+    private List<GroupSimpleDto> groups;
 
-    
-            private List<RoleSimpleDto> roles;
-    
+    private List<NotificationSimpleDto> notifications;
 
-    
-            private List<GroupSimpleDto> groups;
-    
-
-    
-        private List<NotificationSimpleDto> notifications;
-
-
-    }
+}

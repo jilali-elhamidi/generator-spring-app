@@ -1,8 +1,9 @@
-package com.example.modules.social_media.dto;
+package com.example.modules.social_media.dtosimple;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
 
     import java.util.Date;
 
@@ -11,7 +12,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfileSimpleDto {
-private Long id;
+    private Long id;
 
     private String name;
 

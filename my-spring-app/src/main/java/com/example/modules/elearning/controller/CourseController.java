@@ -1,6 +1,8 @@
 package com.example.modules.elearning.controller;
 
+import com.example.modules.elearning.dto.CourseDto;
 import com.example.modules.elearning.model.Course;
+import com.example.modules.elearning.mapper.CourseMapper;
 import com.example.modules.elearning.service.CourseService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -15,43 +17,51 @@ import java.util.List;
 public class CourseController {
 
     private final CourseService courseService;
+    private final CourseMapper courseMapper;
 
-    public CourseController(CourseService courseService) {
+    public CourseController(CourseService courseService,
+                                    CourseMapper courseMapper) {
         this.courseService = courseService;
+        this.courseMapper = courseMapper;
     }
 
     @GetMapping
-    public ResponseEntity<List<Course>> getAllCourses() {
-        return ResponseEntity.ok(courseService.findAll());
+    public ResponseEntity<List<CourseDto>> getAllCourses() {
+        List<Course> entities = courseService.findAll();
+        return ResponseEntity.ok(courseMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
+    public ResponseEntity<CourseDto> getCourseById(@PathVariable Long id) {
         return courseService.findById(id)
+                .map(courseMapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Course> createCourse(
-            @Valid @RequestBody Course course,
+    public ResponseEntity<CourseDto> createCourse(
+            @Valid @RequestBody CourseDto courseDto,
             UriComponentsBuilder uriBuilder) {
 
-        Course saved = courseService.save(course);
+        Course entity = courseMapper.toEntity(courseDto);
+        Course saved = courseService.save(entity);
         URI location = uriBuilder.path("/api/courses/{id}")
-                .buildAndExpand(saved.getId()).toUri();
-
-        return ResponseEntity.created(location).body(saved);
+                                 .buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location).body(courseMapper.toDto(saved));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Course> updateCourse(
+    public ResponseEntity<CourseDto> updateCourse(
             @PathVariable Long id,
-            @Valid @RequestBody Course courseRequest) {
+            @Valid @RequestBody CourseDto courseDto) {
 
         try {
-            Course updated = courseService.update(id, courseRequest);
-            return ResponseEntity.ok(updated);
+            Course updatedEntity = courseService.update(
+                    id,
+                    courseMapper.toEntity(courseDto)
+            );
+            return ResponseEntity.ok(courseMapper.toDto(updatedEntity));
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

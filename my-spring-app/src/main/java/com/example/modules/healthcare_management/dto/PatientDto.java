@@ -4,19 +4,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
-import java.util.Date;
-
-
 import java.util.List;
+import java.util.Date;
 import com.example.modules.healthcare_management.dtosimple.MedicalRecordSimpleDto;
 
-import java.util.List;
 import com.example.modules.healthcare_management.dtosimple.AppointmentSimpleDto;
 
-import java.util.List;
 import com.example.modules.healthcare_management.dtosimple.PrescriptionSimpleDto;
 
-import java.util.List;
 import com.example.modules.healthcare_management.dtosimple.InvoiceSimpleDto;
 
 
@@ -39,7 +34,6 @@ public class PatientDto {
     private String email;
 
     private String phoneNumber;
-
 
     private List<MedicalRecordSimpleDto> medicalRecords;
 

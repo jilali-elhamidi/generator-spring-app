@@ -1,245 +1,79 @@
-module: ecommerce
-
+module: elearning
 entities:
-  - name: Category
+  - name: Course
     fields:
-      - name: name
+      - name: title
         type: String
         validation:
           notNull: true
           size:
-            min: 2
+            min: 3
             max: 100
-      - name: description
-        type: String
-        validation:
-          size:
-            max: 255
-    relationships:
-      - name: products
-        type: Product
-        relationType: OneToMany
-        mappedBy: category
-        inverseField: category
-        fetch: LAZY
-
-  - name: Product
-    fields:
-      - name: name
-        type: String
-        validation:
-          notNull: true
-          size:
-            min: 2
-            max: 100
-      - name: stock
-        type: Integer
-        validation:
-          notNull: true
-          min: 0
-      - name: price
-        type: Double
-        validation:
-          notNull: true
-          min: 2
       - name: description
         type: String
         validation:
           size:
             max: 500
     relationships:
-      - name: category
-        type: Category
+      - name: lessons
+        type: Lesson
+        relationType: OneToMany
+        mappedBy: course
+        inverseField: course
+        fetch: LAZY
+      - name: instructor
+        type: Instructor
         relationType: ManyToOne
-        joinColumn: category_id
-        inverseField: products
+        joinColumn: instructor_id
+        inverseField: courses
         fetch: EAGER
 
-  - name: User
+  - name: Instructor
     fields:
-      - name: username
+      - name: firstName
         type: String
         validation:
           notNull: true
           size:
-            min: 3
+            min: 2
+            max: 50
+      - name: lastName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
             max: 50
       - name: email
         type: String
         validation:
           notNull: true
           email: true
-      - name: phone
-        type: String
-        validation:
-          size:
-            max: 20
     relationships:
-      - name: addresses
-        type: Address
+      - name: courses
+        type: Course
         relationType: OneToMany
-        mappedBy: user
-        inverseField: user
-        fetch: LAZY
-      - name: orders
-        type: Order
-        relationType: OneToMany
-        mappedBy: user
-        inverseField: user
+        mappedBy: instructor
+        inverseField: instructor
         fetch: LAZY
 
-  - name: Address
+  - name: Lesson
     fields:
-      - name: street
+      - name: title
         type: String
         validation:
           notNull: true
           size:
-            min: 5
+            min: 3
             max: 100
-      - name: city
+      - name: content
         type: String
         validation:
           notNull: true
-          size:
-            min: 2
-            max: 50
-      - name: postalCode
-        type: String
-        validation:
-          notNull: true
-          size:
-            min: 4
-            max: 10
-      - name: country
-        type: String
-        validation:
-          notNull: true
-          size:
-            min: 2
-            max: 50
     relationships:
-      - name: user
-        type: User
+      - name: course
+        type: Course
         relationType: ManyToOne
-        joinColumn: user_id
-        inverseField: addresses
-        fetch: LAZY
-
-  - name: Order
-    fields:
-      - name: orderDate
-        type: Date
-        validation:
-          notNull: true
-      - name: status
-        type: String
-        validation:
-          notNull: true
-    relationships:
-      - name: user
-        type: User
-        relationType: ManyToOne
-        joinColumn: user_id
-        inverseField: orders
-        fetch: LAZY
-      - name: orderItems
-        type: OrderItem
-        relationType: OneToMany
-        mappedBy: order
-        inverseField: order
+        joinColumn: course_id
+        inverseField: lessons
         fetch: EAGER
-      - name: payment
-        type: Payment
-        relationType: OneToOne
-        mappedBy: order # Corrigé : le champ "payment" de l'entité "Payment" est l'owner
-        inverseField: payment
-        fetch: EAGER
-        owner: false # Corrigé : Order est non-owner
-      - name: shipment
-        type: Shipment
-        relationType: OneToOne
-        mappedBy: order # Corrigé : le champ "shipment" de l'entité "Shipment" est l'owner
-        inverseField: shipment
-        fetch: EAGER
-        owner: false # Corrigé : Order est non-owner
-
-  - name: OrderItem
-    fields:
-      - name: quantity
-        type: Integer
-        validation:
-          notNull: true
-          min: 1
-      - name: price
-        type: Double
-        validation:
-          notNull: true
-          min: 2
-    relationships:
-      - name: product
-        type: Product
-        relationType: ManyToOne
-        joinColumn: product_id
-        inverseField: orderItems
-        fetch: EAGER
-      - name: order
-        type: Order
-        relationType: ManyToOne
-        joinColumn: order_id
-        inverseField: orderItems
-        fetch: EAGER
-
-  - name: Payment
-    fields:
-      - name: method
-        type: String
-        validation:
-          notNull: true
-          size:
-            max: 50
-      - name: paymentDate
-        type: Date
-        validation:
-          notNull: true
-      - name: amount
-        type: Double
-        validation:
-          notNull: true
-          min: 2
-    relationships:
-      - name: order
-        type: Order
-        relationType: OneToOne
-        joinColumn: order_id # Corrigé : Payment est propriétaire de la clé étrangère
-        inverseField: order
-        fetch: LAZY
-        owner: true # Corrigé : Payment est l'owner
-
-  - name: Shipment
-    fields:
-      - name: shipmentDate
-        type: Date
-        validation:
-          notNull: true
-      - name: carrier
-        type: String
-        validation:
-          notNull: true
-          size:
-            max: 100
-      - name: trackingNumber
-        type: String
-        validation:
-          notNull: true
-          size:
-            min: 2
-            max: 100
-    relationships:
-      - name: order
-        type: Order
-        relationType: OneToOne
-        joinColumn: order_id
-        inverseField: order
-        fetch: LAZY
-        owner: true

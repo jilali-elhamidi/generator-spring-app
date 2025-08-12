@@ -2,7 +2,7 @@ package com.example.modules.social_media.mapper;
 
 import com.example.modules.social_media.model.Comment;
 import com.example.modules.social_media.dto.CommentDto;
-import com.example.modules.social_media.dto.CommentSimpleDto;
+import com.example.modules.social_media.dtosimple.CommentSimpleDto;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,17 +13,17 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
+    CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
 
+    CommentDto toDto(Comment comment);
 
-CommentDto toDto(Comment comment);
+    CommentSimpleDto toSimpleDto(Comment comment);
 
-CommentSimpleDto toSimpleDto(Comment comment);
+    @InheritInverseConfiguration
+    Comment toEntity(CommentDto commentDto);
 
-@InheritInverseConfiguration
-Comment toEntity(CommentDto commentDto);
-
-List<CommentDto> toDtoList(List<Comment> commentList);
+    List<CommentDto> toDtoList(List<Comment> commentList);
 
     List<Comment> toEntityList(List<CommentDto> commentDtoList);
-        }
+
+}

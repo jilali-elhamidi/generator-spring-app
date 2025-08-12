@@ -3,22 +3,15 @@ package com.example.modules.social_media.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
 
+import com.example.modules.social_media.dtosimple.ProfileSimpleDto;
 
+import com.example.modules.social_media.dtosimple.PostSimpleDto;
 
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.ProfileSimpleDto;
-    
+import com.example.modules.social_media.dtosimple.ProfileSimpleDto;
 
-    
-        import java.util.List;
-        import com.example.modules.social_media.dto.PostSimpleDto;
-    
-
-    
-        import com.example.modules.social_media.dto.ProfileSimpleDto;
-    
 
 
 @Data
@@ -26,25 +19,16 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GroupDto {
 
-private Long id;
-
+    private Long id;
 
     private String name;
 
     private String description;
 
+    private List<ProfileSimpleDto> members;
 
+    private List<PostSimpleDto> posts;
 
-    
-            private List<ProfileSimpleDto> members;
-    
+    private ProfileSimpleDto owner;
 
-    
-        private List<PostSimpleDto> posts;
-    
-
-    
-            private ProfileSimpleDto owner;
-    
-
-    }
+}

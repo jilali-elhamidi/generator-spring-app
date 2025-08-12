@@ -17,40 +17,46 @@ public class LessonService extends BaseService<Lesson> {
     protected final LessonRepository lessonRepository;
     private final CourseRepository courseRepository;
 
-    public LessonService(LessonRepository repository, CourseRepository courseRepository) {
-    super(repository);
-    this.lessonRepository = repository;
-    this.courseRepository = courseRepository;
-}
+    public LessonService(LessonRepository repository,CourseRepository courseRepository)
+    {
+        super(repository);
+        this.lessonRepository = repository;
+        this.courseRepository = courseRepository;
+    }
 
     @Override
     public Lesson save(Lesson lesson) {
+
         if (lesson.getCourse() != null && lesson.getCourse().getId() != null) {
         Course course = courseRepository.findById(lesson.getCourse().getId())
-            .orElseThrow(() -> new RuntimeException("Course not found"));
+                .orElseThrow(() -> new RuntimeException("Course not found"));
         lesson.setCourse(course);
+        }
+
+        return lessonRepository.save(lesson);
     }
-    return lessonRepository.save(lesson);
-    }
+
 
     public Lesson update(Long id, Lesson lessonRequest) {
-    Lesson existing = lessonRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Lesson not found"));
+        Lesson existing = lessonRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Lesson not found"));
 
-// Copier les champs simples
-    existing.setTitle(lessonRequest.getTitle());
-    existing.setContent(lessonRequest.getContent());
+    // Copier les champs simples
+        existing.setTitle(lessonRequest.getTitle());
+        existing.setContent(lessonRequest.getContent());
 
 // Relations ManyToOne : mise à jour conditionnelle
-    if (lessonRequest.getCourse() != null &&lessonRequest.getCourse().getId() != null) {
-    Course course = courseRepository.findById(lessonRequest.getCourse().getId())
-        .orElseThrow(() -> new RuntimeException("Course not found"));
-    existing.setCourse(course);
-    }
-    // Sinon on garde la relation existante
+
+        if (lessonRequest.getCourse() != null && lessonRequest.getCourse().getId() != null) {
+        Course course = courseRepository.findById(lessonRequest.getCourse().getId())
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        existing.setCourse(course);
+        }
+
+// Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
 
-    return lessonRepository.save(existing);
+        return lessonRepository.save(existing);
     }
 }

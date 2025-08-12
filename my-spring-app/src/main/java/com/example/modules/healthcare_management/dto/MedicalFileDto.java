@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
-
+import java.util.List;
 
 import com.example.modules.healthcare_management.dtosimple.MedicalRecordSimpleDto;
 
@@ -20,7 +20,6 @@ public class MedicalFileDto {
     private String fileUrl;
 
     private String fileType;
-
 
     private MedicalRecordSimpleDto record;
 

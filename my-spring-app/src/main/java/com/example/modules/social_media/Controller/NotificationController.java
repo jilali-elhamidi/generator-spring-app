@@ -16,56 +16,60 @@ import java.util.List;
 @RequestMapping("/api/notifications")
 public class NotificationController {
 
-private final NotificationService notificationService;
-private final NotificationMapper notificationMapper;
+    private final NotificationService notificationService;
+    private final NotificationMapper notificationMapper;
 
-public NotificationController(NotificationService notificationService, NotificationMapper notificationMapper) {
-this.notificationService = notificationService;
-this.notificationMapper = notificationMapper;
-}
+    public NotificationController(NotificationService notificationService,
+                                    NotificationMapper notificationMapper) {
+        this.notificationService = notificationService;
+        this.notificationMapper = notificationMapper;
+    }
 
-@GetMapping
-public ResponseEntity<List<NotificationDto>> getAllNotifications() {
-    List<Notification> entities = notificationService.findAll();
-    return ResponseEntity.ok(notificationMapper.toDtoList(entities));
+    @GetMapping
+    public ResponseEntity<List<NotificationDto>> getAllNotifications() {
+        List<Notification> entities = notificationService.findAll();
+        return ResponseEntity.ok(notificationMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<NotificationDto> getNotificationById(@PathVariable Long id) {
         return notificationService.findById(id)
-        .map(notificationMapper::toDto)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-        }
+                .map(notificationMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        @PostMapping
-        public ResponseEntity<NotificationDto> createNotification(
+    @PostMapping
+    public ResponseEntity<NotificationDto> createNotification(
             @Valid @RequestBody NotificationDto notificationDto,
             UriComponentsBuilder uriBuilder) {
 
-            Notification entity = notificationMapper.toEntity(notificationDto);
-            Notification saved = notificationService.save(entity);
-            URI location = uriBuilder.path("/api/notifications/{id}")
-            .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(notificationMapper.toDto(saved));
-            }
+        Notification entity = notificationMapper.toEntity(notificationDto);
+        Notification saved = notificationService.save(entity);
+        URI location = uriBuilder.path("/api/notifications/{id}")
+                                 .buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location).body(notificationMapper.toDto(saved));
+    }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<NotificationDto> updateNotification(
-                @PathVariable Long id,
-                @Valid @RequestBody NotificationDto notificationDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<NotificationDto> updateNotification(
+            @PathVariable Long id,
+            @Valid @RequestBody NotificationDto notificationDto) {
 
-                try {
-                Notification updatedEntity = notificationService.update(id, notificationMapper.toEntity(notificationDto));
-                return ResponseEntity.ok(notificationMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
-                }
+        try {
+            Notification updatedEntity = notificationService.update(
+                    id,
+                    notificationMapper.toEntity(notificationDto)
+            );
+            return ResponseEntity.ok(notificationMapper.toDto(updatedEntity));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
-                    notificationService.deleteById(id);
-                    return ResponseEntity.noContent().build();
-                    }
-                    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
+        notificationService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

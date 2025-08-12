@@ -4,9 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
-
-
 import java.util.List;
+
 import com.example.modules.healthcare_management.dtosimple.DoctorSimpleDto;
 
 
@@ -23,7 +22,6 @@ public class DepartmentDto {
     private String name;
 
     private String description;
-
 
     private List<DoctorSimpleDto> doctors;
 

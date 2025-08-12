@@ -1,11 +1,28 @@
 module: elearning
+
 entities:
   - name: Course
     fields:
+      - name: id
+        type: Long
+        id: true
+        generatedValue: IDENTITY
       - name: title
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 100
       - name: description
         type: String
+        validation:
+          size:
+            max: 500
+      - name: createdAt
+        type: LocalDateTime
+      - name: updatedAt
+        type: LocalDateTime
     relationships:
       - name: lessons
         type: Lesson
@@ -22,12 +39,33 @@ entities:
 
   - name: Instructor
     fields:
+      - name: id
+        type: Long
+        id: true
+        generatedValue: IDENTITY
       - name: firstName
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
       - name: lastName
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
       - name: email
         type: String
+        validation:
+          notNull: true
+          email: true
+      - name: createdAt
+        type: LocalDateTime
+      - name: updatedAt
+        type: LocalDateTime
     relationships:
       - name: courses
         type: Course
@@ -38,10 +76,25 @@ entities:
 
   - name: Lesson
     fields:
+      - name: id
+        type: Long
+        id: true
+        generatedValue: IDENTITY
       - name: title
         type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 100
       - name: content
         type: String
+        validation:
+          notNull: true
+      - name: createdAt
+        type: LocalDateTime
+      - name: updatedAt
+        type: LocalDateTime
     relationships:
       - name: course
         type: Course

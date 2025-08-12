@@ -25,4 +25,5 @@ public interface MedicationMapper {
     List<MedicationDto> toDtoList(List<Medication> medicationList);
 
     List<Medication> toEntityList(List<MedicationDto> medicationDtoList);
+
 }

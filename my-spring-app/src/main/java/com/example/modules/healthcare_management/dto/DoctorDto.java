@@ -4,12 +4,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
-
-
 import java.util.List;
+
 import com.example.modules.healthcare_management.dtosimple.AppointmentSimpleDto;
 
-import java.util.List;
 import com.example.modules.healthcare_management.dtosimple.PrescriptionSimpleDto;
 
 import com.example.modules.healthcare_management.dtosimple.DepartmentSimpleDto;
@@ -32,7 +30,6 @@ public class DoctorDto {
     private String email;
 
     private String phoneNumber;
-
 
     private List<AppointmentSimpleDto> appointments;
 

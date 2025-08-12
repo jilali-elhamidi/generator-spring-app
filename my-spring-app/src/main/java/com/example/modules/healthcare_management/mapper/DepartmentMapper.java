@@ -25,4 +25,5 @@ public interface DepartmentMapper {
     List<DepartmentDto> toDtoList(List<Department> departmentList);
 
     List<Department> toEntityList(List<DepartmentDto> departmentDtoList);
+
 }

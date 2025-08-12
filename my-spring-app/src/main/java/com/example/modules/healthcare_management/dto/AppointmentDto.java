@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
-
+import java.util.List;
 
 import com.example.modules.healthcare_management.dtosimple.PatientSimpleDto;
 
@@ -24,7 +24,6 @@ public class AppointmentDto {
     private LocalDateTime appointmentDate;
 
     private String status;
-
 
     private PatientSimpleDto patient;
 

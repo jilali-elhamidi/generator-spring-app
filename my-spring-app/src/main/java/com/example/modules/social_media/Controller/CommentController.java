@@ -16,56 +16,60 @@ import java.util.List;
 @RequestMapping("/api/comments")
 public class CommentController {
 
-private final CommentService commentService;
-private final CommentMapper commentMapper;
+    private final CommentService commentService;
+    private final CommentMapper commentMapper;
 
-public CommentController(CommentService commentService, CommentMapper commentMapper) {
-this.commentService = commentService;
-this.commentMapper = commentMapper;
-}
+    public CommentController(CommentService commentService,
+                                    CommentMapper commentMapper) {
+        this.commentService = commentService;
+        this.commentMapper = commentMapper;
+    }
 
-@GetMapping
-public ResponseEntity<List<CommentDto>> getAllComments() {
-    List<Comment> entities = commentService.findAll();
-    return ResponseEntity.ok(commentMapper.toDtoList(entities));
+    @GetMapping
+    public ResponseEntity<List<CommentDto>> getAllComments() {
+        List<Comment> entities = commentService.findAll();
+        return ResponseEntity.ok(commentMapper.toDtoList(entities));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CommentDto> getCommentById(@PathVariable Long id) {
         return commentService.findById(id)
-        .map(commentMapper::toDto)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
-        }
+                .map(commentMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        @PostMapping
-        public ResponseEntity<CommentDto> createComment(
+    @PostMapping
+    public ResponseEntity<CommentDto> createComment(
             @Valid @RequestBody CommentDto commentDto,
             UriComponentsBuilder uriBuilder) {
 
-            Comment entity = commentMapper.toEntity(commentDto);
-            Comment saved = commentService.save(entity);
-            URI location = uriBuilder.path("/api/comments/{id}")
-            .buildAndExpand(saved.getId()).toUri();
-            return ResponseEntity.created(location).body(commentMapper.toDto(saved));
-            }
+        Comment entity = commentMapper.toEntity(commentDto);
+        Comment saved = commentService.save(entity);
+        URI location = uriBuilder.path("/api/comments/{id}")
+                                 .buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location).body(commentMapper.toDto(saved));
+    }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<CommentDto> updateComment(
-                @PathVariable Long id,
-                @Valid @RequestBody CommentDto commentDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<CommentDto> updateComment(
+            @PathVariable Long id,
+            @Valid @RequestBody CommentDto commentDto) {
 
-                try {
-                Comment updatedEntity = commentService.update(id, commentMapper.toEntity(commentDto));
-                return ResponseEntity.ok(commentMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
-                }
+        try {
+            Comment updatedEntity = commentService.update(
+                    id,
+                    commentMapper.toEntity(commentDto)
+            );
+            return ResponseEntity.ok(commentMapper.toDto(updatedEntity));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
-                    commentService.deleteById(id);
-                    return ResponseEntity.noContent().build();
-                    }
-                    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
+        commentService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

@@ -4,14 +4,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Date;
-
-
 import com.example.modules.healthcare_management.dtosimple.PatientSimpleDto;
 
 import com.example.modules.healthcare_management.dtosimple.DoctorSimpleDto;
 
-import java.util.List;
 import com.example.modules.healthcare_management.dtosimple.MedicationSimpleDto;
 
 
@@ -26,7 +24,6 @@ public class PrescriptionDto {
     private Date prescriptionDate;
 
     private String dosageInstructions;
-
 
     private PatientSimpleDto patient;
 

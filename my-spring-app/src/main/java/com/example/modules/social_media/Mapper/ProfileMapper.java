@@ -2,7 +2,7 @@ package com.example.modules.social_media.mapper;
 
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.dto.ProfileDto;
-import com.example.modules.social_media.dto.ProfileSimpleDto;
+import com.example.modules.social_media.dtosimple.ProfileSimpleDto;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,17 +13,17 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProfileMapper {
 
-ProfileMapper INSTANCE = Mappers.getMapper(ProfileMapper.class);
+    ProfileMapper INSTANCE = Mappers.getMapper(ProfileMapper.class);
 
+    ProfileDto toDto(Profile profile);
 
-ProfileDto toDto(Profile profile);
+    ProfileSimpleDto toSimpleDto(Profile profile);
 
-ProfileSimpleDto toSimpleDto(Profile profile);
+    @InheritInverseConfiguration
+    Profile toEntity(ProfileDto profileDto);
 
-@InheritInverseConfiguration
-Profile toEntity(ProfileDto profileDto);
-
-List<ProfileDto> toDtoList(List<Profile> profileList);
+    List<ProfileDto> toDtoList(List<Profile> profileList);
 
     List<Profile> toEntityList(List<ProfileDto> profileDtoList);
-        }
+
+}
