@@ -11,6 +11,8 @@ import com.example.modules.entertainment_ecosystem.model.TVShow;
 import com.example.modules.entertainment_ecosystem.repository.TVShowRepository;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
+import com.example.modules.entertainment_ecosystem.model.MerchandiseType;
+import com.example.modules.entertainment_ecosystem.repository.MerchandiseTypeRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -25,8 +27,9 @@ public class MerchandiseService extends BaseService<Merchandise> {
     private final MovieRepository relatedMoviesRepository;
     private final TVShowRepository relatedShowsRepository;
     private final UserProfileRepository ownedByUsersRepository;
+    private final MerchandiseTypeRepository productTypeRepository;
 
-    public MerchandiseService(MerchandiseRepository repository,ArtistRepository artistRepository,MovieRepository relatedMoviesRepository,TVShowRepository relatedShowsRepository,UserProfileRepository ownedByUsersRepository)
+    public MerchandiseService(MerchandiseRepository repository,ArtistRepository artistRepository,MovieRepository relatedMoviesRepository,TVShowRepository relatedShowsRepository,UserProfileRepository ownedByUsersRepository,MerchandiseTypeRepository productTypeRepository)
     {
         super(repository);
         this.merchandiseRepository = repository;
@@ -34,6 +37,7 @@ public class MerchandiseService extends BaseService<Merchandise> {
         this.relatedMoviesRepository = relatedMoviesRepository;
         this.relatedShowsRepository = relatedShowsRepository;
         this.ownedByUsersRepository = ownedByUsersRepository;
+        this.productTypeRepository = productTypeRepository;
     }
 
     @Override
@@ -43,6 +47,12 @@ public class MerchandiseService extends BaseService<Merchandise> {
         Artist artist = artistRepository.findById(merchandise.getArtist().getId())
                 .orElseThrow(() -> new RuntimeException("Artist not found"));
         merchandise.setArtist(artist);
+        }
+
+        if (merchandise.getProductType() != null && merchandise.getProductType().getId() != null) {
+        MerchandiseType productType = productTypeRepository.findById(merchandise.getProductType().getId())
+                .orElseThrow(() -> new RuntimeException("MerchandiseType not found"));
+        merchandise.setProductType(productType);
         }
 
         return merchandiseRepository.save(merchandise);
@@ -64,6 +74,12 @@ public class MerchandiseService extends BaseService<Merchandise> {
         Artist artist = artistRepository.findById(merchandiseRequest.getArtist().getId())
                 .orElseThrow(() -> new RuntimeException("Artist not found"));
         existing.setArtist(artist);
+        }
+
+        if (merchandiseRequest.getProductType() != null && merchandiseRequest.getProductType().getId() != null) {
+        MerchandiseType productType = productTypeRepository.findById(merchandiseRequest.getProductType().getId())
+                .orElseThrow(() -> new RuntimeException("MerchandiseType not found"));
+        existing.setProductType(productType);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -96,6 +112,17 @@ public class MerchandiseService extends BaseService<Merchandise> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+
+    
+
+    
+
+    
+
+    
+
+    
+
 
         return merchandiseRepository.save(existing);
     }

@@ -88,6 +88,13 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
 
 // Relations OneToMany : synchronisation sécurisée
 
+    
+
+    
+
+    
+
+
         return playlistitemRepository.save(existing);
     }
 }

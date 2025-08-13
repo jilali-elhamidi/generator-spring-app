@@ -10,7 +10,7 @@ import com.example.modules.entertainment_ecosystem.dtosimple.SeasonSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDto;
 
-
+import com.example.modules.entertainment_ecosystem.dtosimple.PodcastEpisodeSimpleDto;
 
 
 
@@ -33,6 +33,6 @@ public class EpisodeDto {
 
     private List<UserProfileSimpleDto> watchedByUsers;
 
-    
+    private PodcastEpisodeSimpleDto relatedPodcastEpisode;
 
 }

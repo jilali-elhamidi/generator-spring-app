@@ -6,6 +6,10 @@ import com.example.modules.ecommerce.repository.OrderRepository;
 import com.example.modules.ecommerce.model.User;
 import com.example.modules.ecommerce.repository.UserRepository;
 import com.example.modules.ecommerce.model.OrderItem;
+import com.example.modules.ecommerce.model.Payment;
+import com.example.modules.ecommerce.repository.PaymentRepository;
+import com.example.modules.ecommerce.model.Shipment;
+import com.example.modules.ecommerce.repository.ShipmentRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -17,12 +21,16 @@ public class OrderService extends BaseService<Order> {
 
     protected final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final PaymentRepository paymentRepository;
+    private final ShipmentRepository shipmentRepository;
 
-    public OrderService(OrderRepository repository,UserRepository userRepository)
+    public OrderService(OrderRepository repository,UserRepository userRepository,PaymentRepository paymentRepository,ShipmentRepository shipmentRepository)
     {
         super(repository);
         this.orderRepository = repository;
         this.userRepository = userRepository;
+            this.paymentRepository = paymentRepository;
+            this.shipmentRepository = shipmentRepository;
     }
 
     @Override
@@ -40,9 +48,25 @@ public class OrderService extends BaseService<Order> {
             }
         }
         if (order.getPayment() != null) {
+        
+        
+            // Vérifier si l'entité est déjà persistée
+            order.setPayment(
+            paymentRepository.findById(order.getPayment().getId())
+            .orElseThrow(() -> new RuntimeException("payment not found"))
+            );
+        
         order.getPayment().setOrder(order);
         }
         if (order.getShipment() != null) {
+        
+        
+            // Vérifier si l'entité est déjà persistée
+            order.setShipment(
+            shipmentRepository.findById(order.getShipment().getId())
+            .orElseThrow(() -> new RuntimeException("shipment not found"))
+            );
+        
         order.getShipment().setOrder(order);
         }
 
@@ -77,6 +101,46 @@ public class OrderService extends BaseService<Order> {
             existing.getOrderItems().add(item);
             }
         }
+
+
+        if (orderRequest.getPayment() != null
+        && orderRequest.getPayment().getId() != null) {
+
+        Payment payment = paymentRepository.findById(
+        orderRequest.getPayment().getId()
+        ).orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.setPayment(payment);
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        
+            payment.setOrder(existing);
+        
+        }
+
+    
+
+    
+
+        if (orderRequest.getShipment() != null
+        && orderRequest.getShipment().getId() != null) {
+
+        Shipment shipment = shipmentRepository.findById(
+        orderRequest.getShipment().getId()
+        ).orElseThrow(() -> new RuntimeException("Shipment not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.setShipment(shipment);
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        
+            shipment.setOrder(existing);
+        
+        }
+
+    
+
 
         return orderRepository.save(existing);
     }

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlaylistSimpleDto {
+
     private Long id;
 
     private String name;

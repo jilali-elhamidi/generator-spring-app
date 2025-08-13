@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Review;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.GameAchievement;
+import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Review;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.GameAchievement;import com.example.modules.entertainment_ecosystem.model.GameSession;import com.example.modules.entertainment_ecosystem.model.DevelopmentStudio;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -57,6 +57,15 @@ public class VideoGame extends BaseEntity {
     @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("game")
     private List<GameAchievement> achievements;
+    
+    @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("game")
+    private List<GameSession> sessions;
+    
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "studio_id")
+    @JsonIgnoreProperties("games")
+    private DevelopmentStudio developerStudio;
     
 
 }

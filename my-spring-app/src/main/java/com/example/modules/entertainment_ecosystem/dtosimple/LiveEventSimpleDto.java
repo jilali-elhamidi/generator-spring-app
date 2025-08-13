@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LiveEventSimpleDto {
+
     private Long id;
 
     private String name;

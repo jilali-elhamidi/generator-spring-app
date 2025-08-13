@@ -15,16 +15,18 @@ import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "episode_tbl")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Data
 @EqualsAndHashCode(callSuper = true)
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Episode extends BaseEntity {
 
-    @NotNull @Min(1)
+// === Attributs simples ===
+
+    @NotNull@Min(1)
     private Integer episodeNumber;
 
-    @NotNull @Size(min = 2, max = 255)
+    @NotNull@Size(min = 2, max = 255)
     private String title;
 
     @Size(max = 500)
@@ -33,17 +35,22 @@ public class Episode extends BaseEntity {
     @Min(1)
     private Integer durationMinutes;
 
+
+// === Relations ===
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "season_id")
     @JsonIgnoreProperties("episodes")
     private Season season;
-
-    @ManyToMany(mappedBy = "watchedEpisodes", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("watchedByUsers")
-    private List<UserProfile> watchedByUsers;
-
-    @OneToOne(fetch = FetchType.LAZY)
+    
+    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("")
+            private List<UserProfile> watchedByUsers;
+        
+    @OneToOne
     @JoinColumn(name = "related_podcast_episode_id")
-    @JsonIgnoreProperties("episode")
+    @JsonIgnoreProperties("relatedEpisode")
     private PodcastEpisode relatedPodcastEpisode;
+            
+
 }

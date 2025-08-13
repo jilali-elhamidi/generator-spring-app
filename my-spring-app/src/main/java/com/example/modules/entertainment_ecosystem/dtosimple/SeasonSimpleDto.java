@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SeasonSimpleDto {
+
     private Long id;
 
     private Integer seasonNumber;

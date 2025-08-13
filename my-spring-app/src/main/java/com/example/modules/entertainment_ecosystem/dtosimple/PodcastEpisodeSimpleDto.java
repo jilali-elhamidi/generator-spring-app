@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PodcastEpisodeSimpleDto {
+
     private Long id;
 
     private String title;

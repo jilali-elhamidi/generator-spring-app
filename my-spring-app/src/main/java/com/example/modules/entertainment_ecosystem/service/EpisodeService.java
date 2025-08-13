@@ -7,6 +7,8 @@ import com.example.modules.entertainment_ecosystem.model.Season;
 import com.example.modules.entertainment_ecosystem.repository.SeasonRepository;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
+import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;
+import com.example.modules.entertainment_ecosystem.repository.PodcastEpisodeRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -19,13 +21,15 @@ public class EpisodeService extends BaseService<Episode> {
     protected final EpisodeRepository episodeRepository;
     private final SeasonRepository seasonRepository;
     private final UserProfileRepository watchedByUsersRepository;
+    private final PodcastEpisodeRepository relatedPodcastEpisodeRepository;
 
-    public EpisodeService(EpisodeRepository repository,SeasonRepository seasonRepository,UserProfileRepository watchedByUsersRepository)
+    public EpisodeService(EpisodeRepository repository,SeasonRepository seasonRepository,UserProfileRepository watchedByUsersRepository,PodcastEpisodeRepository relatedPodcastEpisodeRepository)
     {
         super(repository);
         this.episodeRepository = repository;
         this.seasonRepository = seasonRepository;
         this.watchedByUsersRepository = watchedByUsersRepository;
+            this.relatedPodcastEpisodeRepository = relatedPodcastEpisodeRepository;
     }
 
     @Override
@@ -37,6 +41,14 @@ public class EpisodeService extends BaseService<Episode> {
         episode.setSeason(season);
         }
         if (episode.getRelatedPodcastEpisode() != null) {
+        
+        
+            // Vérifier si l'entité est déjà persistée
+            episode.setRelatedPodcastEpisode(
+            relatedPodcastEpisodeRepository.findById(episode.getRelatedPodcastEpisode().getId())
+            .orElseThrow(() -> new RuntimeException("relatedPodcastEpisode not found"))
+            );
+        
         episode.getRelatedPodcastEpisode().setRelatedEpisode(episode);
         }
 
@@ -74,6 +86,31 @@ public class EpisodeService extends BaseService<Episode> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+
+    
+
+    
+
+    
+
+        if (episodeRequest.getRelatedPodcastEpisode() != null
+        && episodeRequest.getRelatedPodcastEpisode().getId() != null) {
+
+        PodcastEpisode relatedPodcastEpisode = relatedPodcastEpisodeRepository.findById(
+        episodeRequest.getRelatedPodcastEpisode().getId()
+        ).orElseThrow(() -> new RuntimeException("PodcastEpisode not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.setRelatedPodcastEpisode(relatedPodcastEpisode);
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        
+            relatedPodcastEpisode.setRelatedEpisode(existing);
+        
+        }
+
+    
+
 
         return episodeRepository.save(existing);
     }

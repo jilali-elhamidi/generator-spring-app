@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Date;
-
+import com.example.modules.entertainment_ecosystem.dtosimple.BookingSimpleDto;
 
 
 
@@ -23,6 +23,6 @@ public class PaymentDto {
 
     private String method;
 
-    
+    private BookingSimpleDto booking;
 
 }

@@ -6,7 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.validation.constraints.*;
+import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Date;
+import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.Episode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -18,10 +21,9 @@ import lombok.EqualsAndHashCode;
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class PodcastEpisode extends BaseEntity {
 
-    // === Attributs simples ===
+// === Attributs simples ===
 
-    @NotNull
-    @Size(min = 2, max = 255)
+    @NotNull@Size(min = 2, max = 255)
     private String title;
 
     @NotNull
@@ -30,15 +32,18 @@ public class PodcastEpisode extends BaseEntity {
     @Min(1)
     private Integer durationMinutes;
 
-    // === Relations ===
+
+// === Relations ===
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "podcast_id")
     @JsonIgnoreProperties("episodes")
     private Podcast podcast;
-
-    @OneToOne(mappedBy = "relatedPodcastEpisode", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    
+    @OneToOne
+    @JoinColumn(name = "")
     @JsonIgnoreProperties("relatedPodcastEpisode")
-    private Episode relatedEpisode;  // Champ inverse, nom cohérent avec Episode.relatedPodcastEpisode
+    private Episode relatedEpisode;
+            
 
 }

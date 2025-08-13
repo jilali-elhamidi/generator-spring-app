@@ -9,8 +9,8 @@ import java.util.List;
 {{~/if}}{{#each relationships}}
 {{#if (eq relationType "OneToMany")~}}
 import com.example.modules.{{../module}}.dtosimple.{{type}}SimpleDto;{{~else if (eq relationType "ManyToMany")~}}
-import com.example.modules.{{../module}}.dtosimple.{{type}}SimpleDto;{{~else if (and (eq relationType "OneToOne") owner)~}}
-import com.example.modules.{{../module}}.dtosimple.{{type}}SimpleDto;{{~else if (eq relationType "ManyToOne")~}}
+import com.example.modules.{{../module}}.dtosimple.{{type}}SimpleDto;{{~else if (eq relationType "OneToOne")~}}
+    import com.example.modules.{{../module}}.dtosimple.{{type}}SimpleDto;{{~else if (eq relationType "ManyToOne")~}}
 import com.example.modules.{{../module}}.dtosimple.{{type}}SimpleDto;
 {{~/if}}
 {{/each}}
@@ -29,12 +29,10 @@ public class {{entityName}}Dto {
         private List<{{type}}SimpleDto> {{name}};
     {{~else if (eq relationType "ManyToMany")~}}
         private List<{{type}}SimpleDto> {{name}};
-    {{~else if (and (eq relationType "OneToOne") owner)~}}
+    {{~else if (eq relationType "OneToOne")~}}
         private {{type}}SimpleDto {{name}};
     {{~else if (eq relationType "ManyToOne")~}}
         private {{type}}SimpleDto {{name}};
-    {{~else if (and (eq relationType "OneToOne") (not owner))~}}
-        private Long {{name}};
     {{~/if}}
 {{/each}}
 }

@@ -16,6 +16,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.EventLocationSimple
 
 import com.example.modules.entertainment_ecosystem.dtosimple.SponsorSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.EventAudienceSimpleDto;
+
 
 
 @Data
@@ -40,5 +42,7 @@ public class LiveEventDto {
     private EventLocationSimpleDto location;
 
     private SponsorSimpleDto sponsor;
+
+    private EventAudienceSimpleDto audience;
 
 }

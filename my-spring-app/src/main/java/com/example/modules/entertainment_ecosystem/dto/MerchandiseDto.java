@@ -14,6 +14,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.TVShowSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseTypeSimpleDto;
+
 
 
 @Data
@@ -36,5 +38,7 @@ public class MerchandiseDto {
     private List<TVShowSimpleDto> relatedShows;
 
     private List<UserProfileSimpleDto> ownedByUsers;
+
+    private MerchandiseTypeSimpleDto productType;
 
 }

@@ -7,6 +7,8 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
 import com.example.modules.entertainment_ecosystem.repository.StreamingPlatformRepository;
+import com.example.modules.entertainment_ecosystem.model.SubscriptionPlan;
+import com.example.modules.entertainment_ecosystem.repository.SubscriptionPlanRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -19,13 +21,15 @@ public class SubscriptionService extends BaseService<Subscription> {
     protected final SubscriptionRepository subscriptionRepository;
     private final UserProfileRepository userRepository;
     private final StreamingPlatformRepository platformRepository;
+    private final SubscriptionPlanRepository planRepository;
 
-    public SubscriptionService(SubscriptionRepository repository,UserProfileRepository userRepository,StreamingPlatformRepository platformRepository)
+    public SubscriptionService(SubscriptionRepository repository,UserProfileRepository userRepository,StreamingPlatformRepository platformRepository,SubscriptionPlanRepository planRepository)
     {
         super(repository);
         this.subscriptionRepository = repository;
         this.userRepository = userRepository;
         this.platformRepository = platformRepository;
+        this.planRepository = planRepository;
     }
 
     @Override
@@ -41,6 +45,12 @@ public class SubscriptionService extends BaseService<Subscription> {
         StreamingPlatform platform = platformRepository.findById(subscription.getPlatform().getId())
                 .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
         subscription.setPlatform(platform);
+        }
+
+        if (subscription.getPlan() != null && subscription.getPlan().getId() != null) {
+        SubscriptionPlan plan = planRepository.findById(subscription.getPlan().getId())
+                .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
+        subscription.setPlan(plan);
         }
 
         return subscriptionRepository.save(subscription);
@@ -70,9 +80,22 @@ public class SubscriptionService extends BaseService<Subscription> {
         existing.setPlatform(platform);
         }
 
+        if (subscriptionRequest.getPlan() != null && subscriptionRequest.getPlan().getId() != null) {
+        SubscriptionPlan plan = planRepository.findById(subscriptionRequest.getPlan().getId())
+                .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
+        existing.setPlan(plan);
+        }
+
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+
+    
+
+    
+
+    
+
 
         return subscriptionRepository.save(existing);
     }

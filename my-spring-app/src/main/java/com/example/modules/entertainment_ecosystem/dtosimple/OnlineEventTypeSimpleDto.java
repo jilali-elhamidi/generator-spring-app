@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OnlineEventTypeSimpleDto {
+
     private Long id;
 
     private String name;

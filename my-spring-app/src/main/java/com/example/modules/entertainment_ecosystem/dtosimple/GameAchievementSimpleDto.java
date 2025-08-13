@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameAchievementSimpleDto {
+
     private Long id;
 
     private String name;

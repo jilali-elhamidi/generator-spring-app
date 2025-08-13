@@ -58,6 +58,9 @@ public class ShiftService extends BaseService<Shift> {
 
 // Relations OneToMany : synchronisation sécurisée
 
+    
+
+
         return shiftRepository.save(existing);
     }
 }

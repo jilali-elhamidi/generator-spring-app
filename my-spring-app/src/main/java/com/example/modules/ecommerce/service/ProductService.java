@@ -59,6 +59,9 @@ public class ProductService extends BaseService<Product> {
 
 // Relations OneToMany : synchronisation sécurisée
 
+    
+
+
         return productRepository.save(existing);
     }
 }

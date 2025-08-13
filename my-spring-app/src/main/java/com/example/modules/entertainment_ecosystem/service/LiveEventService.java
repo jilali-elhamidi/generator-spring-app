@@ -12,6 +12,8 @@ import com.example.modules.entertainment_ecosystem.model.EventLocation;
 import com.example.modules.entertainment_ecosystem.repository.EventLocationRepository;
 import com.example.modules.entertainment_ecosystem.model.Sponsor;
 import com.example.modules.entertainment_ecosystem.repository.SponsorRepository;
+import com.example.modules.entertainment_ecosystem.model.EventAudience;
+import com.example.modules.entertainment_ecosystem.repository.EventAudienceRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -26,8 +28,9 @@ public class LiveEventService extends BaseService<LiveEvent> {
     private final EventTypeRepository eventTypeRepository;
     private final EventLocationRepository locationRepository;
     private final SponsorRepository sponsorRepository;
+    private final EventAudienceRepository audienceRepository;
 
-    public LiveEventService(LiveEventRepository repository,ArtistRepository performersRepository,EventTypeRepository eventTypeRepository,EventLocationRepository locationRepository,SponsorRepository sponsorRepository)
+    public LiveEventService(LiveEventRepository repository,ArtistRepository performersRepository,EventTypeRepository eventTypeRepository,EventLocationRepository locationRepository,SponsorRepository sponsorRepository,EventAudienceRepository audienceRepository)
     {
         super(repository);
         this.liveeventRepository = repository;
@@ -35,6 +38,7 @@ public class LiveEventService extends BaseService<LiveEvent> {
         this.eventTypeRepository = eventTypeRepository;
         this.locationRepository = locationRepository;
         this.sponsorRepository = sponsorRepository;
+            this.audienceRepository = audienceRepository;
     }
 
     @Override
@@ -62,6 +66,17 @@ public class LiveEventService extends BaseService<LiveEvent> {
             for (Ticket item : liveevent.getTickets()) {
             item.setEvent(liveevent);
             }
+        }
+        if (liveevent.getAudience() != null) {
+        
+        
+            // Vérifier si l'entité est déjà persistée
+            liveevent.setAudience(
+            audienceRepository.findById(liveevent.getAudience().getId())
+            .orElseThrow(() -> new RuntimeException("audience not found"))
+            );
+        
+        liveevent.getAudience().setEvent(liveevent);
         }
 
         return liveeventRepository.save(liveevent);
@@ -117,6 +132,37 @@ public class LiveEventService extends BaseService<LiveEvent> {
             existing.getTickets().add(item);
             }
         }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+        if (liveeventRequest.getAudience() != null
+        && liveeventRequest.getAudience().getId() != null) {
+
+        EventAudience audience = audienceRepository.findById(
+        liveeventRequest.getAudience().getId()
+        ).orElseThrow(() -> new RuntimeException("EventAudience not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.setAudience(audience);
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        
+            audience.setEvent(existing);
+        
+        }
+
+    
+
 
         return liveeventRepository.save(existing);
     }

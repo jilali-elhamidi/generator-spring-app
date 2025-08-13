@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TicketSimpleDto {
+
     private Long id;
 
     private String ticketNumber;

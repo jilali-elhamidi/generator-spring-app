@@ -42,6 +42,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.MusicTrackSimpleDto
 
 import com.example.modules.entertainment_ecosystem.dtosimple.PlaylistSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.UserWalletSimpleDto;
+
 
 
 @Data
@@ -104,5 +106,7 @@ public class UserProfileDto {
     private List<MusicTrackSimpleDto> listenedMusic;
 
     private List<PlaylistSimpleDto> playlists;
+
+    private UserWalletSimpleDto wallet;
 
 }

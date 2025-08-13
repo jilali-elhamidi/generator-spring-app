@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.Employee;
+import com.example.modules.entertainment_ecosystem.model.LiveEvent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -35,9 +35,9 @@ public class EventLocation extends BaseEntity {
     @OneToMany(mappedBy = "location", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("location")
     private List<LiveEvent> liveEvents;
-    
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "employee_id")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contact_person_id")
     @JsonIgnoreProperties("managedLocations")
     private Employee contactPerson;
     

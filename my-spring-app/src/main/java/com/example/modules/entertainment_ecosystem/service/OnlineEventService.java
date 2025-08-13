@@ -88,6 +88,13 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
 
 // Relations OneToMany : synchronisation sécurisée
 
+    
+
+    
+
+    
+
+
         return onlineeventRepository.save(existing);
     }
 }

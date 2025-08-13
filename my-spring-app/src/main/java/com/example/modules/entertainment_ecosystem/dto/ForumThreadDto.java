@@ -10,6 +10,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.ForumPostSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.ForumCategorySimpleDto;
+
 
 
 @Data
@@ -28,5 +30,7 @@ public class ForumThreadDto {
     private UserProfileSimpleDto author;
 
     private List<ForumPostSimpleDto> forumPosts;
+
+    private ForumCategorySimpleDto category;
 
 }

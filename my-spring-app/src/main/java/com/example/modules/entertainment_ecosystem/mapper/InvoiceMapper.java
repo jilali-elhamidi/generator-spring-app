@@ -1,0 +1,29 @@
+package com.example.modules.entertainment_ecosystem.mapper;
+
+import com.example.modules.entertainment_ecosystem.model.Invoice;
+import com.example.modules.entertainment_ecosystem.dto.InvoiceDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.InvoiceSimpleDto;
+import org.mapstruct.InheritInverseConfiguration;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+import java.util.List;
+
+
+@Mapper(componentModel = "spring")
+public interface InvoiceMapper {
+
+    InvoiceMapper INSTANCE = Mappers.getMapper(InvoiceMapper.class);
+
+    InvoiceDto toDto(Invoice invoice);
+
+    InvoiceSimpleDto toSimpleDto(Invoice invoice);
+
+    @InheritInverseConfiguration
+    Invoice toEntity(InvoiceDto invoiceDto);
+
+    List<InvoiceDto> toDtoList(List<Invoice> invoiceList);
+
+    List<Invoice> toEntityList(List<InvoiceDto> invoiceDtoList);
+
+}

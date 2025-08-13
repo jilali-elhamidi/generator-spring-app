@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.ProductionCompany;import com.example.modules.entertainment_ecosystem.model.Shift;
+import com.example.modules.entertainment_ecosystem.model.ProductionCompany;import com.example.modules.entertainment_ecosystem.model.Shift;import com.example.modules.entertainment_ecosystem.model.EventLocation;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -46,6 +46,10 @@ public class Employee extends BaseEntity {
     @OneToMany(mappedBy = "employee", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("employee")
     private List<Shift> shifts;
+    
+    @OneToMany(mappedBy = "contactPerson", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("contactPerson")
+    private List<EventLocation> managedLocations;
     
 
 }

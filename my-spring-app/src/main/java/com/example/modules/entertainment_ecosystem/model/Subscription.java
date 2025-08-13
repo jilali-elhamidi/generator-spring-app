@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
+import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;import com.example.modules.entertainment_ecosystem.model.SubscriptionPlan;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -44,6 +44,11 @@ public class Subscription extends BaseEntity {
     @JoinColumn(name = "platform_id")
     @JsonIgnoreProperties("subscriptions")
     private StreamingPlatform platform;
+    
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "plan_id")
+    @JsonIgnoreProperties("subscriptions")
+    private SubscriptionPlan plan;
     
 
 }

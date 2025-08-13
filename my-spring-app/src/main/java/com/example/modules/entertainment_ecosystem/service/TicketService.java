@@ -106,6 +106,15 @@ public class TicketService extends BaseService<Ticket> {
 
 // Relations OneToMany : synchronisation sécurisée
 
+    
+
+    
+
+    
+
+    
+
+
         return ticketRepository.save(existing);
     }
 }

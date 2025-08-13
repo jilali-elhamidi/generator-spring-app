@@ -35,10 +35,9 @@ public class Payment extends BaseEntity {
 
 // === Relations ===
 
-    @OneToOne
-    @JoinColumn(name = "order_id")
-    @JsonIgnoreProperties("order")
+    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("payment")
     private Order order;
-            
+        
 
 }

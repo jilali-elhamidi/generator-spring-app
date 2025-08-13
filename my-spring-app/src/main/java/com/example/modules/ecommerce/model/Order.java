@@ -41,13 +41,15 @@ public class Order extends BaseEntity {
     @JsonIgnoreProperties("order")
     private List<OrderItem> orderItems;
     
-    @OneToOne(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("payment")
+    @OneToOne
+    @JoinColumn(name = "payment_id")
+    @JsonIgnoreProperties("order")
     private Payment payment;
-        
-    @OneToOne(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("shipment")
+            
+    @OneToOne
+    @JoinColumn(name = "shipment_id")
+    @JsonIgnoreProperties("order")
     private Shipment shipment;
-        
+            
 
 }

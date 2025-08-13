@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentSimpleDto {
+
     private Long id;
 
     private Double amount;

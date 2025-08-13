@@ -6,6 +6,7 @@ import com.example.modules.entertainment_ecosystem.repository.EmployeeRepository
 import com.example.modules.entertainment_ecosystem.model.ProductionCompany;
 import com.example.modules.entertainment_ecosystem.repository.ProductionCompanyRepository;
 import com.example.modules.entertainment_ecosystem.model.Shift;
+import com.example.modules.entertainment_ecosystem.model.EventLocation;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -37,6 +38,12 @@ public class EmployeeService extends BaseService<Employee> {
         if (employee.getShifts() != null) {
             for (Shift item : employee.getShifts()) {
             item.setEmployee(employee);
+            }
+        }
+
+        if (employee.getManagedLocations() != null) {
+            for (EventLocation item : employee.getManagedLocations()) {
+            item.setContactPerson(employee);
             }
         }
 
@@ -73,6 +80,21 @@ public class EmployeeService extends BaseService<Employee> {
             existing.getShifts().add(item);
             }
         }
+
+        existing.getManagedLocations().clear();
+        if (employeeRequest.getManagedLocations() != null) {
+            for (var item : employeeRequest.getManagedLocations()) {
+            item.setContactPerson(existing);
+            existing.getManagedLocations().add(item);
+            }
+        }
+
+    
+
+    
+
+    
+
 
         return employeeRepository.save(existing);
     }

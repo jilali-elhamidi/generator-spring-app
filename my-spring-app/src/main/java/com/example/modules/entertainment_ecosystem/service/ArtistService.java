@@ -218,6 +218,31 @@ public class ArtistService extends BaseService<Artist> {
             }
         }
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
         return artistRepository.save(existing);
     }
 }

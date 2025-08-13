@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.ForumPost;
+import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.ForumPost;import com.example.modules.entertainment_ecosystem.model.ForumCategory;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -42,6 +42,11 @@ public class ForumThread extends BaseEntity {
     @OneToMany(mappedBy = "thread", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("thread")
     private List<ForumPost> forumPosts;
+    
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "category_id")
+    @JsonIgnoreProperties("threads")
+    private ForumCategory category;
     
 
 }

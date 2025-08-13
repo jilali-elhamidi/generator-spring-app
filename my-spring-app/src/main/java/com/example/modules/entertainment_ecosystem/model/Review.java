@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.VideoGame;
+import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.ReviewComment;import com.example.modules.entertainment_ecosystem.model.MediaFile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -54,11 +54,15 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "video_game_id")
     @JsonIgnoreProperties("reviews")
     private VideoGame videoGame;
-
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "reviewable_content_id")
-    @JsonIgnoreProperties("reviews")
-    private ReviewableContent reviewableContent;
     
+    @OneToMany(mappedBy = "review", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("review")
+    private List<ReviewComment> reviewComments;
+    
+    @OneToOne
+    @JoinColumn(name = "media_file_id")
+    @JsonIgnoreProperties("review")
+    private MediaFile mediaFile;
+            
 
 }

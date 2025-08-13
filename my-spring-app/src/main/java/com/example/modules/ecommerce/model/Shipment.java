@@ -35,10 +35,9 @@ public class Shipment extends BaseEntity {
 
 // === Relations ===
 
-    @OneToOne
-    @JoinColumn(name = "order_id")
-    @JsonIgnoreProperties("order")
+    @OneToOne(mappedBy = "shipment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("shipment")
     private Order order;
-            
+        
 
 }

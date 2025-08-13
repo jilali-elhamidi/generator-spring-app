@@ -8,8 +8,6 @@ import java.util.List;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.LiveEventSimpleDto;
 
-import com.example.modules.entertainment_ecosystem.dtosimple.EmployeeSimpleDto;
-
 
 
 @Data
@@ -24,7 +22,5 @@ public class EventLocationDto {
     private String address;
 
     private List<LiveEventSimpleDto> liveEvents;
-
-    private EmployeeSimpleDto contactPerson;
 
 }

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShiftSimpleDto {
+
     private Long id;
 
     private Date shiftDate;

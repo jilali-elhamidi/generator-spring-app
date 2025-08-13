@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
+import com.example.modules.entertainment_ecosystem.dtosimple.LiveEventSimpleDto;
 
 
 
@@ -21,6 +21,6 @@ public class EventAudienceDto {
 
     private String audienceType;
 
-    
+    private LiveEventSimpleDto event;
 
 }

@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Ticket;import com.example.modules.entertainment_ecosystem.model.EventType;import com.example.modules.entertainment_ecosystem.model.EventLocation;import com.example.modules.entertainment_ecosystem.model.Sponsor;
+import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Ticket;import com.example.modules.entertainment_ecosystem.model.EventType;import com.example.modules.entertainment_ecosystem.model.EventLocation;import com.example.modules.entertainment_ecosystem.model.Sponsor;import com.example.modules.entertainment_ecosystem.model.EventAudience;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -41,29 +41,30 @@ public class LiveEvent extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "artist_id"))
             @JsonIgnoreProperties("")
             private List<Artist> performers;
-
+            
     @OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("event")
     private List<Ticket> tickets;
-
+    
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "event_type_id")
     @JsonIgnoreProperties("events")
     private EventType eventType;
-
+    
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "location_id")
     @JsonIgnoreProperties("liveEvents")
     private EventLocation location;
-
+    
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "sponsor_id")
     @JsonIgnoreProperties("sponsoredEvents")
     private Sponsor sponsor;
-
-    @OneToOne(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    
+    @OneToOne
+    @JoinColumn(name = "audience_id")
     @JsonIgnoreProperties("event")
     private EventAudience audience;
-
+            
 
 }

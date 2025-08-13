@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Date;
 import com.example.modules.entertainment_ecosystem.dtosimple.PodcastSimpleDto;
 
-
+import com.example.modules.entertainment_ecosystem.dtosimple.EpisodeSimpleDto;
 
 
 
@@ -27,6 +27,6 @@ public class PodcastEpisodeDto {
 
     private PodcastSimpleDto podcast;
 
-    
+    private EpisodeSimpleDto relatedEpisode;
 
 }

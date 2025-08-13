@@ -12,6 +12,9 @@ import com.example.modules.{{../module}}.model.{{type}};
 {{~else if (eq relationType "ManyToMany")}}
 import com.example.modules.{{../module}}.model.{{type}};
 import com.example.modules.{{../module}}.repository.{{type}}Repository;
+{{~else if (eq relationType "OneToOne")}}
+import com.example.modules.{{../module}}.model.{{type}};
+import com.example.modules.{{../module}}.repository.{{type}}Repository;
 {{~/if}}
 {{~/each}}
 
@@ -31,9 +34,12 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 {{~#if (eq relationType "ManyToMany")}}
     private final {{type}}Repository {{name}}Repository;
 {{~/if}}
+{{~#if (eq relationType "OneToOne")}}
+    private final {{type}}Repository {{name}}Repository;
+{{~/if}}
 {{~/each}}
 
-    public {{entityName}}Service({{entityName}}Repository repository{{~#each relationships}}{{~#if (eq relationType "ManyToOne")}},{{type}}Repository {{name}}Repository{{~/if}}{{~#if (eq relationType "ManyToMany")}},{{type}}Repository {{name}}Repository{{~/if}}{{~/each}})
+    public {{entityName}}Service({{entityName}}Repository repository{{~#each relationships}}{{~#if (eq relationType "ManyToOne")}},{{type}}Repository {{name}}Repository{{~/if}}{{~#if (eq relationType "ManyToMany")}},{{type}}Repository {{name}}Repository{{~/if}}{{~#if (eq relationType "OneToOne")}},{{type}}Repository {{name}}Repository{{~/if}}{{~/each}})
     {
         super(repository);
         this.{{entityNameLowercase}}Repository = repository;
@@ -43,6 +49,9 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         {{~/if}}
         {{~#if (eq relationType "ManyToMany")}}
         this.{{name}}Repository = {{name}}Repository;
+        {{~/if}}
+        {{~#if (eq relationType "OneToOne")}}
+            this.{{name}}Repository = {{name}}Repository;
         {{~/if}}
     {{~/each}}
     }
@@ -75,9 +84,17 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 {{~/each}}
 
 {{~#each relationships}}
-{{~#if (eq relationType "OneToOne")}}
+    {{~#if (eq relationType "OneToOne")}}
         if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
-        {{../entityNameLowercase}}.get{{capitalize name}}().set{{capitalize ../entityName}}({{../entityNameLowercase}});
+        {{!-- Récupération de l'entité existante si nécessaire --}}
+        {{#if }}
+            // Vérifier si l'entité est déjà persistée
+            {{../entityNameLowercase}}.set{{capitalize name}}(
+            {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
+            .orElseThrow(() -> new RuntimeException("{{name}} not found"))
+            );
+        {{/if}}
+        {{../entityNameLowercase}}.get{{capitalize name}}().set{{capitalize inverseField}}({{../entityNameLowercase}});
         }
 {{~/if}}
 {{~/each}}
@@ -139,6 +156,29 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 
 {{~/if}}
 {{~/each}}
+{{#each relationships}}
+    {{#if (eq relationType "OneToOne")}}
+
+        if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null
+        && {{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
+
+        {{type}} {{name}} = {{name}}Repository.findById(
+        {{entityNameLowercase}}Request.get{{capitalize name}}().getId()
+        ).orElseThrow(() -> new RuntimeException("{{type}} not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.set{{capitalize name}}({{name}});
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        {{#if mappedBy}}
+            {{name}}.set{{capitalize mappedBy}}(existing);
+        {{else if inverseField}}
+            {{name}}.set{{capitalize inverseField}}(existing);
+        {{/if}}
+        }
+
+    {{/if}}
+{{/each}}
 
         return {{entityNameLowercase}}Repository.save(existing);
     }

@@ -10,6 +10,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.StreamingPlatformSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.SubscriptionPlanSimpleDto;
+
 
 
 @Data
@@ -28,5 +30,7 @@ public class SubscriptionDto {
     private UserProfileSimpleDto user;
 
     private StreamingPlatformSimpleDto platform;
+
+    private SubscriptionPlanSimpleDto plan;
 
 }

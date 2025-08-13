@@ -10,6 +10,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.ProductionCompanySi
 
 import com.example.modules.entertainment_ecosystem.dtosimple.ShiftSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.EventLocationSimpleDto;
+
 
 
 @Data
@@ -30,5 +32,7 @@ public class EmployeeDto {
     private ProductionCompanySimpleDto productionCompany;
 
     private List<ShiftSimpleDto> shifts;
+
+    private List<EventLocationSimpleDto> managedLocations;
 
 }

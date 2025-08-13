@@ -11,6 +11,9 @@ import com.example.modules.entertainment_ecosystem.model.Book;
 import com.example.modules.entertainment_ecosystem.repository.BookRepository;
 import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
+import com.example.modules.entertainment_ecosystem.model.ReviewComment;
+import com.example.modules.entertainment_ecosystem.model.MediaFile;
+import com.example.modules.entertainment_ecosystem.repository.MediaFileRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -25,8 +28,9 @@ public class ReviewService extends BaseService<Review> {
     private final MovieRepository movieRepository;
     private final BookRepository bookRepository;
     private final VideoGameRepository videoGameRepository;
+    private final MediaFileRepository mediaFileRepository;
 
-    public ReviewService(ReviewRepository repository,UserProfileRepository userRepository,MovieRepository movieRepository,BookRepository bookRepository,VideoGameRepository videoGameRepository)
+    public ReviewService(ReviewRepository repository,UserProfileRepository userRepository,MovieRepository movieRepository,BookRepository bookRepository,VideoGameRepository videoGameRepository,MediaFileRepository mediaFileRepository)
     {
         super(repository);
         this.reviewRepository = repository;
@@ -34,6 +38,7 @@ public class ReviewService extends BaseService<Review> {
         this.movieRepository = movieRepository;
         this.bookRepository = bookRepository;
         this.videoGameRepository = videoGameRepository;
+            this.mediaFileRepository = mediaFileRepository;
     }
 
     @Override
@@ -61,6 +66,23 @@ public class ReviewService extends BaseService<Review> {
         VideoGame videoGame = videoGameRepository.findById(review.getVideoGame().getId())
                 .orElseThrow(() -> new RuntimeException("VideoGame not found"));
         review.setVideoGame(videoGame);
+        }
+
+        if (review.getReviewComments() != null) {
+            for (ReviewComment item : review.getReviewComments()) {
+            item.setReview(review);
+            }
+        }
+        if (review.getMediaFile() != null) {
+        
+        
+            // Vérifier si l'entité est déjà persistée
+            review.setMediaFile(
+            mediaFileRepository.findById(review.getMediaFile().getId())
+            .orElseThrow(() -> new RuntimeException("mediaFile not found"))
+            );
+        
+        review.getMediaFile().setReview(review);
         }
 
         return reviewRepository.save(review);
@@ -105,6 +127,45 @@ public class ReviewService extends BaseService<Review> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+
+        existing.getReviewComments().clear();
+        if (reviewRequest.getReviewComments() != null) {
+            for (var item : reviewRequest.getReviewComments()) {
+            item.setReview(existing);
+            existing.getReviewComments().add(item);
+            }
+        }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+        if (reviewRequest.getMediaFile() != null
+        && reviewRequest.getMediaFile().getId() != null) {
+
+        MediaFile mediaFile = mediaFileRepository.findById(
+        reviewRequest.getMediaFile().getId()
+        ).orElseThrow(() -> new RuntimeException("MediaFile not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.setMediaFile(mediaFile);
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        
+            mediaFile.setReview(existing);
+        
+        }
+
+    
+
 
         return reviewRepository.save(existing);
     }

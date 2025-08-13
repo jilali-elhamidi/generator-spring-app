@@ -73,6 +73,11 @@ public class OrderItemService extends BaseService<OrderItem> {
 
 // Relations OneToMany : synchronisation sécurisée
 
+    
+
+    
+
+
         return orderitemRepository.save(existing);
     }
 }

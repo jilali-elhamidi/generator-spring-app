@@ -32,9 +32,10 @@ public class EventAudience extends BaseEntity {
 
 // === Relations ===
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "event_id")
     @JsonIgnoreProperties("audience")
     private LiveEvent event;
+            
 
 }

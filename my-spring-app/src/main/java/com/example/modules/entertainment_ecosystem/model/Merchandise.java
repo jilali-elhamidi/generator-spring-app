@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.UserProfile;
+import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.MerchandiseType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -58,5 +58,10 @@ public class Merchandise extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<UserProfile> ownedByUsers;
         
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "type_id")
+    @JsonIgnoreProperties("items")
+    private MerchandiseType productType;
+    
 
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Date;
 import com.example.modules.entertainment_ecosystem.dtosimple.TicketSimpleDto;
 
-
+import com.example.modules.entertainment_ecosystem.dtosimple.PaymentSimpleDto;
 
 
 
@@ -25,6 +25,6 @@ public class BookingDto {
 
     private List<TicketSimpleDto> tickets;
 
-    
+    private PaymentSimpleDto payment;
 
 }

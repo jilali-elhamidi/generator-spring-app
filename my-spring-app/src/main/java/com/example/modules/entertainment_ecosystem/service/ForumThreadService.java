@@ -6,6 +6,8 @@ import com.example.modules.entertainment_ecosystem.repository.ForumThreadReposit
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.ForumPost;
+import com.example.modules.entertainment_ecosystem.model.ForumCategory;
+import com.example.modules.entertainment_ecosystem.repository.ForumCategoryRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -17,12 +19,14 @@ public class ForumThreadService extends BaseService<ForumThread> {
 
     protected final ForumThreadRepository forumthreadRepository;
     private final UserProfileRepository authorRepository;
+    private final ForumCategoryRepository categoryRepository;
 
-    public ForumThreadService(ForumThreadRepository repository,UserProfileRepository authorRepository)
+    public ForumThreadService(ForumThreadRepository repository,UserProfileRepository authorRepository,ForumCategoryRepository categoryRepository)
     {
         super(repository);
         this.forumthreadRepository = repository;
         this.authorRepository = authorRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -32,6 +36,12 @@ public class ForumThreadService extends BaseService<ForumThread> {
         UserProfile author = authorRepository.findById(forumthread.getAuthor().getId())
                 .orElseThrow(() -> new RuntimeException("UserProfile not found"));
         forumthread.setAuthor(author);
+        }
+
+        if (forumthread.getCategory() != null && forumthread.getCategory().getId() != null) {
+        ForumCategory category = categoryRepository.findById(forumthread.getCategory().getId())
+                .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+        forumthread.setCategory(category);
         }
 
         if (forumthread.getForumPosts() != null) {
@@ -61,6 +71,12 @@ public class ForumThreadService extends BaseService<ForumThread> {
         existing.setAuthor(author);
         }
 
+        if (forumthreadRequest.getCategory() != null && forumthreadRequest.getCategory().getId() != null) {
+        ForumCategory category = categoryRepository.findById(forumthreadRequest.getCategory().getId())
+                .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+        existing.setCategory(category);
+        }
+
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
@@ -72,6 +88,13 @@ public class ForumThreadService extends BaseService<ForumThread> {
             existing.getForumPosts().add(item);
             }
         }
+
+    
+
+    
+
+    
+
 
         return forumthreadRepository.save(existing);
     }

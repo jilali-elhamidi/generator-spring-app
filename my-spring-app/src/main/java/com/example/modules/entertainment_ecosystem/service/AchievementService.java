@@ -58,6 +58,9 @@ public class AchievementService extends BaseService<Achievement> {
 
 // Relations OneToMany : synchronisation sécurisée
 
+    
+
+
         return achievementRepository.save(existing);
     }
 }

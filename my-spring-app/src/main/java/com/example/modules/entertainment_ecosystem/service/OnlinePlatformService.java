@@ -3,7 +3,6 @@ package com.example.modules.entertainment_ecosystem.service;
 import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.OnlinePlatform;
 import com.example.modules.entertainment_ecosystem.repository.OnlinePlatformRepository;
-import com.example.modules.entertainment_ecosystem.model.OnlineEvent;
 import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
 
 import org.springframework.stereotype.Service;
@@ -25,12 +24,6 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
     @Override
     public OnlinePlatform save(OnlinePlatform onlineplatform) {
 
-        if (onlineplatform.getLiveEvents() != null) {
-            for (OnlineEvent item : onlineplatform.getLiveEvents()) {
-            item.setPlatform(onlineplatform);
-            }
-        }
-
         if (onlineplatform.getStreams() != null) {
             for (StreamingPlatform item : onlineplatform.getStreams()) {
             item.setOnlinePlatform(onlineplatform);
@@ -47,21 +40,12 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
 
     // Copier les champs simples
         existing.setName(onlineplatformRequest.getName());
-        existing.setUrl(onlineplatformRequest.getUrl());
 
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
-        existing.getLiveEvents().clear();
-        if (onlineplatformRequest.getLiveEvents() != null) {
-            for (var item : onlineplatformRequest.getLiveEvents()) {
-            item.setPlatform(existing);
-            existing.getLiveEvents().add(item);
-            }
-        }
 
         existing.getStreams().clear();
         if (onlineplatformRequest.getStreams() != null) {
@@ -70,6 +54,9 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
             existing.getStreams().add(item);
             }
         }
+
+    
+
 
         return onlineplatformRepository.save(existing);
     }

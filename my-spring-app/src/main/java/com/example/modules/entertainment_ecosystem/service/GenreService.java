@@ -131,6 +131,21 @@ public class GenreService extends BaseService<Genre> {
 
 // Relations OneToMany : synchronisation sécurisée
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
         return genreRepository.save(existing);
     }
 }

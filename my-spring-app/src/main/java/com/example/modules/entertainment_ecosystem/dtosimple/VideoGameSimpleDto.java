@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VideoGameSimpleDto {
+
     private Long id;
 
     private String title;

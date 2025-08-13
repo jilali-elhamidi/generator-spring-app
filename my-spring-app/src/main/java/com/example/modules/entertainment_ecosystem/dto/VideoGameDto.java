@@ -16,6 +16,10 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.GameAchievementSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.GameSessionSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.DevelopmentStudioSimpleDto;
+
 
 
 @Data
@@ -42,5 +46,9 @@ public class VideoGameDto {
     private List<UserProfileSimpleDto> playedBy;
 
     private List<GameAchievementSimpleDto> achievements;
+
+    private List<GameSessionSimpleDto> sessions;
+
+    private DevelopmentStudioSimpleDto developerStudio;
 
 }

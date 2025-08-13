@@ -10,10 +10,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OnlinePlatformSimpleDto {
+
     private Long id;
 
     private String name;
-
-    private String url;
 
 }

@@ -14,6 +14,10 @@ import com.example.modules.entertainment_ecosystem.dtosimple.BookSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.VideoGameSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.ReviewCommentSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MediaFileSimpleDto;
+
 
 
 @Data
@@ -36,5 +40,9 @@ public class ReviewDto {
     private BookSimpleDto book;
 
     private VideoGameSimpleDto videoGame;
+
+    private List<ReviewCommentSimpleDto> reviewComments;
+
+    private MediaFileSimpleDto mediaFile;
 
 }

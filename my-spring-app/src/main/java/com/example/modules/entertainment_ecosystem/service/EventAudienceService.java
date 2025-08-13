@@ -3,6 +3,8 @@ package com.example.modules.entertainment_ecosystem.service;
 import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.EventAudience;
 import com.example.modules.entertainment_ecosystem.repository.EventAudienceRepository;
+import com.example.modules.entertainment_ecosystem.model.LiveEvent;
+import com.example.modules.entertainment_ecosystem.repository.LiveEventRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -13,16 +15,26 @@ import java.util.List;
 public class EventAudienceService extends BaseService<EventAudience> {
 
     protected final EventAudienceRepository eventaudienceRepository;
+    private final LiveEventRepository eventRepository;
 
-    public EventAudienceService(EventAudienceRepository repository)
+    public EventAudienceService(EventAudienceRepository repository,LiveEventRepository eventRepository)
     {
         super(repository);
         this.eventaudienceRepository = repository;
+            this.eventRepository = eventRepository;
     }
 
     @Override
     public EventAudience save(EventAudience eventaudience) {
         if (eventaudience.getEvent() != null) {
+        
+        
+            // Vérifier si l'entité est déjà persistée
+            eventaudience.setEvent(
+            eventRepository.findById(eventaudience.getEvent().getId())
+            .orElseThrow(() -> new RuntimeException("event not found"))
+            );
+        
         eventaudience.getEvent().setAudience(eventaudience);
         }
 
@@ -43,6 +55,27 @@ public class EventAudienceService extends BaseService<EventAudience> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+
+    
+
+        if (eventaudienceRequest.getEvent() != null
+        && eventaudienceRequest.getEvent().getId() != null) {
+
+        LiveEvent event = eventRepository.findById(
+        eventaudienceRequest.getEvent().getId()
+        ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.setEvent(event);
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        
+            event.setAudience(existing);
+        
+        }
+
+    
+
 
         return eventaudienceRepository.save(existing);
     }

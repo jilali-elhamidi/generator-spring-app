@@ -4,6 +4,8 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.Booking;
 import com.example.modules.entertainment_ecosystem.repository.BookingRepository;
 import com.example.modules.entertainment_ecosystem.model.Ticket;
+import com.example.modules.entertainment_ecosystem.model.Payment;
+import com.example.modules.entertainment_ecosystem.repository.PaymentRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -14,11 +16,13 @@ import java.util.List;
 public class BookingService extends BaseService<Booking> {
 
     protected final BookingRepository bookingRepository;
+    private final PaymentRepository paymentRepository;
 
-    public BookingService(BookingRepository repository)
+    public BookingService(BookingRepository repository,PaymentRepository paymentRepository)
     {
         super(repository);
         this.bookingRepository = repository;
+            this.paymentRepository = paymentRepository;
     }
 
     @Override
@@ -30,6 +34,14 @@ public class BookingService extends BaseService<Booking> {
             }
         }
         if (booking.getPayment() != null) {
+        
+        
+            // Vérifier si l'entité est déjà persistée
+            booking.setPayment(
+            paymentRepository.findById(booking.getPayment().getId())
+            .orElseThrow(() -> new RuntimeException("payment not found"))
+            );
+        
         booking.getPayment().setBooking(booking);
         }
 
@@ -58,6 +70,29 @@ public class BookingService extends BaseService<Booking> {
             existing.getTickets().add(item);
             }
         }
+
+    
+
+    
+
+        if (bookingRequest.getPayment() != null
+        && bookingRequest.getPayment().getId() != null) {
+
+        Payment payment = paymentRepository.findById(
+        bookingRequest.getPayment().getId()
+        ).orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.setPayment(payment);
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        
+            payment.setBooking(existing);
+        
+        }
+
+    
+
 
         return bookingRepository.save(existing);
     }

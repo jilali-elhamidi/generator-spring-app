@@ -32,6 +32,8 @@ import com.example.modules.entertainment_ecosystem.repository.PodcastRepository;
 import com.example.modules.entertainment_ecosystem.model.MusicTrack;
 import com.example.modules.entertainment_ecosystem.repository.MusicTrackRepository;
 import com.example.modules.entertainment_ecosystem.model.Playlist;
+import com.example.modules.entertainment_ecosystem.model.UserWallet;
+import com.example.modules.entertainment_ecosystem.repository.UserWalletRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -53,8 +55,9 @@ public class UserProfileService extends BaseService<UserProfile> {
     private final MerchandiseRepository ownedMerchandiseRepository;
     private final PodcastRepository libraryPodcastsRepository;
     private final MusicTrackRepository listenedMusicRepository;
+    private final UserWalletRepository walletRepository;
 
-    public UserProfileService(UserProfileRepository repository,MovieRepository watchlistMoviesRepository,ArtistRepository favoriteArtistsRepository,UserProfileRepository followedUsersRepository,UserProfileRepository followingUsersRepository,GenreRepository favoriteGenresRepository,EpisodeRepository watchedEpisodesRepository,VideoGameRepository playedGamesRepository,OnlineEventRepository attendedOnlineEventsRepository,MerchandiseRepository ownedMerchandiseRepository,PodcastRepository libraryPodcastsRepository,MusicTrackRepository listenedMusicRepository)
+    public UserProfileService(UserProfileRepository repository,MovieRepository watchlistMoviesRepository,ArtistRepository favoriteArtistsRepository,UserProfileRepository followedUsersRepository,UserProfileRepository followingUsersRepository,GenreRepository favoriteGenresRepository,EpisodeRepository watchedEpisodesRepository,VideoGameRepository playedGamesRepository,OnlineEventRepository attendedOnlineEventsRepository,MerchandiseRepository ownedMerchandiseRepository,PodcastRepository libraryPodcastsRepository,MusicTrackRepository listenedMusicRepository,UserWalletRepository walletRepository)
     {
         super(repository);
         this.userprofileRepository = repository;
@@ -69,6 +72,7 @@ public class UserProfileService extends BaseService<UserProfile> {
         this.ownedMerchandiseRepository = ownedMerchandiseRepository;
         this.libraryPodcastsRepository = libraryPodcastsRepository;
         this.listenedMusicRepository = listenedMusicRepository;
+            this.walletRepository = walletRepository;
     }
 
     @Override
@@ -114,6 +118,17 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (Playlist item : userprofile.getPlaylists()) {
             item.setOwner(userprofile);
             }
+        }
+        if (userprofile.getWallet() != null) {
+        
+        
+            // Vérifier si l'entité est déjà persistée
+            userprofile.setWallet(
+            walletRepository.findById(userprofile.getWallet().getId())
+            .orElseThrow(() -> new RuntimeException("wallet not found"))
+            );
+        
+        userprofile.getWallet().setUser(userprofile);
         }
 
         return userprofileRepository.save(userprofile);
@@ -295,6 +310,63 @@ public class UserProfileService extends BaseService<UserProfile> {
             existing.getPlaylists().add(item);
             }
         }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+        if (userprofileRequest.getWallet() != null
+        && userprofileRequest.getWallet().getId() != null) {
+
+        UserWallet wallet = walletRepository.findById(
+        userprofileRequest.getWallet().getId()
+        ).orElseThrow(() -> new RuntimeException("UserWallet not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.setWallet(wallet);
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        
+            wallet.setUser(existing);
+        
+        }
+
+    
+
 
         return userprofileRepository.save(existing);
     }

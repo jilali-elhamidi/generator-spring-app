@@ -54,11 +54,6 @@ public class OnlineEvent extends BaseEntity {
     @JoinColumn(name = "type_id")
     @JsonIgnoreProperties("events")
     private OnlineEventType type;
-
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "platform_id")
-    @JsonIgnoreProperties("liveEvents")  // ou autre propriété inverse dans OnlinePlatform
-    private OnlinePlatform platform;
     
 
 }
