@@ -12,7 +12,11 @@ import com.example.modules.entertainment_ecosystem.dtosimple.TVShowSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.SubscriptionSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.StreamingServiceSimpleDto;
+
 import com.example.modules.entertainment_ecosystem.dtosimple.OnlinePlatformSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.AdCampaignSimpleDto;
 
 
 
@@ -33,6 +37,10 @@ public class StreamingPlatformDto {
 
     private List<SubscriptionSimpleDto> subscriptions;
 
+    private StreamingServiceSimpleDto streamingService;
+
     private OnlinePlatformSimpleDto onlinePlatform;
+
+    private List<AdCampaignSimpleDto> adCampaigns;
 
 }

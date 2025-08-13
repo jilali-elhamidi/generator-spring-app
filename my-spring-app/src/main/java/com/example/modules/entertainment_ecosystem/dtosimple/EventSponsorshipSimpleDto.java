@@ -1,0 +1,24 @@
+package com.example.modules.entertainment_ecosystem.dtosimple;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+
+    import java.util.Date;
+
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class EventSponsorshipSimpleDto {
+
+    private Long id;
+
+    private Double amount;
+
+    private Date startDate;
+
+    private Date endDate;
+
+}

@@ -14,6 +14,8 @@ import com.example.modules.entertainment_ecosystem.repository.VideoGameRepositor
 import com.example.modules.entertainment_ecosystem.model.ReviewComment;
 import com.example.modules.entertainment_ecosystem.model.MediaFile;
 import com.example.modules.entertainment_ecosystem.repository.MediaFileRepository;
+import com.example.modules.entertainment_ecosystem.model.ReviewRating;
+import com.example.modules.entertainment_ecosystem.model.ReviewLike;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -70,6 +72,18 @@ public class ReviewService extends BaseService<Review> {
 
         if (review.getReviewComments() != null) {
             for (ReviewComment item : review.getReviewComments()) {
+            item.setReview(review);
+            }
+        }
+
+        if (review.getRatings() != null) {
+            for (ReviewRating item : review.getRatings()) {
+            item.setReview(review);
+            }
+        }
+
+        if (review.getLikes() != null) {
+            for (ReviewLike item : review.getLikes()) {
             item.setReview(review);
             }
         }
@@ -136,6 +150,22 @@ public class ReviewService extends BaseService<Review> {
             }
         }
 
+        existing.getRatings().clear();
+        if (reviewRequest.getRatings() != null) {
+            for (var item : reviewRequest.getRatings()) {
+            item.setReview(existing);
+            existing.getRatings().add(item);
+            }
+        }
+
+        existing.getLikes().clear();
+        if (reviewRequest.getLikes() != null) {
+            for (var item : reviewRequest.getLikes()) {
+            item.setReview(existing);
+            existing.getLikes().add(item);
+            }
+        }
+
     
 
     
@@ -163,6 +193,10 @@ public class ReviewService extends BaseService<Review> {
             mediaFile.setReview(existing);
         
         }
+
+    
+
+    
 
     
 

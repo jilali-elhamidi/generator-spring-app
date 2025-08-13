@@ -1,0 +1,65 @@
+package com.example.modules.entertainment_ecosystem.service;
+
+import com.example.core.service.BaseService;
+import com.example.modules.entertainment_ecosystem.model.VideoGameRating;
+import com.example.modules.entertainment_ecosystem.repository.VideoGameRatingRepository;
+import com.example.modules.entertainment_ecosystem.model.VideoGame;
+import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
+
+import org.springframework.stereotype.Service;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.List;
+
+@Service
+public class VideoGameRatingService extends BaseService<VideoGameRating> {
+
+    protected final VideoGameRatingRepository videogameratingRepository;
+    private final VideoGameRepository gameRepository;
+
+    public VideoGameRatingService(VideoGameRatingRepository repository,VideoGameRepository gameRepository)
+    {
+        super(repository);
+        this.videogameratingRepository = repository;
+        this.gameRepository = gameRepository;
+    }
+
+    @Override
+    public VideoGameRating save(VideoGameRating videogamerating) {
+
+        if (videogamerating.getGame() != null && videogamerating.getGame().getId() != null) {
+        VideoGame game = gameRepository.findById(videogamerating.getGame().getId())
+                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        videogamerating.setGame(game);
+        }
+
+        return videogameratingRepository.save(videogamerating);
+    }
+
+
+    public VideoGameRating update(Long id, VideoGameRating videogameratingRequest) {
+        VideoGameRating existing = videogameratingRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("VideoGameRating not found"));
+
+    // Copier les champs simples
+        existing.setRatingSystem(videogameratingRequest.getRatingSystem());
+        existing.setRating(videogameratingRequest.getRating());
+
+// Relations ManyToOne : mise à jour conditionnelle
+
+        if (videogameratingRequest.getGame() != null && videogameratingRequest.getGame().getId() != null) {
+        VideoGame game = gameRepository.findById(videogameratingRequest.getGame().getId())
+                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        existing.setGame(game);
+        }
+
+// Relations ManyToMany : synchronisation sécurisée
+
+// Relations OneToMany : synchronisation sécurisée
+
+    
+
+
+        return videogameratingRepository.save(existing);
+    }
+}

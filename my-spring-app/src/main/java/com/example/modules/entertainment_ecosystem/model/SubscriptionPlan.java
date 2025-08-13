@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.Subscription;
+import com.example.modules.entertainment_ecosystem.model.Subscription;import com.example.modules.entertainment_ecosystem.model.StreamingService;import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -38,6 +38,15 @@ public class SubscriptionPlan extends BaseEntity {
     @OneToMany(mappedBy = "plan", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("plan")
     private List<Subscription> subscriptions;
+    
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "service_id")
+    @JsonIgnoreProperties("plans")
+    private StreamingService service;
+    
+    @OneToMany(mappedBy = "subscriptionPlan", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("subscriptionPlan")
+    private List<StreamingContentLicense> includedStreamingContentLicenses;
     
 
 }

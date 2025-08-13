@@ -16,6 +16,20 @@ import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.ProductionCompanySimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.ArtistSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.StreamingContentLicenseSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentProviderSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.TVShowStudioSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentRatingSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentTagSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentLanguageSimpleDto;
+
 
 
 @Data
@@ -42,5 +56,19 @@ public class TVShowDto {
     private List<MerchandiseSimpleDto> relatedMerchandise;
 
     private ProductionCompanySimpleDto productionCompany;
+
+    private List<ArtistSimpleDto> cast;
+
+    private List<StreamingContentLicenseSimpleDto> streamingLicenses;
+
+    private ContentProviderSimpleDto provider;
+
+    private TVShowStudioSimpleDto tvShowStudio;
+
+    private ContentRatingSimpleDto contentRating;
+
+    private List<ContentTagSimpleDto> tags;
+
+    private List<ContentLanguageSimpleDto> languages;
 
 }

@@ -7,6 +7,8 @@ import com.example.modules.entertainment_ecosystem.model.Podcast;
 import com.example.modules.entertainment_ecosystem.repository.PodcastRepository;
 import com.example.modules.entertainment_ecosystem.model.Episode;
 import com.example.modules.entertainment_ecosystem.repository.EpisodeRepository;
+import com.example.modules.entertainment_ecosystem.model.PodcastGuest;
+import com.example.modules.entertainment_ecosystem.repository.PodcastGuestRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -19,13 +21,15 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
     protected final PodcastEpisodeRepository podcastepisodeRepository;
     private final PodcastRepository podcastRepository;
     private final EpisodeRepository relatedEpisodeRepository;
+    private final PodcastGuestRepository guestAppearancesRepository;
 
-    public PodcastEpisodeService(PodcastEpisodeRepository repository,PodcastRepository podcastRepository,EpisodeRepository relatedEpisodeRepository)
+    public PodcastEpisodeService(PodcastEpisodeRepository repository,PodcastRepository podcastRepository,EpisodeRepository relatedEpisodeRepository,PodcastGuestRepository guestAppearancesRepository)
     {
         super(repository);
         this.podcastepisodeRepository = repository;
         this.podcastRepository = podcastRepository;
             this.relatedEpisodeRepository = relatedEpisodeRepository;
+        this.guestAppearancesRepository = guestAppearancesRepository;
     }
 
     @Override
@@ -71,6 +75,15 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
 
 // Relations ManyToMany : synchronisation sécurisée
 
+        if (podcastepisodeRequest.getGuestAppearances() != null) {
+            existing.getGuestAppearances().clear();
+            List<PodcastGuest> guestAppearancesList = podcastepisodeRequest.getGuestAppearances().stream()
+                .map(item -> guestAppearancesRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("PodcastGuest not found")))
+                .collect(Collectors.toList());
+        existing.getGuestAppearances().addAll(guestAppearancesList);
+        }
+
 // Relations OneToMany : synchronisation sécurisée
 
     
@@ -92,6 +105,8 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
             relatedEpisode.setRelatedPodcastEpisode(existing);
         
         }
+
+    
 
     
 

@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
+import com.example.modules.entertainment_ecosystem.model.UserAchievement;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -35,6 +36,12 @@ public class GameAchievementService extends BaseService<GameAchievement> {
         VideoGame game = gameRepository.findById(gameachievement.getGame().getId())
                 .orElseThrow(() -> new RuntimeException("VideoGame not found"));
         gameachievement.setGame(game);
+        }
+
+        if (gameachievement.getUserAchievements() != null) {
+            for (UserAchievement item : gameachievement.getUserAchievements()) {
+            item.setAchievement(gameachievement);
+            }
         }
 
         return gameachievementRepository.save(gameachievement);
@@ -70,6 +77,16 @@ public class GameAchievementService extends BaseService<GameAchievement> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+
+        existing.getUserAchievements().clear();
+        if (gameachievementRequest.getUserAchievements() != null) {
+            for (var item : gameachievementRequest.getUserAchievements()) {
+            item.setAchievement(existing);
+            existing.getUserAchievements().add(item);
+            }
+        }
+
+    
 
     
 

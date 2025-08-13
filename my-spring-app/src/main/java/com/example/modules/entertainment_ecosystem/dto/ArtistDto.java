@@ -6,12 +6,6 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.dtosimple.MovieSimpleDto;
-
-import com.example.modules.entertainment_ecosystem.dtosimple.MovieSimpleDto;
-
-import com.example.modules.entertainment_ecosystem.dtosimple.TVShowSimpleDto;
-
 import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.MusicTrackSimpleDto;
@@ -30,6 +24,22 @@ import com.example.modules.entertainment_ecosystem.dtosimple.VideoGameSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.ManagerSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.ArtistAwardSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MovieSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MovieSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.TVShowSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.DigitalAssetSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.TVShowSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ArtistSocialMediaSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.EpisodeCreditSimpleDto;
+
 
 
 @Data
@@ -46,12 +56,6 @@ public class ArtistDto {
     private Date birthDate;
 
     private String nationality;
-
-    private List<MovieSimpleDto> actedInMovies;
-
-    private List<MovieSimpleDto> directedMovies;
-
-    private List<TVShowSimpleDto> directedShows;
 
     private List<UserProfileSimpleDto> favoriteArtists;
 
@@ -70,5 +74,21 @@ public class ArtistDto {
     private List<VideoGameSimpleDto> managedGames;
 
     private ManagerSimpleDto manager;
+
+    private List<ArtistAwardSimpleDto> awards;
+
+    private List<MovieSimpleDto> actedInMovies;
+
+    private List<MovieSimpleDto> directedMovies;
+
+    private List<TVShowSimpleDto> directedShows;
+
+    private List<DigitalAssetSimpleDto> managedAssets;
+
+    private List<TVShowSimpleDto> actedInShows;
+
+    private List<ArtistSocialMediaSimpleDto> socialMediaLinks;
+
+    private List<EpisodeCreditSimpleDto> episodeCredits;
 
 }

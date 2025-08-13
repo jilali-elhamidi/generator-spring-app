@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.TicketStatus;import com.example.modules.entertainment_ecosystem.model.Booking;
+import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.TicketStatus;import com.example.modules.entertainment_ecosystem.model.Booking;import com.example.modules.entertainment_ecosystem.model.EventTicketType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -54,6 +54,11 @@ public class Ticket extends BaseEntity {
     @JoinColumn(name = "booking_id")
     @JsonIgnoreProperties("tickets")
     private Booking booking;
+    
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "ticket_type_id")
+    @JsonIgnoreProperties("tickets")
+    private EventTicketType type;
     
 
 }

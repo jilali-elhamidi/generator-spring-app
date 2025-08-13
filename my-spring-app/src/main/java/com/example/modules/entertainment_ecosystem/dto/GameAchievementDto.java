@@ -10,6 +10,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.VideoGameSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.UserAchievementSimpleDto;
+
 
 
 @Data
@@ -28,5 +30,7 @@ public class GameAchievementDto {
     private VideoGameSimpleDto game;
 
     private List<UserProfileSimpleDto> earnedBy;
+
+    private List<UserAchievementSimpleDto> userAchievements;
 
 }

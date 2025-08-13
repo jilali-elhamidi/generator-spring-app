@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.Genre;
+import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.MusicLabel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -48,5 +48,10 @@ public class Album extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Genre> genres;
             
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "music_label_id")
+    @JsonIgnoreProperties("albums")
+    private MusicLabel musicLabel;
+    
 
 }

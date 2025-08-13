@@ -8,6 +8,10 @@ import java.util.List;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.SubscriptionSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.StreamingServiceSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.StreamingContentLicenseSimpleDto;
+
 
 
 @Data
@@ -24,5 +28,9 @@ public class SubscriptionPlanDto {
     private String description;
 
     private List<SubscriptionSimpleDto> subscriptions;
+
+    private StreamingServiceSimpleDto service;
+
+    private List<StreamingContentLicenseSimpleDto> includedStreamingContentLicenses;
 
 }

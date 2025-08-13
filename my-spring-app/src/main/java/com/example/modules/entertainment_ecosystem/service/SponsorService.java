@@ -4,6 +4,8 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.Sponsor;
 import com.example.modules.entertainment_ecosystem.repository.SponsorRepository;
 import com.example.modules.entertainment_ecosystem.model.LiveEvent;
+import com.example.modules.entertainment_ecosystem.model.EventSponsorship;
+import com.example.modules.entertainment_ecosystem.model.AdCampaign;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -30,6 +32,18 @@ public class SponsorService extends BaseService<Sponsor> {
             }
         }
 
+        if (sponsor.getSponsorships() != null) {
+            for (EventSponsorship item : sponsor.getSponsorships()) {
+            item.setSponsor(sponsor);
+            }
+        }
+
+        if (sponsor.getAdCampaigns() != null) {
+            for (AdCampaign item : sponsor.getAdCampaigns()) {
+            item.setAdvertiser(sponsor);
+            }
+        }
+
         return sponsorRepository.save(sponsor);
     }
 
@@ -41,6 +55,7 @@ public class SponsorService extends BaseService<Sponsor> {
     // Copier les champs simples
         existing.setName(sponsorRequest.getName());
         existing.setContactEmail(sponsorRequest.getContactEmail());
+        existing.setCompanyType(sponsorRequest.getCompanyType());
 
 // Relations ManyToOne : mise à jour conditionnelle
 
@@ -55,6 +70,26 @@ public class SponsorService extends BaseService<Sponsor> {
             existing.getSponsoredEvents().add(item);
             }
         }
+
+        existing.getSponsorships().clear();
+        if (sponsorRequest.getSponsorships() != null) {
+            for (var item : sponsorRequest.getSponsorships()) {
+            item.setSponsor(existing);
+            existing.getSponsorships().add(item);
+            }
+        }
+
+        existing.getAdCampaigns().clear();
+        if (sponsorRequest.getAdCampaigns() != null) {
+            for (var item : sponsorRequest.getAdCampaigns()) {
+            item.setAdvertiser(existing);
+            existing.getAdCampaigns().add(item);
+            }
+        }
+
+    
+
+    
 
     
 

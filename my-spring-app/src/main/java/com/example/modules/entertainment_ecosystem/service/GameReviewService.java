@@ -7,6 +7,9 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
+import com.example.modules.entertainment_ecosystem.model.GameReviewComment;
+import com.example.modules.entertainment_ecosystem.model.GameReviewUpvote;
+import com.example.modules.entertainment_ecosystem.model.GameReviewDownvote;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -43,6 +46,24 @@ public class GameReviewService extends BaseService<GameReview> {
         gamereview.setGame(game);
         }
 
+        if (gamereview.getComments() != null) {
+            for (GameReviewComment item : gamereview.getComments()) {
+            item.setReview(gamereview);
+            }
+        }
+
+        if (gamereview.getUpvotes() != null) {
+            for (GameReviewUpvote item : gamereview.getUpvotes()) {
+            item.setReview(gamereview);
+            }
+        }
+
+        if (gamereview.getDownvotes() != null) {
+            for (GameReviewDownvote item : gamereview.getDownvotes()) {
+            item.setReview(gamereview);
+            }
+        }
+
         return gamereviewRepository.save(gamereview);
     }
 
@@ -72,6 +93,36 @@ public class GameReviewService extends BaseService<GameReview> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+
+        existing.getComments().clear();
+        if (gamereviewRequest.getComments() != null) {
+            for (var item : gamereviewRequest.getComments()) {
+            item.setReview(existing);
+            existing.getComments().add(item);
+            }
+        }
+
+        existing.getUpvotes().clear();
+        if (gamereviewRequest.getUpvotes() != null) {
+            for (var item : gamereviewRequest.getUpvotes()) {
+            item.setReview(existing);
+            existing.getUpvotes().add(item);
+            }
+        }
+
+        existing.getDownvotes().clear();
+        if (gamereviewRequest.getDownvotes() != null) {
+            for (var item : gamereviewRequest.getDownvotes()) {
+            item.setReview(existing);
+            existing.getDownvotes().add(item);
+            }
+        }
+
+    
+
+    
+
+    
 
     
 

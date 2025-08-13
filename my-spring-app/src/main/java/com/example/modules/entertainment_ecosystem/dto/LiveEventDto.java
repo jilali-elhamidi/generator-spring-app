@@ -18,6 +18,10 @@ import com.example.modules.entertainment_ecosystem.dtosimple.SponsorSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.EventAudienceSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.EventSponsorshipSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentTagSimpleDto;
+
 
 
 @Data
@@ -44,5 +48,9 @@ public class LiveEventDto {
     private SponsorSimpleDto sponsor;
 
     private EventAudienceSimpleDto audience;
+
+    private List<EventSponsorshipSimpleDto> sponsorships;
+
+    private List<ContentTagSimpleDto> tags;
 
 }

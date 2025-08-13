@@ -16,6 +16,18 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseTypeSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseInventorySimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseReviewSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseSaleSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseSupplierSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseShippingSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseOrderItemSimpleDto;
+
 
 
 @Data
@@ -40,5 +52,17 @@ public class MerchandiseDto {
     private List<UserProfileSimpleDto> ownedByUsers;
 
     private MerchandiseTypeSimpleDto productType;
+
+    private MerchandiseInventorySimpleDto inventory;
+
+    private List<MerchandiseReviewSimpleDto> reviews;
+
+    private List<MerchandiseSaleSimpleDto> sales;
+
+    private MerchandiseSupplierSimpleDto supplier;
+
+    private List<MerchandiseShippingSimpleDto> shipments;
+
+    private List<MerchandiseOrderItemSimpleDto> orderItems;
 
 }

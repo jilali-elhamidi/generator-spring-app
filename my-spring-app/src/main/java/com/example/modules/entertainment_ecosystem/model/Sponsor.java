@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.LiveEvent;
+import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.EventSponsorship;import com.example.modules.entertainment_ecosystem.model.AdCampaign;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -29,12 +29,23 @@ public class Sponsor extends BaseEntity {
     @NotNull@Email
     private String contactEmail;
 
+    
+    private String companyType;
+
 
 // === Relations ===
 
     @OneToMany(mappedBy = "sponsor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("sponsor")
     private List<LiveEvent> sponsoredEvents;
+    
+    @OneToMany(mappedBy = "sponsor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("sponsor")
+    private List<EventSponsorship> sponsorships;
+    
+    @OneToMany(mappedBy = "advertiser", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("advertiser")
+    private List<AdCampaign> adCampaigns;
     
 
 }

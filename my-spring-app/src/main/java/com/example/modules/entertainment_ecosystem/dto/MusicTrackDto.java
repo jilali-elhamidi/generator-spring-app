@@ -16,6 +16,14 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.PlaylistItemSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.DigitalPurchaseSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MusicFormatSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.StreamingContentLicenseSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentProviderSimpleDto;
+
 
 
 @Data
@@ -40,5 +48,13 @@ public class MusicTrackDto {
     private List<UserProfileSimpleDto> listenedByUsers;
 
     private List<PlaylistItemSimpleDto> playlistItems;
+
+    private List<DigitalPurchaseSimpleDto> purchases;
+
+    private List<MusicFormatSimpleDto> formats;
+
+    private List<StreamingContentLicenseSimpleDto> streamingLicenses;
+
+    private ContentProviderSimpleDto provider;
 
 }

@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.Season;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.ProductionCompany;
+import com.example.modules.entertainment_ecosystem.model.Season;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.ProductionCompany;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;import com.example.modules.entertainment_ecosystem.model.ContentProvider;import com.example.modules.entertainment_ecosystem.model.TVShowStudio;import com.example.modules.entertainment_ecosystem.model.ContentRating;import com.example.modules.entertainment_ecosystem.model.ContentTag;import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -63,5 +63,45 @@ public class TVShow extends BaseEntity {
     @JsonIgnoreProperties("tvShows")
     private ProductionCompany productionCompany;
     
+    @ManyToMany(fetch = FetchType.LAZY)
+            @JoinTable(name = "tvshow_cast",
+            joinColumns = @JoinColumn(name = "tvshow_id"),
+            inverseJoinColumns = @JoinColumn(name = "artist_id"))
+            @JsonIgnoreProperties("")
+            private List<Artist> cast;
+            
+    @OneToMany(mappedBy = "tvShow", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("tvShow")
+    private List<StreamingContentLicense> streamingLicenses;
+    
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "provider_id")
+    @JsonIgnoreProperties("providedTvShows")
+    private ContentProvider provider;
+    
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "tv_show_studio_id")
+    @JsonIgnoreProperties("tvShows")
+    private TVShowStudio tvShowStudio;
+    
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "content_rating_id")
+    @JsonIgnoreProperties("ratedTvShows")
+    private ContentRating contentRating;
+    
+    @ManyToMany(fetch = FetchType.LAZY)
+            @JoinTable(name = "tvshow_tags",
+            joinColumns = @JoinColumn(name = "tag_id"),
+            inverseJoinColumns = @JoinColumn(name = "tvshow_id"))
+            @JsonIgnoreProperties("")
+            private List<ContentTag> tags;
+            
+    @ManyToMany(fetch = FetchType.EAGER)
+            @JoinTable(name = "tvshow_languages",
+            joinColumns = @JoinColumn(name = "tvshow_id"),
+            inverseJoinColumns = @JoinColumn(name = "language_id"))
+            @JsonIgnoreProperties("")
+            private List<ContentLanguage> languages;
+            
 
 }

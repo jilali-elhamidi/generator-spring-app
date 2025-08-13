@@ -17,4 +17,6 @@ public class SponsorSimpleDto {
 
     private String contactEmail;
 
+    private String companyType;
+
 }

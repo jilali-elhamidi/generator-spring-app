@@ -7,6 +7,8 @@ import com.example.modules.entertainment_ecosystem.model.UserWallet;
 import com.example.modules.entertainment_ecosystem.repository.UserWalletRepository;
 import com.example.modules.entertainment_ecosystem.model.Invoice;
 import com.example.modules.entertainment_ecosystem.repository.InvoiceRepository;
+import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;
+import com.example.modules.entertainment_ecosystem.repository.DigitalPurchaseRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -19,13 +21,15 @@ public class TransactionService extends BaseService<Transaction> {
     protected final TransactionRepository transactionRepository;
     private final UserWalletRepository walletRepository;
     private final InvoiceRepository relatedInvoiceRepository;
+    private final DigitalPurchaseRepository digitalPurchaseRepository;
 
-    public TransactionService(TransactionRepository repository,UserWalletRepository walletRepository,InvoiceRepository relatedInvoiceRepository)
+    public TransactionService(TransactionRepository repository,UserWalletRepository walletRepository,InvoiceRepository relatedInvoiceRepository,DigitalPurchaseRepository digitalPurchaseRepository)
     {
         super(repository);
         this.transactionRepository = repository;
         this.walletRepository = walletRepository;
             this.relatedInvoiceRepository = relatedInvoiceRepository;
+            this.digitalPurchaseRepository = digitalPurchaseRepository;
     }
 
     @Override
@@ -46,6 +50,17 @@ public class TransactionService extends BaseService<Transaction> {
             );
         
         transaction.getRelatedInvoice().setTransaction(transaction);
+        }
+        if (transaction.getDigitalPurchase() != null) {
+        
+        
+            // Vérifier si l'entité est déjà persistée
+            transaction.setDigitalPurchase(
+            digitalPurchaseRepository.findById(transaction.getDigitalPurchase().getId())
+            .orElseThrow(() -> new RuntimeException("digitalPurchase not found"))
+            );
+        
+        transaction.getDigitalPurchase().setTransaction(transaction);
         }
 
         return transactionRepository.save(transaction);
@@ -90,6 +105,26 @@ public class TransactionService extends BaseService<Transaction> {
         // Si la relation est bidirectionnelle et que le champ inverse existe
         
             relatedInvoice.setTransaction(existing);
+        
+        }
+
+    
+
+    
+
+        if (transactionRequest.getDigitalPurchase() != null
+        && transactionRequest.getDigitalPurchase().getId() != null) {
+
+        DigitalPurchase digitalPurchase = digitalPurchaseRepository.findById(
+        transactionRequest.getDigitalPurchase().getId()
+        ).orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+
+        // Mise à jour de la relation côté propriétaire
+        existing.setDigitalPurchase(digitalPurchase);
+
+        // Si la relation est bidirectionnelle et que le champ inverse existe
+        
+            digitalPurchase.setTransaction(existing);
         
         }
 

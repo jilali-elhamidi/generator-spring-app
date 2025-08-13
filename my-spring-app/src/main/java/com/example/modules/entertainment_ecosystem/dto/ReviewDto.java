@@ -18,6 +18,10 @@ import com.example.modules.entertainment_ecosystem.dtosimple.ReviewCommentSimple
 
 import com.example.modules.entertainment_ecosystem.dtosimple.MediaFileSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.ReviewRatingSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ReviewLikeSimpleDto;
+
 
 
 @Data
@@ -44,5 +48,9 @@ public class ReviewDto {
     private List<ReviewCommentSimpleDto> reviewComments;
 
     private MediaFileSimpleDto mediaFile;
+
+    private List<ReviewRatingSimpleDto> ratings;
+
+    private List<ReviewLikeSimpleDto> likes;
 
 }

@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.Episode;
+import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.Episode;import com.example.modules.entertainment_ecosystem.model.PodcastGuest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -44,6 +44,13 @@ public class PodcastEpisode extends BaseEntity {
     @JoinColumn(name = "")
     @JsonIgnoreProperties("relatedPodcastEpisode")
     private Episode relatedEpisode;
+            
+    @ManyToMany(fetch = FetchType.LAZY)
+            @JoinTable(name = "podcast_guest_appearances",
+            joinColumns = @JoinColumn(name = "episode_id"),
+            inverseJoinColumns = @JoinColumn(name = "guest_id"))
+            @JsonIgnoreProperties("")
+            private List<PodcastGuest> guestAppearances;
             
 
 }

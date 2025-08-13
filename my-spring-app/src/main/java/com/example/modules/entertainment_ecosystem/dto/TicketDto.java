@@ -14,6 +14,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.TicketStatusSimpleD
 
 import com.example.modules.entertainment_ecosystem.dtosimple.BookingSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.EventTicketTypeSimpleDto;
+
 
 
 @Data
@@ -36,5 +38,7 @@ public class TicketDto {
     private TicketStatusSimpleDto status;
 
     private BookingSimpleDto booking;
+
+    private EventTicketTypeSimpleDto type;
 
 }

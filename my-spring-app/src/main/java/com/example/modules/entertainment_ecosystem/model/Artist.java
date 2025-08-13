@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.Album;import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.Manager;
+import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.Album;import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.Manager;import com.example.modules.entertainment_ecosystem.model.ArtistAward;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.DigitalAsset;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.ArtistSocialMedia;import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -38,18 +38,6 @@ public class Artist extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
-            private List<Movie> actedInMovies;
-        
-    @OneToMany(mappedBy = "director", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("director")
-    private List<Movie> directedMovies;
-    
-    @OneToMany(mappedBy = "director", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("director")
-    private List<TVShow> directedShows;
-    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<UserProfile> favoriteArtists;
@@ -86,6 +74,38 @@ public class Artist extends BaseEntity {
     @JoinColumn(name = "manager_id")
     @JsonIgnoreProperties("artists")
     private Manager manager;
+    
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("artist")
+    private List<ArtistAward> awards;
+    
+    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("")
+            private List<Movie> actedInMovies;
+        
+    @OneToMany(mappedBy = "director", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("director")
+    private List<Movie> directedMovies;
+    
+    @OneToMany(mappedBy = "director", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("director")
+    private List<TVShow> directedShows;
+    
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("artist")
+    private List<DigitalAsset> managedAssets;
+    
+    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("")
+            private List<TVShow> actedInShows;
+        
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("artist")
+    private List<ArtistSocialMedia> socialMediaLinks;
+    
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("artist")
+    private List<EpisodeCredit> episodeCredits;
     
 
 }

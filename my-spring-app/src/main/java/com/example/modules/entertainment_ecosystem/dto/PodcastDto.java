@@ -16,6 +16,14 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.PublisherSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.PodcastCategorySimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.PodcastGuestSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentProviderSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentLanguageSimpleDto;
+
 
 
 @Data
@@ -40,5 +48,13 @@ public class PodcastDto {
     private List<UserProfileSimpleDto> listeners;
 
     private PublisherSimpleDto publisher;
+
+    private List<PodcastCategorySimpleDto> categories;
+
+    private List<PodcastGuestSimpleDto> guests;
+
+    private ContentProviderSimpleDto provider;
+
+    private List<ContentLanguageSimpleDto> languages;
 
 }

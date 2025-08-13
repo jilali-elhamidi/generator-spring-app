@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;
 import com.example.modules.entertainment_ecosystem.repository.PodcastEpisodeRepository;
+import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -39,6 +40,12 @@ public class EpisodeService extends BaseService<Episode> {
         Season season = seasonRepository.findById(episode.getSeason().getId())
                 .orElseThrow(() -> new RuntimeException("Season not found"));
         episode.setSeason(season);
+        }
+
+        if (episode.getCredits() != null) {
+            for (EpisodeCredit item : episode.getCredits()) {
+            item.setEpisode(episode);
+            }
         }
         if (episode.getRelatedPodcastEpisode() != null) {
         
@@ -87,6 +94,14 @@ public class EpisodeService extends BaseService<Episode> {
 
 // Relations OneToMany : synchronisation sécurisée
 
+        existing.getCredits().clear();
+        if (episodeRequest.getCredits() != null) {
+            for (var item : episodeRequest.getCredits()) {
+            item.setEpisode(existing);
+            existing.getCredits().add(item);
+            }
+        }
+
     
 
     
@@ -108,6 +123,8 @@ public class EpisodeService extends BaseService<Episode> {
             relatedPodcastEpisode.setRelatedEpisode(existing);
         
         }
+
+    
 
     
 

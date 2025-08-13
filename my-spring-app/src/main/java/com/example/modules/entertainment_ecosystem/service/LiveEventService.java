@@ -14,6 +14,9 @@ import com.example.modules.entertainment_ecosystem.model.Sponsor;
 import com.example.modules.entertainment_ecosystem.repository.SponsorRepository;
 import com.example.modules.entertainment_ecosystem.model.EventAudience;
 import com.example.modules.entertainment_ecosystem.repository.EventAudienceRepository;
+import com.example.modules.entertainment_ecosystem.model.EventSponsorship;
+import com.example.modules.entertainment_ecosystem.model.ContentTag;
+import com.example.modules.entertainment_ecosystem.repository.ContentTagRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -29,8 +32,9 @@ public class LiveEventService extends BaseService<LiveEvent> {
     private final EventLocationRepository locationRepository;
     private final SponsorRepository sponsorRepository;
     private final EventAudienceRepository audienceRepository;
+    private final ContentTagRepository tagsRepository;
 
-    public LiveEventService(LiveEventRepository repository,ArtistRepository performersRepository,EventTypeRepository eventTypeRepository,EventLocationRepository locationRepository,SponsorRepository sponsorRepository,EventAudienceRepository audienceRepository)
+    public LiveEventService(LiveEventRepository repository,ArtistRepository performersRepository,EventTypeRepository eventTypeRepository,EventLocationRepository locationRepository,SponsorRepository sponsorRepository,EventAudienceRepository audienceRepository,ContentTagRepository tagsRepository)
     {
         super(repository);
         this.liveeventRepository = repository;
@@ -39,6 +43,7 @@ public class LiveEventService extends BaseService<LiveEvent> {
         this.locationRepository = locationRepository;
         this.sponsorRepository = sponsorRepository;
             this.audienceRepository = audienceRepository;
+        this.tagsRepository = tagsRepository;
     }
 
     @Override
@@ -64,6 +69,12 @@ public class LiveEventService extends BaseService<LiveEvent> {
 
         if (liveevent.getTickets() != null) {
             for (Ticket item : liveevent.getTickets()) {
+            item.setEvent(liveevent);
+            }
+        }
+
+        if (liveevent.getSponsorships() != null) {
+            for (EventSponsorship item : liveevent.getSponsorships()) {
             item.setEvent(liveevent);
             }
         }
@@ -123,6 +134,15 @@ public class LiveEventService extends BaseService<LiveEvent> {
         existing.getPerformers().addAll(performersList);
         }
 
+        if (liveeventRequest.getTags() != null) {
+            existing.getTags().clear();
+            List<ContentTag> tagsList = liveeventRequest.getTags().stream()
+                .map(item -> tagsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("ContentTag not found")))
+                .collect(Collectors.toList());
+        existing.getTags().addAll(tagsList);
+        }
+
 // Relations OneToMany : synchronisation sécurisée
 
         existing.getTickets().clear();
@@ -130,6 +150,14 @@ public class LiveEventService extends BaseService<LiveEvent> {
             for (var item : liveeventRequest.getTickets()) {
             item.setEvent(existing);
             existing.getTickets().add(item);
+            }
+        }
+
+        existing.getSponsorships().clear();
+        if (liveeventRequest.getSponsorships() != null) {
+            for (var item : liveeventRequest.getSponsorships()) {
+            item.setEvent(existing);
+            existing.getSponsorships().add(item);
             }
         }
 
@@ -160,6 +188,10 @@ public class LiveEventService extends BaseService<LiveEvent> {
             audience.setEvent(existing);
         
         }
+
+    
+
+    
 
     
 

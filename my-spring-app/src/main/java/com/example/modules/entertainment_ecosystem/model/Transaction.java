@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.UserWallet;import com.example.modules.entertainment_ecosystem.model.Invoice;
+import com.example.modules.entertainment_ecosystem.model.UserWallet;import com.example.modules.entertainment_ecosystem.model.Invoice;import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -43,6 +43,10 @@ public class Transaction extends BaseEntity {
     @OneToOne(mappedBy = "transaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("transaction")
     private Invoice relatedInvoice;
+        
+    @OneToOne(mappedBy = "transaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("transaction")
+    private DigitalPurchase digitalPurchase;
         
 
 }

@@ -12,6 +12,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.PodcastEpisodeSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.EpisodeCreditSimpleDto;
+
 
 
 @Data
@@ -34,5 +36,7 @@ public class EpisodeDto {
     private List<UserProfileSimpleDto> watchedByUsers;
 
     private PodcastEpisodeSimpleDto relatedPodcastEpisode;
+
+    private List<EpisodeCreditSimpleDto> credits;
 
 }

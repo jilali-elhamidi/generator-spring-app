@@ -3,10 +3,6 @@ package com.example.modules.entertainment_ecosystem.service;
 import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
-import com.example.modules.entertainment_ecosystem.model.Movie;
-import com.example.modules.entertainment_ecosystem.repository.MovieRepository;
-import com.example.modules.entertainment_ecosystem.model.Movie;
-import com.example.modules.entertainment_ecosystem.model.TVShow;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.MusicTrack;
@@ -19,6 +15,16 @@ import com.example.modules.entertainment_ecosystem.model.Merchandise;
 import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.model.Manager;
 import com.example.modules.entertainment_ecosystem.repository.ManagerRepository;
+import com.example.modules.entertainment_ecosystem.model.ArtistAward;
+import com.example.modules.entertainment_ecosystem.model.Movie;
+import com.example.modules.entertainment_ecosystem.repository.MovieRepository;
+import com.example.modules.entertainment_ecosystem.model.Movie;
+import com.example.modules.entertainment_ecosystem.model.TVShow;
+import com.example.modules.entertainment_ecosystem.model.DigitalAsset;
+import com.example.modules.entertainment_ecosystem.model.TVShow;
+import com.example.modules.entertainment_ecosystem.repository.TVShowRepository;
+import com.example.modules.entertainment_ecosystem.model.ArtistSocialMedia;
+import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -29,19 +35,21 @@ import java.util.List;
 public class ArtistService extends BaseService<Artist> {
 
     protected final ArtistRepository artistRepository;
-    private final MovieRepository actedInMoviesRepository;
     private final UserProfileRepository favoriteArtistsRepository;
     private final LiveEventRepository participatedInEventsRepository;
     private final ManagerRepository managerRepository;
+    private final MovieRepository actedInMoviesRepository;
+    private final TVShowRepository actedInShowsRepository;
 
-    public ArtistService(ArtistRepository repository,MovieRepository actedInMoviesRepository,UserProfileRepository favoriteArtistsRepository,LiveEventRepository participatedInEventsRepository,ManagerRepository managerRepository)
+    public ArtistService(ArtistRepository repository,UserProfileRepository favoriteArtistsRepository,LiveEventRepository participatedInEventsRepository,ManagerRepository managerRepository,MovieRepository actedInMoviesRepository,TVShowRepository actedInShowsRepository)
     {
         super(repository);
         this.artistRepository = repository;
-        this.actedInMoviesRepository = actedInMoviesRepository;
         this.favoriteArtistsRepository = favoriteArtistsRepository;
         this.participatedInEventsRepository = participatedInEventsRepository;
         this.managerRepository = managerRepository;
+        this.actedInMoviesRepository = actedInMoviesRepository;
+        this.actedInShowsRepository = actedInShowsRepository;
     }
 
     @Override
@@ -51,18 +59,6 @@ public class ArtistService extends BaseService<Artist> {
         Manager manager = managerRepository.findById(artist.getManager().getId())
                 .orElseThrow(() -> new RuntimeException("Manager not found"));
         artist.setManager(manager);
-        }
-
-        if (artist.getDirectedMovies() != null) {
-            for (Movie item : artist.getDirectedMovies()) {
-            item.setDirector(artist);
-            }
-        }
-
-        if (artist.getDirectedShows() != null) {
-            for (TVShow item : artist.getDirectedShows()) {
-            item.setDirector(artist);
-            }
         }
 
         if (artist.getComposedMusic() != null) {
@@ -101,6 +97,42 @@ public class ArtistService extends BaseService<Artist> {
             }
         }
 
+        if (artist.getAwards() != null) {
+            for (ArtistAward item : artist.getAwards()) {
+            item.setArtist(artist);
+            }
+        }
+
+        if (artist.getDirectedMovies() != null) {
+            for (Movie item : artist.getDirectedMovies()) {
+            item.setDirector(artist);
+            }
+        }
+
+        if (artist.getDirectedShows() != null) {
+            for (TVShow item : artist.getDirectedShows()) {
+            item.setDirector(artist);
+            }
+        }
+
+        if (artist.getManagedAssets() != null) {
+            for (DigitalAsset item : artist.getManagedAssets()) {
+            item.setArtist(artist);
+            }
+        }
+
+        if (artist.getSocialMediaLinks() != null) {
+            for (ArtistSocialMedia item : artist.getSocialMediaLinks()) {
+            item.setArtist(artist);
+            }
+        }
+
+        if (artist.getEpisodeCredits() != null) {
+            for (EpisodeCredit item : artist.getEpisodeCredits()) {
+            item.setArtist(artist);
+            }
+        }
+
         return artistRepository.save(artist);
     }
 
@@ -125,15 +157,6 @@ public class ArtistService extends BaseService<Artist> {
 
 // Relations ManyToMany : synchronisation sécurisée
 
-        if (artistRequest.getActedInMovies() != null) {
-            existing.getActedInMovies().clear();
-            List<Movie> actedInMoviesList = artistRequest.getActedInMovies().stream()
-                .map(item -> actedInMoviesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Movie not found")))
-                .collect(Collectors.toList());
-        existing.getActedInMovies().addAll(actedInMoviesList);
-        }
-
         if (artistRequest.getFavoriteArtists() != null) {
             existing.getFavoriteArtists().clear();
             List<UserProfile> favoriteArtistsList = artistRequest.getFavoriteArtists().stream()
@@ -152,23 +175,25 @@ public class ArtistService extends BaseService<Artist> {
         existing.getParticipatedInEvents().addAll(participatedInEventsList);
         }
 
+        if (artistRequest.getActedInMovies() != null) {
+            existing.getActedInMovies().clear();
+            List<Movie> actedInMoviesList = artistRequest.getActedInMovies().stream()
+                .map(item -> actedInMoviesRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("Movie not found")))
+                .collect(Collectors.toList());
+        existing.getActedInMovies().addAll(actedInMoviesList);
+        }
+
+        if (artistRequest.getActedInShows() != null) {
+            existing.getActedInShows().clear();
+            List<TVShow> actedInShowsList = artistRequest.getActedInShows().stream()
+                .map(item -> actedInShowsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("TVShow not found")))
+                .collect(Collectors.toList());
+        existing.getActedInShows().addAll(actedInShowsList);
+        }
+
 // Relations OneToMany : synchronisation sécurisée
-
-        existing.getDirectedMovies().clear();
-        if (artistRequest.getDirectedMovies() != null) {
-            for (var item : artistRequest.getDirectedMovies()) {
-            item.setDirector(existing);
-            existing.getDirectedMovies().add(item);
-            }
-        }
-
-        existing.getDirectedShows().clear();
-        if (artistRequest.getDirectedShows() != null) {
-            for (var item : artistRequest.getDirectedShows()) {
-            item.setDirector(existing);
-            existing.getDirectedShows().add(item);
-            }
-        }
 
         existing.getComposedMusic().clear();
         if (artistRequest.getComposedMusic() != null) {
@@ -217,6 +242,64 @@ public class ArtistService extends BaseService<Artist> {
             existing.getManagedGames().add(item);
             }
         }
+
+        existing.getAwards().clear();
+        if (artistRequest.getAwards() != null) {
+            for (var item : artistRequest.getAwards()) {
+            item.setArtist(existing);
+            existing.getAwards().add(item);
+            }
+        }
+
+        existing.getDirectedMovies().clear();
+        if (artistRequest.getDirectedMovies() != null) {
+            for (var item : artistRequest.getDirectedMovies()) {
+            item.setDirector(existing);
+            existing.getDirectedMovies().add(item);
+            }
+        }
+
+        existing.getDirectedShows().clear();
+        if (artistRequest.getDirectedShows() != null) {
+            for (var item : artistRequest.getDirectedShows()) {
+            item.setDirector(existing);
+            existing.getDirectedShows().add(item);
+            }
+        }
+
+        existing.getManagedAssets().clear();
+        if (artistRequest.getManagedAssets() != null) {
+            for (var item : artistRequest.getManagedAssets()) {
+            item.setArtist(existing);
+            existing.getManagedAssets().add(item);
+            }
+        }
+
+        existing.getSocialMediaLinks().clear();
+        if (artistRequest.getSocialMediaLinks() != null) {
+            for (var item : artistRequest.getSocialMediaLinks()) {
+            item.setArtist(existing);
+            existing.getSocialMediaLinks().add(item);
+            }
+        }
+
+        existing.getEpisodeCredits().clear();
+        if (artistRequest.getEpisodeCredits() != null) {
+            for (var item : artistRequest.getEpisodeCredits()) {
+            item.setArtist(existing);
+            existing.getEpisodeCredits().add(item);
+            }
+        }
+
+    
+
+    
+
+    
+
+    
+
+    
 
     
 

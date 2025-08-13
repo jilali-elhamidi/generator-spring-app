@@ -34,6 +34,27 @@ import com.example.modules.entertainment_ecosystem.repository.MusicTrackReposito
 import com.example.modules.entertainment_ecosystem.model.Playlist;
 import com.example.modules.entertainment_ecosystem.model.UserWallet;
 import com.example.modules.entertainment_ecosystem.repository.UserWalletRepository;
+import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;
+import com.example.modules.entertainment_ecosystem.model.GameSession;
+import com.example.modules.entertainment_ecosystem.model.GameReviewComment;
+import com.example.modules.entertainment_ecosystem.model.UserPlaylist;
+import com.example.modules.entertainment_ecosystem.model.UserPlaylistItem;
+import com.example.modules.entertainment_ecosystem.model.ReviewRating;
+import com.example.modules.entertainment_ecosystem.model.ReviewLike;
+import com.example.modules.entertainment_ecosystem.model.UserActivityLog;
+import com.example.modules.entertainment_ecosystem.model.UserSetting;
+import com.example.modules.entertainment_ecosystem.model.UserFollower;
+import com.example.modules.entertainment_ecosystem.model.UserFollower;
+import com.example.modules.entertainment_ecosystem.model.UserAchievement;
+import com.example.modules.entertainment_ecosystem.model.Notification;
+import com.example.modules.entertainment_ecosystem.model.MerchandiseReview;
+import com.example.modules.entertainment_ecosystem.model.UserPreference;
+import com.example.modules.entertainment_ecosystem.model.MerchandiseSale;
+import com.example.modules.entertainment_ecosystem.model.GamePlaySession;
+import com.example.modules.entertainment_ecosystem.model.GameReviewUpvote;
+import com.example.modules.entertainment_ecosystem.model.GameReviewDownvote;
+import com.example.modules.entertainment_ecosystem.model.UserMessage;
+import com.example.modules.entertainment_ecosystem.model.UserMessage;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -117,6 +138,132 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getPlaylists() != null) {
             for (Playlist item : userprofile.getPlaylists()) {
             item.setOwner(userprofile);
+            }
+        }
+
+        if (userprofile.getDigitalPurchases() != null) {
+            for (DigitalPurchase item : userprofile.getDigitalPurchases()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getGameSessions() != null) {
+            for (GameSession item : userprofile.getGameSessions()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getGameReviewComments() != null) {
+            for (GameReviewComment item : userprofile.getGameReviewComments()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getUserPlaylists() != null) {
+            for (UserPlaylist item : userprofile.getUserPlaylists()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getUserPlaylistItems() != null) {
+            for (UserPlaylistItem item : userprofile.getUserPlaylistItems()) {
+            item.setAddedBy(userprofile);
+            }
+        }
+
+        if (userprofile.getGivenRatings() != null) {
+            for (ReviewRating item : userprofile.getGivenRatings()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getLikedReviews() != null) {
+            for (ReviewLike item : userprofile.getLikedReviews()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getActivityLogs() != null) {
+            for (UserActivityLog item : userprofile.getActivityLogs()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getSettings() != null) {
+            for (UserSetting item : userprofile.getSettings()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getFollowers() != null) {
+            for (UserFollower item : userprofile.getFollowers()) {
+            item.setFollowed(userprofile);
+            }
+        }
+
+        if (userprofile.getFollowing() != null) {
+            for (UserFollower item : userprofile.getFollowing()) {
+            item.setFollower(userprofile);
+            }
+        }
+
+        if (userprofile.getUserAchievements() != null) {
+            for (UserAchievement item : userprofile.getUserAchievements()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getNotifications() != null) {
+            for (Notification item : userprofile.getNotifications()) {
+            item.setRecipient(userprofile);
+            }
+        }
+
+        if (userprofile.getMerchandiseReviews() != null) {
+            for (MerchandiseReview item : userprofile.getMerchandiseReviews()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getPreferences() != null) {
+            for (UserPreference item : userprofile.getPreferences()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getMerchandiseSales() != null) {
+            for (MerchandiseSale item : userprofile.getMerchandiseSales()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getGamePlaySessions() != null) {
+            for (GamePlaySession item : userprofile.getGamePlaySessions()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getGameReviewUpvotes() != null) {
+            for (GameReviewUpvote item : userprofile.getGameReviewUpvotes()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getGameReviewDownvotes() != null) {
+            for (GameReviewDownvote item : userprofile.getGameReviewDownvotes()) {
+            item.setUser(userprofile);
+            }
+        }
+
+        if (userprofile.getSentMessages() != null) {
+            for (UserMessage item : userprofile.getSentMessages()) {
+            item.setSender(userprofile);
+            }
+        }
+
+        if (userprofile.getReceivedMessages() != null) {
+            for (UserMessage item : userprofile.getReceivedMessages()) {
+            item.setReceiver(userprofile);
             }
         }
         if (userprofile.getWallet() != null) {
@@ -311,6 +458,174 @@ public class UserProfileService extends BaseService<UserProfile> {
             }
         }
 
+        existing.getDigitalPurchases().clear();
+        if (userprofileRequest.getDigitalPurchases() != null) {
+            for (var item : userprofileRequest.getDigitalPurchases()) {
+            item.setUser(existing);
+            existing.getDigitalPurchases().add(item);
+            }
+        }
+
+        existing.getGameSessions().clear();
+        if (userprofileRequest.getGameSessions() != null) {
+            for (var item : userprofileRequest.getGameSessions()) {
+            item.setUser(existing);
+            existing.getGameSessions().add(item);
+            }
+        }
+
+        existing.getGameReviewComments().clear();
+        if (userprofileRequest.getGameReviewComments() != null) {
+            for (var item : userprofileRequest.getGameReviewComments()) {
+            item.setUser(existing);
+            existing.getGameReviewComments().add(item);
+            }
+        }
+
+        existing.getUserPlaylists().clear();
+        if (userprofileRequest.getUserPlaylists() != null) {
+            for (var item : userprofileRequest.getUserPlaylists()) {
+            item.setUser(existing);
+            existing.getUserPlaylists().add(item);
+            }
+        }
+
+        existing.getUserPlaylistItems().clear();
+        if (userprofileRequest.getUserPlaylistItems() != null) {
+            for (var item : userprofileRequest.getUserPlaylistItems()) {
+            item.setAddedBy(existing);
+            existing.getUserPlaylistItems().add(item);
+            }
+        }
+
+        existing.getGivenRatings().clear();
+        if (userprofileRequest.getGivenRatings() != null) {
+            for (var item : userprofileRequest.getGivenRatings()) {
+            item.setUser(existing);
+            existing.getGivenRatings().add(item);
+            }
+        }
+
+        existing.getLikedReviews().clear();
+        if (userprofileRequest.getLikedReviews() != null) {
+            for (var item : userprofileRequest.getLikedReviews()) {
+            item.setUser(existing);
+            existing.getLikedReviews().add(item);
+            }
+        }
+
+        existing.getActivityLogs().clear();
+        if (userprofileRequest.getActivityLogs() != null) {
+            for (var item : userprofileRequest.getActivityLogs()) {
+            item.setUser(existing);
+            existing.getActivityLogs().add(item);
+            }
+        }
+
+        existing.getSettings().clear();
+        if (userprofileRequest.getSettings() != null) {
+            for (var item : userprofileRequest.getSettings()) {
+            item.setUser(existing);
+            existing.getSettings().add(item);
+            }
+        }
+
+        existing.getFollowers().clear();
+        if (userprofileRequest.getFollowers() != null) {
+            for (var item : userprofileRequest.getFollowers()) {
+            item.setFollowed(existing);
+            existing.getFollowers().add(item);
+            }
+        }
+
+        existing.getFollowing().clear();
+        if (userprofileRequest.getFollowing() != null) {
+            for (var item : userprofileRequest.getFollowing()) {
+            item.setFollower(existing);
+            existing.getFollowing().add(item);
+            }
+        }
+
+        existing.getUserAchievements().clear();
+        if (userprofileRequest.getUserAchievements() != null) {
+            for (var item : userprofileRequest.getUserAchievements()) {
+            item.setUser(existing);
+            existing.getUserAchievements().add(item);
+            }
+        }
+
+        existing.getNotifications().clear();
+        if (userprofileRequest.getNotifications() != null) {
+            for (var item : userprofileRequest.getNotifications()) {
+            item.setRecipient(existing);
+            existing.getNotifications().add(item);
+            }
+        }
+
+        existing.getMerchandiseReviews().clear();
+        if (userprofileRequest.getMerchandiseReviews() != null) {
+            for (var item : userprofileRequest.getMerchandiseReviews()) {
+            item.setUser(existing);
+            existing.getMerchandiseReviews().add(item);
+            }
+        }
+
+        existing.getPreferences().clear();
+        if (userprofileRequest.getPreferences() != null) {
+            for (var item : userprofileRequest.getPreferences()) {
+            item.setUser(existing);
+            existing.getPreferences().add(item);
+            }
+        }
+
+        existing.getMerchandiseSales().clear();
+        if (userprofileRequest.getMerchandiseSales() != null) {
+            for (var item : userprofileRequest.getMerchandiseSales()) {
+            item.setUser(existing);
+            existing.getMerchandiseSales().add(item);
+            }
+        }
+
+        existing.getGamePlaySessions().clear();
+        if (userprofileRequest.getGamePlaySessions() != null) {
+            for (var item : userprofileRequest.getGamePlaySessions()) {
+            item.setUser(existing);
+            existing.getGamePlaySessions().add(item);
+            }
+        }
+
+        existing.getGameReviewUpvotes().clear();
+        if (userprofileRequest.getGameReviewUpvotes() != null) {
+            for (var item : userprofileRequest.getGameReviewUpvotes()) {
+            item.setUser(existing);
+            existing.getGameReviewUpvotes().add(item);
+            }
+        }
+
+        existing.getGameReviewDownvotes().clear();
+        if (userprofileRequest.getGameReviewDownvotes() != null) {
+            for (var item : userprofileRequest.getGameReviewDownvotes()) {
+            item.setUser(existing);
+            existing.getGameReviewDownvotes().add(item);
+            }
+        }
+
+        existing.getSentMessages().clear();
+        if (userprofileRequest.getSentMessages() != null) {
+            for (var item : userprofileRequest.getSentMessages()) {
+            item.setSender(existing);
+            existing.getSentMessages().add(item);
+            }
+        }
+
+        existing.getReceivedMessages().clear();
+        if (userprofileRequest.getReceivedMessages() != null) {
+            for (var item : userprofileRequest.getReceivedMessages()) {
+            item.setReceiver(existing);
+            existing.getReceivedMessages().add(item);
+            }
+        }
+
     
 
     
@@ -364,6 +679,48 @@ public class UserProfileService extends BaseService<UserProfile> {
             wallet.setUser(existing);
         
         }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
     
 

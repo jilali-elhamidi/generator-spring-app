@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.License;
+import com.example.modules.entertainment_ecosystem.model.DigitalAssetType;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.License;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -26,15 +26,17 @@ public class DigitalAsset extends BaseEntity {
     @NotNull@Size(min = 2, max = 255)
     private String name;
 
-    @NotNull
-    private String type;
-
     @NotNull@Size(max = 500)
     private String url;
 
 
 // === Relations ===
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "type_id")
+    @JsonIgnoreProperties("assets")
+    private DigitalAssetType assetType;
+    
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "artist_id")
     @JsonIgnoreProperties("managedAssets")

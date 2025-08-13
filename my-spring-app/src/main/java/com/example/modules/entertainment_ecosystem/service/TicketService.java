@@ -11,6 +11,8 @@ import com.example.modules.entertainment_ecosystem.model.TicketStatus;
 import com.example.modules.entertainment_ecosystem.repository.TicketStatusRepository;
 import com.example.modules.entertainment_ecosystem.model.Booking;
 import com.example.modules.entertainment_ecosystem.repository.BookingRepository;
+import com.example.modules.entertainment_ecosystem.model.EventTicketType;
+import com.example.modules.entertainment_ecosystem.repository.EventTicketTypeRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -25,8 +27,9 @@ public class TicketService extends BaseService<Ticket> {
     private final LiveEventRepository eventRepository;
     private final TicketStatusRepository statusRepository;
     private final BookingRepository bookingRepository;
+    private final EventTicketTypeRepository typeRepository;
 
-    public TicketService(TicketRepository repository,UserProfileRepository userRepository,LiveEventRepository eventRepository,TicketStatusRepository statusRepository,BookingRepository bookingRepository)
+    public TicketService(TicketRepository repository,UserProfileRepository userRepository,LiveEventRepository eventRepository,TicketStatusRepository statusRepository,BookingRepository bookingRepository,EventTicketTypeRepository typeRepository)
     {
         super(repository);
         this.ticketRepository = repository;
@@ -34,6 +37,7 @@ public class TicketService extends BaseService<Ticket> {
         this.eventRepository = eventRepository;
         this.statusRepository = statusRepository;
         this.bookingRepository = bookingRepository;
+        this.typeRepository = typeRepository;
     }
 
     @Override
@@ -61,6 +65,12 @@ public class TicketService extends BaseService<Ticket> {
         Booking booking = bookingRepository.findById(ticket.getBooking().getId())
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
         ticket.setBooking(booking);
+        }
+
+        if (ticket.getType() != null && ticket.getType().getId() != null) {
+        EventTicketType type = typeRepository.findById(ticket.getType().getId())
+                .orElseThrow(() -> new RuntimeException("EventTicketType not found"));
+        ticket.setType(type);
         }
 
         return ticketRepository.save(ticket);
@@ -102,9 +112,17 @@ public class TicketService extends BaseService<Ticket> {
         existing.setBooking(booking);
         }
 
+        if (ticketRequest.getType() != null && ticketRequest.getType().getId() != null) {
+        EventTicketType type = typeRepository.findById(ticketRequest.getType().getId())
+                .orElseThrow(() -> new RuntimeException("EventTicketType not found"));
+        existing.setType(type);
+        }
+
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+
+    
 
     
 

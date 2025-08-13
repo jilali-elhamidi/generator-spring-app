@@ -20,6 +20,22 @@ import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.ProductionCompanySimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.DigitalPurchaseSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MovieFormatSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.StreamingContentLicenseSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentProviderSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MovieStudioSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentRatingSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentTagSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentLanguageSimpleDto;
+
 
 
 @Data
@@ -52,5 +68,21 @@ public class MovieDto {
     private List<MerchandiseSimpleDto> relatedMerchandise;
 
     private ProductionCompanySimpleDto productionCompany;
+
+    private List<DigitalPurchaseSimpleDto> purchases;
+
+    private List<MovieFormatSimpleDto> formats;
+
+    private List<StreamingContentLicenseSimpleDto> streamingLicenses;
+
+    private ContentProviderSimpleDto provider;
+
+    private MovieStudioSimpleDto movieStudio;
+
+    private ContentRatingSimpleDto contentRating;
+
+    private List<ContentTagSimpleDto> tags;
+
+    private List<ContentLanguageSimpleDto> languages;
 
 }

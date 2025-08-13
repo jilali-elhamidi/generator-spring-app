@@ -10,6 +10,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserWalletSimpleDto
 
 import com.example.modules.entertainment_ecosystem.dtosimple.InvoiceSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.DigitalPurchaseSimpleDto;
+
 
 
 @Data
@@ -28,5 +30,7 @@ public class TransactionDto {
     private UserWalletSimpleDto wallet;
 
     private InvoiceSimpleDto relatedInvoice;
+
+    private DigitalPurchaseSimpleDto digitalPurchase;
 
 }

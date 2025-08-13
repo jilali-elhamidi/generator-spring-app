@@ -8,6 +8,8 @@ import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 import com.example.modules.entertainment_ecosystem.model.MusicTrack;
 import com.example.modules.entertainment_ecosystem.model.Genre;
 import com.example.modules.entertainment_ecosystem.repository.GenreRepository;
+import com.example.modules.entertainment_ecosystem.model.MusicLabel;
+import com.example.modules.entertainment_ecosystem.repository.MusicLabelRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -20,13 +22,15 @@ public class AlbumService extends BaseService<Album> {
     protected final AlbumRepository albumRepository;
     private final ArtistRepository artistRepository;
     private final GenreRepository genresRepository;
+    private final MusicLabelRepository musicLabelRepository;
 
-    public AlbumService(AlbumRepository repository,ArtistRepository artistRepository,GenreRepository genresRepository)
+    public AlbumService(AlbumRepository repository,ArtistRepository artistRepository,GenreRepository genresRepository,MusicLabelRepository musicLabelRepository)
     {
         super(repository);
         this.albumRepository = repository;
         this.artistRepository = artistRepository;
         this.genresRepository = genresRepository;
+        this.musicLabelRepository = musicLabelRepository;
     }
 
     @Override
@@ -36,6 +40,12 @@ public class AlbumService extends BaseService<Album> {
         Artist artist = artistRepository.findById(album.getArtist().getId())
                 .orElseThrow(() -> new RuntimeException("Artist not found"));
         album.setArtist(artist);
+        }
+
+        if (album.getMusicLabel() != null && album.getMusicLabel().getId() != null) {
+        MusicLabel musicLabel = musicLabelRepository.findById(album.getMusicLabel().getId())
+                .orElseThrow(() -> new RuntimeException("MusicLabel not found"));
+        album.setMusicLabel(musicLabel);
         }
 
         if (album.getTracks() != null) {
@@ -64,6 +74,12 @@ public class AlbumService extends BaseService<Album> {
         existing.setArtist(artist);
         }
 
+        if (albumRequest.getMusicLabel() != null && albumRequest.getMusicLabel().getId() != null) {
+        MusicLabel musicLabel = musicLabelRepository.findById(albumRequest.getMusicLabel().getId())
+                .orElseThrow(() -> new RuntimeException("MusicLabel not found"));
+        existing.setMusicLabel(musicLabel);
+        }
+
 // Relations ManyToMany : synchronisation sécurisée
 
         if (albumRequest.getGenres() != null) {
@@ -84,6 +100,8 @@ public class AlbumService extends BaseService<Album> {
             existing.getTracks().add(item);
             }
         }
+
+    
 
     
 

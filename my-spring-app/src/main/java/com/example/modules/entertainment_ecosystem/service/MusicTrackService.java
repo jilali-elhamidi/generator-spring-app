@@ -12,6 +12,12 @@ import com.example.modules.entertainment_ecosystem.repository.GenreRepository;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.PlaylistItem;
+import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;
+import com.example.modules.entertainment_ecosystem.model.MusicFormat;
+import com.example.modules.entertainment_ecosystem.repository.MusicFormatRepository;
+import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;
+import com.example.modules.entertainment_ecosystem.model.ContentProvider;
+import com.example.modules.entertainment_ecosystem.repository.ContentProviderRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -26,8 +32,10 @@ public class MusicTrackService extends BaseService<MusicTrack> {
     private final ArtistRepository artistRepository;
     private final GenreRepository genreRepository;
     private final UserProfileRepository listenedByUsersRepository;
+    private final MusicFormatRepository formatsRepository;
+    private final ContentProviderRepository providerRepository;
 
-    public MusicTrackService(MusicTrackRepository repository,AlbumRepository albumRepository,ArtistRepository artistRepository,GenreRepository genreRepository,UserProfileRepository listenedByUsersRepository)
+    public MusicTrackService(MusicTrackRepository repository,AlbumRepository albumRepository,ArtistRepository artistRepository,GenreRepository genreRepository,UserProfileRepository listenedByUsersRepository,MusicFormatRepository formatsRepository,ContentProviderRepository providerRepository)
     {
         super(repository);
         this.musictrackRepository = repository;
@@ -35,6 +43,8 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         this.artistRepository = artistRepository;
         this.genreRepository = genreRepository;
         this.listenedByUsersRepository = listenedByUsersRepository;
+        this.formatsRepository = formatsRepository;
+        this.providerRepository = providerRepository;
     }
 
     @Override
@@ -58,9 +68,27 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         musictrack.setGenre(genre);
         }
 
+        if (musictrack.getProvider() != null && musictrack.getProvider().getId() != null) {
+        ContentProvider provider = providerRepository.findById(musictrack.getProvider().getId())
+                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+        musictrack.setProvider(provider);
+        }
+
         if (musictrack.getPlaylistItems() != null) {
             for (PlaylistItem item : musictrack.getPlaylistItems()) {
             item.setTrack(musictrack);
+            }
+        }
+
+        if (musictrack.getPurchases() != null) {
+            for (DigitalPurchase item : musictrack.getPurchases()) {
+            item.setMusicTrack(musictrack);
+            }
+        }
+
+        if (musictrack.getStreamingLicenses() != null) {
+            for (StreamingContentLicense item : musictrack.getStreamingLicenses()) {
+            item.setMusicTrack(musictrack);
             }
         }
 
@@ -97,6 +125,12 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         existing.setGenre(genre);
         }
 
+        if (musictrackRequest.getProvider() != null && musictrackRequest.getProvider().getId() != null) {
+        ContentProvider provider = providerRepository.findById(musictrackRequest.getProvider().getId())
+                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+        existing.setProvider(provider);
+        }
+
 // Relations ManyToMany : synchronisation sécurisée
 
         if (musictrackRequest.getListenedByUsers() != null) {
@@ -108,6 +142,15 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         existing.getListenedByUsers().addAll(listenedByUsersList);
         }
 
+        if (musictrackRequest.getFormats() != null) {
+            existing.getFormats().clear();
+            List<MusicFormat> formatsList = musictrackRequest.getFormats().stream()
+                .map(item -> formatsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("MusicFormat not found")))
+                .collect(Collectors.toList());
+        existing.getFormats().addAll(formatsList);
+        }
+
 // Relations OneToMany : synchronisation sécurisée
 
         existing.getPlaylistItems().clear();
@@ -117,6 +160,30 @@ public class MusicTrackService extends BaseService<MusicTrack> {
             existing.getPlaylistItems().add(item);
             }
         }
+
+        existing.getPurchases().clear();
+        if (musictrackRequest.getPurchases() != null) {
+            for (var item : musictrackRequest.getPurchases()) {
+            item.setMusicTrack(existing);
+            existing.getPurchases().add(item);
+            }
+        }
+
+        existing.getStreamingLicenses().clear();
+        if (musictrackRequest.getStreamingLicenses() != null) {
+            for (var item : musictrackRequest.getStreamingLicenses()) {
+            item.setMusicTrack(existing);
+            existing.getStreamingLicenses().add(item);
+            }
+        }
+
+    
+
+    
+
+    
+
+    
 
     
 

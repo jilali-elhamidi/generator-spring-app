@@ -8,8 +8,12 @@ import com.example.modules.entertainment_ecosystem.repository.MovieRepository;
 import com.example.modules.entertainment_ecosystem.model.TVShow;
 import com.example.modules.entertainment_ecosystem.repository.TVShowRepository;
 import com.example.modules.entertainment_ecosystem.model.Subscription;
+import com.example.modules.entertainment_ecosystem.model.StreamingService;
+import com.example.modules.entertainment_ecosystem.repository.StreamingServiceRepository;
 import com.example.modules.entertainment_ecosystem.model.OnlinePlatform;
 import com.example.modules.entertainment_ecosystem.repository.OnlinePlatformRepository;
+import com.example.modules.entertainment_ecosystem.model.AdCampaign;
+import com.example.modules.entertainment_ecosystem.repository.AdCampaignRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -22,19 +26,29 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
     protected final StreamingPlatformRepository streamingplatformRepository;
     private final MovieRepository moviesRepository;
     private final TVShowRepository tvShowsRepository;
+    private final StreamingServiceRepository streamingServiceRepository;
     private final OnlinePlatformRepository onlinePlatformRepository;
+    private final AdCampaignRepository adCampaignsRepository;
 
-    public StreamingPlatformService(StreamingPlatformRepository repository,MovieRepository moviesRepository,TVShowRepository tvShowsRepository,OnlinePlatformRepository onlinePlatformRepository)
+    public StreamingPlatformService(StreamingPlatformRepository repository,MovieRepository moviesRepository,TVShowRepository tvShowsRepository,StreamingServiceRepository streamingServiceRepository,OnlinePlatformRepository onlinePlatformRepository,AdCampaignRepository adCampaignsRepository)
     {
         super(repository);
         this.streamingplatformRepository = repository;
         this.moviesRepository = moviesRepository;
         this.tvShowsRepository = tvShowsRepository;
+        this.streamingServiceRepository = streamingServiceRepository;
         this.onlinePlatformRepository = onlinePlatformRepository;
+        this.adCampaignsRepository = adCampaignsRepository;
     }
 
     @Override
     public StreamingPlatform save(StreamingPlatform streamingplatform) {
+
+        if (streamingplatform.getStreamingService() != null && streamingplatform.getStreamingService().getId() != null) {
+        StreamingService streamingService = streamingServiceRepository.findById(streamingplatform.getStreamingService().getId())
+                .orElseThrow(() -> new RuntimeException("StreamingService not found"));
+        streamingplatform.setStreamingService(streamingService);
+        }
 
         if (streamingplatform.getOnlinePlatform() != null && streamingplatform.getOnlinePlatform().getId() != null) {
         OnlinePlatform onlinePlatform = onlinePlatformRepository.findById(streamingplatform.getOnlinePlatform().getId())
@@ -62,6 +76,12 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
 
 // Relations ManyToOne : mise à jour conditionnelle
 
+        if (streamingplatformRequest.getStreamingService() != null && streamingplatformRequest.getStreamingService().getId() != null) {
+        StreamingService streamingService = streamingServiceRepository.findById(streamingplatformRequest.getStreamingService().getId())
+                .orElseThrow(() -> new RuntimeException("StreamingService not found"));
+        existing.setStreamingService(streamingService);
+        }
+
         if (streamingplatformRequest.getOnlinePlatform() != null && streamingplatformRequest.getOnlinePlatform().getId() != null) {
         OnlinePlatform onlinePlatform = onlinePlatformRepository.findById(streamingplatformRequest.getOnlinePlatform().getId())
                 .orElseThrow(() -> new RuntimeException("OnlinePlatform not found"));
@@ -88,6 +108,15 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         existing.getTvShows().addAll(tvShowsList);
         }
 
+        if (streamingplatformRequest.getAdCampaigns() != null) {
+            existing.getAdCampaigns().clear();
+            List<AdCampaign> adCampaignsList = streamingplatformRequest.getAdCampaigns().stream()
+                .map(item -> adCampaignsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("AdCampaign not found")))
+                .collect(Collectors.toList());
+        existing.getAdCampaigns().addAll(adCampaignsList);
+        }
+
 // Relations OneToMany : synchronisation sécurisée
 
         existing.getSubscriptions().clear();
@@ -97,6 +126,10 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
             existing.getSubscriptions().add(item);
             }
         }
+
+    
+
+    
 
     
 

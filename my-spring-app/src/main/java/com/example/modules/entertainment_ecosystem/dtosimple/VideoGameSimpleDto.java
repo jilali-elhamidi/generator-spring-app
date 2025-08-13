@@ -1,7 +1,5 @@
 package com.example.modules.entertainment_ecosystem.dtosimple;
 
-import com.example.modules.entertainment_ecosystem.model.Artist;
-import com.example.modules.entertainment_ecosystem.model.Publisher;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -9,7 +7,8 @@ import java.time.LocalDateTime;
 
     import java.util.Date;
 
-
+import com.example.modules.entertainment_ecosystem.model.Publisher;
+import com.example.modules.entertainment_ecosystem.model.Artist;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

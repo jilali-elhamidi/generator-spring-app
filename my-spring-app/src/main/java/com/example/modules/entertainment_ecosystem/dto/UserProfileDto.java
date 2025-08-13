@@ -44,6 +44,48 @@ import com.example.modules.entertainment_ecosystem.dtosimple.PlaylistSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.UserWalletSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.DigitalPurchaseSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.GameSessionSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.GameReviewCommentSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserPlaylistSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserPlaylistItemSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ReviewRatingSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.ReviewLikeSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserActivityLogSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserSettingSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserFollowerSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserFollowerSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserAchievementSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.NotificationSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseReviewSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserPreferenceSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseSaleSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.GamePlaySessionSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.GameReviewUpvoteSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.GameReviewDownvoteSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserMessageSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.UserMessageSimpleDto;
+
 
 
 @Data
@@ -108,5 +150,47 @@ public class UserProfileDto {
     private List<PlaylistSimpleDto> playlists;
 
     private UserWalletSimpleDto wallet;
+
+    private List<DigitalPurchaseSimpleDto> digitalPurchases;
+
+    private List<GameSessionSimpleDto> gameSessions;
+
+    private List<GameReviewCommentSimpleDto> gameReviewComments;
+
+    private List<UserPlaylistSimpleDto> userPlaylists;
+
+    private List<UserPlaylistItemSimpleDto> userPlaylistItems;
+
+    private List<ReviewRatingSimpleDto> givenRatings;
+
+    private List<ReviewLikeSimpleDto> likedReviews;
+
+    private List<UserActivityLogSimpleDto> activityLogs;
+
+    private List<UserSettingSimpleDto> settings;
+
+    private List<UserFollowerSimpleDto> followers;
+
+    private List<UserFollowerSimpleDto> following;
+
+    private List<UserAchievementSimpleDto> userAchievements;
+
+    private List<NotificationSimpleDto> notifications;
+
+    private List<MerchandiseReviewSimpleDto> merchandiseReviews;
+
+    private List<UserPreferenceSimpleDto> preferences;
+
+    private List<MerchandiseSaleSimpleDto> merchandiseSales;
+
+    private List<GamePlaySessionSimpleDto> gamePlaySessions;
+
+    private List<GameReviewUpvoteSimpleDto> gameReviewUpvotes;
+
+    private List<GameReviewDownvoteSimpleDto> gameReviewDownvotes;
+
+    private List<UserMessageSimpleDto> sentMessages;
+
+    private List<UserMessageSimpleDto> receivedMessages;
 
 }

@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.Season;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;
+import com.example.modules.entertainment_ecosystem.model.Season;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -48,9 +48,13 @@ public class Episode extends BaseEntity {
             private List<UserProfile> watchedByUsers;
         
     @OneToOne
-    @JoinColumn(name = "related_podcast_episode_id")
+    @JoinColumn(name = "")
     @JsonIgnoreProperties("relatedEpisode")
     private PodcastEpisode relatedPodcastEpisode;
             
+    @OneToMany(mappedBy = "episode", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("episode")
+    private List<EpisodeCredit> credits;
+    
 
 }

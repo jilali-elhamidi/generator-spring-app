@@ -8,6 +8,10 @@ import java.util.List;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.LiveEventSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.EventSponsorshipSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.AdCampaignSimpleDto;
+
 
 
 @Data
@@ -21,6 +25,12 @@ public class SponsorDto {
 
     private String contactEmail;
 
+    private String companyType;
+
     private List<LiveEventSimpleDto> sponsoredEvents;
+
+    private List<EventSponsorshipSimpleDto> sponsorships;
+
+    private List<AdCampaignSimpleDto> adCampaigns;
 
 }

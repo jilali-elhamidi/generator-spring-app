@@ -10,6 +10,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.PodcastSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.EpisodeSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.PodcastGuestSimpleDto;
+
 
 
 @Data
@@ -28,5 +30,7 @@ public class PodcastEpisodeDto {
     private PodcastSimpleDto podcast;
 
     private EpisodeSimpleDto relatedEpisode;
+
+    private List<PodcastGuestSimpleDto> guestAppearances;
 
 }

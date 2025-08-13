@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Subscription;import com.example.modules.entertainment_ecosystem.model.OnlinePlatform;
+import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Subscription;import com.example.modules.entertainment_ecosystem.model.StreamingService;import com.example.modules.entertainment_ecosystem.model.OnlinePlatform;import com.example.modules.entertainment_ecosystem.model.AdCampaign;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -45,9 +45,18 @@ public class StreamingPlatform extends BaseEntity {
     private List<Subscription> subscriptions;
     
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "service_id")
+    @JsonIgnoreProperties("platforms")
+    private StreamingService streamingService;
+    
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "online_platform_id")
     @JsonIgnoreProperties("streams")
     private OnlinePlatform onlinePlatform;
     
+    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("")
+            private List<AdCampaign> adCampaigns;
+        
 
 }

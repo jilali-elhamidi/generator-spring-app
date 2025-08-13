@@ -12,6 +12,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.MusicTrackSimpleDto
 
 import com.example.modules.entertainment_ecosystem.dtosimple.GenreSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.MusicLabelSimpleDto;
+
 
 
 @Data
@@ -30,5 +32,7 @@ public class AlbumDto {
     private List<MusicTrackSimpleDto> tracks;
 
     private List<GenreSimpleDto> genres;
+
+    private MusicLabelSimpleDto musicLabel;
 
 }

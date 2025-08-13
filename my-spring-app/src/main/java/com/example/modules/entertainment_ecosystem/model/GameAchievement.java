@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.UserProfile;
+import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.UserAchievement;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -44,5 +44,9 @@ public class GameAchievement extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<UserProfile> earnedBy;
         
+    @OneToMany(mappedBy = "achievement", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("achievement")
+    private List<UserAchievement> userAchievements;
+    
 
 }

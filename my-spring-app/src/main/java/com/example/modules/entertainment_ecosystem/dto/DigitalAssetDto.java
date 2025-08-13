@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.DigitalAssetTypeSimpleDto;
+
 import com.example.modules.entertainment_ecosystem.dtosimple.ArtistSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.LicenseSimpleDto;
@@ -21,9 +23,9 @@ public class DigitalAssetDto {
 
     private String name;
 
-    private String type;
-
     private String url;
+
+    private DigitalAssetTypeSimpleDto assetType;
 
     private ArtistSimpleDto artist;
 

@@ -15,8 +15,6 @@ public class DigitalAssetSimpleDto {
 
     private String name;
 
-    private String type;
-
     private String url;
 
 }
