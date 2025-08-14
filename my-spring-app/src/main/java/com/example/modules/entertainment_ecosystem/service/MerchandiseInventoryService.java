@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MerchandiseInventoryService extends BaseService<MerchandiseInventory> {
@@ -24,18 +25,27 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
     {
         super(repository);
         this.merchandiseinventoryRepository = repository;
-            this.merchandiseItemRepository = merchandiseItemRepository;
+        this.merchandiseItemRepository = merchandiseItemRepository;
         this.warehouseRepository = warehouseRepository;
     }
 
     @Override
     public MerchandiseInventory save(MerchandiseInventory merchandiseinventory) {
 
-        if (merchandiseinventory.getWarehouse() != null && merchandiseinventory.getWarehouse().getId() != null) {
-        Warehouse warehouse = warehouseRepository.findById(merchandiseinventory.getWarehouse().getId())
-                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-        merchandiseinventory.setWarehouse(warehouse);
+
+    
+
+    
+
+    
+    if (merchandiseinventory.getWarehouse() != null
+        && merchandiseinventory.getWarehouse().getId() != null) {
+        Warehouse existingWarehouse = warehouseRepository.findById(
+        merchandiseinventory.getWarehouse().getId()
+        ).orElseThrow(() -> new RuntimeException("Warehouse not found"));
+        merchandiseinventory.setWarehouse(existingWarehouse);
         }
+    
         if (merchandiseinventory.getMerchandiseItem() != null) {
         
         
@@ -61,11 +71,16 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
         existing.setLastUpdated(merchandiseinventoryRequest.getLastUpdated());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (merchandiseinventoryRequest.getWarehouse() != null &&
+        merchandiseinventoryRequest.getWarehouse().getId() != null) {
 
-        if (merchandiseinventoryRequest.getWarehouse() != null && merchandiseinventoryRequest.getWarehouse().getId() != null) {
-        Warehouse warehouse = warehouseRepository.findById(merchandiseinventoryRequest.getWarehouse().getId())
-                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
-        existing.setWarehouse(warehouse);
+        Warehouse existingWarehouse = warehouseRepository.findById(
+        merchandiseinventoryRequest.getWarehouse().getId()
+        ).orElseThrow(() -> new RuntimeException("Warehouse not found"));
+
+        existing.setWarehouse(existingWarehouse);
+        } else {
+        existing.setWarehouse(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -97,4 +112,6 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
 
         return merchandiseinventoryRepository.save(existing);
     }
+
+
 }

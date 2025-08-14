@@ -51,22 +51,27 @@ public class AlbumController {
         return ResponseEntity.created(location).body(albumMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<AlbumDto> updateAlbum(
-            @PathVariable Long id,
-            @Valid @RequestBody AlbumDto albumDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<AlbumDto> updateAlbum(
+                @PathVariable Long id,
+                @Valid @RequestBody AlbumDto albumDto) {
 
-        try {
-            Album updatedEntity = albumService.update(
-                    id,
-                    albumMapper.toEntity(albumDto)
-            );
-            return ResponseEntity.ok(albumMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Album existing = albumService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Album not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                albumMapper.updateEntityFromDto(albumDto, existing);
+
+                // Sauvegarde
+                Album updatedEntity = albumService.save(existing);
+
+                return ResponseEntity.ok(albumMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAlbum(@PathVariable Long id) {
         albumService.deleteById(id);

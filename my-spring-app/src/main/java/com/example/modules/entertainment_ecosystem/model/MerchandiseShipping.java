@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.MerchandiseOrder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "merchandiseshipping_tbl")
@@ -35,10 +37,13 @@ public class MerchandiseShipping extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "merchandise_id")
-    @JsonIgnoreProperties("shipments")
-    private Merchandise merchandiseItem;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "merchandiseItem_id")
+        
+        private Merchandise merchandiseItem;
+    
+    
     
     @OneToOne(mappedBy = "shippingDetails", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("shippingDetails")

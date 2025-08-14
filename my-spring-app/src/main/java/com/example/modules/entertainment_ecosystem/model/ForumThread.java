@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.ForumPost;import com.example.modules.entertainment_ecosystem.model.ForumCategory;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "forumthread_tbl")
@@ -34,19 +36,24 @@ public class ForumThread extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "author_id")
-    @JsonIgnoreProperties("forumThreads")
-    private UserProfile author;
     
-    @OneToMany(mappedBy = "thread", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("thread")
-    private List<ForumPost> forumPosts;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "author_id")
+        
+        private UserProfile author;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "category_id")
-    @JsonIgnoreProperties("threads")
-    private ForumCategory category;
+    
+    
+    @OneToMany(mappedBy = "thread", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<ForumPost> forumPosts;
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "category_id")
+        
+        private ForumCategory category;
+    
     
 
 }

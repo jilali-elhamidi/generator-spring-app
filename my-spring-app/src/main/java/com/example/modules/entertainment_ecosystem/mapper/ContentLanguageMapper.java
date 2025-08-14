@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface ContentLanguageMapper {
     List<ContentLanguageDto> toDtoList(List<ContentLanguage> contentlanguageList);
 
     List<ContentLanguage> toEntityList(List<ContentLanguageDto> contentlanguageDtoList);
+
+    void updateEntityFromDto(ContentLanguageDto dto, @MappingTarget ContentLanguage entity);
 
 }

@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface MerchandiseInventoryMapper {
     List<MerchandiseInventoryDto> toDtoList(List<MerchandiseInventory> merchandiseinventoryList);
 
     List<MerchandiseInventory> toEntityList(List<MerchandiseInventoryDto> merchandiseinventoryDtoList);
+
+    void updateEntityFromDto(MerchandiseInventoryDto dto, @MappingTarget MerchandiseInventory entity);
 
 }

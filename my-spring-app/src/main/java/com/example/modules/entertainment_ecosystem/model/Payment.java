@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Booking;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "payment_tbl")
@@ -35,6 +37,7 @@ public class Payment extends BaseEntity {
 
 // === Relations ===
 
+    
     @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("payment")
     private Booking booking;

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderItem> {
@@ -31,17 +32,27 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
     @Override
     public MerchandiseOrderItem save(MerchandiseOrderItem merchandiseorderitem) {
 
-        if (merchandiseorderitem.getMerchandiseItem() != null && merchandiseorderitem.getMerchandiseItem().getId() != null) {
-        Merchandise merchandiseItem = merchandiseItemRepository.findById(merchandiseorderitem.getMerchandiseItem().getId())
-                .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        merchandiseorderitem.setMerchandiseItem(merchandiseItem);
-        }
 
-        if (merchandiseorderitem.getOrder() != null && merchandiseorderitem.getOrder().getId() != null) {
-        MerchandiseOrder order = orderRepository.findById(merchandiseorderitem.getOrder().getId())
-                .orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
-        merchandiseorderitem.setOrder(order);
+    
+
+    
+
+    if (merchandiseorderitem.getMerchandiseItem() != null
+        && merchandiseorderitem.getMerchandiseItem().getId() != null) {
+        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+        merchandiseorderitem.getMerchandiseItem().getId()
+        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+        merchandiseorderitem.setMerchandiseItem(existingMerchandiseItem);
         }
+    
+    if (merchandiseorderitem.getOrder() != null
+        && merchandiseorderitem.getOrder().getId() != null) {
+        MerchandiseOrder existingOrder = orderRepository.findById(
+        merchandiseorderitem.getOrder().getId()
+        ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
+        merchandiseorderitem.setOrder(existingOrder);
+        }
+    
 
         return merchandiseorderitemRepository.save(merchandiseorderitem);
     }
@@ -56,17 +67,27 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
         existing.setPriceAtPurchase(merchandiseorderitemRequest.getPriceAtPurchase());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (merchandiseorderitemRequest.getMerchandiseItem() != null &&
+        merchandiseorderitemRequest.getMerchandiseItem().getId() != null) {
 
-        if (merchandiseorderitemRequest.getMerchandiseItem() != null && merchandiseorderitemRequest.getMerchandiseItem().getId() != null) {
-        Merchandise merchandiseItem = merchandiseItemRepository.findById(merchandiseorderitemRequest.getMerchandiseItem().getId())
-                .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        existing.setMerchandiseItem(merchandiseItem);
+        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+        merchandiseorderitemRequest.getMerchandiseItem().getId()
+        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+
+        existing.setMerchandiseItem(existingMerchandiseItem);
+        } else {
+        existing.setMerchandiseItem(null);
         }
+        if (merchandiseorderitemRequest.getOrder() != null &&
+        merchandiseorderitemRequest.getOrder().getId() != null) {
 
-        if (merchandiseorderitemRequest.getOrder() != null && merchandiseorderitemRequest.getOrder().getId() != null) {
-        MerchandiseOrder order = orderRepository.findById(merchandiseorderitemRequest.getOrder().getId())
-                .orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
-        existing.setOrder(order);
+        MerchandiseOrder existingOrder = orderRepository.findById(
+        merchandiseorderitemRequest.getOrder().getId()
+        ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
+
+        existing.setOrder(existingOrder);
+        } else {
+        existing.setOrder(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -80,4 +101,6 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
 
         return merchandiseorderitemRepository.save(existing);
     }
+
+
 }

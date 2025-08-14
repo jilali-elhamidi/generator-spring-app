@@ -51,22 +51,27 @@ public class EventLocationController {
         return ResponseEntity.created(location).body(eventlocationMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<EventLocationDto> updateEventLocation(
-            @PathVariable Long id,
-            @Valid @RequestBody EventLocationDto eventlocationDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<EventLocationDto> updateEventLocation(
+                @PathVariable Long id,
+                @Valid @RequestBody EventLocationDto eventlocationDto) {
 
-        try {
-            EventLocation updatedEntity = eventlocationService.update(
-                    id,
-                    eventlocationMapper.toEntity(eventlocationDto)
-            );
-            return ResponseEntity.ok(eventlocationMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                EventLocation existing = eventlocationService.findById(id)
+                .orElseThrow(() -> new RuntimeException("EventLocation not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                eventlocationMapper.updateEntityFromDto(eventlocationDto, existing);
+
+                // Sauvegarde
+                EventLocation updatedEntity = eventlocationService.save(existing);
+
+                return ResponseEntity.ok(eventlocationMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEventLocation(@PathVariable Long id) {
         eventlocationService.deleteById(id);

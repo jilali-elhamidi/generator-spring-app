@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class EventAudienceService extends BaseService<EventAudience> {
@@ -21,11 +22,16 @@ public class EventAudienceService extends BaseService<EventAudience> {
     {
         super(repository);
         this.eventaudienceRepository = repository;
-            this.eventRepository = eventRepository;
+        this.eventRepository = eventRepository;
     }
 
     @Override
     public EventAudience save(EventAudience eventaudience) {
+
+
+    
+
+    
         if (eventaudience.getEvent() != null) {
         
         
@@ -79,4 +85,6 @@ public class EventAudienceService extends BaseService<EventAudience> {
 
         return eventaudienceRepository.save(existing);
     }
+
+
 }

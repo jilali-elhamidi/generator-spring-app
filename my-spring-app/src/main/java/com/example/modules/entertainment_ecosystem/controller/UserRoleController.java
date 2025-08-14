@@ -51,22 +51,27 @@ public class UserRoleController {
         return ResponseEntity.created(location).body(userroleMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserRoleDto> updateUserRole(
-            @PathVariable Long id,
-            @Valid @RequestBody UserRoleDto userroleDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<UserRoleDto> updateUserRole(
+                @PathVariable Long id,
+                @Valid @RequestBody UserRoleDto userroleDto) {
 
-        try {
-            UserRole updatedEntity = userroleService.update(
-                    id,
-                    userroleMapper.toEntity(userroleDto)
-            );
-            return ResponseEntity.ok(userroleMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                UserRole existing = userroleService.findById(id)
+                .orElseThrow(() -> new RuntimeException("UserRole not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                userroleMapper.updateEntityFromDto(userroleDto, existing);
+
+                // Sauvegarde
+                UserRole updatedEntity = userroleService.save(existing);
+
+                return ResponseEntity.ok(userroleMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserRole(@PathVariable Long id) {
         userroleService.deleteById(id);

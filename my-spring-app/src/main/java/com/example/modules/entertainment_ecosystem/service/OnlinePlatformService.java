@@ -4,31 +4,54 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.OnlinePlatform;
 import com.example.modules.entertainment_ecosystem.repository.OnlinePlatformRepository;
 import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
+import com.example.modules.entertainment_ecosystem.repository.StreamingPlatformRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class OnlinePlatformService extends BaseService<OnlinePlatform> {
 
     protected final OnlinePlatformRepository onlineplatformRepository;
+    private final StreamingPlatformRepository streamsRepository;
 
-    public OnlinePlatformService(OnlinePlatformRepository repository)
+    public OnlinePlatformService(OnlinePlatformRepository repository,StreamingPlatformRepository streamsRepository)
     {
         super(repository);
         this.onlineplatformRepository = repository;
+        this.streamsRepository = streamsRepository;
     }
 
     @Override
     public OnlinePlatform save(OnlinePlatform onlineplatform) {
 
-        if (onlineplatform.getStreams() != null) {
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (onlineplatform.getStreams() != null) {
+            List<StreamingPlatform> managedStreams = new ArrayList<>();
             for (StreamingPlatform item : onlineplatform.getStreams()) {
+            if (item.getId() != null) {
+            StreamingPlatform existingItem = streamsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setOnlinePlatform(onlineplatform);
+            managedStreams.add(existingItem);
+            } else {
             item.setOnlinePlatform(onlineplatform);
+            managedStreams.add(item);
             }
-        }
+            }
+            onlineplatform.setStreams(managedStreams);
+            }
+        
+    
+
+    
 
         return onlineplatformRepository.save(onlineplatform);
     }
@@ -46,13 +69,23 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getStreams().clear();
+
         if (onlineplatformRequest.getStreams() != null) {
-            for (var item : onlineplatformRequest.getStreams()) {
-            item.setOnlinePlatform(existing);
-            existing.getStreams().add(item);
-            }
+        List<StreamingPlatform> managedStreams = new ArrayList<>();
+
+        for (var item : onlineplatformRequest.getStreams()) {
+        if (item.getId() != null) {
+        StreamingPlatform existingItem = streamsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
+        existingItem.setOnlinePlatform(existing);
+        managedStreams.add(existingItem);
+        } else {
+        item.setOnlinePlatform(existing);
+        managedStreams.add(item);
+        }
+        }
+        existing.setStreams(managedStreams);
         }
 
     
@@ -60,4 +93,6 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
 
         return onlineplatformRepository.save(existing);
     }
+
+
 }

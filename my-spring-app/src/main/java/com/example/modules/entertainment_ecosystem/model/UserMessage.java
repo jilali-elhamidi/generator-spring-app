@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.MessageThread;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "usermessage_tbl")
@@ -38,20 +40,26 @@ public class UserMessage extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "sender_id")
-    @JsonIgnoreProperties("sentMessages")
-    private UserProfile sender;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "receiver_id")
-    @JsonIgnoreProperties("receivedMessages")
-    private UserProfile receiver;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "sender_id")
+        
+        private UserProfile sender;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "thread_id")
-    @JsonIgnoreProperties("messages")
-    private MessageThread thread;
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "receiver_id")
+        
+        private UserProfile receiver;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "thread_id")
+        
+        private MessageThread thread;
+    
     
 
 }

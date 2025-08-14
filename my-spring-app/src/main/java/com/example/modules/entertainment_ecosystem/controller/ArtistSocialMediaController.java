@@ -51,22 +51,27 @@ public class ArtistSocialMediaController {
         return ResponseEntity.created(location).body(artistsocialmediaMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ArtistSocialMediaDto> updateArtistSocialMedia(
-            @PathVariable Long id,
-            @Valid @RequestBody ArtistSocialMediaDto artistsocialmediaDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ArtistSocialMediaDto> updateArtistSocialMedia(
+                @PathVariable Long id,
+                @Valid @RequestBody ArtistSocialMediaDto artistsocialmediaDto) {
 
-        try {
-            ArtistSocialMedia updatedEntity = artistsocialmediaService.update(
-                    id,
-                    artistsocialmediaMapper.toEntity(artistsocialmediaDto)
-            );
-            return ResponseEntity.ok(artistsocialmediaMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                ArtistSocialMedia existing = artistsocialmediaService.findById(id)
+                .orElseThrow(() -> new RuntimeException("ArtistSocialMedia not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                artistsocialmediaMapper.updateEntityFromDto(artistsocialmediaDto, existing);
+
+                // Sauvegarde
+                ArtistSocialMedia updatedEntity = artistsocialmediaService.save(existing);
+
+                return ResponseEntity.ok(artistsocialmediaMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArtistSocialMedia(@PathVariable Long id) {
         artistsocialmediaService.deleteById(id);

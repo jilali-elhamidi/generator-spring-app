@@ -51,22 +51,27 @@ public class VideoGameController {
         return ResponseEntity.created(location).body(videogameMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<VideoGameDto> updateVideoGame(
-            @PathVariable Long id,
-            @Valid @RequestBody VideoGameDto videogameDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<VideoGameDto> updateVideoGame(
+                @PathVariable Long id,
+                @Valid @RequestBody VideoGameDto videogameDto) {
 
-        try {
-            VideoGame updatedEntity = videogameService.update(
-                    id,
-                    videogameMapper.toEntity(videogameDto)
-            );
-            return ResponseEntity.ok(videogameMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                VideoGame existing = videogameService.findById(id)
+                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                videogameMapper.updateEntityFromDto(videogameDto, existing);
+
+                // Sauvegarde
+                VideoGame updatedEntity = videogameService.save(existing);
+
+                return ResponseEntity.ok(videogameMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVideoGame(@PathVariable Long id) {
         videogameService.deleteById(id);

@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface GameReviewCommentMapper {
     List<GameReviewCommentDto> toDtoList(List<GameReviewComment> gamereviewcommentList);
 
     List<GameReviewComment> toEntityList(List<GameReviewCommentDto> gamereviewcommentDtoList);
+
+    void updateEntityFromDto(GameReviewCommentDto dto, @MappingTarget GameReviewComment entity);
 
 }

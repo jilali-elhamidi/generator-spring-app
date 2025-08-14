@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface PublisherMapper {
     List<PublisherDto> toDtoList(List<Publisher> publisherList);
 
     List<Publisher> toEntityList(List<PublisherDto> publisherDtoList);
+
+    void updateEntityFromDto(PublisherDto dto, @MappingTarget Publisher entity);
 
 }

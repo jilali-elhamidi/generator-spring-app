@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface LicenseMapper {
     List<LicenseDto> toDtoList(List<License> licenseList);
 
     List<License> toEntityList(List<LicenseDto> licenseDtoList);
+
+    void updateEntityFromDto(LicenseDto dto, @MappingTarget License entity);
 
 }

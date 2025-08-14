@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ShiftService extends BaseService<Shift> {
@@ -27,11 +28,17 @@ public class ShiftService extends BaseService<Shift> {
     @Override
     public Shift save(Shift shift) {
 
-        if (shift.getEmployee() != null && shift.getEmployee().getId() != null) {
-        Employee employee = employeeRepository.findById(shift.getEmployee().getId())
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-        shift.setEmployee(employee);
+
+    
+
+    if (shift.getEmployee() != null
+        && shift.getEmployee().getId() != null) {
+        Employee existingEmployee = employeeRepository.findById(
+        shift.getEmployee().getId()
+        ).orElseThrow(() -> new RuntimeException("Employee not found"));
+        shift.setEmployee(existingEmployee);
         }
+    
 
         return shiftRepository.save(shift);
     }
@@ -47,11 +54,16 @@ public class ShiftService extends BaseService<Shift> {
         existing.setEndTime(shiftRequest.getEndTime());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (shiftRequest.getEmployee() != null &&
+        shiftRequest.getEmployee().getId() != null) {
 
-        if (shiftRequest.getEmployee() != null && shiftRequest.getEmployee().getId() != null) {
-        Employee employee = employeeRepository.findById(shiftRequest.getEmployee().getId())
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-        existing.setEmployee(employee);
+        Employee existingEmployee = employeeRepository.findById(
+        shiftRequest.getEmployee().getId()
+        ).orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        existing.setEmployee(existingEmployee);
+        } else {
+        existing.setEmployee(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -63,4 +75,6 @@ public class ShiftService extends BaseService<Shift> {
 
         return shiftRepository.save(existing);
     }
+
+
 }

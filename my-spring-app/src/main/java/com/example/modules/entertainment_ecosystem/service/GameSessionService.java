@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class GameSessionService extends BaseService<GameSession> {
@@ -31,17 +32,27 @@ public class GameSessionService extends BaseService<GameSession> {
     @Override
     public GameSession save(GameSession gamesession) {
 
-        if (gamesession.getUser() != null && gamesession.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(gamesession.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        gamesession.setUser(user);
-        }
 
-        if (gamesession.getGame() != null && gamesession.getGame().getId() != null) {
-        VideoGame game = gameRepository.findById(gamesession.getGame().getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        gamesession.setGame(game);
+    
+
+    
+
+    if (gamesession.getUser() != null
+        && gamesession.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        gamesession.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        gamesession.setUser(existingUser);
         }
+    
+    if (gamesession.getGame() != null
+        && gamesession.getGame().getId() != null) {
+        VideoGame existingGame = gameRepository.findById(
+        gamesession.getGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        gamesession.setGame(existingGame);
+        }
+    
 
         return gamesessionRepository.save(gamesession);
     }
@@ -57,17 +68,27 @@ public class GameSessionService extends BaseService<GameSession> {
         existing.setSessionDate(gamesessionRequest.getSessionDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (gamesessionRequest.getUser() != null &&
+        gamesessionRequest.getUser().getId() != null) {
 
-        if (gamesessionRequest.getUser() != null && gamesessionRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(gamesessionRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        gamesessionRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
+        if (gamesessionRequest.getGame() != null &&
+        gamesessionRequest.getGame().getId() != null) {
 
-        if (gamesessionRequest.getGame() != null && gamesessionRequest.getGame().getId() != null) {
-        VideoGame game = gameRepository.findById(gamesessionRequest.getGame().getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        existing.setGame(game);
+        VideoGame existingGame = gameRepository.findById(
+        gamesessionRequest.getGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+        existing.setGame(existingGame);
+        } else {
+        existing.setGame(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -81,4 +102,6 @@ public class GameSessionService extends BaseService<GameSession> {
 
         return gamesessionRepository.save(existing);
     }
+
+
 }

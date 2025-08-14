@@ -4,25 +4,51 @@ import com.example.core.service.BaseService;
 import com.example.modules.ecommerce.model.Category;
 import com.example.modules.ecommerce.repository.CategoryRepository;
 import com.example.modules.ecommerce.model.Product;
+import com.example.modules.ecommerce.repository.ProductRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class CategoryService extends BaseService<Category> {
 
     protected final CategoryRepository categoryRepository;
+    private final ProductRepository productsRepository;
 
-    public CategoryService(CategoryRepository repository)
+    public CategoryService(CategoryRepository repository,ProductRepository productsRepository)
     {
         super(repository);
         this.categoryRepository = repository;
+        this.productsRepository = productsRepository;
     }
 
     @Override
     public Category save(Category category) {
+
+
+    
+        if (category.getProducts() != null) {
+        List<Product> managedProducts = new ArrayList<>();
+        for (Product item : category.getProducts()) {
+        if (item.getId() != null) {
+        Product existingItem = productsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+        // Set the parent reference on the existing item
+        existingItem.setCategory(category);
+        managedProducts.add(existingItem);
+        } else {
+        // Set the parent reference on the new item
+        item.setCategory(category);
+        managedProducts.add(item);
+        }
+        }
+        category.setProducts(managedProducts);
+        }
+    
+
 
         if (category.getProducts() != null) {
             for (Product item : category.getProducts()) {

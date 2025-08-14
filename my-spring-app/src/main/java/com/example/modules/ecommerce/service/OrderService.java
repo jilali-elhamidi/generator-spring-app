@@ -6,6 +6,7 @@ import com.example.modules.ecommerce.repository.OrderRepository;
 import com.example.modules.ecommerce.model.User;
 import com.example.modules.ecommerce.repository.UserRepository;
 import com.example.modules.ecommerce.model.OrderItem;
+import com.example.modules.ecommerce.repository.OrderItemRepository;
 import com.example.modules.ecommerce.model.Payment;
 import com.example.modules.ecommerce.repository.PaymentRepository;
 import com.example.modules.ecommerce.model.Shipment;
@@ -15,32 +16,57 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class OrderService extends BaseService<Order> {
 
     protected final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final OrderItemRepository orderItemsRepository;
     private final PaymentRepository paymentRepository;
     private final ShipmentRepository shipmentRepository;
 
-    public OrderService(OrderRepository repository,UserRepository userRepository,PaymentRepository paymentRepository,ShipmentRepository shipmentRepository)
+    public OrderService(OrderRepository repository,UserRepository userRepository,OrderItemRepository orderItemsRepository,PaymentRepository paymentRepository,ShipmentRepository shipmentRepository)
     {
         super(repository);
         this.orderRepository = repository;
         this.userRepository = userRepository;
-            this.paymentRepository = paymentRepository;
-            this.shipmentRepository = shipmentRepository;
+        this.orderItemsRepository = orderItemsRepository;
+        this.paymentRepository = paymentRepository;
+        this.shipmentRepository = shipmentRepository;
     }
 
     @Override
     public Order save(Order order) {
 
-        if (order.getUser() != null && order.getUser().getId() != null) {
-        User user = userRepository.findById(order.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        order.setUser(user);
+
+    
+
+    
+        if (order.getOrderItems() != null) {
+        List<OrderItem> managedOrderItems = new ArrayList<>();
+        for (OrderItem item : order.getOrderItems()) {
+        if (item.getId() != null) {
+        OrderItem existingItem = orderItemsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("OrderItem not found"));
+        // Set the parent reference on the existing item
+        existingItem.setOrder(order);
+        managedOrderItems.add(existingItem);
+        } else {
+        // Set the parent reference on the new item
+        item.setOrder(order);
+        managedOrderItems.add(item);
         }
+        }
+        order.setOrderItems(managedOrderItems);
+        }
+    
+
+    
+
+    
+
 
         if (order.getOrderItems() != null) {
             for (OrderItem item : order.getOrderItems()) {
@@ -102,6 +128,11 @@ public class OrderService extends BaseService<Order> {
             }
         }
 
+    
+
+    
+
+    
 
         if (orderRequest.getPayment() != null
         && orderRequest.getPayment().getId() != null) {

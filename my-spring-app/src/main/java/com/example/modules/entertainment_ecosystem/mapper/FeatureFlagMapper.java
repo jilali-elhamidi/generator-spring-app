@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface FeatureFlagMapper {
     List<FeatureFlagDto> toDtoList(List<FeatureFlag> featureflagList);
 
     List<FeatureFlag> toEntityList(List<FeatureFlagDto> featureflagDtoList);
+
+    void updateEntityFromDto(FeatureFlagDto dto, @MappingTarget FeatureFlag entity);
 
 }

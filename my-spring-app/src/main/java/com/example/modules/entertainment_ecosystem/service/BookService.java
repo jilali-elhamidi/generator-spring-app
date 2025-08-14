@@ -8,6 +8,7 @@ import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 import com.example.modules.entertainment_ecosystem.model.Publisher;
 import com.example.modules.entertainment_ecosystem.repository.PublisherRepository;
 import com.example.modules.entertainment_ecosystem.model.Review;
+import com.example.modules.entertainment_ecosystem.repository.ReviewRepository;
 import com.example.modules.entertainment_ecosystem.model.Genre;
 import com.example.modules.entertainment_ecosystem.repository.GenreRepository;
 
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class BookService extends BaseService<Book> {
@@ -22,37 +24,69 @@ public class BookService extends BaseService<Book> {
     protected final BookRepository bookRepository;
     private final ArtistRepository authorRepository;
     private final PublisherRepository publisherRepository;
+    private final ReviewRepository reviewsRepository;
     private final GenreRepository genresRepository;
 
-    public BookService(BookRepository repository,ArtistRepository authorRepository,PublisherRepository publisherRepository,GenreRepository genresRepository)
+    public BookService(BookRepository repository,ArtistRepository authorRepository,PublisherRepository publisherRepository,ReviewRepository reviewsRepository,GenreRepository genresRepository)
     {
         super(repository);
         this.bookRepository = repository;
         this.authorRepository = authorRepository;
         this.publisherRepository = publisherRepository;
+        this.reviewsRepository = reviewsRepository;
         this.genresRepository = genresRepository;
     }
 
     @Override
     public Book save(Book book) {
 
-        if (book.getAuthor() != null && book.getAuthor().getId() != null) {
-        Artist author = authorRepository.findById(book.getAuthor().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        book.setAuthor(author);
-        }
 
-        if (book.getPublisher() != null && book.getPublisher().getId() != null) {
-        Publisher publisher = publisherRepository.findById(book.getPublisher().getId())
-                .orElseThrow(() -> new RuntimeException("Publisher not found"));
-        book.setPublisher(publisher);
-        }
+    
 
-        if (book.getReviews() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (book.getReviews() != null) {
+            List<Review> managedReviews = new ArrayList<>();
             for (Review item : book.getReviews()) {
+            if (item.getId() != null) {
+            Review existingItem = reviewsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Review not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setBook(book);
+            managedReviews.add(existingItem);
+            } else {
             item.setBook(book);
+            managedReviews.add(item);
             }
+            }
+            book.setReviews(managedReviews);
+            }
+        
+    
+
+    
+
+    if (book.getAuthor() != null
+        && book.getAuthor().getId() != null) {
+        Artist existingAuthor = authorRepository.findById(
+        book.getAuthor().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        book.setAuthor(existingAuthor);
         }
+    
+    if (book.getPublisher() != null
+        && book.getPublisher().getId() != null) {
+        Publisher existingPublisher = publisherRepository.findById(
+        book.getPublisher().getId()
+        ).orElseThrow(() -> new RuntimeException("Publisher not found"));
+        book.setPublisher(existingPublisher);
+        }
+    
+    
+    
 
         return bookRepository.save(book);
     }
@@ -69,17 +103,27 @@ public class BookService extends BaseService<Book> {
         existing.setSynopsis(bookRequest.getSynopsis());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (bookRequest.getAuthor() != null &&
+        bookRequest.getAuthor().getId() != null) {
 
-        if (bookRequest.getAuthor() != null && bookRequest.getAuthor().getId() != null) {
-        Artist author = authorRepository.findById(bookRequest.getAuthor().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setAuthor(author);
+        Artist existingAuthor = authorRepository.findById(
+        bookRequest.getAuthor().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setAuthor(existingAuthor);
+        } else {
+        existing.setAuthor(null);
         }
+        if (bookRequest.getPublisher() != null &&
+        bookRequest.getPublisher().getId() != null) {
 
-        if (bookRequest.getPublisher() != null && bookRequest.getPublisher().getId() != null) {
-        Publisher publisher = publisherRepository.findById(bookRequest.getPublisher().getId())
-                .orElseThrow(() -> new RuntimeException("Publisher not found"));
-        existing.setPublisher(publisher);
+        Publisher existingPublisher = publisherRepository.findById(
+        bookRequest.getPublisher().getId()
+        ).orElseThrow(() -> new RuntimeException("Publisher not found"));
+
+        existing.setPublisher(existingPublisher);
+        } else {
+        existing.setPublisher(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -94,13 +138,23 @@ public class BookService extends BaseService<Book> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getReviews().clear();
+
         if (bookRequest.getReviews() != null) {
-            for (var item : bookRequest.getReviews()) {
-            item.setBook(existing);
-            existing.getReviews().add(item);
-            }
+        List<Review> managedReviews = new ArrayList<>();
+
+        for (var item : bookRequest.getReviews()) {
+        if (item.getId() != null) {
+        Review existingItem = reviewsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Review not found"));
+        existingItem.setBook(existing);
+        managedReviews.add(existingItem);
+        } else {
+        item.setBook(existing);
+        managedReviews.add(item);
+        }
+        }
+        existing.setReviews(managedReviews);
         }
 
     
@@ -114,4 +168,6 @@ public class BookService extends BaseService<Book> {
 
         return bookRepository.save(existing);
     }
+
+
 }

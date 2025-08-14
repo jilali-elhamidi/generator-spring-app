@@ -2,6 +2,7 @@ package com.example;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
@@ -15,21 +16,22 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CodeGenerator {
 
     private final Handlebars handlebars;
+    private List<Map<String, Object>> entities;
 
     public CodeGenerator() {
         TemplateLoader loader = new ClassPathTemplateLoader("/templates", ".hbs");
         this.handlebars = new Handlebars(loader);
-
         this.handlebars.registerHelper("capitalize", StringHelpers.capitalize);
 
+        // == Helpers de comparaison ==
         this.handlebars.registerHelper("eq", (Helper<Object>) (a, options) -> {
             Object b = options.param(0);
             return (a == null && b == null) || (a != null && a.equals(b));
@@ -45,11 +47,7 @@ public class CodeGenerator {
                     }
                 }
             }
-            if (result) {
-                return options.fn(options.context);
-            } else {
-                return options.inverse();
-            }
+            return result ? options.fn(options.context) : options.inverse();
         });
 
         this.handlebars.registerHelper("or", (Helper<Object>) (context, options) -> {
@@ -65,6 +63,33 @@ public class CodeGenerator {
         });
 
         this.handlebars.registerHelper("not", (Helper<Object>) (a, options) -> !isTruthy(a));
+
+        // == Nouveau helper lookupInverseRelationship ==
+        this.handlebars.registerHelper("lookupInverseRelationship", (Helper<Object>) (context, options) -> {
+            // Premier paramètre = type de l'entité cible
+            String targetEntityType = (String) context;
+            // Deuxième paramètre = mappedBy
+            String targetMappedBy = options.param(0);
+
+            List<Map<String, Object>> allEntities = (List<Map<String, Object>>) options.context.get("allEntities");
+            if (allEntities == null) {
+                return null;
+            }
+
+            for (Map<String, Object> entity : allEntities) {
+                if (entity.get("name").equals(targetEntityType)) {
+                    List<Map<String, Object>> entityRelationships = (List<Map<String, Object>>) entity.get("relationships");
+                    if (entityRelationships != null) {
+                        for (Map<String, Object> rel : entityRelationships) {
+                            if ("ManyToOne".equals(rel.get("relationType")) && targetMappedBy.equals(rel.get("name"))) {
+                                return rel;
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        });
     }
 
     private static boolean isTruthy(Object value) {
@@ -72,25 +97,27 @@ public class CodeGenerator {
         if (value instanceof Boolean) return (Boolean) value;
         if (value instanceof Number) return ((Number) value).doubleValue() != 0;
         if (value instanceof String) return !((String) value).isEmpty();
-        if (value instanceof List) return !((List) value).isEmpty();
-        if (value instanceof Map) return !((Map) value).isEmpty();
+        if (value instanceof List) return !((List<?>) value).isEmpty();
+        if (value instanceof Map) return !((Map<?, ?>) value).isEmpty();
         return true;
     }
 
-    public void generateCode(String yamlFilePath, String outputDir) throws IOException {
+    public void generateCode(String yamlFilePath, String outputDir, List<String> options) throws IOException {
         Yaml yaml = new Yaml();
         try (InputStream inputStream = new FileInputStream(yamlFilePath)) {
             Map<String, Object> data = yaml.load(inputStream);
 
             String moduleName = (String) data.get("module");
-            List<Map<String, Object>> entities = (List<Map<String, Object>>) data.get("entities");
+            this.entities = (List<Map<String, Object>>) data.get("entities");
 
-            if (entities == null) {
+            if (this.entities == null) {
                 System.err.println("❌ Aucune entité définie dans le YAML");
                 return;
             }
 
-            for (Map<String, Object> entity : entities) {
+            boolean generateServicesOnly = options.contains("--services-only");
+
+            for (Map<String, Object> entity : this.entities) {
                 String entityName = (String) entity.get("name");
                 String entityNameLowercase = entityName.toLowerCase();
                 List<Map<String, Object>> fields = (List<Map<String, Object>>) entity.get("fields");
@@ -103,20 +130,30 @@ public class CodeGenerator {
                 context.put("fields", fields);
                 context.put("relationships", relationships);
                 context.put("hasDate", hasType(fields, "Date"));
+                context.put("allEntities", this.entities);
 
-                // Génération des templates principaux
-                generateJavaFile("EntityTemplate", outputDir, moduleName, entityName, "model", context);
-                generateJavaFile("RepositoryTemplate", outputDir, moduleName, entityName, "repository", context);
-                generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
-                generateJavaFile("ControllerTemplate", outputDir, moduleName, entityName, "controller", context);
+                boolean hasManyToOne = false;
+                if (relationships != null) {
+                    for (Map<String, Object> relationship : relationships) {
+                        if ("ManyToOne".equals(relationship.get("relationType"))) {
+                            hasManyToOne = true;
+                            break;
+                        }
+                    }
+                }
+                context.put("hasParentReference", hasManyToOne);
 
-                // Génération du DTO complet dans le dossier 'dto'
-                generateJavaFile("DtoTemplate", outputDir, moduleName, entityName, "dto", context);
-
-                // Génération systématique du DTO simple dans le dossier 'simpledto'
-                generateJavaFile("DtoSimpleTemplate", outputDir, moduleName, entityName, "dtosimple", context);
-
-                generateJavaFile("MapperTemplate", outputDir, moduleName, entityName, "mapper", context);
+                if (generateServicesOnly) {
+                    generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
+                } else {
+                    generateJavaFile("EntityTemplate", outputDir, moduleName, entityName, "model", context);
+                    generateJavaFile("RepositoryTemplate", outputDir, moduleName, entityName, "repository", context);
+                    generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
+                    generateJavaFile("ControllerTemplate", outputDir, moduleName, entityName, "controller", context);
+                    generateJavaFile("DtoTemplate", outputDir, moduleName, entityName, "dto", context);
+                    generateJavaFile("DtoSimpleTemplate", outputDir, moduleName, entityName, "dtosimple", context);
+                    generateJavaFile("MapperTemplate", outputDir, moduleName, entityName, "mapper", context);
+                }
             }
         }
     }
@@ -154,9 +191,28 @@ public class CodeGenerator {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
-            System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <répertoire-de-sortie>");
+            System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <répertoire-de-sortie> [--services-only]");
             return;
         }
-        new CodeGenerator().generateCode(args[0], args[1]);
+
+        String yamlFilePath = "";
+        String outputDir = "";
+        List<String> options = new ArrayList<>();
+
+        for (String arg : args) {
+            if (arg.startsWith("--")) {
+                options.add(arg);
+            } else if (yamlFilePath.isEmpty()) {
+                yamlFilePath = arg;
+            } else if (outputDir.isEmpty()) {
+                outputDir = arg;
+            }
+        }
+
+        if (!yamlFilePath.isEmpty() && !outputDir.isEmpty()) {
+            new CodeGenerator().generateCode(yamlFilePath, outputDir, options);
+        } else {
+            System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <répertoire-de-sortie> [--services-only]");
+        }
     }
 }

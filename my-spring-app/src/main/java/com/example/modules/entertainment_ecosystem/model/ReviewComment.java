@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Review;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "reviewcomment_tbl")
@@ -32,15 +34,19 @@ public class ReviewComment extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("reviewComments")
-    private UserProfile user;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "review_id")
-    @JsonIgnoreProperties("reviewComments")
-    private Review review;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "user_id")
+        
+        private UserProfile user;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "review_id")
+        
+        private Review review;
+    
     
 
 }

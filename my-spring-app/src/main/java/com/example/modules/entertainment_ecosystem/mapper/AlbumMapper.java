@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface AlbumMapper {
     List<AlbumDto> toDtoList(List<Album> albumList);
 
     List<Album> toEntityList(List<AlbumDto> albumDtoList);
+
+    void updateEntityFromDto(AlbumDto dto, @MappingTarget Album entity);
 
 }

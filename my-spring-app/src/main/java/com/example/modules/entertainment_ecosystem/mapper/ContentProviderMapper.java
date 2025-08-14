@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface ContentProviderMapper {
     List<ContentProviderDto> toDtoList(List<ContentProvider> contentproviderList);
 
     List<ContentProvider> toEntityList(List<ContentProviderDto> contentproviderDtoList);
+
+    void updateEntityFromDto(ContentProviderDto dto, @MappingTarget ContentProvider entity);
 
 }

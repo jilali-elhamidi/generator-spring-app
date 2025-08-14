@@ -4,31 +4,54 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.TicketStatus;
 import com.example.modules.entertainment_ecosystem.repository.TicketStatusRepository;
 import com.example.modules.entertainment_ecosystem.model.Ticket;
+import com.example.modules.entertainment_ecosystem.repository.TicketRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class TicketStatusService extends BaseService<TicketStatus> {
 
     protected final TicketStatusRepository ticketstatusRepository;
+    private final TicketRepository ticketsRepository;
 
-    public TicketStatusService(TicketStatusRepository repository)
+    public TicketStatusService(TicketStatusRepository repository,TicketRepository ticketsRepository)
     {
         super(repository);
         this.ticketstatusRepository = repository;
+        this.ticketsRepository = ticketsRepository;
     }
 
     @Override
     public TicketStatus save(TicketStatus ticketstatus) {
 
-        if (ticketstatus.getTickets() != null) {
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (ticketstatus.getTickets() != null) {
+            List<Ticket> managedTickets = new ArrayList<>();
             for (Ticket item : ticketstatus.getTickets()) {
+            if (item.getId() != null) {
+            Ticket existingItem = ticketsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setStatus(ticketstatus);
+            managedTickets.add(existingItem);
+            } else {
             item.setStatus(ticketstatus);
+            managedTickets.add(item);
             }
-        }
+            }
+            ticketstatus.setTickets(managedTickets);
+            }
+        
+    
+
+    
 
         return ticketstatusRepository.save(ticketstatus);
     }
@@ -46,13 +69,23 @@ public class TicketStatusService extends BaseService<TicketStatus> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getTickets().clear();
+
         if (ticketstatusRequest.getTickets() != null) {
-            for (var item : ticketstatusRequest.getTickets()) {
-            item.setStatus(existing);
-            existing.getTickets().add(item);
-            }
+        List<Ticket> managedTickets = new ArrayList<>();
+
+        for (var item : ticketstatusRequest.getTickets()) {
+        if (item.getId() != null) {
+        Ticket existingItem = ticketsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        existingItem.setStatus(existing);
+        managedTickets.add(existingItem);
+        } else {
+        item.setStatus(existing);
+        managedTickets.add(item);
+        }
+        }
+        existing.setTickets(managedTickets);
         }
 
     
@@ -60,4 +93,6 @@ public class TicketStatusService extends BaseService<TicketStatus> {
 
         return ticketstatusRepository.save(existing);
     }
+
+
 }

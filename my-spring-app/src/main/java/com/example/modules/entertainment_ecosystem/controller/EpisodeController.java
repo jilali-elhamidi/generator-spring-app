@@ -51,22 +51,27 @@ public class EpisodeController {
         return ResponseEntity.created(location).body(episodeMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<EpisodeDto> updateEpisode(
-            @PathVariable Long id,
-            @Valid @RequestBody EpisodeDto episodeDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<EpisodeDto> updateEpisode(
+                @PathVariable Long id,
+                @Valid @RequestBody EpisodeDto episodeDto) {
 
-        try {
-            Episode updatedEntity = episodeService.update(
-                    id,
-                    episodeMapper.toEntity(episodeDto)
-            );
-            return ResponseEntity.ok(episodeMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Episode existing = episodeService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Episode not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                episodeMapper.updateEntityFromDto(episodeDto, existing);
+
+                // Sauvegarde
+                Episode updatedEntity = episodeService.save(existing);
+
+                return ResponseEntity.ok(episodeMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEpisode(@PathVariable Long id) {
         episodeService.deleteById(id);

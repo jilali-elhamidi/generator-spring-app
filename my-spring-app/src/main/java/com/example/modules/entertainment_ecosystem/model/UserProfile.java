@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Review;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Subscription;import com.example.modules.entertainment_ecosystem.model.Episode;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.ForumThread;import com.example.modules.entertainment_ecosystem.model.ForumPost;import com.example.modules.entertainment_ecosystem.model.Achievement;import com.example.modules.entertainment_ecosystem.model.OnlineEvent;import com.example.modules.entertainment_ecosystem.model.OnlineEvent;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.Playlist;import com.example.modules.entertainment_ecosystem.model.UserWallet;import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;import com.example.modules.entertainment_ecosystem.model.GameSession;import com.example.modules.entertainment_ecosystem.model.GameReviewComment;import com.example.modules.entertainment_ecosystem.model.UserPlaylist;import com.example.modules.entertainment_ecosystem.model.UserPlaylistItem;import com.example.modules.entertainment_ecosystem.model.ReviewRating;import com.example.modules.entertainment_ecosystem.model.ReviewLike;import com.example.modules.entertainment_ecosystem.model.UserActivityLog;import com.example.modules.entertainment_ecosystem.model.UserSetting;import com.example.modules.entertainment_ecosystem.model.UserFollower;import com.example.modules.entertainment_ecosystem.model.UserFollower;import com.example.modules.entertainment_ecosystem.model.UserAchievement;import com.example.modules.entertainment_ecosystem.model.Notification;import com.example.modules.entertainment_ecosystem.model.MerchandiseReview;import com.example.modules.entertainment_ecosystem.model.UserPreference;import com.example.modules.entertainment_ecosystem.model.MerchandiseSale;import com.example.modules.entertainment_ecosystem.model.GamePlaySession;import com.example.modules.entertainment_ecosystem.model.GameReviewUpvote;import com.example.modules.entertainment_ecosystem.model.GameReviewDownvote;import com.example.modules.entertainment_ecosystem.model.UserMessage;import com.example.modules.entertainment_ecosystem.model.UserMessage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "userprofile_tbl")
@@ -52,9 +54,11 @@ public class UserProfile extends BaseEntity {
 
 // === Relations ===
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<Review> reviews;
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Review> reviews;
+    
     
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_movie_watchlist",
@@ -63,6 +67,7 @@ public class UserProfile extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Movie> watchlistMovies;
             
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_favorite_artists",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -70,10 +75,12 @@ public class UserProfile extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Artist> favoriteArtists;
             
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<UserProfile> followedUsers;
         
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_followers",
             joinColumns = @JoinColumn(name = "follower_id"),
@@ -81,6 +88,7 @@ public class UserProfile extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<UserProfile> followingUsers;
             
+    
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "user_favorite_genres",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -88,9 +96,11 @@ public class UserProfile extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Genre> favoriteGenres;
             
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<Subscription> subscriptions;
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Subscription> subscriptions;
+    
     
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_watched_episodes",
@@ -99,6 +109,7 @@ public class UserProfile extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Episode> watchedEpisodes;
             
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_games",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -106,26 +117,32 @@ public class UserProfile extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<VideoGame> playedGames;
             
-    @OneToMany(mappedBy = "author", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("author")
-    private List<ForumThread> forumThreads;
     
-    @OneToMany(mappedBy = "author", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("author")
-    private List<ForumPost> forumPosts;
+    @OneToMany(mappedBy = "author", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<ForumThread> forumThreads;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<Achievement> achievements;
     
-    @OneToMany(mappedBy = "host", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("host")
-    private List<OnlineEvent> hostedOnlineEvents;
+    @OneToMany(mappedBy = "author", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<ForumPost> forumPosts;
+    
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Achievement> achievements;
+    
+    
+    @OneToMany(mappedBy = "host", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<OnlineEvent> hostedOnlineEvents;
+    
     
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<OnlineEvent> attendedOnlineEvents;
         
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_merchandise",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -133,6 +150,7 @@ public class UserProfile extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Merchandise> ownedMerchandise;
             
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_podcast_library",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -140,6 +158,7 @@ public class UserProfile extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Podcast> libraryPodcasts;
             
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_music_history",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -147,98 +166,121 @@ public class UserProfile extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<MusicTrack> listenedMusic;
             
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("owner")
-    private List<Playlist> playlists;
+    
+    @OneToMany(mappedBy = "owner", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Playlist> playlists;
+    
     
     @OneToOne
     @JoinColumn(name = "wallet_id")
     @JsonIgnoreProperties("user")
     private UserWallet wallet;
             
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<DigitalPurchase> digitalPurchases;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<GameSession> gameSessions;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<DigitalPurchase> digitalPurchases;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<GameReviewComment> gameReviewComments;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<UserPlaylist> userPlaylists;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<GameSession> gameSessions;
     
-    @OneToMany(mappedBy = "addedBy", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("addedBy")
-    private List<UserPlaylistItem> userPlaylistItems;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<ReviewRating> givenRatings;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<GameReviewComment> gameReviewComments;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<ReviewLike> likedReviews;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.EAGER)
-    @JsonIgnoreProperties("user")
-    private List<UserActivityLog> activityLogs;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserPlaylist> userPlaylists;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<UserSetting> settings;
     
-    @OneToMany(mappedBy = "followed", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("followed")
-    private List<UserFollower> followers;
+    @OneToMany(mappedBy = "addedBy", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserPlaylistItem> userPlaylistItems;
     
-    @OneToMany(mappedBy = "follower", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("follower")
-    private List<UserFollower> following;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<UserAchievement> userAchievements;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<ReviewRating> givenRatings;
     
-    @OneToMany(mappedBy = "recipient", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.EAGER)
-    @JsonIgnoreProperties("recipient")
-    private List<Notification> notifications;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<MerchandiseReview> merchandiseReviews;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<ReviewLike> likedReviews;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<UserPreference> preferences;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<MerchandiseSale> merchandiseSales;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.EAGER)
+        @JsonManagedReference
+        private List<UserActivityLog> activityLogs;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<GamePlaySession> gamePlaySessions;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<GameReviewUpvote> gameReviewUpvotes;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserSetting> settings;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<GameReviewDownvote> gameReviewDownvotes;
     
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("sender")
-    private List<UserMessage> sentMessages;
+    @OneToMany(mappedBy = "followed", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserFollower> followers;
     
-    @OneToMany(mappedBy = "receiver", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("receiver")
-    private List<UserMessage> receivedMessages;
+    
+    @OneToMany(mappedBy = "follower", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserFollower> following;
+    
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserAchievement> userAchievements;
+    
+    
+    @OneToMany(mappedBy = "recipient", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.EAGER)
+        @JsonManagedReference
+        private List<Notification> notifications;
+    
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<MerchandiseReview> merchandiseReviews;
+    
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserPreference> preferences;
+    
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<MerchandiseSale> merchandiseSales;
+    
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<GamePlaySession> gamePlaySessions;
+    
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<GameReviewUpvote> gameReviewUpvotes;
+    
+    
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<GameReviewDownvote> gameReviewDownvotes;
+    
+    
+    @OneToMany(mappedBy = "sender", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserMessage> sentMessages;
+    
+    
+    @OneToMany(mappedBy = "receiver", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserMessage> receivedMessages;
     
 
 }

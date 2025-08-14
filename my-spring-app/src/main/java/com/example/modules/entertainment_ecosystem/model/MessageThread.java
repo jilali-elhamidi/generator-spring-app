@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.UserMessage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "messagethread_tbl")
@@ -32,6 +34,7 @@ public class MessageThread extends BaseEntity {
 
 // === Relations ===
 
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "message_thread_participants",
             joinColumns = @JoinColumn(name = "thread_id"),
@@ -39,9 +42,10 @@ public class MessageThread extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<UserProfile> participants;
             
-    @OneToMany(mappedBy = "thread", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("thread")
-    private List<UserMessage> messages;
+    
+    @OneToMany(mappedBy = "thread", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<UserMessage> messages;
     
 
 }

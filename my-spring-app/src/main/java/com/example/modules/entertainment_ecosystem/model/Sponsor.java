@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.EventSponsorship;import com.example.modules.entertainment_ecosystem.model.AdCampaign;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "sponsor_tbl")
@@ -35,17 +37,20 @@ public class Sponsor extends BaseEntity {
 
 // === Relations ===
 
-    @OneToMany(mappedBy = "sponsor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("sponsor")
-    private List<LiveEvent> sponsoredEvents;
     
-    @OneToMany(mappedBy = "sponsor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("sponsor")
-    private List<EventSponsorship> sponsorships;
+    @OneToMany(mappedBy = "sponsor", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<LiveEvent> sponsoredEvents;
     
-    @OneToMany(mappedBy = "advertiser", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("advertiser")
-    private List<AdCampaign> adCampaigns;
+    
+    @OneToMany(mappedBy = "sponsor", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<EventSponsorship> sponsorships;
+    
+    
+    @OneToMany(mappedBy = "advertiser", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<AdCampaign> adCampaigns;
     
 
 }

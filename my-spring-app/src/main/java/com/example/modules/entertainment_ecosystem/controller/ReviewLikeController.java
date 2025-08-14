@@ -51,22 +51,27 @@ public class ReviewLikeController {
         return ResponseEntity.created(location).body(reviewlikeMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ReviewLikeDto> updateReviewLike(
-            @PathVariable Long id,
-            @Valid @RequestBody ReviewLikeDto reviewlikeDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ReviewLikeDto> updateReviewLike(
+                @PathVariable Long id,
+                @Valid @RequestBody ReviewLikeDto reviewlikeDto) {
 
-        try {
-            ReviewLike updatedEntity = reviewlikeService.update(
-                    id,
-                    reviewlikeMapper.toEntity(reviewlikeDto)
-            );
-            return ResponseEntity.ok(reviewlikeMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                ReviewLike existing = reviewlikeService.findById(id)
+                .orElseThrow(() -> new RuntimeException("ReviewLike not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                reviewlikeMapper.updateEntityFromDto(reviewlikeDto, existing);
+
+                // Sauvegarde
+                ReviewLike updatedEntity = reviewlikeService.save(existing);
+
+                return ResponseEntity.ok(reviewlikeMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReviewLike(@PathVariable Long id) {
         reviewlikeService.deleteById(id);

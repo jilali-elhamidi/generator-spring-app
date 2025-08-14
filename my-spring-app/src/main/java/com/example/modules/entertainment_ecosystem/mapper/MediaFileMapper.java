@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface MediaFileMapper {
     List<MediaFileDto> toDtoList(List<MediaFile> mediafileList);
 
     List<MediaFile> toEntityList(List<MediaFileDto> mediafileDtoList);
+
+    void updateEntityFromDto(MediaFileDto dto, @MappingTarget MediaFile entity);
 
 }

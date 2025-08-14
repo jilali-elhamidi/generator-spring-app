@@ -51,22 +51,27 @@ public class LicenseController {
         return ResponseEntity.created(location).body(licenseMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<LicenseDto> updateLicense(
-            @PathVariable Long id,
-            @Valid @RequestBody LicenseDto licenseDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<LicenseDto> updateLicense(
+                @PathVariable Long id,
+                @Valid @RequestBody LicenseDto licenseDto) {
 
-        try {
-            License updatedEntity = licenseService.update(
-                    id,
-                    licenseMapper.toEntity(licenseDto)
-            );
-            return ResponseEntity.ok(licenseMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                License existing = licenseService.findById(id)
+                .orElseThrow(() -> new RuntimeException("License not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                licenseMapper.updateEntityFromDto(licenseDto, existing);
+
+                // Sauvegarde
+                License updatedEntity = licenseService.save(existing);
+
+                return ResponseEntity.ok(licenseMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLicense(@PathVariable Long id) {
         licenseService.deleteById(id);

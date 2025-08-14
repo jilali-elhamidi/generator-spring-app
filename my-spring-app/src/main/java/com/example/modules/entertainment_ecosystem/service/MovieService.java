@@ -8,6 +8,7 @@ import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 import com.example.modules.entertainment_ecosystem.model.Review;
+import com.example.modules.entertainment_ecosystem.repository.ReviewRepository;
 import com.example.modules.entertainment_ecosystem.model.Genre;
 import com.example.modules.entertainment_ecosystem.repository.GenreRepository;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
@@ -17,9 +18,11 @@ import com.example.modules.entertainment_ecosystem.repository.MerchandiseReposit
 import com.example.modules.entertainment_ecosystem.model.ProductionCompany;
 import com.example.modules.entertainment_ecosystem.repository.ProductionCompanyRepository;
 import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;
+import com.example.modules.entertainment_ecosystem.repository.DigitalPurchaseRepository;
 import com.example.modules.entertainment_ecosystem.model.MovieFormat;
 import com.example.modules.entertainment_ecosystem.repository.MovieFormatRepository;
 import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;
+import com.example.modules.entertainment_ecosystem.repository.StreamingContentLicenseRepository;
 import com.example.modules.entertainment_ecosystem.model.ContentProvider;
 import com.example.modules.entertainment_ecosystem.repository.ContentProviderRepository;
 import com.example.modules.entertainment_ecosystem.model.MovieStudio;
@@ -35,6 +38,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MovieService extends BaseService<Movie> {
@@ -42,28 +46,34 @@ public class MovieService extends BaseService<Movie> {
     protected final MovieRepository movieRepository;
     private final ArtistRepository castRepository;
     private final ArtistRepository directorRepository;
+    private final ReviewRepository reviewsRepository;
     private final GenreRepository genresRepository;
     private final UserProfileRepository watchlistUsersRepository;
     private final MerchandiseRepository relatedMerchandiseRepository;
     private final ProductionCompanyRepository productionCompanyRepository;
+    private final DigitalPurchaseRepository purchasesRepository;
     private final MovieFormatRepository formatsRepository;
+    private final StreamingContentLicenseRepository streamingLicensesRepository;
     private final ContentProviderRepository providerRepository;
     private final MovieStudioRepository movieStudioRepository;
     private final ContentRatingRepository contentRatingRepository;
     private final ContentTagRepository tagsRepository;
     private final ContentLanguageRepository languagesRepository;
 
-    public MovieService(MovieRepository repository,ArtistRepository castRepository,ArtistRepository directorRepository,GenreRepository genresRepository,UserProfileRepository watchlistUsersRepository,MerchandiseRepository relatedMerchandiseRepository,ProductionCompanyRepository productionCompanyRepository,MovieFormatRepository formatsRepository,ContentProviderRepository providerRepository,MovieStudioRepository movieStudioRepository,ContentRatingRepository contentRatingRepository,ContentTagRepository tagsRepository,ContentLanguageRepository languagesRepository)
+    public MovieService(MovieRepository repository,ArtistRepository castRepository,ArtistRepository directorRepository,ReviewRepository reviewsRepository,GenreRepository genresRepository,UserProfileRepository watchlistUsersRepository,MerchandiseRepository relatedMerchandiseRepository,ProductionCompanyRepository productionCompanyRepository,DigitalPurchaseRepository purchasesRepository,MovieFormatRepository formatsRepository,StreamingContentLicenseRepository streamingLicensesRepository,ContentProviderRepository providerRepository,MovieStudioRepository movieStudioRepository,ContentRatingRepository contentRatingRepository,ContentTagRepository tagsRepository,ContentLanguageRepository languagesRepository)
     {
         super(repository);
         this.movieRepository = repository;
         this.castRepository = castRepository;
         this.directorRepository = directorRepository;
+        this.reviewsRepository = reviewsRepository;
         this.genresRepository = genresRepository;
         this.watchlistUsersRepository = watchlistUsersRepository;
         this.relatedMerchandiseRepository = relatedMerchandiseRepository;
         this.productionCompanyRepository = productionCompanyRepository;
+        this.purchasesRepository = purchasesRepository;
         this.formatsRepository = formatsRepository;
+        this.streamingLicensesRepository = streamingLicensesRepository;
         this.providerRepository = providerRepository;
         this.movieStudioRepository = movieStudioRepository;
         this.contentRatingRepository = contentRatingRepository;
@@ -74,53 +84,147 @@ public class MovieService extends BaseService<Movie> {
     @Override
     public Movie save(Movie movie) {
 
-        if (movie.getDirector() != null && movie.getDirector().getId() != null) {
-        Artist director = directorRepository.findById(movie.getDirector().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        movie.setDirector(director);
-        }
 
-        if (movie.getProductionCompany() != null && movie.getProductionCompany().getId() != null) {
-        ProductionCompany productionCompany = productionCompanyRepository.findById(movie.getProductionCompany().getId())
-                .orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-        movie.setProductionCompany(productionCompany);
-        }
+    
 
-        if (movie.getProvider() != null && movie.getProvider().getId() != null) {
-        ContentProvider provider = providerRepository.findById(movie.getProvider().getId())
-                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-        movie.setProvider(provider);
-        }
+    
 
-        if (movie.getMovieStudio() != null && movie.getMovieStudio().getId() != null) {
-        MovieStudio movieStudio = movieStudioRepository.findById(movie.getMovieStudio().getId())
-                .orElseThrow(() -> new RuntimeException("MovieStudio not found"));
-        movie.setMovieStudio(movieStudio);
-        }
-
-        if (movie.getContentRating() != null && movie.getContentRating().getId() != null) {
-        ContentRating contentRating = contentRatingRepository.findById(movie.getContentRating().getId())
-                .orElseThrow(() -> new RuntimeException("ContentRating not found"));
-        movie.setContentRating(contentRating);
-        }
-
-        if (movie.getReviews() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (movie.getReviews() != null) {
+            List<Review> managedReviews = new ArrayList<>();
             for (Review item : movie.getReviews()) {
+            if (item.getId() != null) {
+            Review existingItem = reviewsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Review not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMovie(movie);
+            managedReviews.add(existingItem);
+            } else {
             item.setMovie(movie);
+            managedReviews.add(item);
             }
-        }
+            }
+            movie.setReviews(managedReviews);
+            }
+        
+    
 
-        if (movie.getPurchases() != null) {
+    
+
+    
+
+    
+
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (movie.getPurchases() != null) {
+            List<DigitalPurchase> managedPurchases = new ArrayList<>();
             for (DigitalPurchase item : movie.getPurchases()) {
+            if (item.getId() != null) {
+            DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMovie(movie);
+            managedPurchases.add(existingItem);
+            } else {
             item.setMovie(movie);
+            managedPurchases.add(item);
             }
-        }
+            }
+            movie.setPurchases(managedPurchases);
+            }
+        
+    
 
-        if (movie.getStreamingLicenses() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (movie.getStreamingLicenses() != null) {
+            List<StreamingContentLicense> managedStreamingLicenses = new ArrayList<>();
             for (StreamingContentLicense item : movie.getStreamingLicenses()) {
+            if (item.getId() != null) {
+            StreamingContentLicense existingItem = streamingLicensesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMovie(movie);
+            managedStreamingLicenses.add(existingItem);
+            } else {
             item.setMovie(movie);
+            managedStreamingLicenses.add(item);
             }
+            }
+            movie.setStreamingLicenses(managedStreamingLicenses);
+            }
+        
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    if (movie.getDirector() != null
+        && movie.getDirector().getId() != null) {
+        Artist existingDirector = directorRepository.findById(
+        movie.getDirector().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        movie.setDirector(existingDirector);
         }
+    
+    
+    
+    
+    
+    if (movie.getProductionCompany() != null
+        && movie.getProductionCompany().getId() != null) {
+        ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+        movie.getProductionCompany().getId()
+        ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
+        movie.setProductionCompany(existingProductionCompany);
+        }
+    
+    
+    
+    
+    if (movie.getProvider() != null
+        && movie.getProvider().getId() != null) {
+        ContentProvider existingProvider = providerRepository.findById(
+        movie.getProvider().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+        movie.setProvider(existingProvider);
+        }
+    
+    if (movie.getMovieStudio() != null
+        && movie.getMovieStudio().getId() != null) {
+        MovieStudio existingMovieStudio = movieStudioRepository.findById(
+        movie.getMovieStudio().getId()
+        ).orElseThrow(() -> new RuntimeException("MovieStudio not found"));
+        movie.setMovieStudio(existingMovieStudio);
+        }
+    
+    if (movie.getContentRating() != null
+        && movie.getContentRating().getId() != null) {
+        ContentRating existingContentRating = contentRatingRepository.findById(
+        movie.getContentRating().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
+        movie.setContentRating(existingContentRating);
+        }
+    
+    
+    
 
         return movieRepository.save(movie);
     }
@@ -138,35 +242,60 @@ public class MovieService extends BaseService<Movie> {
         existing.setBoxOfficeRevenue(movieRequest.getBoxOfficeRevenue());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (movieRequest.getDirector() != null &&
+        movieRequest.getDirector().getId() != null) {
 
-        if (movieRequest.getDirector() != null && movieRequest.getDirector().getId() != null) {
-        Artist director = directorRepository.findById(movieRequest.getDirector().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setDirector(director);
+        Artist existingDirector = directorRepository.findById(
+        movieRequest.getDirector().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setDirector(existingDirector);
+        } else {
+        existing.setDirector(null);
         }
+        if (movieRequest.getProductionCompany() != null &&
+        movieRequest.getProductionCompany().getId() != null) {
 
-        if (movieRequest.getProductionCompany() != null && movieRequest.getProductionCompany().getId() != null) {
-        ProductionCompany productionCompany = productionCompanyRepository.findById(movieRequest.getProductionCompany().getId())
-                .orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-        existing.setProductionCompany(productionCompany);
+        ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+        movieRequest.getProductionCompany().getId()
+        ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
+
+        existing.setProductionCompany(existingProductionCompany);
+        } else {
+        existing.setProductionCompany(null);
         }
+        if (movieRequest.getProvider() != null &&
+        movieRequest.getProvider().getId() != null) {
 
-        if (movieRequest.getProvider() != null && movieRequest.getProvider().getId() != null) {
-        ContentProvider provider = providerRepository.findById(movieRequest.getProvider().getId())
-                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-        existing.setProvider(provider);
+        ContentProvider existingProvider = providerRepository.findById(
+        movieRequest.getProvider().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+
+        existing.setProvider(existingProvider);
+        } else {
+        existing.setProvider(null);
         }
+        if (movieRequest.getMovieStudio() != null &&
+        movieRequest.getMovieStudio().getId() != null) {
 
-        if (movieRequest.getMovieStudio() != null && movieRequest.getMovieStudio().getId() != null) {
-        MovieStudio movieStudio = movieStudioRepository.findById(movieRequest.getMovieStudio().getId())
-                .orElseThrow(() -> new RuntimeException("MovieStudio not found"));
-        existing.setMovieStudio(movieStudio);
+        MovieStudio existingMovieStudio = movieStudioRepository.findById(
+        movieRequest.getMovieStudio().getId()
+        ).orElseThrow(() -> new RuntimeException("MovieStudio not found"));
+
+        existing.setMovieStudio(existingMovieStudio);
+        } else {
+        existing.setMovieStudio(null);
         }
+        if (movieRequest.getContentRating() != null &&
+        movieRequest.getContentRating().getId() != null) {
 
-        if (movieRequest.getContentRating() != null && movieRequest.getContentRating().getId() != null) {
-        ContentRating contentRating = contentRatingRepository.findById(movieRequest.getContentRating().getId())
-                .orElseThrow(() -> new RuntimeException("ContentRating not found"));
-        existing.setContentRating(contentRating);
+        ContentRating existingContentRating = contentRatingRepository.findById(
+        movieRequest.getContentRating().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
+
+        existing.setContentRating(existingContentRating);
+        } else {
+        existing.setContentRating(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -235,29 +364,59 @@ public class MovieService extends BaseService<Movie> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getReviews().clear();
+
         if (movieRequest.getReviews() != null) {
-            for (var item : movieRequest.getReviews()) {
-            item.setMovie(existing);
-            existing.getReviews().add(item);
-            }
-        }
+        List<Review> managedReviews = new ArrayList<>();
 
+        for (var item : movieRequest.getReviews()) {
+        if (item.getId() != null) {
+        Review existingItem = reviewsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Review not found"));
+        existingItem.setMovie(existing);
+        managedReviews.add(existingItem);
+        } else {
+        item.setMovie(existing);
+        managedReviews.add(item);
+        }
+        }
+        existing.setReviews(managedReviews);
+        }
         existing.getPurchases().clear();
-        if (movieRequest.getPurchases() != null) {
-            for (var item : movieRequest.getPurchases()) {
-            item.setMovie(existing);
-            existing.getPurchases().add(item);
-            }
-        }
 
+        if (movieRequest.getPurchases() != null) {
+        List<DigitalPurchase> managedPurchases = new ArrayList<>();
+
+        for (var item : movieRequest.getPurchases()) {
+        if (item.getId() != null) {
+        DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+        existingItem.setMovie(existing);
+        managedPurchases.add(existingItem);
+        } else {
+        item.setMovie(existing);
+        managedPurchases.add(item);
+        }
+        }
+        existing.setPurchases(managedPurchases);
+        }
         existing.getStreamingLicenses().clear();
+
         if (movieRequest.getStreamingLicenses() != null) {
-            for (var item : movieRequest.getStreamingLicenses()) {
-            item.setMovie(existing);
-            existing.getStreamingLicenses().add(item);
-            }
+        List<StreamingContentLicense> managedStreamingLicenses = new ArrayList<>();
+
+        for (var item : movieRequest.getStreamingLicenses()) {
+        if (item.getId() != null) {
+        StreamingContentLicense existingItem = streamingLicensesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
+        existingItem.setMovie(existing);
+        managedStreamingLicenses.add(existingItem);
+        } else {
+        item.setMovie(existing);
+        managedStreamingLicenses.add(item);
+        }
+        }
+        existing.setStreamingLicenses(managedStreamingLicenses);
         }
 
     
@@ -293,4 +452,6 @@ public class MovieService extends BaseService<Movie> {
 
         return movieRepository.save(existing);
     }
+
+
 }

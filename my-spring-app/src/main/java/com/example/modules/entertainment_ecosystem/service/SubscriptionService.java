@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class SubscriptionService extends BaseService<Subscription> {
@@ -35,23 +36,37 @@ public class SubscriptionService extends BaseService<Subscription> {
     @Override
     public Subscription save(Subscription subscription) {
 
-        if (subscription.getUser() != null && subscription.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(subscription.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        subscription.setUser(user);
-        }
 
-        if (subscription.getPlatform() != null && subscription.getPlatform().getId() != null) {
-        StreamingPlatform platform = platformRepository.findById(subscription.getPlatform().getId())
-                .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
-        subscription.setPlatform(platform);
-        }
+    
 
-        if (subscription.getPlan() != null && subscription.getPlan().getId() != null) {
-        SubscriptionPlan plan = planRepository.findById(subscription.getPlan().getId())
-                .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
-        subscription.setPlan(plan);
+    
+
+    
+
+    if (subscription.getUser() != null
+        && subscription.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        subscription.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        subscription.setUser(existingUser);
         }
+    
+    if (subscription.getPlatform() != null
+        && subscription.getPlatform().getId() != null) {
+        StreamingPlatform existingPlatform = platformRepository.findById(
+        subscription.getPlatform().getId()
+        ).orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
+        subscription.setPlatform(existingPlatform);
+        }
+    
+    if (subscription.getPlan() != null
+        && subscription.getPlan().getId() != null) {
+        SubscriptionPlan existingPlan = planRepository.findById(
+        subscription.getPlan().getId()
+        ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
+        subscription.setPlan(existingPlan);
+        }
+    
 
         return subscriptionRepository.save(subscription);
     }
@@ -67,23 +82,38 @@ public class SubscriptionService extends BaseService<Subscription> {
         existing.setStatus(subscriptionRequest.getStatus());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (subscriptionRequest.getUser() != null &&
+        subscriptionRequest.getUser().getId() != null) {
 
-        if (subscriptionRequest.getUser() != null && subscriptionRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(subscriptionRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        subscriptionRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
+        if (subscriptionRequest.getPlatform() != null &&
+        subscriptionRequest.getPlatform().getId() != null) {
 
-        if (subscriptionRequest.getPlatform() != null && subscriptionRequest.getPlatform().getId() != null) {
-        StreamingPlatform platform = platformRepository.findById(subscriptionRequest.getPlatform().getId())
-                .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
-        existing.setPlatform(platform);
+        StreamingPlatform existingPlatform = platformRepository.findById(
+        subscriptionRequest.getPlatform().getId()
+        ).orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
+
+        existing.setPlatform(existingPlatform);
+        } else {
+        existing.setPlatform(null);
         }
+        if (subscriptionRequest.getPlan() != null &&
+        subscriptionRequest.getPlan().getId() != null) {
 
-        if (subscriptionRequest.getPlan() != null && subscriptionRequest.getPlan().getId() != null) {
-        SubscriptionPlan plan = planRepository.findById(subscriptionRequest.getPlan().getId())
-                .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
-        existing.setPlan(plan);
+        SubscriptionPlan existingPlan = planRepository.findById(
+        subscriptionRequest.getPlan().getId()
+        ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
+
+        existing.setPlan(existingPlan);
+        } else {
+        existing.setPlan(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -99,4 +129,6 @@ public class SubscriptionService extends BaseService<Subscription> {
 
         return subscriptionRepository.save(existing);
     }
+
+
 }

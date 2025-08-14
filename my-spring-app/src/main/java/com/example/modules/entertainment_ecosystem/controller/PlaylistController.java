@@ -51,22 +51,27 @@ public class PlaylistController {
         return ResponseEntity.created(location).body(playlistMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PlaylistDto> updatePlaylist(
-            @PathVariable Long id,
-            @Valid @RequestBody PlaylistDto playlistDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<PlaylistDto> updatePlaylist(
+                @PathVariable Long id,
+                @Valid @RequestBody PlaylistDto playlistDto) {
 
-        try {
-            Playlist updatedEntity = playlistService.update(
-                    id,
-                    playlistMapper.toEntity(playlistDto)
-            );
-            return ResponseEntity.ok(playlistMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Playlist existing = playlistService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Playlist not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                playlistMapper.updateEntityFromDto(playlistDto, existing);
+
+                // Sauvegarde
+                Playlist updatedEntity = playlistService.save(existing);
+
+                return ResponseEntity.ok(playlistMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
         playlistService.deleteById(id);

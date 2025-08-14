@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface OnlineEventTypeMapper {
     List<OnlineEventTypeDto> toDtoList(List<OnlineEventType> onlineeventtypeList);
 
     List<OnlineEventType> toEntityList(List<OnlineEventTypeDto> onlineeventtypeDtoList);
+
+    void updateEntityFromDto(OnlineEventTypeDto dto, @MappingTarget OnlineEventType entity);
 
 }

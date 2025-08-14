@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class UserSettingService extends BaseService<UserSetting> {
@@ -27,11 +28,17 @@ public class UserSettingService extends BaseService<UserSetting> {
     @Override
     public UserSetting save(UserSetting usersetting) {
 
-        if (usersetting.getUser() != null && usersetting.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(usersetting.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        usersetting.setUser(user);
+
+    
+
+    if (usersetting.getUser() != null
+        && usersetting.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        usersetting.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        usersetting.setUser(existingUser);
         }
+    
 
         return usersettingRepository.save(usersetting);
     }
@@ -46,11 +53,16 @@ public class UserSettingService extends BaseService<UserSetting> {
         existing.setSettingValue(usersettingRequest.getSettingValue());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (usersettingRequest.getUser() != null &&
+        usersettingRequest.getUser().getId() != null) {
 
-        if (usersettingRequest.getUser() != null && usersettingRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(usersettingRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        usersettingRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -62,4 +74,6 @@ public class UserSettingService extends BaseService<UserSetting> {
 
         return usersettingRepository.save(existing);
     }
+
+
 }

@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface BookMapper {
     List<BookDto> toDtoList(List<Book> bookList);
 
     List<Book> toEntityList(List<BookDto> bookDtoList);
+
+    void updateEntityFromDto(BookDto dto, @MappingTarget Book entity);
 
 }

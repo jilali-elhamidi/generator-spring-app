@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "usersetting_tbl")
@@ -32,10 +34,12 @@ public class UserSetting extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("settings")
-    private UserProfile user;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "user_id")
+        
+        private UserProfile user;
+    
     
 
 }

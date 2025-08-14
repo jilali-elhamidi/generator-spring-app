@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class UserFollowService extends BaseService<UserFollow> {
@@ -31,17 +32,27 @@ public class UserFollowService extends BaseService<UserFollow> {
     @Override
     public UserFollow save(UserFollow userfollow) {
 
-        if (userfollow.getFollower() != null && userfollow.getFollower().getId() != null) {
-        UserProfile follower = followerRepository.findById(userfollow.getFollower().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userfollow.setFollower(follower);
-        }
 
-        if (userfollow.getFollowed() != null && userfollow.getFollowed().getId() != null) {
-        UserProfile followed = followedRepository.findById(userfollow.getFollowed().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userfollow.setFollowed(followed);
+    
+
+    
+
+    if (userfollow.getFollower() != null
+        && userfollow.getFollower().getId() != null) {
+        UserProfile existingFollower = followerRepository.findById(
+        userfollow.getFollower().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        userfollow.setFollower(existingFollower);
         }
+    
+    if (userfollow.getFollowed() != null
+        && userfollow.getFollowed().getId() != null) {
+        UserProfile existingFollowed = followedRepository.findById(
+        userfollow.getFollowed().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        userfollow.setFollowed(existingFollowed);
+        }
+    
 
         return userfollowRepository.save(userfollow);
     }
@@ -55,17 +66,27 @@ public class UserFollowService extends BaseService<UserFollow> {
         existing.setFollowDate(userfollowRequest.getFollowDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (userfollowRequest.getFollower() != null &&
+        userfollowRequest.getFollower().getId() != null) {
 
-        if (userfollowRequest.getFollower() != null && userfollowRequest.getFollower().getId() != null) {
-        UserProfile follower = followerRepository.findById(userfollowRequest.getFollower().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setFollower(follower);
+        UserProfile existingFollower = followerRepository.findById(
+        userfollowRequest.getFollower().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setFollower(existingFollower);
+        } else {
+        existing.setFollower(null);
         }
+        if (userfollowRequest.getFollowed() != null &&
+        userfollowRequest.getFollowed().getId() != null) {
 
-        if (userfollowRequest.getFollowed() != null && userfollowRequest.getFollowed().getId() != null) {
-        UserProfile followed = followedRepository.findById(userfollowRequest.getFollowed().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setFollowed(followed);
+        UserProfile existingFollowed = followedRepository.findById(
+        userfollowRequest.getFollowed().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setFollowed(existingFollowed);
+        } else {
+        existing.setFollowed(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -79,4 +100,6 @@ public class UserFollowService extends BaseService<UserFollow> {
 
         return userfollowRepository.save(existing);
     }
+
+
 }

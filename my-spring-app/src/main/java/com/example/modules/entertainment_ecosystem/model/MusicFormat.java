@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.MusicTrack;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "musicformat_tbl")
@@ -29,6 +31,7 @@ public class MusicFormat extends BaseEntity {
 
 // === Relations ===
 
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<MusicTrack> musicTracks;

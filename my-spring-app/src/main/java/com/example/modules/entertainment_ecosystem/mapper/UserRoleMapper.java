@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface UserRoleMapper {
     List<UserRoleDto> toDtoList(List<UserRole> userroleList);
 
     List<UserRole> toEntityList(List<UserRoleDto> userroleDtoList);
+
+    void updateEntityFromDto(UserRoleDto dto, @MappingTarget UserRole entity);
 
 }

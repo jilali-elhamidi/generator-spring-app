@@ -51,22 +51,27 @@ public class UserPlaylistItemController {
         return ResponseEntity.created(location).body(userplaylistitemMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserPlaylistItemDto> updateUserPlaylistItem(
-            @PathVariable Long id,
-            @Valid @RequestBody UserPlaylistItemDto userplaylistitemDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<UserPlaylistItemDto> updateUserPlaylistItem(
+                @PathVariable Long id,
+                @Valid @RequestBody UserPlaylistItemDto userplaylistitemDto) {
 
-        try {
-            UserPlaylistItem updatedEntity = userplaylistitemService.update(
-                    id,
-                    userplaylistitemMapper.toEntity(userplaylistitemDto)
-            );
-            return ResponseEntity.ok(userplaylistitemMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                UserPlaylistItem existing = userplaylistitemService.findById(id)
+                .orElseThrow(() -> new RuntimeException("UserPlaylistItem not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                userplaylistitemMapper.updateEntityFromDto(userplaylistitemDto, existing);
+
+                // Sauvegarde
+                UserPlaylistItem updatedEntity = userplaylistitemService.save(existing);
+
+                return ResponseEntity.ok(userplaylistitemMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserPlaylistItem(@PathVariable Long id) {
         userplaylistitemService.deleteById(id);

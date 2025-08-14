@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.OnlineEventType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "onlineevent_tbl")
@@ -38,10 +40,13 @@ public class OnlineEvent extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "host_id")
-    @JsonIgnoreProperties("hostedOnlineEvents")
-    private UserProfile host;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "host_id")
+        
+        private UserProfile host;
+    
+    
     
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "online_event_attendees",
@@ -50,10 +55,12 @@ public class OnlineEvent extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<UserProfile> attendees;
             
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "type_id")
-    @JsonIgnoreProperties("events")
-    private OnlineEventType type;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "type_id")
+        
+        private OnlineEventType type;
+    
     
 
 }

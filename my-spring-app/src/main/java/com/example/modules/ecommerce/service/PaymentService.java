@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class PaymentService extends BaseService<Payment> {
@@ -21,11 +22,15 @@ public class PaymentService extends BaseService<Payment> {
     {
         super(repository);
         this.paymentRepository = repository;
-            this.orderRepository = orderRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
     public Payment save(Payment payment) {
+
+
+    
+
         if (payment.getOrder() != null) {
         
         

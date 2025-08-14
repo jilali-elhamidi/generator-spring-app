@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Movie;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "moviemerchandise_tbl")
@@ -32,10 +34,12 @@ public class MovieMerchandise extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "movie_id")
-    @JsonIgnoreProperties("movieMerchandise")
-    private Movie movie;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "movie_id")
+        
+        private Movie movie;
+    
     
 
 }

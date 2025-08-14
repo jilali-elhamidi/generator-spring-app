@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class OnlineEventService extends BaseService<OnlineEvent> {
@@ -35,17 +36,30 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
     @Override
     public OnlineEvent save(OnlineEvent onlineevent) {
 
-        if (onlineevent.getHost() != null && onlineevent.getHost().getId() != null) {
-        UserProfile host = hostRepository.findById(onlineevent.getHost().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        onlineevent.setHost(host);
-        }
 
-        if (onlineevent.getType() != null && onlineevent.getType().getId() != null) {
-        OnlineEventType type = typeRepository.findById(onlineevent.getType().getId())
-                .orElseThrow(() -> new RuntimeException("OnlineEventType not found"));
-        onlineevent.setType(type);
+    
+
+    
+
+    
+
+    if (onlineevent.getHost() != null
+        && onlineevent.getHost().getId() != null) {
+        UserProfile existingHost = hostRepository.findById(
+        onlineevent.getHost().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        onlineevent.setHost(existingHost);
         }
+    
+    
+    if (onlineevent.getType() != null
+        && onlineevent.getType().getId() != null) {
+        OnlineEventType existingType = typeRepository.findById(
+        onlineevent.getType().getId()
+        ).orElseThrow(() -> new RuntimeException("OnlineEventType not found"));
+        onlineevent.setType(existingType);
+        }
+    
 
         return onlineeventRepository.save(onlineevent);
     }
@@ -62,17 +76,27 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
         existing.setDescription(onlineeventRequest.getDescription());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (onlineeventRequest.getHost() != null &&
+        onlineeventRequest.getHost().getId() != null) {
 
-        if (onlineeventRequest.getHost() != null && onlineeventRequest.getHost().getId() != null) {
-        UserProfile host = hostRepository.findById(onlineeventRequest.getHost().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setHost(host);
+        UserProfile existingHost = hostRepository.findById(
+        onlineeventRequest.getHost().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setHost(existingHost);
+        } else {
+        existing.setHost(null);
         }
+        if (onlineeventRequest.getType() != null &&
+        onlineeventRequest.getType().getId() != null) {
 
-        if (onlineeventRequest.getType() != null && onlineeventRequest.getType().getId() != null) {
-        OnlineEventType type = typeRepository.findById(onlineeventRequest.getType().getId())
-                .orElseThrow(() -> new RuntimeException("OnlineEventType not found"));
-        existing.setType(type);
+        OnlineEventType existingType = typeRepository.findById(
+        onlineeventRequest.getType().getId()
+        ).orElseThrow(() -> new RuntimeException("OnlineEventType not found"));
+
+        existing.setType(existingType);
+        } else {
+        existing.setType(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -97,4 +121,6 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
 
         return onlineeventRepository.save(existing);
     }
+
+
 }

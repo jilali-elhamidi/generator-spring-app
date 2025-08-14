@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ArtistAwardService extends BaseService<ArtistAward> {
@@ -27,11 +28,17 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
     @Override
     public ArtistAward save(ArtistAward artistaward) {
 
-        if (artistaward.getArtist() != null && artistaward.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(artistaward.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        artistaward.setArtist(artist);
+
+    
+
+    if (artistaward.getArtist() != null
+        && artistaward.getArtist().getId() != null) {
+        Artist existingArtist = artistRepository.findById(
+        artistaward.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        artistaward.setArtist(existingArtist);
         }
+    
 
         return artistawardRepository.save(artistaward);
     }
@@ -46,11 +53,16 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
         existing.setYear(artistawardRequest.getYear());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (artistawardRequest.getArtist() != null &&
+        artistawardRequest.getArtist().getId() != null) {
 
-        if (artistawardRequest.getArtist() != null && artistawardRequest.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(artistawardRequest.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setArtist(artist);
+        Artist existingArtist = artistRepository.findById(
+        artistawardRequest.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setArtist(existingArtist);
+        } else {
+        existing.setArtist(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -62,4 +74,6 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
 
         return artistawardRepository.save(existing);
     }
+
+
 }

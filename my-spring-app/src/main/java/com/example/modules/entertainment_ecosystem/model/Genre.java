@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.Podcast;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "genre_tbl")
@@ -29,18 +31,22 @@ public class Genre extends BaseEntity {
 
 // === Relations ===
 
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<Movie> movies;
         
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<TVShow> tvShows;
         
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<Book> bookGenres;
         
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "genre_music_tracks",
             joinColumns = @JoinColumn(name = "genre_id"),
@@ -48,14 +54,17 @@ public class Genre extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<MusicTrack> musicTracks;
             
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<UserProfile> favoriteUsers;
         
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<VideoGame> videoGames;
         
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "podcast_genres",
             joinColumns = @JoinColumn(name = "genre_id"),

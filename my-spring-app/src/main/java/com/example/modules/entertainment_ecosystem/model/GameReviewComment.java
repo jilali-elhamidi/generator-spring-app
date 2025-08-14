@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.GameReview;import com.example.modules.entertainment_ecosystem.model.GameReviewComment;import com.example.modules.entertainment_ecosystem.model.GameReviewComment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "gamereviewcomment_tbl")
@@ -32,24 +34,31 @@ public class GameReviewComment extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("gameReviewComments")
-    private UserProfile user;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "review_id")
-    @JsonIgnoreProperties("comments")
-    private GameReview review;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "user_id")
+        
+        private UserProfile user;
     
-    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("parentComment")
-    private List<GameReviewComment> replies;
     
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "parent_comment_id")
-    @JsonIgnoreProperties("replies")
-    private GameReviewComment parentComment;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "review_id")
+        
+        private GameReview review;
+    
+    
+    
+    @OneToMany(mappedBy = "parentComment", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<GameReviewComment> replies;
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "parentComment_id")
+        
+        private GameReviewComment parentComment;
+    
     
 
 }

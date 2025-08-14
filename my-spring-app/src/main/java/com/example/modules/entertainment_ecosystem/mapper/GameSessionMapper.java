@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface GameSessionMapper {
     List<GameSessionDto> toDtoList(List<GameSession> gamesessionList);
 
     List<GameSession> toEntityList(List<GameSessionDto> gamesessionDtoList);
+
+    void updateEntityFromDto(GameSessionDto dto, @MappingTarget GameSession entity);
 
 }

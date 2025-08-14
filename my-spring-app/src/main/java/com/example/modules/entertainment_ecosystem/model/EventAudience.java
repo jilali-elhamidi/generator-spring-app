@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.LiveEvent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "eventaudience_tbl")
@@ -32,6 +34,7 @@ public class EventAudience extends BaseEntity {
 
 // === Relations ===
 
+    
     @OneToOne
     @JoinColumn(name = "event_id")
     @JsonIgnoreProperties("audience")

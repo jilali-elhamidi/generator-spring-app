@@ -51,22 +51,27 @@ public class ContentRatingController {
         return ResponseEntity.created(location).body(contentratingMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ContentRatingDto> updateContentRating(
-            @PathVariable Long id,
-            @Valid @RequestBody ContentRatingDto contentratingDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ContentRatingDto> updateContentRating(
+                @PathVariable Long id,
+                @Valid @RequestBody ContentRatingDto contentratingDto) {
 
-        try {
-            ContentRating updatedEntity = contentratingService.update(
-                    id,
-                    contentratingMapper.toEntity(contentratingDto)
-            );
-            return ResponseEntity.ok(contentratingMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                ContentRating existing = contentratingService.findById(id)
+                .orElseThrow(() -> new RuntimeException("ContentRating not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                contentratingMapper.updateEntityFromDto(contentratingDto, existing);
+
+                // Sauvegarde
+                ContentRating updatedEntity = contentratingService.save(existing);
+
+                return ResponseEntity.ok(contentratingMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContentRating(@PathVariable Long id) {
         contentratingService.deleteById(id);

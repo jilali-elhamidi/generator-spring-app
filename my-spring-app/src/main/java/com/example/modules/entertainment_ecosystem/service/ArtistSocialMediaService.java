@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
@@ -27,11 +28,17 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
     @Override
     public ArtistSocialMedia save(ArtistSocialMedia artistsocialmedia) {
 
-        if (artistsocialmedia.getArtist() != null && artistsocialmedia.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(artistsocialmedia.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        artistsocialmedia.setArtist(artist);
+
+    
+
+    if (artistsocialmedia.getArtist() != null
+        && artistsocialmedia.getArtist().getId() != null) {
+        Artist existingArtist = artistRepository.findById(
+        artistsocialmedia.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        artistsocialmedia.setArtist(existingArtist);
         }
+    
 
         return artistsocialmediaRepository.save(artistsocialmedia);
     }
@@ -46,11 +53,16 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
         existing.setUrl(artistsocialmediaRequest.getUrl());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (artistsocialmediaRequest.getArtist() != null &&
+        artistsocialmediaRequest.getArtist().getId() != null) {
 
-        if (artistsocialmediaRequest.getArtist() != null && artistsocialmediaRequest.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(artistsocialmediaRequest.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setArtist(artist);
+        Artist existingArtist = artistRepository.findById(
+        artistsocialmediaRequest.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setArtist(existingArtist);
+        } else {
+        existing.setArtist(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -62,4 +74,6 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
 
         return artistsocialmediaRepository.save(existing);
     }
+
+
 }

@@ -6,6 +6,7 @@ import com.example.modules.entertainment_ecosystem.repository.AlbumRepository;
 import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 import com.example.modules.entertainment_ecosystem.model.MusicTrack;
+import com.example.modules.entertainment_ecosystem.repository.MusicTrackRepository;
 import com.example.modules.entertainment_ecosystem.model.Genre;
 import com.example.modules.entertainment_ecosystem.repository.GenreRepository;
 import com.example.modules.entertainment_ecosystem.model.MusicLabel;
@@ -15,20 +16,23 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class AlbumService extends BaseService<Album> {
 
     protected final AlbumRepository albumRepository;
     private final ArtistRepository artistRepository;
+    private final MusicTrackRepository tracksRepository;
     private final GenreRepository genresRepository;
     private final MusicLabelRepository musicLabelRepository;
 
-    public AlbumService(AlbumRepository repository,ArtistRepository artistRepository,GenreRepository genresRepository,MusicLabelRepository musicLabelRepository)
+    public AlbumService(AlbumRepository repository,ArtistRepository artistRepository,MusicTrackRepository tracksRepository,GenreRepository genresRepository,MusicLabelRepository musicLabelRepository)
     {
         super(repository);
         this.albumRepository = repository;
         this.artistRepository = artistRepository;
+        this.tracksRepository = tracksRepository;
         this.genresRepository = genresRepository;
         this.musicLabelRepository = musicLabelRepository;
     }
@@ -36,23 +40,53 @@ public class AlbumService extends BaseService<Album> {
     @Override
     public Album save(Album album) {
 
-        if (album.getArtist() != null && album.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(album.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        album.setArtist(artist);
-        }
 
-        if (album.getMusicLabel() != null && album.getMusicLabel().getId() != null) {
-        MusicLabel musicLabel = musicLabelRepository.findById(album.getMusicLabel().getId())
-                .orElseThrow(() -> new RuntimeException("MusicLabel not found"));
-        album.setMusicLabel(musicLabel);
-        }
+    
 
-        if (album.getTracks() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (album.getTracks() != null) {
+            List<MusicTrack> managedTracks = new ArrayList<>();
             for (MusicTrack item : album.getTracks()) {
+            if (item.getId() != null) {
+            MusicTrack existingItem = tracksRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setAlbum(album);
+            managedTracks.add(existingItem);
+            } else {
             item.setAlbum(album);
+            managedTracks.add(item);
             }
+            }
+            album.setTracks(managedTracks);
+            }
+        
+    
+
+    
+
+    
+
+    if (album.getArtist() != null
+        && album.getArtist().getId() != null) {
+        Artist existingArtist = artistRepository.findById(
+        album.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        album.setArtist(existingArtist);
         }
+    
+    
+    
+    if (album.getMusicLabel() != null
+        && album.getMusicLabel().getId() != null) {
+        MusicLabel existingMusicLabel = musicLabelRepository.findById(
+        album.getMusicLabel().getId()
+        ).orElseThrow(() -> new RuntimeException("MusicLabel not found"));
+        album.setMusicLabel(existingMusicLabel);
+        }
+    
 
         return albumRepository.save(album);
     }
@@ -67,17 +101,27 @@ public class AlbumService extends BaseService<Album> {
         existing.setReleaseDate(albumRequest.getReleaseDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (albumRequest.getArtist() != null &&
+        albumRequest.getArtist().getId() != null) {
 
-        if (albumRequest.getArtist() != null && albumRequest.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(albumRequest.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setArtist(artist);
+        Artist existingArtist = artistRepository.findById(
+        albumRequest.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setArtist(existingArtist);
+        } else {
+        existing.setArtist(null);
         }
+        if (albumRequest.getMusicLabel() != null &&
+        albumRequest.getMusicLabel().getId() != null) {
 
-        if (albumRequest.getMusicLabel() != null && albumRequest.getMusicLabel().getId() != null) {
-        MusicLabel musicLabel = musicLabelRepository.findById(albumRequest.getMusicLabel().getId())
-                .orElseThrow(() -> new RuntimeException("MusicLabel not found"));
-        existing.setMusicLabel(musicLabel);
+        MusicLabel existingMusicLabel = musicLabelRepository.findById(
+        albumRequest.getMusicLabel().getId()
+        ).orElseThrow(() -> new RuntimeException("MusicLabel not found"));
+
+        existing.setMusicLabel(existingMusicLabel);
+        } else {
+        existing.setMusicLabel(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -92,13 +136,23 @@ public class AlbumService extends BaseService<Album> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getTracks().clear();
+
         if (albumRequest.getTracks() != null) {
-            for (var item : albumRequest.getTracks()) {
-            item.setAlbum(existing);
-            existing.getTracks().add(item);
-            }
+        List<MusicTrack> managedTracks = new ArrayList<>();
+
+        for (var item : albumRequest.getTracks()) {
+        if (item.getId() != null) {
+        MusicTrack existingItem = tracksRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+        existingItem.setAlbum(existing);
+        managedTracks.add(existingItem);
+        } else {
+        item.setAlbum(existing);
+        managedTracks.add(item);
+        }
+        }
+        existing.setTracks(managedTracks);
         }
 
     
@@ -112,4 +166,6 @@ public class AlbumService extends BaseService<Album> {
 
         return albumRepository.save(existing);
     }
+
+
 }

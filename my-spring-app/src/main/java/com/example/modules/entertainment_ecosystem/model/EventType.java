@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.LiveEvent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "eventtype_tbl")
@@ -29,9 +31,10 @@ public class EventType extends BaseEntity {
 
 // === Relations ===
 
-    @OneToMany(mappedBy = "eventType", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("eventType")
-    private List<LiveEvent> events;
+    
+    @OneToMany(mappedBy = "eventType", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<LiveEvent> events;
     
 
 }

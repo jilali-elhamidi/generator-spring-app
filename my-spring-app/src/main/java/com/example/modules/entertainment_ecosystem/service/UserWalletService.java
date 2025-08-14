@@ -6,33 +6,59 @@ import com.example.modules.entertainment_ecosystem.repository.UserWalletReposito
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.Transaction;
+import com.example.modules.entertainment_ecosystem.repository.TransactionRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class UserWalletService extends BaseService<UserWallet> {
 
     protected final UserWalletRepository userwalletRepository;
     private final UserProfileRepository userRepository;
+    private final TransactionRepository transactionsRepository;
 
-    public UserWalletService(UserWalletRepository repository,UserProfileRepository userRepository)
+    public UserWalletService(UserWalletRepository repository,UserProfileRepository userRepository,TransactionRepository transactionsRepository)
     {
         super(repository);
         this.userwalletRepository = repository;
-            this.userRepository = userRepository;
+        this.userRepository = userRepository;
+        this.transactionsRepository = transactionsRepository;
     }
 
     @Override
     public UserWallet save(UserWallet userwallet) {
 
-        if (userwallet.getTransactions() != null) {
+
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (userwallet.getTransactions() != null) {
+            List<Transaction> managedTransactions = new ArrayList<>();
             for (Transaction item : userwallet.getTransactions()) {
+            if (item.getId() != null) {
+            Transaction existingItem = transactionsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Transaction not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setWallet(userwallet);
+            managedTransactions.add(existingItem);
+            } else {
             item.setWallet(userwallet);
+            managedTransactions.add(item);
             }
-        }
+            }
+            userwallet.setTransactions(managedTransactions);
+            }
+        
+    
+
+    
+    
         if (userwallet.getUser() != null) {
         
         
@@ -61,13 +87,23 @@ public class UserWalletService extends BaseService<UserWallet> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getTransactions().clear();
+
         if (userwalletRequest.getTransactions() != null) {
-            for (var item : userwalletRequest.getTransactions()) {
-            item.setWallet(existing);
-            existing.getTransactions().add(item);
-            }
+        List<Transaction> managedTransactions = new ArrayList<>();
+
+        for (var item : userwalletRequest.getTransactions()) {
+        if (item.getId() != null) {
+        Transaction existingItem = transactionsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        existingItem.setWallet(existing);
+        managedTransactions.add(existingItem);
+        } else {
+        item.setWallet(existing);
+        managedTransactions.add(item);
+        }
+        }
+        existing.setTransactions(managedTransactions);
         }
 
     
@@ -95,4 +131,6 @@ public class UserWalletService extends BaseService<UserWallet> {
 
         return userwalletRepository.save(existing);
     }
+
+
 }

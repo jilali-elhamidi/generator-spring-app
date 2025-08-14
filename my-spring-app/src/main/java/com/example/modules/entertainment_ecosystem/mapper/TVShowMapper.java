@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface TVShowMapper {
     List<TVShowDto> toDtoList(List<TVShow> tvshowList);
 
     List<TVShow> toEntityList(List<TVShowDto> tvshowDtoList);
+
+    void updateEntityFromDto(TVShowDto dto, @MappingTarget TVShow entity);
 
 }

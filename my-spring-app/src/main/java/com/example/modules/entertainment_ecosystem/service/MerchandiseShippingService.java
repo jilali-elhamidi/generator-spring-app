@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MerchandiseShippingService extends BaseService<MerchandiseShipping> {
@@ -25,17 +26,26 @@ public class MerchandiseShippingService extends BaseService<MerchandiseShipping>
         super(repository);
         this.merchandiseshippingRepository = repository;
         this.merchandiseItemRepository = merchandiseItemRepository;
-            this.orderRepository = orderRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
     public MerchandiseShipping save(MerchandiseShipping merchandiseshipping) {
 
-        if (merchandiseshipping.getMerchandiseItem() != null && merchandiseshipping.getMerchandiseItem().getId() != null) {
-        Merchandise merchandiseItem = merchandiseItemRepository.findById(merchandiseshipping.getMerchandiseItem().getId())
-                .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        merchandiseshipping.setMerchandiseItem(merchandiseItem);
+
+    
+
+    
+
+    if (merchandiseshipping.getMerchandiseItem() != null
+        && merchandiseshipping.getMerchandiseItem().getId() != null) {
+        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+        merchandiseshipping.getMerchandiseItem().getId()
+        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+        merchandiseshipping.setMerchandiseItem(existingMerchandiseItem);
         }
+    
+    
         if (merchandiseshipping.getOrder() != null) {
         
         
@@ -62,11 +72,16 @@ public class MerchandiseShippingService extends BaseService<MerchandiseShipping>
         existing.setTrackingNumber(merchandiseshippingRequest.getTrackingNumber());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (merchandiseshippingRequest.getMerchandiseItem() != null &&
+        merchandiseshippingRequest.getMerchandiseItem().getId() != null) {
 
-        if (merchandiseshippingRequest.getMerchandiseItem() != null && merchandiseshippingRequest.getMerchandiseItem().getId() != null) {
-        Merchandise merchandiseItem = merchandiseItemRepository.findById(merchandiseshippingRequest.getMerchandiseItem().getId())
-                .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        existing.setMerchandiseItem(merchandiseItem);
+        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+        merchandiseshippingRequest.getMerchandiseItem().getId()
+        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+
+        existing.setMerchandiseItem(existingMerchandiseItem);
+        } else {
+        existing.setMerchandiseItem(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -98,4 +113,6 @@ public class MerchandiseShippingService extends BaseService<MerchandiseShipping>
 
         return merchandiseshippingRepository.save(existing);
     }
+
+
 }

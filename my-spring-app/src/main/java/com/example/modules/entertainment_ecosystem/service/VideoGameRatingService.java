@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class VideoGameRatingService extends BaseService<VideoGameRating> {
@@ -27,11 +28,17 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
     @Override
     public VideoGameRating save(VideoGameRating videogamerating) {
 
-        if (videogamerating.getGame() != null && videogamerating.getGame().getId() != null) {
-        VideoGame game = gameRepository.findById(videogamerating.getGame().getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        videogamerating.setGame(game);
+
+    
+
+    if (videogamerating.getGame() != null
+        && videogamerating.getGame().getId() != null) {
+        VideoGame existingGame = gameRepository.findById(
+        videogamerating.getGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        videogamerating.setGame(existingGame);
         }
+    
 
         return videogameratingRepository.save(videogamerating);
     }
@@ -46,11 +53,16 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
         existing.setRating(videogameratingRequest.getRating());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (videogameratingRequest.getGame() != null &&
+        videogameratingRequest.getGame().getId() != null) {
 
-        if (videogameratingRequest.getGame() != null && videogameratingRequest.getGame().getId() != null) {
-        VideoGame game = gameRepository.findById(videogameratingRequest.getGame().getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        existing.setGame(game);
+        VideoGame existingGame = gameRepository.findById(
+        videogameratingRequest.getGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+        existing.setGame(existingGame);
+        } else {
+        existing.setGame(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -62,4 +74,6 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
 
         return videogameratingRepository.save(existing);
     }
+
+
 }

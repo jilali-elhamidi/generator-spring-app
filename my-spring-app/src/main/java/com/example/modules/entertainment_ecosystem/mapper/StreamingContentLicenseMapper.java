@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface StreamingContentLicenseMapper {
     List<StreamingContentLicenseDto> toDtoList(List<StreamingContentLicense> streamingcontentlicenseList);
 
     List<StreamingContentLicense> toEntityList(List<StreamingContentLicenseDto> streamingcontentlicenseDtoList);
+
+    void updateEntityFromDto(StreamingContentLicenseDto dto, @MappingTarget StreamingContentLicense entity);
 
 }

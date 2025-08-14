@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class DigitalAssetService extends BaseService<DigitalAsset> {
@@ -29,23 +30,36 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
         this.digitalassetRepository = repository;
         this.assetTypeRepository = assetTypeRepository;
         this.artistRepository = artistRepository;
-            this.licenseRepository = licenseRepository;
+        this.licenseRepository = licenseRepository;
     }
 
     @Override
     public DigitalAsset save(DigitalAsset digitalasset) {
 
-        if (digitalasset.getAssetType() != null && digitalasset.getAssetType().getId() != null) {
-        DigitalAssetType assetType = assetTypeRepository.findById(digitalasset.getAssetType().getId())
-                .orElseThrow(() -> new RuntimeException("DigitalAssetType not found"));
-        digitalasset.setAssetType(assetType);
-        }
 
-        if (digitalasset.getArtist() != null && digitalasset.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(digitalasset.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        digitalasset.setArtist(artist);
+    
+
+    
+
+    
+
+    if (digitalasset.getAssetType() != null
+        && digitalasset.getAssetType().getId() != null) {
+        DigitalAssetType existingAssetType = assetTypeRepository.findById(
+        digitalasset.getAssetType().getId()
+        ).orElseThrow(() -> new RuntimeException("DigitalAssetType not found"));
+        digitalasset.setAssetType(existingAssetType);
         }
+    
+    if (digitalasset.getArtist() != null
+        && digitalasset.getArtist().getId() != null) {
+        Artist existingArtist = artistRepository.findById(
+        digitalasset.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        digitalasset.setArtist(existingArtist);
+        }
+    
+    
         if (digitalasset.getLicense() != null) {
         
         
@@ -71,17 +85,27 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
         existing.setUrl(digitalassetRequest.getUrl());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (digitalassetRequest.getAssetType() != null &&
+        digitalassetRequest.getAssetType().getId() != null) {
 
-        if (digitalassetRequest.getAssetType() != null && digitalassetRequest.getAssetType().getId() != null) {
-        DigitalAssetType assetType = assetTypeRepository.findById(digitalassetRequest.getAssetType().getId())
-                .orElseThrow(() -> new RuntimeException("DigitalAssetType not found"));
-        existing.setAssetType(assetType);
+        DigitalAssetType existingAssetType = assetTypeRepository.findById(
+        digitalassetRequest.getAssetType().getId()
+        ).orElseThrow(() -> new RuntimeException("DigitalAssetType not found"));
+
+        existing.setAssetType(existingAssetType);
+        } else {
+        existing.setAssetType(null);
         }
+        if (digitalassetRequest.getArtist() != null &&
+        digitalassetRequest.getArtist().getId() != null) {
 
-        if (digitalassetRequest.getArtist() != null && digitalassetRequest.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(digitalassetRequest.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setArtist(artist);
+        Artist existingArtist = artistRepository.findById(
+        digitalassetRequest.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setArtist(existingArtist);
+        } else {
+        existing.setArtist(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -115,4 +139,6 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
 
         return digitalassetRepository.save(existing);
     }
+
+
 }

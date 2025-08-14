@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class UserPlaylistItemService extends BaseService<UserPlaylistItem> {
@@ -35,23 +36,37 @@ public class UserPlaylistItemService extends BaseService<UserPlaylistItem> {
     @Override
     public UserPlaylistItem save(UserPlaylistItem userplaylistitem) {
 
-        if (userplaylistitem.getPlaylist() != null && userplaylistitem.getPlaylist().getId() != null) {
-        UserPlaylist playlist = playlistRepository.findById(userplaylistitem.getPlaylist().getId())
-                .orElseThrow(() -> new RuntimeException("UserPlaylist not found"));
-        userplaylistitem.setPlaylist(playlist);
-        }
 
-        if (userplaylistitem.getMusicTrack() != null && userplaylistitem.getMusicTrack().getId() != null) {
-        MusicTrack musicTrack = musicTrackRepository.findById(userplaylistitem.getMusicTrack().getId())
-                .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        userplaylistitem.setMusicTrack(musicTrack);
-        }
+    
 
-        if (userplaylistitem.getAddedBy() != null && userplaylistitem.getAddedBy().getId() != null) {
-        UserProfile addedBy = addedByRepository.findById(userplaylistitem.getAddedBy().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userplaylistitem.setAddedBy(addedBy);
+    
+
+    
+
+    if (userplaylistitem.getPlaylist() != null
+        && userplaylistitem.getPlaylist().getId() != null) {
+        UserPlaylist existingPlaylist = playlistRepository.findById(
+        userplaylistitem.getPlaylist().getId()
+        ).orElseThrow(() -> new RuntimeException("UserPlaylist not found"));
+        userplaylistitem.setPlaylist(existingPlaylist);
         }
+    
+    if (userplaylistitem.getMusicTrack() != null
+        && userplaylistitem.getMusicTrack().getId() != null) {
+        MusicTrack existingMusicTrack = musicTrackRepository.findById(
+        userplaylistitem.getMusicTrack().getId()
+        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+        userplaylistitem.setMusicTrack(existingMusicTrack);
+        }
+    
+    if (userplaylistitem.getAddedBy() != null
+        && userplaylistitem.getAddedBy().getId() != null) {
+        UserProfile existingAddedBy = addedByRepository.findById(
+        userplaylistitem.getAddedBy().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        userplaylistitem.setAddedBy(existingAddedBy);
+        }
+    
 
         return userplaylistitemRepository.save(userplaylistitem);
     }
@@ -65,23 +80,38 @@ public class UserPlaylistItemService extends BaseService<UserPlaylistItem> {
         existing.setPosition(userplaylistitemRequest.getPosition());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (userplaylistitemRequest.getPlaylist() != null &&
+        userplaylistitemRequest.getPlaylist().getId() != null) {
 
-        if (userplaylistitemRequest.getPlaylist() != null && userplaylistitemRequest.getPlaylist().getId() != null) {
-        UserPlaylist playlist = playlistRepository.findById(userplaylistitemRequest.getPlaylist().getId())
-                .orElseThrow(() -> new RuntimeException("UserPlaylist not found"));
-        existing.setPlaylist(playlist);
+        UserPlaylist existingPlaylist = playlistRepository.findById(
+        userplaylistitemRequest.getPlaylist().getId()
+        ).orElseThrow(() -> new RuntimeException("UserPlaylist not found"));
+
+        existing.setPlaylist(existingPlaylist);
+        } else {
+        existing.setPlaylist(null);
         }
+        if (userplaylistitemRequest.getMusicTrack() != null &&
+        userplaylistitemRequest.getMusicTrack().getId() != null) {
 
-        if (userplaylistitemRequest.getMusicTrack() != null && userplaylistitemRequest.getMusicTrack().getId() != null) {
-        MusicTrack musicTrack = musicTrackRepository.findById(userplaylistitemRequest.getMusicTrack().getId())
-                .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        existing.setMusicTrack(musicTrack);
+        MusicTrack existingMusicTrack = musicTrackRepository.findById(
+        userplaylistitemRequest.getMusicTrack().getId()
+        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+
+        existing.setMusicTrack(existingMusicTrack);
+        } else {
+        existing.setMusicTrack(null);
         }
+        if (userplaylistitemRequest.getAddedBy() != null &&
+        userplaylistitemRequest.getAddedBy().getId() != null) {
 
-        if (userplaylistitemRequest.getAddedBy() != null && userplaylistitemRequest.getAddedBy().getId() != null) {
-        UserProfile addedBy = addedByRepository.findById(userplaylistitemRequest.getAddedBy().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setAddedBy(addedBy);
+        UserProfile existingAddedBy = addedByRepository.findById(
+        userplaylistitemRequest.getAddedBy().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setAddedBy(existingAddedBy);
+        } else {
+        existing.setAddedBy(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -97,4 +127,6 @@ public class UserPlaylistItemService extends BaseService<UserPlaylistItem> {
 
         return userplaylistitemRepository.save(existing);
     }
+
+
 }

@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserWallet;import com.example.modules.entertainment_ecosystem.model.Invoice;import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "transaction_tbl")
@@ -35,15 +37,19 @@ public class Transaction extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "wallet_id")
-    @JsonIgnoreProperties("transactions")
-    private UserWallet wallet;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "wallet_id")
+        
+        private UserWallet wallet;
+    
+    
     
     @OneToOne(mappedBy = "transaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("transaction")
     private Invoice relatedInvoice;
         
+    
     @OneToOne(mappedBy = "transaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("transaction")
     private DigitalPurchase digitalPurchase;

@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface PodcastMapper {
     List<PodcastDto> toDtoList(List<Podcast> podcastList);
 
     List<Podcast> toEntityList(List<PodcastDto> podcastDtoList);
+
+    void updateEntityFromDto(PodcastDto dto, @MappingTarget Podcast entity);
 
 }

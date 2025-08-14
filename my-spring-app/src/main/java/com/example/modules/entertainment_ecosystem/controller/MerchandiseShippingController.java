@@ -51,22 +51,27 @@ public class MerchandiseShippingController {
         return ResponseEntity.created(location).body(merchandiseshippingMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<MerchandiseShippingDto> updateMerchandiseShipping(
-            @PathVariable Long id,
-            @Valid @RequestBody MerchandiseShippingDto merchandiseshippingDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<MerchandiseShippingDto> updateMerchandiseShipping(
+                @PathVariable Long id,
+                @Valid @RequestBody MerchandiseShippingDto merchandiseshippingDto) {
 
-        try {
-            MerchandiseShipping updatedEntity = merchandiseshippingService.update(
-                    id,
-                    merchandiseshippingMapper.toEntity(merchandiseshippingDto)
-            );
-            return ResponseEntity.ok(merchandiseshippingMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                MerchandiseShipping existing = merchandiseshippingService.findById(id)
+                .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                merchandiseshippingMapper.updateEntityFromDto(merchandiseshippingDto, existing);
+
+                // Sauvegarde
+                MerchandiseShipping updatedEntity = merchandiseshippingService.save(existing);
+
+                return ResponseEntity.ok(merchandiseshippingMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMerchandiseShipping(@PathVariable Long id) {
         merchandiseshippingService.deleteById(id);

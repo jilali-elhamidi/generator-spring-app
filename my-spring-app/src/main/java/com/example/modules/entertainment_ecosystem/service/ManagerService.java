@@ -4,31 +4,54 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.Manager;
 import com.example.modules.entertainment_ecosystem.repository.ManagerRepository;
 import com.example.modules.entertainment_ecosystem.model.Artist;
+import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ManagerService extends BaseService<Manager> {
 
     protected final ManagerRepository managerRepository;
+    private final ArtistRepository artistsRepository;
 
-    public ManagerService(ManagerRepository repository)
+    public ManagerService(ManagerRepository repository,ArtistRepository artistsRepository)
     {
         super(repository);
         this.managerRepository = repository;
+        this.artistsRepository = artistsRepository;
     }
 
     @Override
     public Manager save(Manager manager) {
 
-        if (manager.getArtists() != null) {
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (manager.getArtists() != null) {
+            List<Artist> managedArtists = new ArrayList<>();
             for (Artist item : manager.getArtists()) {
+            if (item.getId() != null) {
+            Artist existingItem = artistsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Artist not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setManager(manager);
+            managedArtists.add(existingItem);
+            } else {
             item.setManager(manager);
+            managedArtists.add(item);
             }
-        }
+            }
+            manager.setArtists(managedArtists);
+            }
+        
+    
+
+    
 
         return managerRepository.save(manager);
     }
@@ -47,13 +70,23 @@ public class ManagerService extends BaseService<Manager> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getArtists().clear();
+
         if (managerRequest.getArtists() != null) {
-            for (var item : managerRequest.getArtists()) {
-            item.setManager(existing);
-            existing.getArtists().add(item);
-            }
+        List<Artist> managedArtists = new ArrayList<>();
+
+        for (var item : managerRequest.getArtists()) {
+        if (item.getId() != null) {
+        Artist existingItem = artistsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found"));
+        existingItem.setManager(existing);
+        managedArtists.add(existingItem);
+        } else {
+        item.setManager(existing);
+        managedArtists.add(item);
+        }
+        }
+        existing.setArtists(managedArtists);
         }
 
     
@@ -61,4 +94,6 @@ public class ManagerService extends BaseService<Manager> {
 
         return managerRepository.save(existing);
     }
+
+
 }

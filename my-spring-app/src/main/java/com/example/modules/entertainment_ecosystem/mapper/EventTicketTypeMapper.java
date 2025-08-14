@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface EventTicketTypeMapper {
     List<EventTicketTypeDto> toDtoList(List<EventTicketType> eventtickettypeList);
 
     List<EventTicketType> toEntityList(List<EventTicketTypeDto> eventtickettypeDtoList);
+
+    void updateEntityFromDto(EventTicketTypeDto dto, @MappingTarget EventTicketType entity);
 
 }

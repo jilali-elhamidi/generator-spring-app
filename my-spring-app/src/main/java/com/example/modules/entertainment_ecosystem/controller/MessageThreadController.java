@@ -51,22 +51,27 @@ public class MessageThreadController {
         return ResponseEntity.created(location).body(messagethreadMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<MessageThreadDto> updateMessageThread(
-            @PathVariable Long id,
-            @Valid @RequestBody MessageThreadDto messagethreadDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<MessageThreadDto> updateMessageThread(
+                @PathVariable Long id,
+                @Valid @RequestBody MessageThreadDto messagethreadDto) {
 
-        try {
-            MessageThread updatedEntity = messagethreadService.update(
-                    id,
-                    messagethreadMapper.toEntity(messagethreadDto)
-            );
-            return ResponseEntity.ok(messagethreadMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                MessageThread existing = messagethreadService.findById(id)
+                .orElseThrow(() -> new RuntimeException("MessageThread not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                messagethreadMapper.updateEntityFromDto(messagethreadDto, existing);
+
+                // Sauvegarde
+                MessageThread updatedEntity = messagethreadService.save(existing);
+
+                return ResponseEntity.ok(messagethreadMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMessageThread(@PathVariable Long id) {
         messagethreadService.deleteById(id);

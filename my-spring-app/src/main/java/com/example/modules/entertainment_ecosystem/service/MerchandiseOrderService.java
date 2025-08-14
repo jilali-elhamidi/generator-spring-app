@@ -6,6 +6,7 @@ import com.example.modules.entertainment_ecosystem.repository.MerchandiseOrderRe
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseOrderItem;
+import com.example.modules.entertainment_ecosystem.repository.MerchandiseOrderItemRepository;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseShipping;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseShippingRepository;
 
@@ -13,36 +14,65 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
 
     protected final MerchandiseOrderRepository merchandiseorderRepository;
     private final UserProfileRepository userRepository;
+    private final MerchandiseOrderItemRepository itemsRepository;
     private final MerchandiseShippingRepository shippingDetailsRepository;
 
-    public MerchandiseOrderService(MerchandiseOrderRepository repository,UserProfileRepository userRepository,MerchandiseShippingRepository shippingDetailsRepository)
+    public MerchandiseOrderService(MerchandiseOrderRepository repository,UserProfileRepository userRepository,MerchandiseOrderItemRepository itemsRepository,MerchandiseShippingRepository shippingDetailsRepository)
     {
         super(repository);
         this.merchandiseorderRepository = repository;
         this.userRepository = userRepository;
-            this.shippingDetailsRepository = shippingDetailsRepository;
+        this.itemsRepository = itemsRepository;
+        this.shippingDetailsRepository = shippingDetailsRepository;
     }
 
     @Override
     public MerchandiseOrder save(MerchandiseOrder merchandiseorder) {
 
-        if (merchandiseorder.getUser() != null && merchandiseorder.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(merchandiseorder.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        merchandiseorder.setUser(user);
-        }
 
-        if (merchandiseorder.getItems() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (merchandiseorder.getItems() != null) {
+            List<MerchandiseOrderItem> managedItems = new ArrayList<>();
             for (MerchandiseOrderItem item : merchandiseorder.getItems()) {
+            if (item.getId() != null) {
+            MerchandiseOrderItem existingItem = itemsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("MerchandiseOrderItem not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setOrder(merchandiseorder);
+            managedItems.add(existingItem);
+            } else {
             item.setOrder(merchandiseorder);
+            managedItems.add(item);
             }
+            }
+            merchandiseorder.setItems(managedItems);
+            }
+        
+    
+
+    
+
+    if (merchandiseorder.getUser() != null
+        && merchandiseorder.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        merchandiseorder.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        merchandiseorder.setUser(existingUser);
         }
+    
+    
+    
         if (merchandiseorder.getShippingDetails() != null) {
         
         
@@ -68,23 +98,38 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
         existing.setStatus(merchandiseorderRequest.getStatus());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (merchandiseorderRequest.getUser() != null &&
+        merchandiseorderRequest.getUser().getId() != null) {
 
-        if (merchandiseorderRequest.getUser() != null && merchandiseorderRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(merchandiseorderRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        merchandiseorderRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getItems().clear();
+
         if (merchandiseorderRequest.getItems() != null) {
-            for (var item : merchandiseorderRequest.getItems()) {
-            item.setOrder(existing);
-            existing.getItems().add(item);
-            }
+        List<MerchandiseOrderItem> managedItems = new ArrayList<>();
+
+        for (var item : merchandiseorderRequest.getItems()) {
+        if (item.getId() != null) {
+        MerchandiseOrderItem existingItem = itemsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MerchandiseOrderItem not found"));
+        existingItem.setOrder(existing);
+        managedItems.add(existingItem);
+        } else {
+        item.setOrder(existing);
+        managedItems.add(item);
+        }
+        }
+        existing.setItems(managedItems);
         }
 
     
@@ -114,4 +159,6 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
 
         return merchandiseorderRepository.save(existing);
     }
+
+
 }

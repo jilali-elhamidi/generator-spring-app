@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class InvoiceService extends BaseService<Invoice> {
@@ -21,11 +22,16 @@ public class InvoiceService extends BaseService<Invoice> {
     {
         super(repository);
         this.invoiceRepository = repository;
-            this.transactionRepository = transactionRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
     public Invoice save(Invoice invoice) {
+
+
+    
+
+    
         if (invoice.getTransaction() != null) {
         
         
@@ -79,4 +85,6 @@ public class InvoiceService extends BaseService<Invoice> {
 
         return invoiceRepository.save(existing);
     }
+
+
 }

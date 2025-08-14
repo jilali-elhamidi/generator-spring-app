@@ -51,22 +51,27 @@ public class ArtistAwardController {
         return ResponseEntity.created(location).body(artistawardMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ArtistAwardDto> updateArtistAward(
-            @PathVariable Long id,
-            @Valid @RequestBody ArtistAwardDto artistawardDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ArtistAwardDto> updateArtistAward(
+                @PathVariable Long id,
+                @Valid @RequestBody ArtistAwardDto artistawardDto) {
 
-        try {
-            ArtistAward updatedEntity = artistawardService.update(
-                    id,
-                    artistawardMapper.toEntity(artistawardDto)
-            );
-            return ResponseEntity.ok(artistawardMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                ArtistAward existing = artistawardService.findById(id)
+                .orElseThrow(() -> new RuntimeException("ArtistAward not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                artistawardMapper.updateEntityFromDto(artistawardDto, existing);
+
+                // Sauvegarde
+                ArtistAward updatedEntity = artistawardService.save(existing);
+
+                return ResponseEntity.ok(artistawardMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArtistAward(@PathVariable Long id) {
         artistawardService.deleteById(id);

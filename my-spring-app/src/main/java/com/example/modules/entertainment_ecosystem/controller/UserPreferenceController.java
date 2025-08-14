@@ -51,22 +51,27 @@ public class UserPreferenceController {
         return ResponseEntity.created(location).body(userpreferenceMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserPreferenceDto> updateUserPreference(
-            @PathVariable Long id,
-            @Valid @RequestBody UserPreferenceDto userpreferenceDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<UserPreferenceDto> updateUserPreference(
+                @PathVariable Long id,
+                @Valid @RequestBody UserPreferenceDto userpreferenceDto) {
 
-        try {
-            UserPreference updatedEntity = userpreferenceService.update(
-                    id,
-                    userpreferenceMapper.toEntity(userpreferenceDto)
-            );
-            return ResponseEntity.ok(userpreferenceMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                UserPreference existing = userpreferenceService.findById(id)
+                .orElseThrow(() -> new RuntimeException("UserPreference not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                userpreferenceMapper.updateEntityFromDto(userpreferenceDto, existing);
+
+                // Sauvegarde
+                UserPreference updatedEntity = userpreferenceService.save(existing);
+
+                return ResponseEntity.ok(userpreferenceMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserPreference(@PathVariable Long id) {
         userpreferenceService.deleteById(id);

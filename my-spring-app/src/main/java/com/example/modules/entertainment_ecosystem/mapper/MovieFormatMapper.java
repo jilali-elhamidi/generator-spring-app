@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface MovieFormatMapper {
     List<MovieFormatDto> toDtoList(List<MovieFormat> movieformatList);
 
     List<MovieFormat> toEntityList(List<MovieFormatDto> movieformatDtoList);
+
+    void updateEntityFromDto(MovieFormatDto dto, @MappingTarget MovieFormat entity);
 
 }

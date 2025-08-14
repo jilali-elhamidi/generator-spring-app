@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface UserActivityLogMapper {
     List<UserActivityLogDto> toDtoList(List<UserActivityLog> useractivitylogList);
 
     List<UserActivityLog> toEntityList(List<UserActivityLogDto> useractivitylogDtoList);
+
+    void updateEntityFromDto(UserActivityLogDto dto, @MappingTarget UserActivityLog entity);
 
 }

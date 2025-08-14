@@ -4,31 +4,54 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.OnlineEventType;
 import com.example.modules.entertainment_ecosystem.repository.OnlineEventTypeRepository;
 import com.example.modules.entertainment_ecosystem.model.OnlineEvent;
+import com.example.modules.entertainment_ecosystem.repository.OnlineEventRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class OnlineEventTypeService extends BaseService<OnlineEventType> {
 
     protected final OnlineEventTypeRepository onlineeventtypeRepository;
+    private final OnlineEventRepository eventsRepository;
 
-    public OnlineEventTypeService(OnlineEventTypeRepository repository)
+    public OnlineEventTypeService(OnlineEventTypeRepository repository,OnlineEventRepository eventsRepository)
     {
         super(repository);
         this.onlineeventtypeRepository = repository;
+        this.eventsRepository = eventsRepository;
     }
 
     @Override
     public OnlineEventType save(OnlineEventType onlineeventtype) {
 
-        if (onlineeventtype.getEvents() != null) {
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (onlineeventtype.getEvents() != null) {
+            List<OnlineEvent> managedEvents = new ArrayList<>();
             for (OnlineEvent item : onlineeventtype.getEvents()) {
+            if (item.getId() != null) {
+            OnlineEvent existingItem = eventsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setType(onlineeventtype);
+            managedEvents.add(existingItem);
+            } else {
             item.setType(onlineeventtype);
+            managedEvents.add(item);
             }
-        }
+            }
+            onlineeventtype.setEvents(managedEvents);
+            }
+        
+    
+
+    
 
         return onlineeventtypeRepository.save(onlineeventtype);
     }
@@ -46,13 +69,23 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getEvents().clear();
+
         if (onlineeventtypeRequest.getEvents() != null) {
-            for (var item : onlineeventtypeRequest.getEvents()) {
-            item.setType(existing);
-            existing.getEvents().add(item);
-            }
+        List<OnlineEvent> managedEvents = new ArrayList<>();
+
+        for (var item : onlineeventtypeRequest.getEvents()) {
+        if (item.getId() != null) {
+        OnlineEvent existingItem = eventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
+        existingItem.setType(existing);
+        managedEvents.add(existingItem);
+        } else {
+        item.setType(existing);
+        managedEvents.add(item);
+        }
+        }
+        existing.setEvents(managedEvents);
         }
 
     
@@ -60,4 +93,6 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
 
         return onlineeventtypeRepository.save(existing);
     }
+
+
 }

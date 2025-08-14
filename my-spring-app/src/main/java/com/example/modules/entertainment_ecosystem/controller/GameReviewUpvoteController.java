@@ -51,22 +51,27 @@ public class GameReviewUpvoteController {
         return ResponseEntity.created(location).body(gamereviewupvoteMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<GameReviewUpvoteDto> updateGameReviewUpvote(
-            @PathVariable Long id,
-            @Valid @RequestBody GameReviewUpvoteDto gamereviewupvoteDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<GameReviewUpvoteDto> updateGameReviewUpvote(
+                @PathVariable Long id,
+                @Valid @RequestBody GameReviewUpvoteDto gamereviewupvoteDto) {
 
-        try {
-            GameReviewUpvote updatedEntity = gamereviewupvoteService.update(
-                    id,
-                    gamereviewupvoteMapper.toEntity(gamereviewupvoteDto)
-            );
-            return ResponseEntity.ok(gamereviewupvoteMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                GameReviewUpvote existing = gamereviewupvoteService.findById(id)
+                .orElseThrow(() -> new RuntimeException("GameReviewUpvote not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                gamereviewupvoteMapper.updateEntityFromDto(gamereviewupvoteDto, existing);
+
+                // Sauvegarde
+                GameReviewUpvote updatedEntity = gamereviewupvoteService.save(existing);
+
+                return ResponseEntity.ok(gamereviewupvoteMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGameReviewUpvote(@PathVariable Long id) {
         gamereviewupvoteService.deleteById(id);

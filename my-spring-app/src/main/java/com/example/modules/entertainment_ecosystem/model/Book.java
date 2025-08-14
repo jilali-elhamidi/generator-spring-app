@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Publisher;import com.example.modules.entertainment_ecosystem.model.Review;import com.example.modules.entertainment_ecosystem.model.Genre;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "book_tbl")
@@ -38,19 +40,25 @@ public class Book extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "author_id")
-    @JsonIgnoreProperties("booksAuthored")
-    private Artist author;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "publisher_id")
-    @JsonIgnoreProperties("books")
-    private Publisher publisher;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "author_id")
+        
+        private Artist author;
     
-    @OneToMany(mappedBy = "book", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("book")
-    private List<Review> reviews;
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "publisher_id")
+        
+        private Publisher publisher;
+    
+    
+    
+    @OneToMany(mappedBy = "book", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Review> reviews;
+    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "book_genres",

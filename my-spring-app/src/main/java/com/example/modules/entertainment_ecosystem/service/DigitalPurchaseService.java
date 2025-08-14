@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
@@ -37,35 +38,56 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
         this.movieRepository = movieRepository;
         this.musicTrackRepository = musicTrackRepository;
         this.videoGameRepository = videoGameRepository;
-            this.transactionRepository = transactionRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
     public DigitalPurchase save(DigitalPurchase digitalpurchase) {
 
-        if (digitalpurchase.getUser() != null && digitalpurchase.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(digitalpurchase.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        digitalpurchase.setUser(user);
-        }
 
-        if (digitalpurchase.getMovie() != null && digitalpurchase.getMovie().getId() != null) {
-        Movie movie = movieRepository.findById(digitalpurchase.getMovie().getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found"));
-        digitalpurchase.setMovie(movie);
-        }
+    
 
-        if (digitalpurchase.getMusicTrack() != null && digitalpurchase.getMusicTrack().getId() != null) {
-        MusicTrack musicTrack = musicTrackRepository.findById(digitalpurchase.getMusicTrack().getId())
-                .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        digitalpurchase.setMusicTrack(musicTrack);
-        }
+    
 
-        if (digitalpurchase.getVideoGame() != null && digitalpurchase.getVideoGame().getId() != null) {
-        VideoGame videoGame = videoGameRepository.findById(digitalpurchase.getVideoGame().getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        digitalpurchase.setVideoGame(videoGame);
+    
+
+    
+
+    
+
+    if (digitalpurchase.getUser() != null
+        && digitalpurchase.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        digitalpurchase.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        digitalpurchase.setUser(existingUser);
         }
+    
+    if (digitalpurchase.getMovie() != null
+        && digitalpurchase.getMovie().getId() != null) {
+        Movie existingMovie = movieRepository.findById(
+        digitalpurchase.getMovie().getId()
+        ).orElseThrow(() -> new RuntimeException("Movie not found"));
+        digitalpurchase.setMovie(existingMovie);
+        }
+    
+    if (digitalpurchase.getMusicTrack() != null
+        && digitalpurchase.getMusicTrack().getId() != null) {
+        MusicTrack existingMusicTrack = musicTrackRepository.findById(
+        digitalpurchase.getMusicTrack().getId()
+        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+        digitalpurchase.setMusicTrack(existingMusicTrack);
+        }
+    
+    if (digitalpurchase.getVideoGame() != null
+        && digitalpurchase.getVideoGame().getId() != null) {
+        VideoGame existingVideoGame = videoGameRepository.findById(
+        digitalpurchase.getVideoGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        digitalpurchase.setVideoGame(existingVideoGame);
+        }
+    
+    
         if (digitalpurchase.getTransaction() != null) {
         
         
@@ -91,29 +113,49 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
         existing.setPrice(digitalpurchaseRequest.getPrice());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (digitalpurchaseRequest.getUser() != null &&
+        digitalpurchaseRequest.getUser().getId() != null) {
 
-        if (digitalpurchaseRequest.getUser() != null && digitalpurchaseRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(digitalpurchaseRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        digitalpurchaseRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
+        if (digitalpurchaseRequest.getMovie() != null &&
+        digitalpurchaseRequest.getMovie().getId() != null) {
 
-        if (digitalpurchaseRequest.getMovie() != null && digitalpurchaseRequest.getMovie().getId() != null) {
-        Movie movie = movieRepository.findById(digitalpurchaseRequest.getMovie().getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found"));
-        existing.setMovie(movie);
+        Movie existingMovie = movieRepository.findById(
+        digitalpurchaseRequest.getMovie().getId()
+        ).orElseThrow(() -> new RuntimeException("Movie not found"));
+
+        existing.setMovie(existingMovie);
+        } else {
+        existing.setMovie(null);
         }
+        if (digitalpurchaseRequest.getMusicTrack() != null &&
+        digitalpurchaseRequest.getMusicTrack().getId() != null) {
 
-        if (digitalpurchaseRequest.getMusicTrack() != null && digitalpurchaseRequest.getMusicTrack().getId() != null) {
-        MusicTrack musicTrack = musicTrackRepository.findById(digitalpurchaseRequest.getMusicTrack().getId())
-                .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        existing.setMusicTrack(musicTrack);
+        MusicTrack existingMusicTrack = musicTrackRepository.findById(
+        digitalpurchaseRequest.getMusicTrack().getId()
+        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+
+        existing.setMusicTrack(existingMusicTrack);
+        } else {
+        existing.setMusicTrack(null);
         }
+        if (digitalpurchaseRequest.getVideoGame() != null &&
+        digitalpurchaseRequest.getVideoGame().getId() != null) {
 
-        if (digitalpurchaseRequest.getVideoGame() != null && digitalpurchaseRequest.getVideoGame().getId() != null) {
-        VideoGame videoGame = videoGameRepository.findById(digitalpurchaseRequest.getVideoGame().getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        existing.setVideoGame(videoGame);
+        VideoGame existingVideoGame = videoGameRepository.findById(
+        digitalpurchaseRequest.getVideoGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+        existing.setVideoGame(existingVideoGame);
+        } else {
+        existing.setVideoGame(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -151,4 +193,6 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
 
         return digitalpurchaseRepository.save(existing);
     }
+
+
 }

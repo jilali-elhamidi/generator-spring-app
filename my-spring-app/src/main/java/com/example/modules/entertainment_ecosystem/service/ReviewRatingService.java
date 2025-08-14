@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ReviewRatingService extends BaseService<ReviewRating> {
@@ -31,17 +32,27 @@ public class ReviewRatingService extends BaseService<ReviewRating> {
     @Override
     public ReviewRating save(ReviewRating reviewrating) {
 
-        if (reviewrating.getUser() != null && reviewrating.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(reviewrating.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        reviewrating.setUser(user);
-        }
 
-        if (reviewrating.getReview() != null && reviewrating.getReview().getId() != null) {
-        Review review = reviewRepository.findById(reviewrating.getReview().getId())
-                .orElseThrow(() -> new RuntimeException("Review not found"));
-        reviewrating.setReview(review);
+    
+
+    
+
+    if (reviewrating.getUser() != null
+        && reviewrating.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        reviewrating.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        reviewrating.setUser(existingUser);
         }
+    
+    if (reviewrating.getReview() != null
+        && reviewrating.getReview().getId() != null) {
+        Review existingReview = reviewRepository.findById(
+        reviewrating.getReview().getId()
+        ).orElseThrow(() -> new RuntimeException("Review not found"));
+        reviewrating.setReview(existingReview);
+        }
+    
 
         return reviewratingRepository.save(reviewrating);
     }
@@ -56,17 +67,27 @@ public class ReviewRatingService extends BaseService<ReviewRating> {
         existing.setRatingDate(reviewratingRequest.getRatingDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (reviewratingRequest.getUser() != null &&
+        reviewratingRequest.getUser().getId() != null) {
 
-        if (reviewratingRequest.getUser() != null && reviewratingRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(reviewratingRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        reviewratingRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
+        if (reviewratingRequest.getReview() != null &&
+        reviewratingRequest.getReview().getId() != null) {
 
-        if (reviewratingRequest.getReview() != null && reviewratingRequest.getReview().getId() != null) {
-        Review review = reviewRepository.findById(reviewratingRequest.getReview().getId())
-                .orElseThrow(() -> new RuntimeException("Review not found"));
-        existing.setReview(review);
+        Review existingReview = reviewRepository.findById(
+        reviewratingRequest.getReview().getId()
+        ).orElseThrow(() -> new RuntimeException("Review not found"));
+
+        existing.setReview(existingReview);
+        } else {
+        existing.setReview(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -80,4 +101,6 @@ public class ReviewRatingService extends BaseService<ReviewRating> {
 
         return reviewratingRepository.save(existing);
     }
+
+
 }

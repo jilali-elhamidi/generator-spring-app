@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface DigitalPurchaseMapper {
     List<DigitalPurchaseDto> toDtoList(List<DigitalPurchase> digitalpurchaseList);
 
     List<DigitalPurchase> toEntityList(List<DigitalPurchaseDto> digitalpurchaseDtoList);
+
+    void updateEntityFromDto(DigitalPurchaseDto dto, @MappingTarget DigitalPurchase entity);
 
 }

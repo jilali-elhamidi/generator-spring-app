@@ -51,22 +51,27 @@ public class UserActivityLogController {
         return ResponseEntity.created(location).body(useractivitylogMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserActivityLogDto> updateUserActivityLog(
-            @PathVariable Long id,
-            @Valid @RequestBody UserActivityLogDto useractivitylogDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<UserActivityLogDto> updateUserActivityLog(
+                @PathVariable Long id,
+                @Valid @RequestBody UserActivityLogDto useractivitylogDto) {
 
-        try {
-            UserActivityLog updatedEntity = useractivitylogService.update(
-                    id,
-                    useractivitylogMapper.toEntity(useractivitylogDto)
-            );
-            return ResponseEntity.ok(useractivitylogMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                UserActivityLog existing = useractivitylogService.findById(id)
+                .orElseThrow(() -> new RuntimeException("UserActivityLog not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                useractivitylogMapper.updateEntityFromDto(useractivitylogDto, existing);
+
+                // Sauvegarde
+                UserActivityLog updatedEntity = useractivitylogService.save(existing);
+
+                return ResponseEntity.ok(useractivitylogMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserActivityLog(@PathVariable Long id) {
         useractivitylogService.deleteById(id);

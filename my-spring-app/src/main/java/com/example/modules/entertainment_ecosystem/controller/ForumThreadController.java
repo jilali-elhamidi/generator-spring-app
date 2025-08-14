@@ -51,22 +51,27 @@ public class ForumThreadController {
         return ResponseEntity.created(location).body(forumthreadMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ForumThreadDto> updateForumThread(
-            @PathVariable Long id,
-            @Valid @RequestBody ForumThreadDto forumthreadDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ForumThreadDto> updateForumThread(
+                @PathVariable Long id,
+                @Valid @RequestBody ForumThreadDto forumthreadDto) {
 
-        try {
-            ForumThread updatedEntity = forumthreadService.update(
-                    id,
-                    forumthreadMapper.toEntity(forumthreadDto)
-            );
-            return ResponseEntity.ok(forumthreadMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                ForumThread existing = forumthreadService.findById(id)
+                .orElseThrow(() -> new RuntimeException("ForumThread not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                forumthreadMapper.updateEntityFromDto(forumthreadDto, existing);
+
+                // Sauvegarde
+                ForumThread updatedEntity = forumthreadService.save(existing);
+
+                return ResponseEntity.ok(forumthreadMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteForumThread(@PathVariable Long id) {
         forumthreadService.deleteById(id);

@@ -51,22 +51,27 @@ public class MovieFormatController {
         return ResponseEntity.created(location).body(movieformatMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<MovieFormatDto> updateMovieFormat(
-            @PathVariable Long id,
-            @Valid @RequestBody MovieFormatDto movieformatDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<MovieFormatDto> updateMovieFormat(
+                @PathVariable Long id,
+                @Valid @RequestBody MovieFormatDto movieformatDto) {
 
-        try {
-            MovieFormat updatedEntity = movieformatService.update(
-                    id,
-                    movieformatMapper.toEntity(movieformatDto)
-            );
-            return ResponseEntity.ok(movieformatMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                MovieFormat existing = movieformatService.findById(id)
+                .orElseThrow(() -> new RuntimeException("MovieFormat not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                movieformatMapper.updateEntityFromDto(movieformatDto, existing);
+
+                // Sauvegarde
+                MovieFormat updatedEntity = movieformatService.save(existing);
+
+                return ResponseEntity.ok(movieformatMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovieFormat(@PathVariable Long id) {
         movieformatService.deleteById(id);

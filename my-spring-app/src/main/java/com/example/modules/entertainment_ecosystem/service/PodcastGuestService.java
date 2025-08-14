@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class PodcastGuestService extends BaseService<PodcastGuest> {
@@ -31,11 +32,20 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
     @Override
     public PodcastGuest save(PodcastGuest podcastguest) {
 
-        if (podcastguest.getPodcast() != null && podcastguest.getPodcast().getId() != null) {
-        Podcast podcast = podcastRepository.findById(podcastguest.getPodcast().getId())
-                .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        podcastguest.setPodcast(podcast);
+
+    
+
+    
+
+    if (podcastguest.getPodcast() != null
+        && podcastguest.getPodcast().getId() != null) {
+        Podcast existingPodcast = podcastRepository.findById(
+        podcastguest.getPodcast().getId()
+        ).orElseThrow(() -> new RuntimeException("Podcast not found"));
+        podcastguest.setPodcast(existingPodcast);
         }
+    
+    
 
         return podcastguestRepository.save(podcastguest);
     }
@@ -50,11 +60,16 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
         existing.setBio(podcastguestRequest.getBio());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (podcastguestRequest.getPodcast() != null &&
+        podcastguestRequest.getPodcast().getId() != null) {
 
-        if (podcastguestRequest.getPodcast() != null && podcastguestRequest.getPodcast().getId() != null) {
-        Podcast podcast = podcastRepository.findById(podcastguestRequest.getPodcast().getId())
-                .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        existing.setPodcast(podcast);
+        Podcast existingPodcast = podcastRepository.findById(
+        podcastguestRequest.getPodcast().getId()
+        ).orElseThrow(() -> new RuntimeException("Podcast not found"));
+
+        existing.setPodcast(existingPodcast);
+        } else {
+        existing.setPodcast(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -77,4 +92,6 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
 
         return podcastguestRepository.save(existing);
     }
+
+
 }

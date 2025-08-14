@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.Sponsor;import com.example.modules.entertainment_ecosystem.model.Contract;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "eventsponsorship_tbl")
@@ -35,15 +37,20 @@ public class EventSponsorship extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "event_id")
-    @JsonIgnoreProperties("sponsorships")
-    private LiveEvent event;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "sponsor_id")
-    @JsonIgnoreProperties("sponsorships")
-    private Sponsor sponsor;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "event_id")
+        
+        private LiveEvent event;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "sponsor_id")
+        
+        private Sponsor sponsor;
+    
+    
     
     @OneToOne
     @JoinColumn(name = "contract_id")

@@ -8,6 +8,7 @@ import com.example.modules.entertainment_ecosystem.repository.MovieRepository;
 import com.example.modules.entertainment_ecosystem.model.TVShow;
 import com.example.modules.entertainment_ecosystem.repository.TVShowRepository;
 import com.example.modules.entertainment_ecosystem.model.Subscription;
+import com.example.modules.entertainment_ecosystem.repository.SubscriptionRepository;
 import com.example.modules.entertainment_ecosystem.model.StreamingService;
 import com.example.modules.entertainment_ecosystem.repository.StreamingServiceRepository;
 import com.example.modules.entertainment_ecosystem.model.OnlinePlatform;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class StreamingPlatformService extends BaseService<StreamingPlatform> {
@@ -26,16 +28,18 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
     protected final StreamingPlatformRepository streamingplatformRepository;
     private final MovieRepository moviesRepository;
     private final TVShowRepository tvShowsRepository;
+    private final SubscriptionRepository subscriptionsRepository;
     private final StreamingServiceRepository streamingServiceRepository;
     private final OnlinePlatformRepository onlinePlatformRepository;
     private final AdCampaignRepository adCampaignsRepository;
 
-    public StreamingPlatformService(StreamingPlatformRepository repository,MovieRepository moviesRepository,TVShowRepository tvShowsRepository,StreamingServiceRepository streamingServiceRepository,OnlinePlatformRepository onlinePlatformRepository,AdCampaignRepository adCampaignsRepository)
+    public StreamingPlatformService(StreamingPlatformRepository repository,MovieRepository moviesRepository,TVShowRepository tvShowsRepository,SubscriptionRepository subscriptionsRepository,StreamingServiceRepository streamingServiceRepository,OnlinePlatformRepository onlinePlatformRepository,AdCampaignRepository adCampaignsRepository)
     {
         super(repository);
         this.streamingplatformRepository = repository;
         this.moviesRepository = moviesRepository;
         this.tvShowsRepository = tvShowsRepository;
+        this.subscriptionsRepository = subscriptionsRepository;
         this.streamingServiceRepository = streamingServiceRepository;
         this.onlinePlatformRepository = onlinePlatformRepository;
         this.adCampaignsRepository = adCampaignsRepository;
@@ -44,23 +48,59 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
     @Override
     public StreamingPlatform save(StreamingPlatform streamingplatform) {
 
-        if (streamingplatform.getStreamingService() != null && streamingplatform.getStreamingService().getId() != null) {
-        StreamingService streamingService = streamingServiceRepository.findById(streamingplatform.getStreamingService().getId())
-                .orElseThrow(() -> new RuntimeException("StreamingService not found"));
-        streamingplatform.setStreamingService(streamingService);
-        }
 
-        if (streamingplatform.getOnlinePlatform() != null && streamingplatform.getOnlinePlatform().getId() != null) {
-        OnlinePlatform onlinePlatform = onlinePlatformRepository.findById(streamingplatform.getOnlinePlatform().getId())
-                .orElseThrow(() -> new RuntimeException("OnlinePlatform not found"));
-        streamingplatform.setOnlinePlatform(onlinePlatform);
-        }
+    
 
-        if (streamingplatform.getSubscriptions() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (streamingplatform.getSubscriptions() != null) {
+            List<Subscription> managedSubscriptions = new ArrayList<>();
             for (Subscription item : streamingplatform.getSubscriptions()) {
+            if (item.getId() != null) {
+            Subscription existingItem = subscriptionsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Subscription not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setPlatform(streamingplatform);
+            managedSubscriptions.add(existingItem);
+            } else {
             item.setPlatform(streamingplatform);
+            managedSubscriptions.add(item);
             }
+            }
+            streamingplatform.setSubscriptions(managedSubscriptions);
+            }
+        
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    if (streamingplatform.getStreamingService() != null
+        && streamingplatform.getStreamingService().getId() != null) {
+        StreamingService existingStreamingService = streamingServiceRepository.findById(
+        streamingplatform.getStreamingService().getId()
+        ).orElseThrow(() -> new RuntimeException("StreamingService not found"));
+        streamingplatform.setStreamingService(existingStreamingService);
         }
+    
+    if (streamingplatform.getOnlinePlatform() != null
+        && streamingplatform.getOnlinePlatform().getId() != null) {
+        OnlinePlatform existingOnlinePlatform = onlinePlatformRepository.findById(
+        streamingplatform.getOnlinePlatform().getId()
+        ).orElseThrow(() -> new RuntimeException("OnlinePlatform not found"));
+        streamingplatform.setOnlinePlatform(existingOnlinePlatform);
+        }
+    
+    
 
         return streamingplatformRepository.save(streamingplatform);
     }
@@ -75,17 +115,27 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         existing.setWebsite(streamingplatformRequest.getWebsite());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (streamingplatformRequest.getStreamingService() != null &&
+        streamingplatformRequest.getStreamingService().getId() != null) {
 
-        if (streamingplatformRequest.getStreamingService() != null && streamingplatformRequest.getStreamingService().getId() != null) {
-        StreamingService streamingService = streamingServiceRepository.findById(streamingplatformRequest.getStreamingService().getId())
-                .orElseThrow(() -> new RuntimeException("StreamingService not found"));
-        existing.setStreamingService(streamingService);
+        StreamingService existingStreamingService = streamingServiceRepository.findById(
+        streamingplatformRequest.getStreamingService().getId()
+        ).orElseThrow(() -> new RuntimeException("StreamingService not found"));
+
+        existing.setStreamingService(existingStreamingService);
+        } else {
+        existing.setStreamingService(null);
         }
+        if (streamingplatformRequest.getOnlinePlatform() != null &&
+        streamingplatformRequest.getOnlinePlatform().getId() != null) {
 
-        if (streamingplatformRequest.getOnlinePlatform() != null && streamingplatformRequest.getOnlinePlatform().getId() != null) {
-        OnlinePlatform onlinePlatform = onlinePlatformRepository.findById(streamingplatformRequest.getOnlinePlatform().getId())
-                .orElseThrow(() -> new RuntimeException("OnlinePlatform not found"));
-        existing.setOnlinePlatform(onlinePlatform);
+        OnlinePlatform existingOnlinePlatform = onlinePlatformRepository.findById(
+        streamingplatformRequest.getOnlinePlatform().getId()
+        ).orElseThrow(() -> new RuntimeException("OnlinePlatform not found"));
+
+        existing.setOnlinePlatform(existingOnlinePlatform);
+        } else {
+        existing.setOnlinePlatform(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -118,13 +168,23 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getSubscriptions().clear();
+
         if (streamingplatformRequest.getSubscriptions() != null) {
-            for (var item : streamingplatformRequest.getSubscriptions()) {
-            item.setPlatform(existing);
-            existing.getSubscriptions().add(item);
-            }
+        List<Subscription> managedSubscriptions = new ArrayList<>();
+
+        for (var item : streamingplatformRequest.getSubscriptions()) {
+        if (item.getId() != null) {
+        Subscription existingItem = subscriptionsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Subscription not found"));
+        existingItem.setPlatform(existing);
+        managedSubscriptions.add(existingItem);
+        } else {
+        item.setPlatform(existing);
+        managedSubscriptions.add(item);
+        }
+        }
+        existing.setSubscriptions(managedSubscriptions);
         }
 
     
@@ -142,4 +202,6 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
 
         return streamingplatformRepository.save(existing);
     }
+
+
 }

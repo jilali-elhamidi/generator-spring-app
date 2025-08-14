@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface ShiftMapper {
     List<ShiftDto> toDtoList(List<Shift> shiftList);
 
     List<Shift> toEntityList(List<ShiftDto> shiftDtoList);
+
+    void updateEntityFromDto(ShiftDto dto, @MappingTarget Shift entity);
 
 }

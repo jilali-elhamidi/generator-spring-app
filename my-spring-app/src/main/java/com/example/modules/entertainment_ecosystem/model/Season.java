@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Episode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "season_tbl")
@@ -29,14 +31,17 @@ public class Season extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "tvshow_id")
-    @JsonIgnoreProperties("seasons")
-    private TVShow show;
     
-    @OneToMany(mappedBy = "season", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("season")
-    private List<Episode> episodes;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "show_id")
+        
+        private TVShow show;
+    
+    
+    
+    @OneToMany(mappedBy = "season", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Episode> episodes;
     
 
 }

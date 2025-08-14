@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class AchievementService extends BaseService<Achievement> {
@@ -27,11 +28,17 @@ public class AchievementService extends BaseService<Achievement> {
     @Override
     public Achievement save(Achievement achievement) {
 
-        if (achievement.getUser() != null && achievement.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(achievement.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        achievement.setUser(user);
+
+    
+
+    if (achievement.getUser() != null
+        && achievement.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        achievement.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        achievement.setUser(existingUser);
         }
+    
 
         return achievementRepository.save(achievement);
     }
@@ -47,11 +54,16 @@ public class AchievementService extends BaseService<Achievement> {
         existing.setAchievementDate(achievementRequest.getAchievementDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (achievementRequest.getUser() != null &&
+        achievementRequest.getUser().getId() != null) {
 
-        if (achievementRequest.getUser() != null && achievementRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(achievementRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        achievementRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -63,4 +75,6 @@ public class AchievementService extends BaseService<Achievement> {
 
         return achievementRepository.save(existing);
     }
+
+
 }

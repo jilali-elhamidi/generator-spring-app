@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ShipmentService extends BaseService<Shipment> {
@@ -21,11 +22,15 @@ public class ShipmentService extends BaseService<Shipment> {
     {
         super(repository);
         this.shipmentRepository = repository;
-            this.orderRepository = orderRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
     public Shipment save(Shipment shipment) {
+
+
+    
+
         if (shipment.getOrder() != null) {
         
         

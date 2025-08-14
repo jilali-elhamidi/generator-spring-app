@@ -4,31 +4,54 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.Warehouse;
 import com.example.modules.entertainment_ecosystem.repository.WarehouseRepository;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseInventory;
+import com.example.modules.entertainment_ecosystem.repository.MerchandiseInventoryRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class WarehouseService extends BaseService<Warehouse> {
 
     protected final WarehouseRepository warehouseRepository;
+    private final MerchandiseInventoryRepository inventoryItemsRepository;
 
-    public WarehouseService(WarehouseRepository repository)
+    public WarehouseService(WarehouseRepository repository,MerchandiseInventoryRepository inventoryItemsRepository)
     {
         super(repository);
         this.warehouseRepository = repository;
+        this.inventoryItemsRepository = inventoryItemsRepository;
     }
 
     @Override
     public Warehouse save(Warehouse warehouse) {
 
-        if (warehouse.getInventoryItems() != null) {
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (warehouse.getInventoryItems() != null) {
+            List<MerchandiseInventory> managedInventoryItems = new ArrayList<>();
             for (MerchandiseInventory item : warehouse.getInventoryItems()) {
+            if (item.getId() != null) {
+            MerchandiseInventory existingItem = inventoryItemsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("MerchandiseInventory not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setWarehouse(warehouse);
+            managedInventoryItems.add(existingItem);
+            } else {
             item.setWarehouse(warehouse);
+            managedInventoryItems.add(item);
             }
-        }
+            }
+            warehouse.setInventoryItems(managedInventoryItems);
+            }
+        
+    
+
+    
 
         return warehouseRepository.save(warehouse);
     }
@@ -47,13 +70,23 @@ public class WarehouseService extends BaseService<Warehouse> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getInventoryItems().clear();
+
         if (warehouseRequest.getInventoryItems() != null) {
-            for (var item : warehouseRequest.getInventoryItems()) {
-            item.setWarehouse(existing);
-            existing.getInventoryItems().add(item);
-            }
+        List<MerchandiseInventory> managedInventoryItems = new ArrayList<>();
+
+        for (var item : warehouseRequest.getInventoryItems()) {
+        if (item.getId() != null) {
+        MerchandiseInventory existingItem = inventoryItemsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MerchandiseInventory not found"));
+        existingItem.setWarehouse(existing);
+        managedInventoryItems.add(existingItem);
+        } else {
+        item.setWarehouse(existing);
+        managedInventoryItems.add(item);
+        }
+        }
+        existing.setInventoryItems(managedInventoryItems);
         }
 
     
@@ -61,4 +94,6 @@ public class WarehouseService extends BaseService<Warehouse> {
 
         return warehouseRepository.save(existing);
     }
+
+
 }

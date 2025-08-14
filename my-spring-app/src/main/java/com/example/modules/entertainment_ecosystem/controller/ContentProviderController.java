@@ -51,22 +51,27 @@ public class ContentProviderController {
         return ResponseEntity.created(location).body(contentproviderMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ContentProviderDto> updateContentProvider(
-            @PathVariable Long id,
-            @Valid @RequestBody ContentProviderDto contentproviderDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ContentProviderDto> updateContentProvider(
+                @PathVariable Long id,
+                @Valid @RequestBody ContentProviderDto contentproviderDto) {
 
-        try {
-            ContentProvider updatedEntity = contentproviderService.update(
-                    id,
-                    contentproviderMapper.toEntity(contentproviderDto)
-            );
-            return ResponseEntity.ok(contentproviderMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                ContentProvider existing = contentproviderService.findById(id)
+                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                contentproviderMapper.updateEntityFromDto(contentproviderDto, existing);
+
+                // Sauvegarde
+                ContentProvider updatedEntity = contentproviderService.save(existing);
+
+                return ResponseEntity.ok(contentproviderMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContentProvider(@PathVariable Long id) {
         contentproviderService.deleteById(id);

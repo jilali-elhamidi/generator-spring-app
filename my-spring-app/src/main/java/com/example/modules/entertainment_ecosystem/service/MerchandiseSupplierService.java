@@ -4,31 +4,54 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseSupplier;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseSupplierRepository;
 import com.example.modules.entertainment_ecosystem.model.Merchandise;
+import com.example.modules.entertainment_ecosystem.repository.MerchandiseRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MerchandiseSupplierService extends BaseService<MerchandiseSupplier> {
 
     protected final MerchandiseSupplierRepository merchandisesupplierRepository;
+    private final MerchandiseRepository suppliedMerchandiseRepository;
 
-    public MerchandiseSupplierService(MerchandiseSupplierRepository repository)
+    public MerchandiseSupplierService(MerchandiseSupplierRepository repository,MerchandiseRepository suppliedMerchandiseRepository)
     {
         super(repository);
         this.merchandisesupplierRepository = repository;
+        this.suppliedMerchandiseRepository = suppliedMerchandiseRepository;
     }
 
     @Override
     public MerchandiseSupplier save(MerchandiseSupplier merchandisesupplier) {
 
-        if (merchandisesupplier.getSuppliedMerchandise() != null) {
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (merchandisesupplier.getSuppliedMerchandise() != null) {
+            List<Merchandise> managedSuppliedMerchandise = new ArrayList<>();
             for (Merchandise item : merchandisesupplier.getSuppliedMerchandise()) {
+            if (item.getId() != null) {
+            Merchandise existingItem = suppliedMerchandiseRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Merchandise not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setSupplier(merchandisesupplier);
+            managedSuppliedMerchandise.add(existingItem);
+            } else {
             item.setSupplier(merchandisesupplier);
+            managedSuppliedMerchandise.add(item);
             }
-        }
+            }
+            merchandisesupplier.setSuppliedMerchandise(managedSuppliedMerchandise);
+            }
+        
+    
+
+    
 
         return merchandisesupplierRepository.save(merchandisesupplier);
     }
@@ -47,13 +70,23 @@ public class MerchandiseSupplierService extends BaseService<MerchandiseSupplier>
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getSuppliedMerchandise().clear();
+
         if (merchandisesupplierRequest.getSuppliedMerchandise() != null) {
-            for (var item : merchandisesupplierRequest.getSuppliedMerchandise()) {
-            item.setSupplier(existing);
-            existing.getSuppliedMerchandise().add(item);
-            }
+        List<Merchandise> managedSuppliedMerchandise = new ArrayList<>();
+
+        for (var item : merchandisesupplierRequest.getSuppliedMerchandise()) {
+        if (item.getId() != null) {
+        Merchandise existingItem = suppliedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found"));
+        existingItem.setSupplier(existing);
+        managedSuppliedMerchandise.add(existingItem);
+        } else {
+        item.setSupplier(existing);
+        managedSuppliedMerchandise.add(item);
+        }
+        }
+        existing.setSuppliedMerchandise(managedSuppliedMerchandise);
         }
 
     
@@ -61,4 +94,6 @@ public class MerchandiseSupplierService extends BaseService<MerchandiseSupplier>
 
         return merchandisesupplierRepository.save(existing);
     }
+
+
 }

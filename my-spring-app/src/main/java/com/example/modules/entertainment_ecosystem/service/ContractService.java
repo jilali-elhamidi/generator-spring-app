@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ContractService extends BaseService<Contract> {
@@ -21,11 +22,16 @@ public class ContractService extends BaseService<Contract> {
     {
         super(repository);
         this.contractRepository = repository;
-            this.sponsorshipRepository = sponsorshipRepository;
+        this.sponsorshipRepository = sponsorshipRepository;
     }
 
     @Override
     public Contract save(Contract contract) {
+
+
+    
+
+    
         if (contract.getSponsorship() != null) {
         
         
@@ -79,4 +85,6 @@ public class ContractService extends BaseService<Contract> {
 
         return contractRepository.save(existing);
     }
+
+
 }

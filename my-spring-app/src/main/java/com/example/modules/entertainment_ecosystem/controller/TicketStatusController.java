@@ -51,22 +51,27 @@ public class TicketStatusController {
         return ResponseEntity.created(location).body(ticketstatusMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<TicketStatusDto> updateTicketStatus(
-            @PathVariable Long id,
-            @Valid @RequestBody TicketStatusDto ticketstatusDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<TicketStatusDto> updateTicketStatus(
+                @PathVariable Long id,
+                @Valid @RequestBody TicketStatusDto ticketstatusDto) {
 
-        try {
-            TicketStatus updatedEntity = ticketstatusService.update(
-                    id,
-                    ticketstatusMapper.toEntity(ticketstatusDto)
-            );
-            return ResponseEntity.ok(ticketstatusMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                TicketStatus existing = ticketstatusService.findById(id)
+                .orElseThrow(() -> new RuntimeException("TicketStatus not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                ticketstatusMapper.updateEntityFromDto(ticketstatusDto, existing);
+
+                // Sauvegarde
+                TicketStatus updatedEntity = ticketstatusService.save(existing);
+
+                return ResponseEntity.ok(ticketstatusMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTicketStatus(@PathVariable Long id) {
         ticketstatusService.deleteById(id);

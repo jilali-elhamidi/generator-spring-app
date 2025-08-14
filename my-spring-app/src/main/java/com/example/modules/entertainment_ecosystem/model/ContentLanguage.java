@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Podcast;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "contentlanguage_tbl")
@@ -32,14 +34,17 @@ public class ContentLanguage extends BaseEntity {
 
 // === Relations ===
 
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<Movie> movies;
         
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<TVShow> tvShows;
         
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<Podcast> podcasts;

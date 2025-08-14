@@ -12,10 +12,13 @@ import com.example.modules.entertainment_ecosystem.repository.GenreRepository;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.PlaylistItem;
+import com.example.modules.entertainment_ecosystem.repository.PlaylistItemRepository;
 import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;
+import com.example.modules.entertainment_ecosystem.repository.DigitalPurchaseRepository;
 import com.example.modules.entertainment_ecosystem.model.MusicFormat;
 import com.example.modules.entertainment_ecosystem.repository.MusicFormatRepository;
 import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;
+import com.example.modules.entertainment_ecosystem.repository.StreamingContentLicenseRepository;
 import com.example.modules.entertainment_ecosystem.model.ContentProvider;
 import com.example.modules.entertainment_ecosystem.repository.ContentProviderRepository;
 
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MusicTrackService extends BaseService<MusicTrack> {
@@ -32,10 +36,13 @@ public class MusicTrackService extends BaseService<MusicTrack> {
     private final ArtistRepository artistRepository;
     private final GenreRepository genreRepository;
     private final UserProfileRepository listenedByUsersRepository;
+    private final PlaylistItemRepository playlistItemsRepository;
+    private final DigitalPurchaseRepository purchasesRepository;
     private final MusicFormatRepository formatsRepository;
+    private final StreamingContentLicenseRepository streamingLicensesRepository;
     private final ContentProviderRepository providerRepository;
 
-    public MusicTrackService(MusicTrackRepository repository,AlbumRepository albumRepository,ArtistRepository artistRepository,GenreRepository genreRepository,UserProfileRepository listenedByUsersRepository,MusicFormatRepository formatsRepository,ContentProviderRepository providerRepository)
+    public MusicTrackService(MusicTrackRepository repository,AlbumRepository albumRepository,ArtistRepository artistRepository,GenreRepository genreRepository,UserProfileRepository listenedByUsersRepository,PlaylistItemRepository playlistItemsRepository,DigitalPurchaseRepository purchasesRepository,MusicFormatRepository formatsRepository,StreamingContentLicenseRepository streamingLicensesRepository,ContentProviderRepository providerRepository)
     {
         super(repository);
         this.musictrackRepository = repository;
@@ -43,54 +50,132 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         this.artistRepository = artistRepository;
         this.genreRepository = genreRepository;
         this.listenedByUsersRepository = listenedByUsersRepository;
+        this.playlistItemsRepository = playlistItemsRepository;
+        this.purchasesRepository = purchasesRepository;
         this.formatsRepository = formatsRepository;
+        this.streamingLicensesRepository = streamingLicensesRepository;
         this.providerRepository = providerRepository;
     }
 
     @Override
     public MusicTrack save(MusicTrack musictrack) {
 
-        if (musictrack.getAlbum() != null && musictrack.getAlbum().getId() != null) {
-        Album album = albumRepository.findById(musictrack.getAlbum().getId())
-                .orElseThrow(() -> new RuntimeException("Album not found"));
-        musictrack.setAlbum(album);
-        }
 
-        if (musictrack.getArtist() != null && musictrack.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(musictrack.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        musictrack.setArtist(artist);
-        }
+    
 
-        if (musictrack.getGenre() != null && musictrack.getGenre().getId() != null) {
-        Genre genre = genreRepository.findById(musictrack.getGenre().getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found"));
-        musictrack.setGenre(genre);
-        }
+    
 
-        if (musictrack.getProvider() != null && musictrack.getProvider().getId() != null) {
-        ContentProvider provider = providerRepository.findById(musictrack.getProvider().getId())
-                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-        musictrack.setProvider(provider);
-        }
+    
 
-        if (musictrack.getPlaylistItems() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (musictrack.getPlaylistItems() != null) {
+            List<PlaylistItem> managedPlaylistItems = new ArrayList<>();
             for (PlaylistItem item : musictrack.getPlaylistItems()) {
+            if (item.getId() != null) {
+            PlaylistItem existingItem = playlistItemsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("PlaylistItem not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setTrack(musictrack);
+            managedPlaylistItems.add(existingItem);
+            } else {
             item.setTrack(musictrack);
+            managedPlaylistItems.add(item);
             }
-        }
+            }
+            musictrack.setPlaylistItems(managedPlaylistItems);
+            }
+        
+    
 
-        if (musictrack.getPurchases() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (musictrack.getPurchases() != null) {
+            List<DigitalPurchase> managedPurchases = new ArrayList<>();
             for (DigitalPurchase item : musictrack.getPurchases()) {
+            if (item.getId() != null) {
+            DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMusicTrack(musictrack);
+            managedPurchases.add(existingItem);
+            } else {
             item.setMusicTrack(musictrack);
+            managedPurchases.add(item);
             }
-        }
+            }
+            musictrack.setPurchases(managedPurchases);
+            }
+        
+    
 
-        if (musictrack.getStreamingLicenses() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (musictrack.getStreamingLicenses() != null) {
+            List<StreamingContentLicense> managedStreamingLicenses = new ArrayList<>();
             for (StreamingContentLicense item : musictrack.getStreamingLicenses()) {
+            if (item.getId() != null) {
+            StreamingContentLicense existingItem = streamingLicensesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMusicTrack(musictrack);
+            managedStreamingLicenses.add(existingItem);
+            } else {
             item.setMusicTrack(musictrack);
+            managedStreamingLicenses.add(item);
             }
+            }
+            musictrack.setStreamingLicenses(managedStreamingLicenses);
+            }
+        
+    
+
+    
+
+    if (musictrack.getAlbum() != null
+        && musictrack.getAlbum().getId() != null) {
+        Album existingAlbum = albumRepository.findById(
+        musictrack.getAlbum().getId()
+        ).orElseThrow(() -> new RuntimeException("Album not found"));
+        musictrack.setAlbum(existingAlbum);
         }
+    
+    if (musictrack.getArtist() != null
+        && musictrack.getArtist().getId() != null) {
+        Artist existingArtist = artistRepository.findById(
+        musictrack.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        musictrack.setArtist(existingArtist);
+        }
+    
+    if (musictrack.getGenre() != null
+        && musictrack.getGenre().getId() != null) {
+        Genre existingGenre = genreRepository.findById(
+        musictrack.getGenre().getId()
+        ).orElseThrow(() -> new RuntimeException("Genre not found"));
+        musictrack.setGenre(existingGenre);
+        }
+    
+    
+    
+    
+    
+    
+    if (musictrack.getProvider() != null
+        && musictrack.getProvider().getId() != null) {
+        ContentProvider existingProvider = providerRepository.findById(
+        musictrack.getProvider().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+        musictrack.setProvider(existingProvider);
+        }
+    
 
         return musictrackRepository.save(musictrack);
     }
@@ -106,29 +191,49 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         existing.setReleaseDate(musictrackRequest.getReleaseDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (musictrackRequest.getAlbum() != null &&
+        musictrackRequest.getAlbum().getId() != null) {
 
-        if (musictrackRequest.getAlbum() != null && musictrackRequest.getAlbum().getId() != null) {
-        Album album = albumRepository.findById(musictrackRequest.getAlbum().getId())
-                .orElseThrow(() -> new RuntimeException("Album not found"));
-        existing.setAlbum(album);
+        Album existingAlbum = albumRepository.findById(
+        musictrackRequest.getAlbum().getId()
+        ).orElseThrow(() -> new RuntimeException("Album not found"));
+
+        existing.setAlbum(existingAlbum);
+        } else {
+        existing.setAlbum(null);
         }
+        if (musictrackRequest.getArtist() != null &&
+        musictrackRequest.getArtist().getId() != null) {
 
-        if (musictrackRequest.getArtist() != null && musictrackRequest.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(musictrackRequest.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setArtist(artist);
+        Artist existingArtist = artistRepository.findById(
+        musictrackRequest.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setArtist(existingArtist);
+        } else {
+        existing.setArtist(null);
         }
+        if (musictrackRequest.getGenre() != null &&
+        musictrackRequest.getGenre().getId() != null) {
 
-        if (musictrackRequest.getGenre() != null && musictrackRequest.getGenre().getId() != null) {
-        Genre genre = genreRepository.findById(musictrackRequest.getGenre().getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found"));
-        existing.setGenre(genre);
+        Genre existingGenre = genreRepository.findById(
+        musictrackRequest.getGenre().getId()
+        ).orElseThrow(() -> new RuntimeException("Genre not found"));
+
+        existing.setGenre(existingGenre);
+        } else {
+        existing.setGenre(null);
         }
+        if (musictrackRequest.getProvider() != null &&
+        musictrackRequest.getProvider().getId() != null) {
 
-        if (musictrackRequest.getProvider() != null && musictrackRequest.getProvider().getId() != null) {
-        ContentProvider provider = providerRepository.findById(musictrackRequest.getProvider().getId())
-                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-        existing.setProvider(provider);
+        ContentProvider existingProvider = providerRepository.findById(
+        musictrackRequest.getProvider().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+
+        existing.setProvider(existingProvider);
+        } else {
+        existing.setProvider(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -152,29 +257,59 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getPlaylistItems().clear();
+
         if (musictrackRequest.getPlaylistItems() != null) {
-            for (var item : musictrackRequest.getPlaylistItems()) {
-            item.setTrack(existing);
-            existing.getPlaylistItems().add(item);
-            }
-        }
+        List<PlaylistItem> managedPlaylistItems = new ArrayList<>();
 
+        for (var item : musictrackRequest.getPlaylistItems()) {
+        if (item.getId() != null) {
+        PlaylistItem existingItem = playlistItemsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PlaylistItem not found"));
+        existingItem.setTrack(existing);
+        managedPlaylistItems.add(existingItem);
+        } else {
+        item.setTrack(existing);
+        managedPlaylistItems.add(item);
+        }
+        }
+        existing.setPlaylistItems(managedPlaylistItems);
+        }
         existing.getPurchases().clear();
-        if (musictrackRequest.getPurchases() != null) {
-            for (var item : musictrackRequest.getPurchases()) {
-            item.setMusicTrack(existing);
-            existing.getPurchases().add(item);
-            }
-        }
 
+        if (musictrackRequest.getPurchases() != null) {
+        List<DigitalPurchase> managedPurchases = new ArrayList<>();
+
+        for (var item : musictrackRequest.getPurchases()) {
+        if (item.getId() != null) {
+        DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+        existingItem.setMusicTrack(existing);
+        managedPurchases.add(existingItem);
+        } else {
+        item.setMusicTrack(existing);
+        managedPurchases.add(item);
+        }
+        }
+        existing.setPurchases(managedPurchases);
+        }
         existing.getStreamingLicenses().clear();
+
         if (musictrackRequest.getStreamingLicenses() != null) {
-            for (var item : musictrackRequest.getStreamingLicenses()) {
-            item.setMusicTrack(existing);
-            existing.getStreamingLicenses().add(item);
-            }
+        List<StreamingContentLicense> managedStreamingLicenses = new ArrayList<>();
+
+        for (var item : musictrackRequest.getStreamingLicenses()) {
+        if (item.getId() != null) {
+        StreamingContentLicense existingItem = streamingLicensesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
+        existingItem.setMusicTrack(existing);
+        managedStreamingLicenses.add(existingItem);
+        } else {
+        item.setMusicTrack(existing);
+        managedStreamingLicenses.add(item);
+        }
+        }
+        existing.setStreamingLicenses(managedStreamingLicenses);
         }
 
     
@@ -198,4 +333,6 @@ public class MusicTrackService extends BaseService<MusicTrack> {
 
         return musictrackRepository.save(existing);
     }
+
+
 }

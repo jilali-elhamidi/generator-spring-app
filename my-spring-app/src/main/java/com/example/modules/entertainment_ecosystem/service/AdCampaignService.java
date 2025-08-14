@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class AdCampaignService extends BaseService<AdCampaign> {
@@ -31,11 +32,20 @@ public class AdCampaignService extends BaseService<AdCampaign> {
     @Override
     public AdCampaign save(AdCampaign adcampaign) {
 
-        if (adcampaign.getAdvertiser() != null && adcampaign.getAdvertiser().getId() != null) {
-        Sponsor advertiser = advertiserRepository.findById(adcampaign.getAdvertiser().getId())
-                .orElseThrow(() -> new RuntimeException("Sponsor not found"));
-        adcampaign.setAdvertiser(advertiser);
+
+    
+
+    
+
+    if (adcampaign.getAdvertiser() != null
+        && adcampaign.getAdvertiser().getId() != null) {
+        Sponsor existingAdvertiser = advertiserRepository.findById(
+        adcampaign.getAdvertiser().getId()
+        ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
+        adcampaign.setAdvertiser(existingAdvertiser);
         }
+    
+    
 
         return adcampaignRepository.save(adcampaign);
     }
@@ -52,11 +62,16 @@ public class AdCampaignService extends BaseService<AdCampaign> {
         existing.setBudget(adcampaignRequest.getBudget());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (adcampaignRequest.getAdvertiser() != null &&
+        adcampaignRequest.getAdvertiser().getId() != null) {
 
-        if (adcampaignRequest.getAdvertiser() != null && adcampaignRequest.getAdvertiser().getId() != null) {
-        Sponsor advertiser = advertiserRepository.findById(adcampaignRequest.getAdvertiser().getId())
-                .orElseThrow(() -> new RuntimeException("Sponsor not found"));
-        existing.setAdvertiser(advertiser);
+        Sponsor existingAdvertiser = advertiserRepository.findById(
+        adcampaignRequest.getAdvertiser().getId()
+        ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
+
+        existing.setAdvertiser(existingAdvertiser);
+        } else {
+        existing.setAdvertiser(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -79,4 +94,6 @@ public class AdCampaignService extends BaseService<AdCampaign> {
 
         return adcampaignRepository.save(existing);
     }
+
+
 }

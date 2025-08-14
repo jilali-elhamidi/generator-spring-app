@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat> {
@@ -27,11 +28,17 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
     @Override
     public GamePlaySessionStat save(GamePlaySessionStat gameplaysessionstat) {
 
-        if (gameplaysessionstat.getGamePlaySession() != null && gameplaysessionstat.getGamePlaySession().getId() != null) {
-        GamePlaySession gamePlaySession = gamePlaySessionRepository.findById(gameplaysessionstat.getGamePlaySession().getId())
-                .orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
-        gameplaysessionstat.setGamePlaySession(gamePlaySession);
+
+    
+
+    if (gameplaysessionstat.getGamePlaySession() != null
+        && gameplaysessionstat.getGamePlaySession().getId() != null) {
+        GamePlaySession existingGamePlaySession = gamePlaySessionRepository.findById(
+        gameplaysessionstat.getGamePlaySession().getId()
+        ).orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
+        gameplaysessionstat.setGamePlaySession(existingGamePlaySession);
         }
+    
 
         return gameplaysessionstatRepository.save(gameplaysessionstat);
     }
@@ -46,11 +53,16 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
         existing.setStatValue(gameplaysessionstatRequest.getStatValue());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (gameplaysessionstatRequest.getGamePlaySession() != null &&
+        gameplaysessionstatRequest.getGamePlaySession().getId() != null) {
 
-        if (gameplaysessionstatRequest.getGamePlaySession() != null && gameplaysessionstatRequest.getGamePlaySession().getId() != null) {
-        GamePlaySession gamePlaySession = gamePlaySessionRepository.findById(gameplaysessionstatRequest.getGamePlaySession().getId())
-                .orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
-        existing.setGamePlaySession(gamePlaySession);
+        GamePlaySession existingGamePlaySession = gamePlaySessionRepository.findById(
+        gameplaysessionstatRequest.getGamePlaySession().getId()
+        ).orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
+
+        existing.setGamePlaySession(existingGamePlaySession);
+        } else {
+        existing.setGamePlaySession(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -62,4 +74,6 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
 
         return gameplaysessionstatRepository.save(existing);
     }
+
+
 }

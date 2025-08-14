@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface ReviewMapper {
     List<ReviewDto> toDtoList(List<Review> reviewList);
 
     List<Review> toEntityList(List<ReviewDto> reviewDtoList);
+
+    void updateEntityFromDto(ReviewDto dto, @MappingTarget Review entity);
 
 }

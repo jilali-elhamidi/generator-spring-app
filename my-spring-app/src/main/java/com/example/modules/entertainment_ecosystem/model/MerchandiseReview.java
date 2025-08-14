@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Merchandise;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "merchandisereview_tbl")
@@ -35,15 +37,19 @@ public class MerchandiseReview extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("merchandiseReviews")
-    private UserProfile user;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "merchandise_id")
-    @JsonIgnoreProperties("reviews")
-    private Merchandise merchandise;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "user_id")
+        
+        private UserProfile user;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "merchandise_id")
+        
+        private Merchandise merchandise;
+    
     
 
 }

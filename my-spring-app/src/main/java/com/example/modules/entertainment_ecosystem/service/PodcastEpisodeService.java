@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
@@ -28,18 +29,30 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
         super(repository);
         this.podcastepisodeRepository = repository;
         this.podcastRepository = podcastRepository;
-            this.relatedEpisodeRepository = relatedEpisodeRepository;
+        this.relatedEpisodeRepository = relatedEpisodeRepository;
         this.guestAppearancesRepository = guestAppearancesRepository;
     }
 
     @Override
     public PodcastEpisode save(PodcastEpisode podcastepisode) {
 
-        if (podcastepisode.getPodcast() != null && podcastepisode.getPodcast().getId() != null) {
-        Podcast podcast = podcastRepository.findById(podcastepisode.getPodcast().getId())
-                .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        podcastepisode.setPodcast(podcast);
+
+    
+
+    
+
+    
+
+    if (podcastepisode.getPodcast() != null
+        && podcastepisode.getPodcast().getId() != null) {
+        Podcast existingPodcast = podcastRepository.findById(
+        podcastepisode.getPodcast().getId()
+        ).orElseThrow(() -> new RuntimeException("Podcast not found"));
+        podcastepisode.setPodcast(existingPodcast);
         }
+    
+    
+    
         if (podcastepisode.getRelatedEpisode() != null) {
         
         
@@ -66,11 +79,16 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
         existing.setDurationMinutes(podcastepisodeRequest.getDurationMinutes());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (podcastepisodeRequest.getPodcast() != null &&
+        podcastepisodeRequest.getPodcast().getId() != null) {
 
-        if (podcastepisodeRequest.getPodcast() != null && podcastepisodeRequest.getPodcast().getId() != null) {
-        Podcast podcast = podcastRepository.findById(podcastepisodeRequest.getPodcast().getId())
-                .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        existing.setPodcast(podcast);
+        Podcast existingPodcast = podcastRepository.findById(
+        podcastepisodeRequest.getPodcast().getId()
+        ).orElseThrow(() -> new RuntimeException("Podcast not found"));
+
+        existing.setPodcast(existingPodcast);
+        } else {
+        existing.setPodcast(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -113,4 +131,6 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
 
         return podcastepisodeRepository.save(existing);
     }
+
+
 }

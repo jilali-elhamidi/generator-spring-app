@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class LicenseService extends BaseService<License> {
@@ -21,11 +22,16 @@ public class LicenseService extends BaseService<License> {
     {
         super(repository);
         this.licenseRepository = repository;
-            this.assetRepository = assetRepository;
+        this.assetRepository = assetRepository;
     }
 
     @Override
     public License save(License license) {
+
+
+    
+
+    
         if (license.getAsset() != null) {
         
         
@@ -80,4 +86,6 @@ public class LicenseService extends BaseService<License> {
 
         return licenseRepository.save(existing);
     }
+
+
 }

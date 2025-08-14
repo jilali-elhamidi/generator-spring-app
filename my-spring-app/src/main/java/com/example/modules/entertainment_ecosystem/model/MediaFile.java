@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Review;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "mediafile_tbl")
@@ -32,6 +34,7 @@ public class MediaFile extends BaseEntity {
 
 // === Relations ===
 
+    
     @OneToOne(mappedBy = "mediaFile", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("mediaFile")
     private Review review;

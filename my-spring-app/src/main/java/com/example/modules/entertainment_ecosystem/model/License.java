@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.DigitalAsset;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "license_tbl")
@@ -35,6 +37,7 @@ public class License extends BaseEntity {
 
 // === Relations ===
 
+    
     @OneToOne
     @JoinColumn(name = "asset_id")
     @JsonIgnoreProperties("license")

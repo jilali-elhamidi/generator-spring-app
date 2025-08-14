@@ -16,16 +16,21 @@ import com.example.modules.entertainment_ecosystem.repository.MerchandiseTypeRep
 import com.example.modules.entertainment_ecosystem.model.MerchandiseInventory;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseInventoryRepository;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseReview;
+import com.example.modules.entertainment_ecosystem.repository.MerchandiseReviewRepository;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseSale;
+import com.example.modules.entertainment_ecosystem.repository.MerchandiseSaleRepository;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseSupplier;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseSupplierRepository;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseShipping;
+import com.example.modules.entertainment_ecosystem.repository.MerchandiseShippingRepository;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseOrderItem;
+import com.example.modules.entertainment_ecosystem.repository.MerchandiseOrderItemRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MerchandiseService extends BaseService<Merchandise> {
@@ -37,9 +42,13 @@ public class MerchandiseService extends BaseService<Merchandise> {
     private final UserProfileRepository ownedByUsersRepository;
     private final MerchandiseTypeRepository productTypeRepository;
     private final MerchandiseInventoryRepository inventoryRepository;
+    private final MerchandiseReviewRepository reviewsRepository;
+    private final MerchandiseSaleRepository salesRepository;
     private final MerchandiseSupplierRepository supplierRepository;
+    private final MerchandiseShippingRepository shipmentsRepository;
+    private final MerchandiseOrderItemRepository orderItemsRepository;
 
-    public MerchandiseService(MerchandiseRepository repository,ArtistRepository artistRepository,MovieRepository relatedMoviesRepository,TVShowRepository relatedShowsRepository,UserProfileRepository ownedByUsersRepository,MerchandiseTypeRepository productTypeRepository,MerchandiseInventoryRepository inventoryRepository,MerchandiseSupplierRepository supplierRepository)
+    public MerchandiseService(MerchandiseRepository repository,ArtistRepository artistRepository,MovieRepository relatedMoviesRepository,TVShowRepository relatedShowsRepository,UserProfileRepository ownedByUsersRepository,MerchandiseTypeRepository productTypeRepository,MerchandiseInventoryRepository inventoryRepository,MerchandiseReviewRepository reviewsRepository,MerchandiseSaleRepository salesRepository,MerchandiseSupplierRepository supplierRepository,MerchandiseShippingRepository shipmentsRepository,MerchandiseOrderItemRepository orderItemsRepository)
     {
         super(repository);
         this.merchandiseRepository = repository;
@@ -48,54 +57,152 @@ public class MerchandiseService extends BaseService<Merchandise> {
         this.relatedShowsRepository = relatedShowsRepository;
         this.ownedByUsersRepository = ownedByUsersRepository;
         this.productTypeRepository = productTypeRepository;
-            this.inventoryRepository = inventoryRepository;
+        this.inventoryRepository = inventoryRepository;
+        this.reviewsRepository = reviewsRepository;
+        this.salesRepository = salesRepository;
         this.supplierRepository = supplierRepository;
+        this.shipmentsRepository = shipmentsRepository;
+        this.orderItemsRepository = orderItemsRepository;
     }
 
     @Override
     public Merchandise save(Merchandise merchandise) {
 
-        if (merchandise.getArtist() != null && merchandise.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(merchandise.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        merchandise.setArtist(artist);
-        }
 
-        if (merchandise.getProductType() != null && merchandise.getProductType().getId() != null) {
-        MerchandiseType productType = productTypeRepository.findById(merchandise.getProductType().getId())
-                .orElseThrow(() -> new RuntimeException("MerchandiseType not found"));
-        merchandise.setProductType(productType);
-        }
+    
 
-        if (merchandise.getSupplier() != null && merchandise.getSupplier().getId() != null) {
-        MerchandiseSupplier supplier = supplierRepository.findById(merchandise.getSupplier().getId())
-                .orElseThrow(() -> new RuntimeException("MerchandiseSupplier not found"));
-        merchandise.setSupplier(supplier);
-        }
+    
 
-        if (merchandise.getReviews() != null) {
+    
+
+    
+
+    
+
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (merchandise.getReviews() != null) {
+            List<MerchandiseReview> managedReviews = new ArrayList<>();
             for (MerchandiseReview item : merchandise.getReviews()) {
+            if (item.getId() != null) {
+            MerchandiseReview existingItem = reviewsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("MerchandiseReview not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMerchandise(merchandise);
+            managedReviews.add(existingItem);
+            } else {
             item.setMerchandise(merchandise);
+            managedReviews.add(item);
             }
-        }
+            }
+            merchandise.setReviews(managedReviews);
+            }
+        
+    
 
-        if (merchandise.getSales() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (merchandise.getSales() != null) {
+            List<MerchandiseSale> managedSales = new ArrayList<>();
             for (MerchandiseSale item : merchandise.getSales()) {
+            if (item.getId() != null) {
+            MerchandiseSale existingItem = salesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("MerchandiseSale not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMerchandiseItem(merchandise);
+            managedSales.add(existingItem);
+            } else {
             item.setMerchandiseItem(merchandise);
+            managedSales.add(item);
             }
-        }
+            }
+            merchandise.setSales(managedSales);
+            }
+        
+    
 
-        if (merchandise.getShipments() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (merchandise.getShipments() != null) {
+            List<MerchandiseShipping> managedShipments = new ArrayList<>();
             for (MerchandiseShipping item : merchandise.getShipments()) {
+            if (item.getId() != null) {
+            MerchandiseShipping existingItem = shipmentsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMerchandiseItem(merchandise);
+            managedShipments.add(existingItem);
+            } else {
             item.setMerchandiseItem(merchandise);
+            managedShipments.add(item);
             }
-        }
+            }
+            merchandise.setShipments(managedShipments);
+            }
+        
+    
 
-        if (merchandise.getOrderItems() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (merchandise.getOrderItems() != null) {
+            List<MerchandiseOrderItem> managedOrderItems = new ArrayList<>();
             for (MerchandiseOrderItem item : merchandise.getOrderItems()) {
+            if (item.getId() != null) {
+            MerchandiseOrderItem existingItem = orderItemsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("MerchandiseOrderItem not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMerchandiseItem(merchandise);
+            managedOrderItems.add(existingItem);
+            } else {
             item.setMerchandiseItem(merchandise);
+            managedOrderItems.add(item);
             }
+            }
+            merchandise.setOrderItems(managedOrderItems);
+            }
+        
+    
+
+    if (merchandise.getArtist() != null
+        && merchandise.getArtist().getId() != null) {
+        Artist existingArtist = artistRepository.findById(
+        merchandise.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        merchandise.setArtist(existingArtist);
         }
+    
+    
+    
+    
+    if (merchandise.getProductType() != null
+        && merchandise.getProductType().getId() != null) {
+        MerchandiseType existingProductType = productTypeRepository.findById(
+        merchandise.getProductType().getId()
+        ).orElseThrow(() -> new RuntimeException("MerchandiseType not found"));
+        merchandise.setProductType(existingProductType);
+        }
+    
+    
+    
+    
+    if (merchandise.getSupplier() != null
+        && merchandise.getSupplier().getId() != null) {
+        MerchandiseSupplier existingSupplier = supplierRepository.findById(
+        merchandise.getSupplier().getId()
+        ).orElseThrow(() -> new RuntimeException("MerchandiseSupplier not found"));
+        merchandise.setSupplier(existingSupplier);
+        }
+    
+    
+    
         if (merchandise.getInventory() != null) {
         
         
@@ -122,23 +229,38 @@ public class MerchandiseService extends BaseService<Merchandise> {
         existing.setPrice(merchandiseRequest.getPrice());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (merchandiseRequest.getArtist() != null &&
+        merchandiseRequest.getArtist().getId() != null) {
 
-        if (merchandiseRequest.getArtist() != null && merchandiseRequest.getArtist().getId() != null) {
-        Artist artist = artistRepository.findById(merchandiseRequest.getArtist().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setArtist(artist);
+        Artist existingArtist = artistRepository.findById(
+        merchandiseRequest.getArtist().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setArtist(existingArtist);
+        } else {
+        existing.setArtist(null);
         }
+        if (merchandiseRequest.getProductType() != null &&
+        merchandiseRequest.getProductType().getId() != null) {
 
-        if (merchandiseRequest.getProductType() != null && merchandiseRequest.getProductType().getId() != null) {
-        MerchandiseType productType = productTypeRepository.findById(merchandiseRequest.getProductType().getId())
-                .orElseThrow(() -> new RuntimeException("MerchandiseType not found"));
-        existing.setProductType(productType);
+        MerchandiseType existingProductType = productTypeRepository.findById(
+        merchandiseRequest.getProductType().getId()
+        ).orElseThrow(() -> new RuntimeException("MerchandiseType not found"));
+
+        existing.setProductType(existingProductType);
+        } else {
+        existing.setProductType(null);
         }
+        if (merchandiseRequest.getSupplier() != null &&
+        merchandiseRequest.getSupplier().getId() != null) {
 
-        if (merchandiseRequest.getSupplier() != null && merchandiseRequest.getSupplier().getId() != null) {
-        MerchandiseSupplier supplier = supplierRepository.findById(merchandiseRequest.getSupplier().getId())
-                .orElseThrow(() -> new RuntimeException("MerchandiseSupplier not found"));
-        existing.setSupplier(supplier);
+        MerchandiseSupplier existingSupplier = supplierRepository.findById(
+        merchandiseRequest.getSupplier().getId()
+        ).orElseThrow(() -> new RuntimeException("MerchandiseSupplier not found"));
+
+        existing.setSupplier(existingSupplier);
+        } else {
+        existing.setSupplier(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -171,37 +293,77 @@ public class MerchandiseService extends BaseService<Merchandise> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getReviews().clear();
+
         if (merchandiseRequest.getReviews() != null) {
-            for (var item : merchandiseRequest.getReviews()) {
-            item.setMerchandise(existing);
-            existing.getReviews().add(item);
-            }
-        }
+        List<MerchandiseReview> managedReviews = new ArrayList<>();
 
+        for (var item : merchandiseRequest.getReviews()) {
+        if (item.getId() != null) {
+        MerchandiseReview existingItem = reviewsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MerchandiseReview not found"));
+        existingItem.setMerchandise(existing);
+        managedReviews.add(existingItem);
+        } else {
+        item.setMerchandise(existing);
+        managedReviews.add(item);
+        }
+        }
+        existing.setReviews(managedReviews);
+        }
         existing.getSales().clear();
+
         if (merchandiseRequest.getSales() != null) {
-            for (var item : merchandiseRequest.getSales()) {
-            item.setMerchandiseItem(existing);
-            existing.getSales().add(item);
-            }
-        }
+        List<MerchandiseSale> managedSales = new ArrayList<>();
 
+        for (var item : merchandiseRequest.getSales()) {
+        if (item.getId() != null) {
+        MerchandiseSale existingItem = salesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MerchandiseSale not found"));
+        existingItem.setMerchandiseItem(existing);
+        managedSales.add(existingItem);
+        } else {
+        item.setMerchandiseItem(existing);
+        managedSales.add(item);
+        }
+        }
+        existing.setSales(managedSales);
+        }
         existing.getShipments().clear();
-        if (merchandiseRequest.getShipments() != null) {
-            for (var item : merchandiseRequest.getShipments()) {
-            item.setMerchandiseItem(existing);
-            existing.getShipments().add(item);
-            }
-        }
 
+        if (merchandiseRequest.getShipments() != null) {
+        List<MerchandiseShipping> managedShipments = new ArrayList<>();
+
+        for (var item : merchandiseRequest.getShipments()) {
+        if (item.getId() != null) {
+        MerchandiseShipping existingItem = shipmentsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
+        existingItem.setMerchandiseItem(existing);
+        managedShipments.add(existingItem);
+        } else {
+        item.setMerchandiseItem(existing);
+        managedShipments.add(item);
+        }
+        }
+        existing.setShipments(managedShipments);
+        }
         existing.getOrderItems().clear();
+
         if (merchandiseRequest.getOrderItems() != null) {
-            for (var item : merchandiseRequest.getOrderItems()) {
-            item.setMerchandiseItem(existing);
-            existing.getOrderItems().add(item);
-            }
+        List<MerchandiseOrderItem> managedOrderItems = new ArrayList<>();
+
+        for (var item : merchandiseRequest.getOrderItems()) {
+        if (item.getId() != null) {
+        MerchandiseOrderItem existingItem = orderItemsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MerchandiseOrderItem not found"));
+        existingItem.setMerchandiseItem(existing);
+        managedOrderItems.add(existingItem);
+        } else {
+        item.setMerchandiseItem(existing);
+        managedOrderItems.add(item);
+        }
+        }
+        existing.setOrderItems(managedOrderItems);
         }
 
     
@@ -247,4 +409,6 @@ public class MerchandiseService extends BaseService<Merchandise> {
 
         return merchandiseRepository.save(existing);
     }
+
+
 }

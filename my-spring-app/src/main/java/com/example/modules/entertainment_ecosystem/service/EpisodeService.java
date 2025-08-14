@@ -10,11 +10,13 @@ import com.example.modules.entertainment_ecosystem.repository.UserProfileReposit
 import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;
 import com.example.modules.entertainment_ecosystem.repository.PodcastEpisodeRepository;
 import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
+import com.example.modules.entertainment_ecosystem.repository.EpisodeCreditRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class EpisodeService extends BaseService<Episode> {
@@ -23,30 +25,61 @@ public class EpisodeService extends BaseService<Episode> {
     private final SeasonRepository seasonRepository;
     private final UserProfileRepository watchedByUsersRepository;
     private final PodcastEpisodeRepository relatedPodcastEpisodeRepository;
+    private final EpisodeCreditRepository creditsRepository;
 
-    public EpisodeService(EpisodeRepository repository,SeasonRepository seasonRepository,UserProfileRepository watchedByUsersRepository,PodcastEpisodeRepository relatedPodcastEpisodeRepository)
+    public EpisodeService(EpisodeRepository repository,SeasonRepository seasonRepository,UserProfileRepository watchedByUsersRepository,PodcastEpisodeRepository relatedPodcastEpisodeRepository,EpisodeCreditRepository creditsRepository)
     {
         super(repository);
         this.episodeRepository = repository;
         this.seasonRepository = seasonRepository;
         this.watchedByUsersRepository = watchedByUsersRepository;
-            this.relatedPodcastEpisodeRepository = relatedPodcastEpisodeRepository;
+        this.relatedPodcastEpisodeRepository = relatedPodcastEpisodeRepository;
+        this.creditsRepository = creditsRepository;
     }
 
     @Override
     public Episode save(Episode episode) {
 
-        if (episode.getSeason() != null && episode.getSeason().getId() != null) {
-        Season season = seasonRepository.findById(episode.getSeason().getId())
-                .orElseThrow(() -> new RuntimeException("Season not found"));
-        episode.setSeason(season);
-        }
 
-        if (episode.getCredits() != null) {
+    
+
+    
+
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (episode.getCredits() != null) {
+            List<EpisodeCredit> managedCredits = new ArrayList<>();
             for (EpisodeCredit item : episode.getCredits()) {
+            if (item.getId() != null) {
+            EpisodeCredit existingItem = creditsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("EpisodeCredit not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setEpisode(episode);
+            managedCredits.add(existingItem);
+            } else {
             item.setEpisode(episode);
+            managedCredits.add(item);
             }
+            }
+            episode.setCredits(managedCredits);
+            }
+        
+    
+
+    if (episode.getSeason() != null
+        && episode.getSeason().getId() != null) {
+        Season existingSeason = seasonRepository.findById(
+        episode.getSeason().getId()
+        ).orElseThrow(() -> new RuntimeException("Season not found"));
+        episode.setSeason(existingSeason);
         }
+    
+    
+    
+    
         if (episode.getRelatedPodcastEpisode() != null) {
         
         
@@ -74,11 +107,16 @@ public class EpisodeService extends BaseService<Episode> {
         existing.setDurationMinutes(episodeRequest.getDurationMinutes());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (episodeRequest.getSeason() != null &&
+        episodeRequest.getSeason().getId() != null) {
 
-        if (episodeRequest.getSeason() != null && episodeRequest.getSeason().getId() != null) {
-        Season season = seasonRepository.findById(episodeRequest.getSeason().getId())
-                .orElseThrow(() -> new RuntimeException("Season not found"));
-        existing.setSeason(season);
+        Season existingSeason = seasonRepository.findById(
+        episodeRequest.getSeason().getId()
+        ).orElseThrow(() -> new RuntimeException("Season not found"));
+
+        existing.setSeason(existingSeason);
+        } else {
+        existing.setSeason(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -93,13 +131,23 @@ public class EpisodeService extends BaseService<Episode> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getCredits().clear();
+
         if (episodeRequest.getCredits() != null) {
-            for (var item : episodeRequest.getCredits()) {
-            item.setEpisode(existing);
-            existing.getCredits().add(item);
-            }
+        List<EpisodeCredit> managedCredits = new ArrayList<>();
+
+        for (var item : episodeRequest.getCredits()) {
+        if (item.getId() != null) {
+        EpisodeCredit existingItem = creditsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("EpisodeCredit not found"));
+        existingItem.setEpisode(existing);
+        managedCredits.add(existingItem);
+        } else {
+        item.setEpisode(existing);
+        managedCredits.add(item);
+        }
+        }
+        existing.setCredits(managedCredits);
         }
 
     
@@ -131,4 +179,6 @@ public class EpisodeService extends BaseService<Episode> {
 
         return episodeRepository.save(existing);
     }
+
+
 }

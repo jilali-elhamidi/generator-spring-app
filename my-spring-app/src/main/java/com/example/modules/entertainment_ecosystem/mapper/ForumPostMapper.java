@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface ForumPostMapper {
     List<ForumPostDto> toDtoList(List<ForumPost> forumpostList);
 
     List<ForumPost> toEntityList(List<ForumPostDto> forumpostDtoList);
+
+    void updateEntityFromDto(ForumPostDto dto, @MappingTarget ForumPost entity);
 
 }

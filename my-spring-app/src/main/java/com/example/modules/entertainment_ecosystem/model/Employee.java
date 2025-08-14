@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.ProductionCompany;import com.example.modules.entertainment_ecosystem.model.Shift;import com.example.modules.entertainment_ecosystem.model.EventLocation;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "employee_tbl")
@@ -38,18 +40,22 @@ public class Employee extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "company_id")
-    @JsonIgnoreProperties("staff")
-    private ProductionCompany productionCompany;
     
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("employee")
-    private List<Shift> shifts;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "productionCompany_id")
+        
+        private ProductionCompany productionCompany;
     
-    @OneToMany(mappedBy = "contactPerson", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("contactPerson")
-    private List<EventLocation> managedLocations;
+    
+    
+    @OneToMany(mappedBy = "employee", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Shift> shifts;
+    
+    
+    @OneToMany(mappedBy = "contactPerson", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<EventLocation> managedLocations;
     
 
 }

@@ -51,22 +51,27 @@ public class UserFollowerController {
         return ResponseEntity.created(location).body(userfollowerMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserFollowerDto> updateUserFollower(
-            @PathVariable Long id,
-            @Valid @RequestBody UserFollowerDto userfollowerDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<UserFollowerDto> updateUserFollower(
+                @PathVariable Long id,
+                @Valid @RequestBody UserFollowerDto userfollowerDto) {
 
-        try {
-            UserFollower updatedEntity = userfollowerService.update(
-                    id,
-                    userfollowerMapper.toEntity(userfollowerDto)
-            );
-            return ResponseEntity.ok(userfollowerMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                UserFollower existing = userfollowerService.findById(id)
+                .orElseThrow(() -> new RuntimeException("UserFollower not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                userfollowerMapper.updateEntityFromDto(userfollowerDto, existing);
+
+                // Sauvegarde
+                UserFollower updatedEntity = userfollowerService.save(existing);
+
+                return ResponseEntity.ok(userfollowerMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserFollower(@PathVariable Long id) {
         userfollowerService.deleteById(id);

@@ -4,6 +4,7 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.TVShow;
 import com.example.modules.entertainment_ecosystem.repository.TVShowRepository;
 import com.example.modules.entertainment_ecosystem.model.Season;
+import com.example.modules.entertainment_ecosystem.repository.SeasonRepository;
 import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 import com.example.modules.entertainment_ecosystem.model.Genre;
@@ -15,6 +16,7 @@ import com.example.modules.entertainment_ecosystem.repository.ProductionCompanyR
 import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;
+import com.example.modules.entertainment_ecosystem.repository.StreamingContentLicenseRepository;
 import com.example.modules.entertainment_ecosystem.model.ContentProvider;
 import com.example.modules.entertainment_ecosystem.repository.ContentProviderRepository;
 import com.example.modules.entertainment_ecosystem.model.TVShowStudio;
@@ -30,31 +32,36 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class TVShowService extends BaseService<TVShow> {
 
     protected final TVShowRepository tvshowRepository;
+    private final SeasonRepository seasonsRepository;
     private final ArtistRepository directorRepository;
     private final GenreRepository genresRepository;
     private final MerchandiseRepository relatedMerchandiseRepository;
     private final ProductionCompanyRepository productionCompanyRepository;
     private final ArtistRepository castRepository;
+    private final StreamingContentLicenseRepository streamingLicensesRepository;
     private final ContentProviderRepository providerRepository;
     private final TVShowStudioRepository tvShowStudioRepository;
     private final ContentRatingRepository contentRatingRepository;
     private final ContentTagRepository tagsRepository;
     private final ContentLanguageRepository languagesRepository;
 
-    public TVShowService(TVShowRepository repository,ArtistRepository directorRepository,GenreRepository genresRepository,MerchandiseRepository relatedMerchandiseRepository,ProductionCompanyRepository productionCompanyRepository,ArtistRepository castRepository,ContentProviderRepository providerRepository,TVShowStudioRepository tvShowStudioRepository,ContentRatingRepository contentRatingRepository,ContentTagRepository tagsRepository,ContentLanguageRepository languagesRepository)
+    public TVShowService(TVShowRepository repository,SeasonRepository seasonsRepository,ArtistRepository directorRepository,GenreRepository genresRepository,MerchandiseRepository relatedMerchandiseRepository,ProductionCompanyRepository productionCompanyRepository,ArtistRepository castRepository,StreamingContentLicenseRepository streamingLicensesRepository,ContentProviderRepository providerRepository,TVShowStudioRepository tvShowStudioRepository,ContentRatingRepository contentRatingRepository,ContentTagRepository tagsRepository,ContentLanguageRepository languagesRepository)
     {
         super(repository);
         this.tvshowRepository = repository;
+        this.seasonsRepository = seasonsRepository;
         this.directorRepository = directorRepository;
         this.genresRepository = genresRepository;
         this.relatedMerchandiseRepository = relatedMerchandiseRepository;
         this.productionCompanyRepository = productionCompanyRepository;
         this.castRepository = castRepository;
+        this.streamingLicensesRepository = streamingLicensesRepository;
         this.providerRepository = providerRepository;
         this.tvShowStudioRepository = tvShowStudioRepository;
         this.contentRatingRepository = contentRatingRepository;
@@ -65,47 +72,118 @@ public class TVShowService extends BaseService<TVShow> {
     @Override
     public TVShow save(TVShow tvshow) {
 
-        if (tvshow.getDirector() != null && tvshow.getDirector().getId() != null) {
-        Artist director = directorRepository.findById(tvshow.getDirector().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        tvshow.setDirector(director);
-        }
 
-        if (tvshow.getProductionCompany() != null && tvshow.getProductionCompany().getId() != null) {
-        ProductionCompany productionCompany = productionCompanyRepository.findById(tvshow.getProductionCompany().getId())
-                .orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-        tvshow.setProductionCompany(productionCompany);
-        }
-
-        if (tvshow.getProvider() != null && tvshow.getProvider().getId() != null) {
-        ContentProvider provider = providerRepository.findById(tvshow.getProvider().getId())
-                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-        tvshow.setProvider(provider);
-        }
-
-        if (tvshow.getTvShowStudio() != null && tvshow.getTvShowStudio().getId() != null) {
-        TVShowStudio tvShowStudio = tvShowStudioRepository.findById(tvshow.getTvShowStudio().getId())
-                .orElseThrow(() -> new RuntimeException("TVShowStudio not found"));
-        tvshow.setTvShowStudio(tvShowStudio);
-        }
-
-        if (tvshow.getContentRating() != null && tvshow.getContentRating().getId() != null) {
-        ContentRating contentRating = contentRatingRepository.findById(tvshow.getContentRating().getId())
-                .orElseThrow(() -> new RuntimeException("ContentRating not found"));
-        tvshow.setContentRating(contentRating);
-        }
-
-        if (tvshow.getSeasons() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (tvshow.getSeasons() != null) {
+            List<Season> managedSeasons = new ArrayList<>();
             for (Season item : tvshow.getSeasons()) {
+            if (item.getId() != null) {
+            Season existingItem = seasonsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Season not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setShow(tvshow);
+            managedSeasons.add(existingItem);
+            } else {
             item.setShow(tvshow);
+            managedSeasons.add(item);
             }
-        }
+            }
+            tvshow.setSeasons(managedSeasons);
+            }
+        
+    
 
-        if (tvshow.getStreamingLicenses() != null) {
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (tvshow.getStreamingLicenses() != null) {
+            List<StreamingContentLicense> managedStreamingLicenses = new ArrayList<>();
             for (StreamingContentLicense item : tvshow.getStreamingLicenses()) {
+            if (item.getId() != null) {
+            StreamingContentLicense existingItem = streamingLicensesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setTvShow(tvshow);
+            managedStreamingLicenses.add(existingItem);
+            } else {
             item.setTvShow(tvshow);
+            managedStreamingLicenses.add(item);
             }
+            }
+            tvshow.setStreamingLicenses(managedStreamingLicenses);
+            }
+        
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    if (tvshow.getDirector() != null
+        && tvshow.getDirector().getId() != null) {
+        Artist existingDirector = directorRepository.findById(
+        tvshow.getDirector().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        tvshow.setDirector(existingDirector);
         }
+    
+    
+    
+    if (tvshow.getProductionCompany() != null
+        && tvshow.getProductionCompany().getId() != null) {
+        ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+        tvshow.getProductionCompany().getId()
+        ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
+        tvshow.setProductionCompany(existingProductionCompany);
+        }
+    
+    
+    
+    if (tvshow.getProvider() != null
+        && tvshow.getProvider().getId() != null) {
+        ContentProvider existingProvider = providerRepository.findById(
+        tvshow.getProvider().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+        tvshow.setProvider(existingProvider);
+        }
+    
+    if (tvshow.getTvShowStudio() != null
+        && tvshow.getTvShowStudio().getId() != null) {
+        TVShowStudio existingTvShowStudio = tvShowStudioRepository.findById(
+        tvshow.getTvShowStudio().getId()
+        ).orElseThrow(() -> new RuntimeException("TVShowStudio not found"));
+        tvshow.setTvShowStudio(existingTvShowStudio);
+        }
+    
+    if (tvshow.getContentRating() != null
+        && tvshow.getContentRating().getId() != null) {
+        ContentRating existingContentRating = contentRatingRepository.findById(
+        tvshow.getContentRating().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
+        tvshow.setContentRating(existingContentRating);
+        }
+    
+    
+    
 
         return tvshowRepository.save(tvshow);
     }
@@ -122,35 +200,60 @@ public class TVShowService extends BaseService<TVShow> {
         existing.setSynopsis(tvshowRequest.getSynopsis());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (tvshowRequest.getDirector() != null &&
+        tvshowRequest.getDirector().getId() != null) {
 
-        if (tvshowRequest.getDirector() != null && tvshowRequest.getDirector().getId() != null) {
-        Artist director = directorRepository.findById(tvshowRequest.getDirector().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setDirector(director);
+        Artist existingDirector = directorRepository.findById(
+        tvshowRequest.getDirector().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setDirector(existingDirector);
+        } else {
+        existing.setDirector(null);
         }
+        if (tvshowRequest.getProductionCompany() != null &&
+        tvshowRequest.getProductionCompany().getId() != null) {
 
-        if (tvshowRequest.getProductionCompany() != null && tvshowRequest.getProductionCompany().getId() != null) {
-        ProductionCompany productionCompany = productionCompanyRepository.findById(tvshowRequest.getProductionCompany().getId())
-                .orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-        existing.setProductionCompany(productionCompany);
+        ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+        tvshowRequest.getProductionCompany().getId()
+        ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
+
+        existing.setProductionCompany(existingProductionCompany);
+        } else {
+        existing.setProductionCompany(null);
         }
+        if (tvshowRequest.getProvider() != null &&
+        tvshowRequest.getProvider().getId() != null) {
 
-        if (tvshowRequest.getProvider() != null && tvshowRequest.getProvider().getId() != null) {
-        ContentProvider provider = providerRepository.findById(tvshowRequest.getProvider().getId())
-                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-        existing.setProvider(provider);
+        ContentProvider existingProvider = providerRepository.findById(
+        tvshowRequest.getProvider().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+
+        existing.setProvider(existingProvider);
+        } else {
+        existing.setProvider(null);
         }
+        if (tvshowRequest.getTvShowStudio() != null &&
+        tvshowRequest.getTvShowStudio().getId() != null) {
 
-        if (tvshowRequest.getTvShowStudio() != null && tvshowRequest.getTvShowStudio().getId() != null) {
-        TVShowStudio tvShowStudio = tvShowStudioRepository.findById(tvshowRequest.getTvShowStudio().getId())
-                .orElseThrow(() -> new RuntimeException("TVShowStudio not found"));
-        existing.setTvShowStudio(tvShowStudio);
+        TVShowStudio existingTvShowStudio = tvShowStudioRepository.findById(
+        tvshowRequest.getTvShowStudio().getId()
+        ).orElseThrow(() -> new RuntimeException("TVShowStudio not found"));
+
+        existing.setTvShowStudio(existingTvShowStudio);
+        } else {
+        existing.setTvShowStudio(null);
         }
+        if (tvshowRequest.getContentRating() != null &&
+        tvshowRequest.getContentRating().getId() != null) {
 
-        if (tvshowRequest.getContentRating() != null && tvshowRequest.getContentRating().getId() != null) {
-        ContentRating contentRating = contentRatingRepository.findById(tvshowRequest.getContentRating().getId())
-                .orElseThrow(() -> new RuntimeException("ContentRating not found"));
-        existing.setContentRating(contentRating);
+        ContentRating existingContentRating = contentRatingRepository.findById(
+        tvshowRequest.getContentRating().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
+
+        existing.setContentRating(existingContentRating);
+        } else {
+        existing.setContentRating(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -201,21 +304,41 @@ public class TVShowService extends BaseService<TVShow> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getSeasons().clear();
-        if (tvshowRequest.getSeasons() != null) {
-            for (var item : tvshowRequest.getSeasons()) {
-            item.setShow(existing);
-            existing.getSeasons().add(item);
-            }
-        }
 
+        if (tvshowRequest.getSeasons() != null) {
+        List<Season> managedSeasons = new ArrayList<>();
+
+        for (var item : tvshowRequest.getSeasons()) {
+        if (item.getId() != null) {
+        Season existingItem = seasonsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Season not found"));
+        existingItem.setShow(existing);
+        managedSeasons.add(existingItem);
+        } else {
+        item.setShow(existing);
+        managedSeasons.add(item);
+        }
+        }
+        existing.setSeasons(managedSeasons);
+        }
         existing.getStreamingLicenses().clear();
+
         if (tvshowRequest.getStreamingLicenses() != null) {
-            for (var item : tvshowRequest.getStreamingLicenses()) {
-            item.setTvShow(existing);
-            existing.getStreamingLicenses().add(item);
-            }
+        List<StreamingContentLicense> managedStreamingLicenses = new ArrayList<>();
+
+        for (var item : tvshowRequest.getStreamingLicenses()) {
+        if (item.getId() != null) {
+        StreamingContentLicense existingItem = streamingLicensesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
+        existingItem.setTvShow(existing);
+        managedStreamingLicenses.add(existingItem);
+        } else {
+        item.setTvShow(existing);
+        managedStreamingLicenses.add(item);
+        }
+        }
+        existing.setStreamingLicenses(managedStreamingLicenses);
         }
 
     
@@ -245,4 +368,6 @@ public class TVShowService extends BaseService<TVShow> {
 
         return tvshowRepository.save(existing);
     }
+
+
 }

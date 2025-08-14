@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Artist;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "artistsocialmedia_tbl")
@@ -32,10 +34,12 @@ public class ArtistSocialMedia extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "artist_id")
-    @JsonIgnoreProperties("socialMediaLinks")
-    private Artist artist;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "artist_id")
+        
+        private Artist artist;
+    
     
 
 }

@@ -51,22 +51,27 @@ public class MovieStudioController {
         return ResponseEntity.created(location).body(moviestudioMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<MovieStudioDto> updateMovieStudio(
-            @PathVariable Long id,
-            @Valid @RequestBody MovieStudioDto moviestudioDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<MovieStudioDto> updateMovieStudio(
+                @PathVariable Long id,
+                @Valid @RequestBody MovieStudioDto moviestudioDto) {
 
-        try {
-            MovieStudio updatedEntity = moviestudioService.update(
-                    id,
-                    moviestudioMapper.toEntity(moviestudioDto)
-            );
-            return ResponseEntity.ok(moviestudioMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                MovieStudio existing = moviestudioService.findById(id)
+                .orElseThrow(() -> new RuntimeException("MovieStudio not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                moviestudioMapper.updateEntityFromDto(moviestudioDto, existing);
+
+                // Sauvegarde
+                MovieStudio updatedEntity = moviestudioService.save(existing);
+
+                return ResponseEntity.ok(moviestudioMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovieStudio(@PathVariable Long id) {
         moviestudioService.deleteById(id);

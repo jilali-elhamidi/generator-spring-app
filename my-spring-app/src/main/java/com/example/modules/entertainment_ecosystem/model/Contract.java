@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.EventSponsorship;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "contract_tbl")
@@ -32,6 +34,7 @@ public class Contract extends BaseEntity {
 
 // === Relations ===
 
+    
     @OneToOne(mappedBy = "contract", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("contract")
     private EventSponsorship sponsorship;

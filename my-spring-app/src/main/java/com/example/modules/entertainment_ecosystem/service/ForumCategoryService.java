@@ -4,48 +4,95 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.ForumCategory;
 import com.example.modules.entertainment_ecosystem.repository.ForumCategoryRepository;
 import com.example.modules.entertainment_ecosystem.model.ForumThread;
+import com.example.modules.entertainment_ecosystem.repository.ForumThreadRepository;
 import com.example.modules.entertainment_ecosystem.model.ForumCategory;
 import com.example.modules.entertainment_ecosystem.repository.ForumCategoryRepository;
 import com.example.modules.entertainment_ecosystem.model.ForumCategory;
+import com.example.modules.entertainment_ecosystem.repository.ForumCategoryRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ForumCategoryService extends BaseService<ForumCategory> {
 
     protected final ForumCategoryRepository forumcategoryRepository;
+    private final ForumThreadRepository threadsRepository;
     private final ForumCategoryRepository parentCategoryRepository;
+    private final ForumCategoryRepository childCategoriesRepository;
 
-    public ForumCategoryService(ForumCategoryRepository repository,ForumCategoryRepository parentCategoryRepository)
+    public ForumCategoryService(ForumCategoryRepository repository,ForumThreadRepository threadsRepository,ForumCategoryRepository parentCategoryRepository,ForumCategoryRepository childCategoriesRepository)
     {
         super(repository);
         this.forumcategoryRepository = repository;
+        this.threadsRepository = threadsRepository;
         this.parentCategoryRepository = parentCategoryRepository;
+        this.childCategoriesRepository = childCategoriesRepository;
     }
 
     @Override
     public ForumCategory save(ForumCategory forumcategory) {
 
-        if (forumcategory.getParentCategory() != null && forumcategory.getParentCategory().getId() != null) {
-        ForumCategory parentCategory = parentCategoryRepository.findById(forumcategory.getParentCategory().getId())
-                .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-        forumcategory.setParentCategory(parentCategory);
-        }
 
-        if (forumcategory.getThreads() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (forumcategory.getThreads() != null) {
+            List<ForumThread> managedThreads = new ArrayList<>();
             for (ForumThread item : forumcategory.getThreads()) {
+            if (item.getId() != null) {
+            ForumThread existingItem = threadsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("ForumThread not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setCategory(forumcategory);
+            managedThreads.add(existingItem);
+            } else {
             item.setCategory(forumcategory);
+            managedThreads.add(item);
             }
-        }
+            }
+            forumcategory.setThreads(managedThreads);
+            }
+        
+    
 
-        if (forumcategory.getChildCategories() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (forumcategory.getChildCategories() != null) {
+            List<ForumCategory> managedChildCategories = new ArrayList<>();
             for (ForumCategory item : forumcategory.getChildCategories()) {
+            if (item.getId() != null) {
+            ForumCategory existingItem = childCategoriesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setParentCategory(forumcategory);
+            managedChildCategories.add(existingItem);
+            } else {
             item.setParentCategory(forumcategory);
+            managedChildCategories.add(item);
             }
+            }
+            forumcategory.setChildCategories(managedChildCategories);
+            }
+        
+    
+
+    
+    if (forumcategory.getParentCategory() != null
+        && forumcategory.getParentCategory().getId() != null) {
+        ForumCategory existingParentCategory = parentCategoryRepository.findById(
+        forumcategory.getParentCategory().getId()
+        ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+        forumcategory.setParentCategory(existingParentCategory);
         }
+    
+    
 
         return forumcategoryRepository.save(forumcategory);
     }
@@ -59,31 +106,56 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
         existing.setName(forumcategoryRequest.getName());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (forumcategoryRequest.getParentCategory() != null &&
+        forumcategoryRequest.getParentCategory().getId() != null) {
 
-        if (forumcategoryRequest.getParentCategory() != null && forumcategoryRequest.getParentCategory().getId() != null) {
-        ForumCategory parentCategory = parentCategoryRepository.findById(forumcategoryRequest.getParentCategory().getId())
-                .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-        existing.setParentCategory(parentCategory);
+        ForumCategory existingParentCategory = parentCategoryRepository.findById(
+        forumcategoryRequest.getParentCategory().getId()
+        ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+
+        existing.setParentCategory(existingParentCategory);
+        } else {
+        existing.setParentCategory(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getThreads().clear();
-        if (forumcategoryRequest.getThreads() != null) {
-            for (var item : forumcategoryRequest.getThreads()) {
-            item.setCategory(existing);
-            existing.getThreads().add(item);
-            }
-        }
 
+        if (forumcategoryRequest.getThreads() != null) {
+        List<ForumThread> managedThreads = new ArrayList<>();
+
+        for (var item : forumcategoryRequest.getThreads()) {
+        if (item.getId() != null) {
+        ForumThread existingItem = threadsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ForumThread not found"));
+        existingItem.setCategory(existing);
+        managedThreads.add(existingItem);
+        } else {
+        item.setCategory(existing);
+        managedThreads.add(item);
+        }
+        }
+        existing.setThreads(managedThreads);
+        }
         existing.getChildCategories().clear();
+
         if (forumcategoryRequest.getChildCategories() != null) {
-            for (var item : forumcategoryRequest.getChildCategories()) {
-            item.setParentCategory(existing);
-            existing.getChildCategories().add(item);
-            }
+        List<ForumCategory> managedChildCategories = new ArrayList<>();
+
+        for (var item : forumcategoryRequest.getChildCategories()) {
+        if (item.getId() != null) {
+        ForumCategory existingItem = childCategoriesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+        existingItem.setParentCategory(existing);
+        managedChildCategories.add(existingItem);
+        } else {
+        item.setParentCategory(existing);
+        managedChildCategories.add(item);
+        }
+        }
+        existing.setChildCategories(managedChildCategories);
         }
 
     
@@ -95,4 +167,6 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
 
         return forumcategoryRepository.save(existing);
     }
+
+
 }

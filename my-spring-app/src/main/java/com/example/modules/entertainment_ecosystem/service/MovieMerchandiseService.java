@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
@@ -27,11 +28,17 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
     @Override
     public MovieMerchandise save(MovieMerchandise moviemerchandise) {
 
-        if (moviemerchandise.getMovie() != null && moviemerchandise.getMovie().getId() != null) {
-        Movie movie = movieRepository.findById(moviemerchandise.getMovie().getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found"));
-        moviemerchandise.setMovie(movie);
+
+    
+
+    if (moviemerchandise.getMovie() != null
+        && moviemerchandise.getMovie().getId() != null) {
+        Movie existingMovie = movieRepository.findById(
+        moviemerchandise.getMovie().getId()
+        ).orElseThrow(() -> new RuntimeException("Movie not found"));
+        moviemerchandise.setMovie(existingMovie);
         }
+    
 
         return moviemerchandiseRepository.save(moviemerchandise);
     }
@@ -46,11 +53,16 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
         existing.setPrice(moviemerchandiseRequest.getPrice());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (moviemerchandiseRequest.getMovie() != null &&
+        moviemerchandiseRequest.getMovie().getId() != null) {
 
-        if (moviemerchandiseRequest.getMovie() != null && moviemerchandiseRequest.getMovie().getId() != null) {
-        Movie movie = movieRepository.findById(moviemerchandiseRequest.getMovie().getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found"));
-        existing.setMovie(movie);
+        Movie existingMovie = movieRepository.findById(
+        moviemerchandiseRequest.getMovie().getId()
+        ).orElseThrow(() -> new RuntimeException("Movie not found"));
+
+        existing.setMovie(existingMovie);
+        } else {
+        existing.setMovie(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -62,4 +74,6 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
 
         return moviemerchandiseRepository.save(existing);
     }
+
+
 }

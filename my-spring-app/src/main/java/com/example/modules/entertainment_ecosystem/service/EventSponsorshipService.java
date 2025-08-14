@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class EventSponsorshipService extends BaseService<EventSponsorship> {
@@ -29,23 +30,36 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
         this.eventsponsorshipRepository = repository;
         this.eventRepository = eventRepository;
         this.sponsorRepository = sponsorRepository;
-            this.contractRepository = contractRepository;
+        this.contractRepository = contractRepository;
     }
 
     @Override
     public EventSponsorship save(EventSponsorship eventsponsorship) {
 
-        if (eventsponsorship.getEvent() != null && eventsponsorship.getEvent().getId() != null) {
-        LiveEvent event = eventRepository.findById(eventsponsorship.getEvent().getId())
-                .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-        eventsponsorship.setEvent(event);
-        }
 
-        if (eventsponsorship.getSponsor() != null && eventsponsorship.getSponsor().getId() != null) {
-        Sponsor sponsor = sponsorRepository.findById(eventsponsorship.getSponsor().getId())
-                .orElseThrow(() -> new RuntimeException("Sponsor not found"));
-        eventsponsorship.setSponsor(sponsor);
+    
+
+    
+
+    
+
+    if (eventsponsorship.getEvent() != null
+        && eventsponsorship.getEvent().getId() != null) {
+        LiveEvent existingEvent = eventRepository.findById(
+        eventsponsorship.getEvent().getId()
+        ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+        eventsponsorship.setEvent(existingEvent);
         }
+    
+    if (eventsponsorship.getSponsor() != null
+        && eventsponsorship.getSponsor().getId() != null) {
+        Sponsor existingSponsor = sponsorRepository.findById(
+        eventsponsorship.getSponsor().getId()
+        ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
+        eventsponsorship.setSponsor(existingSponsor);
+        }
+    
+    
         if (eventsponsorship.getContract() != null) {
         
         
@@ -72,17 +86,27 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
         existing.setEndDate(eventsponsorshipRequest.getEndDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (eventsponsorshipRequest.getEvent() != null &&
+        eventsponsorshipRequest.getEvent().getId() != null) {
 
-        if (eventsponsorshipRequest.getEvent() != null && eventsponsorshipRequest.getEvent().getId() != null) {
-        LiveEvent event = eventRepository.findById(eventsponsorshipRequest.getEvent().getId())
-                .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-        existing.setEvent(event);
+        LiveEvent existingEvent = eventRepository.findById(
+        eventsponsorshipRequest.getEvent().getId()
+        ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+
+        existing.setEvent(existingEvent);
+        } else {
+        existing.setEvent(null);
         }
+        if (eventsponsorshipRequest.getSponsor() != null &&
+        eventsponsorshipRequest.getSponsor().getId() != null) {
 
-        if (eventsponsorshipRequest.getSponsor() != null && eventsponsorshipRequest.getSponsor().getId() != null) {
-        Sponsor sponsor = sponsorRepository.findById(eventsponsorshipRequest.getSponsor().getId())
-                .orElseThrow(() -> new RuntimeException("Sponsor not found"));
-        existing.setSponsor(sponsor);
+        Sponsor existingSponsor = sponsorRepository.findById(
+        eventsponsorshipRequest.getSponsor().getId()
+        ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
+
+        existing.setSponsor(existingSponsor);
+        } else {
+        existing.setSponsor(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -116,4 +140,6 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
 
         return eventsponsorshipRepository.save(existing);
     }
+
+
 }

@@ -8,11 +8,13 @@ import com.example.modules.entertainment_ecosystem.repository.VideoGameRepositor
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.UserAchievement;
+import com.example.modules.entertainment_ecosystem.repository.UserAchievementRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class GameAchievementService extends BaseService<GameAchievement> {
@@ -20,29 +22,57 @@ public class GameAchievementService extends BaseService<GameAchievement> {
     protected final GameAchievementRepository gameachievementRepository;
     private final VideoGameRepository gameRepository;
     private final UserProfileRepository earnedByRepository;
+    private final UserAchievementRepository userAchievementsRepository;
 
-    public GameAchievementService(GameAchievementRepository repository,VideoGameRepository gameRepository,UserProfileRepository earnedByRepository)
+    public GameAchievementService(GameAchievementRepository repository,VideoGameRepository gameRepository,UserProfileRepository earnedByRepository,UserAchievementRepository userAchievementsRepository)
     {
         super(repository);
         this.gameachievementRepository = repository;
         this.gameRepository = gameRepository;
         this.earnedByRepository = earnedByRepository;
+        this.userAchievementsRepository = userAchievementsRepository;
     }
 
     @Override
     public GameAchievement save(GameAchievement gameachievement) {
 
-        if (gameachievement.getGame() != null && gameachievement.getGame().getId() != null) {
-        VideoGame game = gameRepository.findById(gameachievement.getGame().getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        gameachievement.setGame(game);
-        }
 
-        if (gameachievement.getUserAchievements() != null) {
+    
+
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (gameachievement.getUserAchievements() != null) {
+            List<UserAchievement> managedUserAchievements = new ArrayList<>();
             for (UserAchievement item : gameachievement.getUserAchievements()) {
+            if (item.getId() != null) {
+            UserAchievement existingItem = userAchievementsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("UserAchievement not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setAchievement(gameachievement);
+            managedUserAchievements.add(existingItem);
+            } else {
             item.setAchievement(gameachievement);
+            managedUserAchievements.add(item);
             }
+            }
+            gameachievement.setUserAchievements(managedUserAchievements);
+            }
+        
+    
+
+    if (gameachievement.getGame() != null
+        && gameachievement.getGame().getId() != null) {
+        VideoGame existingGame = gameRepository.findById(
+        gameachievement.getGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        gameachievement.setGame(existingGame);
         }
+    
+    
+    
 
         return gameachievementRepository.save(gameachievement);
     }
@@ -58,11 +88,16 @@ public class GameAchievementService extends BaseService<GameAchievement> {
         existing.setAchievementDate(gameachievementRequest.getAchievementDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (gameachievementRequest.getGame() != null &&
+        gameachievementRequest.getGame().getId() != null) {
 
-        if (gameachievementRequest.getGame() != null && gameachievementRequest.getGame().getId() != null) {
-        VideoGame game = gameRepository.findById(gameachievementRequest.getGame().getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        existing.setGame(game);
+        VideoGame existingGame = gameRepository.findById(
+        gameachievementRequest.getGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+        existing.setGame(existingGame);
+        } else {
+        existing.setGame(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -77,13 +112,23 @@ public class GameAchievementService extends BaseService<GameAchievement> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getUserAchievements().clear();
+
         if (gameachievementRequest.getUserAchievements() != null) {
-            for (var item : gameachievementRequest.getUserAchievements()) {
-            item.setAchievement(existing);
-            existing.getUserAchievements().add(item);
-            }
+        List<UserAchievement> managedUserAchievements = new ArrayList<>();
+
+        for (var item : gameachievementRequest.getUserAchievements()) {
+        if (item.getId() != null) {
+        UserAchievement existingItem = userAchievementsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserAchievement not found"));
+        existingItem.setAchievement(existing);
+        managedUserAchievements.add(existingItem);
+        } else {
+        item.setAchievement(existing);
+        managedUserAchievements.add(item);
+        }
+        }
+        existing.setUserAchievements(managedUserAchievements);
         }
 
     
@@ -95,4 +140,6 @@ public class GameAchievementService extends BaseService<GameAchievement> {
 
         return gameachievementRepository.save(existing);
     }
+
+
 }

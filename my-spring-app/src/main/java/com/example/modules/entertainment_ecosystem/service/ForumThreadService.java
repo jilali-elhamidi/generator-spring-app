@@ -6,6 +6,7 @@ import com.example.modules.entertainment_ecosystem.repository.ForumThreadReposit
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.ForumPost;
+import com.example.modules.entertainment_ecosystem.repository.ForumPostRepository;
 import com.example.modules.entertainment_ecosystem.model.ForumCategory;
 import com.example.modules.entertainment_ecosystem.repository.ForumCategoryRepository;
 
@@ -13,42 +14,72 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ForumThreadService extends BaseService<ForumThread> {
 
     protected final ForumThreadRepository forumthreadRepository;
     private final UserProfileRepository authorRepository;
+    private final ForumPostRepository forumPostsRepository;
     private final ForumCategoryRepository categoryRepository;
 
-    public ForumThreadService(ForumThreadRepository repository,UserProfileRepository authorRepository,ForumCategoryRepository categoryRepository)
+    public ForumThreadService(ForumThreadRepository repository,UserProfileRepository authorRepository,ForumPostRepository forumPostsRepository,ForumCategoryRepository categoryRepository)
     {
         super(repository);
         this.forumthreadRepository = repository;
         this.authorRepository = authorRepository;
+        this.forumPostsRepository = forumPostsRepository;
         this.categoryRepository = categoryRepository;
     }
 
     @Override
     public ForumThread save(ForumThread forumthread) {
 
-        if (forumthread.getAuthor() != null && forumthread.getAuthor().getId() != null) {
-        UserProfile author = authorRepository.findById(forumthread.getAuthor().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        forumthread.setAuthor(author);
-        }
 
-        if (forumthread.getCategory() != null && forumthread.getCategory().getId() != null) {
-        ForumCategory category = categoryRepository.findById(forumthread.getCategory().getId())
-                .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-        forumthread.setCategory(category);
-        }
+    
 
-        if (forumthread.getForumPosts() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (forumthread.getForumPosts() != null) {
+            List<ForumPost> managedForumPosts = new ArrayList<>();
             for (ForumPost item : forumthread.getForumPosts()) {
+            if (item.getId() != null) {
+            ForumPost existingItem = forumPostsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("ForumPost not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setThread(forumthread);
+            managedForumPosts.add(existingItem);
+            } else {
             item.setThread(forumthread);
+            managedForumPosts.add(item);
             }
+            }
+            forumthread.setForumPosts(managedForumPosts);
+            }
+        
+    
+
+    
+
+    if (forumthread.getAuthor() != null
+        && forumthread.getAuthor().getId() != null) {
+        UserProfile existingAuthor = authorRepository.findById(
+        forumthread.getAuthor().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        forumthread.setAuthor(existingAuthor);
         }
+    
+    
+    if (forumthread.getCategory() != null
+        && forumthread.getCategory().getId() != null) {
+        ForumCategory existingCategory = categoryRepository.findById(
+        forumthread.getCategory().getId()
+        ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+        forumthread.setCategory(existingCategory);
+        }
+    
 
         return forumthreadRepository.save(forumthread);
     }
@@ -64,29 +95,49 @@ public class ForumThreadService extends BaseService<ForumThread> {
         existing.setLastPostDate(forumthreadRequest.getLastPostDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (forumthreadRequest.getAuthor() != null &&
+        forumthreadRequest.getAuthor().getId() != null) {
 
-        if (forumthreadRequest.getAuthor() != null && forumthreadRequest.getAuthor().getId() != null) {
-        UserProfile author = authorRepository.findById(forumthreadRequest.getAuthor().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setAuthor(author);
+        UserProfile existingAuthor = authorRepository.findById(
+        forumthreadRequest.getAuthor().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setAuthor(existingAuthor);
+        } else {
+        existing.setAuthor(null);
         }
+        if (forumthreadRequest.getCategory() != null &&
+        forumthreadRequest.getCategory().getId() != null) {
 
-        if (forumthreadRequest.getCategory() != null && forumthreadRequest.getCategory().getId() != null) {
-        ForumCategory category = categoryRepository.findById(forumthreadRequest.getCategory().getId())
-                .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-        existing.setCategory(category);
+        ForumCategory existingCategory = categoryRepository.findById(
+        forumthreadRequest.getCategory().getId()
+        ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+
+        existing.setCategory(existingCategory);
+        } else {
+        existing.setCategory(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getForumPosts().clear();
+
         if (forumthreadRequest.getForumPosts() != null) {
-            for (var item : forumthreadRequest.getForumPosts()) {
-            item.setThread(existing);
-            existing.getForumPosts().add(item);
-            }
+        List<ForumPost> managedForumPosts = new ArrayList<>();
+
+        for (var item : forumthreadRequest.getForumPosts()) {
+        if (item.getId() != null) {
+        ForumPost existingItem = forumPostsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ForumPost not found"));
+        existingItem.setThread(existing);
+        managedForumPosts.add(existingItem);
+        } else {
+        item.setThread(existing);
+        managedForumPosts.add(item);
+        }
+        }
+        existing.setForumPosts(managedForumPosts);
         }
 
     
@@ -98,4 +149,6 @@ public class ForumThreadService extends BaseService<ForumThread> {
 
         return forumthreadRepository.save(existing);
     }
+
+
 }

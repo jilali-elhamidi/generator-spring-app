@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class TicketService extends BaseService<Ticket> {
@@ -43,35 +44,57 @@ public class TicketService extends BaseService<Ticket> {
     @Override
     public Ticket save(Ticket ticket) {
 
-        if (ticket.getUser() != null && ticket.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(ticket.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        ticket.setUser(user);
-        }
 
-        if (ticket.getEvent() != null && ticket.getEvent().getId() != null) {
-        LiveEvent event = eventRepository.findById(ticket.getEvent().getId())
-                .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-        ticket.setEvent(event);
-        }
+    
 
-        if (ticket.getStatus() != null && ticket.getStatus().getId() != null) {
-        TicketStatus status = statusRepository.findById(ticket.getStatus().getId())
-                .orElseThrow(() -> new RuntimeException("TicketStatus not found"));
-        ticket.setStatus(status);
-        }
+    
 
-        if (ticket.getBooking() != null && ticket.getBooking().getId() != null) {
-        Booking booking = bookingRepository.findById(ticket.getBooking().getId())
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-        ticket.setBooking(booking);
-        }
+    
 
-        if (ticket.getType() != null && ticket.getType().getId() != null) {
-        EventTicketType type = typeRepository.findById(ticket.getType().getId())
-                .orElseThrow(() -> new RuntimeException("EventTicketType not found"));
-        ticket.setType(type);
+    
+
+    
+
+    if (ticket.getUser() != null
+        && ticket.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        ticket.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        ticket.setUser(existingUser);
         }
+    
+    if (ticket.getEvent() != null
+        && ticket.getEvent().getId() != null) {
+        LiveEvent existingEvent = eventRepository.findById(
+        ticket.getEvent().getId()
+        ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+        ticket.setEvent(existingEvent);
+        }
+    
+    if (ticket.getStatus() != null
+        && ticket.getStatus().getId() != null) {
+        TicketStatus existingStatus = statusRepository.findById(
+        ticket.getStatus().getId()
+        ).orElseThrow(() -> new RuntimeException("TicketStatus not found"));
+        ticket.setStatus(existingStatus);
+        }
+    
+    if (ticket.getBooking() != null
+        && ticket.getBooking().getId() != null) {
+        Booking existingBooking = bookingRepository.findById(
+        ticket.getBooking().getId()
+        ).orElseThrow(() -> new RuntimeException("Booking not found"));
+        ticket.setBooking(existingBooking);
+        }
+    
+    if (ticket.getType() != null
+        && ticket.getType().getId() != null) {
+        EventTicketType existingType = typeRepository.findById(
+        ticket.getType().getId()
+        ).orElseThrow(() -> new RuntimeException("EventTicketType not found"));
+        ticket.setType(existingType);
+        }
+    
 
         return ticketRepository.save(ticket);
     }
@@ -87,35 +110,60 @@ public class TicketService extends BaseService<Ticket> {
         existing.setSeatInfo(ticketRequest.getSeatInfo());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (ticketRequest.getUser() != null &&
+        ticketRequest.getUser().getId() != null) {
 
-        if (ticketRequest.getUser() != null && ticketRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(ticketRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        ticketRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
+        if (ticketRequest.getEvent() != null &&
+        ticketRequest.getEvent().getId() != null) {
 
-        if (ticketRequest.getEvent() != null && ticketRequest.getEvent().getId() != null) {
-        LiveEvent event = eventRepository.findById(ticketRequest.getEvent().getId())
-                .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-        existing.setEvent(event);
+        LiveEvent existingEvent = eventRepository.findById(
+        ticketRequest.getEvent().getId()
+        ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+
+        existing.setEvent(existingEvent);
+        } else {
+        existing.setEvent(null);
         }
+        if (ticketRequest.getStatus() != null &&
+        ticketRequest.getStatus().getId() != null) {
 
-        if (ticketRequest.getStatus() != null && ticketRequest.getStatus().getId() != null) {
-        TicketStatus status = statusRepository.findById(ticketRequest.getStatus().getId())
-                .orElseThrow(() -> new RuntimeException("TicketStatus not found"));
-        existing.setStatus(status);
+        TicketStatus existingStatus = statusRepository.findById(
+        ticketRequest.getStatus().getId()
+        ).orElseThrow(() -> new RuntimeException("TicketStatus not found"));
+
+        existing.setStatus(existingStatus);
+        } else {
+        existing.setStatus(null);
         }
+        if (ticketRequest.getBooking() != null &&
+        ticketRequest.getBooking().getId() != null) {
 
-        if (ticketRequest.getBooking() != null && ticketRequest.getBooking().getId() != null) {
-        Booking booking = bookingRepository.findById(ticketRequest.getBooking().getId())
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-        existing.setBooking(booking);
+        Booking existingBooking = bookingRepository.findById(
+        ticketRequest.getBooking().getId()
+        ).orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        existing.setBooking(existingBooking);
+        } else {
+        existing.setBooking(null);
         }
+        if (ticketRequest.getType() != null &&
+        ticketRequest.getType().getId() != null) {
 
-        if (ticketRequest.getType() != null && ticketRequest.getType().getId() != null) {
-        EventTicketType type = typeRepository.findById(ticketRequest.getType().getId())
-                .orElseThrow(() -> new RuntimeException("EventTicketType not found"));
-        existing.setType(type);
+        EventTicketType existingType = typeRepository.findById(
+        ticketRequest.getType().getId()
+        ).orElseThrow(() -> new RuntimeException("EventTicketType not found"));
+
+        existing.setType(existingType);
+        } else {
+        existing.setType(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -135,4 +183,6 @@ public class TicketService extends BaseService<Ticket> {
 
         return ticketRepository.save(existing);
     }
+
+
 }

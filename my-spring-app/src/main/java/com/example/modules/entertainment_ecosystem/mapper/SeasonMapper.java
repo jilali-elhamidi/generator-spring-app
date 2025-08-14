@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface SeasonMapper {
     List<SeasonDto> toDtoList(List<Season> seasonList);
 
     List<Season> toEntityList(List<SeasonDto> seasonDtoList);
+
+    void updateEntityFromDto(SeasonDto dto, @MappingTarget Season entity);
 
 }

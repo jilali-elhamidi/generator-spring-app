@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.ReviewComment;import com.example.modules.entertainment_ecosystem.model.MediaFile;import com.example.modules.entertainment_ecosystem.model.ReviewRating;import com.example.modules.entertainment_ecosystem.model.ReviewLike;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "review_tbl")
@@ -35,42 +37,54 @@ public class Review extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("reviews")
-    private UserProfile user;
     
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "movie_id")
-    @JsonIgnoreProperties("reviews")
-    private Movie movie;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "user_id")
+        
+        private UserProfile user;
     
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "book_id")
-    @JsonIgnoreProperties("reviews")
-    private Book book;
     
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "video_game_id")
-    @JsonIgnoreProperties("generalReviews")
-    private VideoGame videoGame;
     
-    @OneToMany(mappedBy = "review", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("review")
-    private List<ReviewComment> reviewComments;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "movie_id")
+        
+        private Movie movie;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "book_id")
+        
+        private Book book;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "videoGame_id")
+        
+        private VideoGame videoGame;
+    
+    
+    
+    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<ReviewComment> reviewComments;
+    
     
     @OneToOne
     @JoinColumn(name = "media_file_id")
     @JsonIgnoreProperties("review")
     private MediaFile mediaFile;
             
-    @OneToMany(mappedBy = "review", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("review")
-    private List<ReviewRating> ratings;
     
-    @OneToMany(mappedBy = "review", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("review")
-    private List<ReviewLike> likes;
+    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<ReviewRating> ratings;
+    
+    
+    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<ReviewLike> likes;
     
 
 }

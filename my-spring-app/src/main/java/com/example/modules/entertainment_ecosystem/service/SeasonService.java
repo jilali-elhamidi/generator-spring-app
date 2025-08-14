@@ -6,39 +6,66 @@ import com.example.modules.entertainment_ecosystem.repository.SeasonRepository;
 import com.example.modules.entertainment_ecosystem.model.TVShow;
 import com.example.modules.entertainment_ecosystem.repository.TVShowRepository;
 import com.example.modules.entertainment_ecosystem.model.Episode;
+import com.example.modules.entertainment_ecosystem.repository.EpisodeRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class SeasonService extends BaseService<Season> {
 
     protected final SeasonRepository seasonRepository;
     private final TVShowRepository showRepository;
+    private final EpisodeRepository episodesRepository;
 
-    public SeasonService(SeasonRepository repository,TVShowRepository showRepository)
+    public SeasonService(SeasonRepository repository,TVShowRepository showRepository,EpisodeRepository episodesRepository)
     {
         super(repository);
         this.seasonRepository = repository;
         this.showRepository = showRepository;
+        this.episodesRepository = episodesRepository;
     }
 
     @Override
     public Season save(Season season) {
 
-        if (season.getShow() != null && season.getShow().getId() != null) {
-        TVShow show = showRepository.findById(season.getShow().getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        season.setShow(show);
-        }
 
-        if (season.getEpisodes() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (season.getEpisodes() != null) {
+            List<Episode> managedEpisodes = new ArrayList<>();
             for (Episode item : season.getEpisodes()) {
+            if (item.getId() != null) {
+            Episode existingItem = episodesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Episode not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setSeason(season);
+            managedEpisodes.add(existingItem);
+            } else {
             item.setSeason(season);
+            managedEpisodes.add(item);
             }
+            }
+            season.setEpisodes(managedEpisodes);
+            }
+        
+    
+
+    if (season.getShow() != null
+        && season.getShow().getId() != null) {
+        TVShow existingShow = showRepository.findById(
+        season.getShow().getId()
+        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
+        season.setShow(existingShow);
         }
+    
+    
 
         return seasonRepository.save(season);
     }
@@ -52,23 +79,38 @@ public class SeasonService extends BaseService<Season> {
         existing.setSeasonNumber(seasonRequest.getSeasonNumber());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (seasonRequest.getShow() != null &&
+        seasonRequest.getShow().getId() != null) {
 
-        if (seasonRequest.getShow() != null && seasonRequest.getShow().getId() != null) {
-        TVShow show = showRepository.findById(seasonRequest.getShow().getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        existing.setShow(show);
+        TVShow existingShow = showRepository.findById(
+        seasonRequest.getShow().getId()
+        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
+
+        existing.setShow(existingShow);
+        } else {
+        existing.setShow(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getEpisodes().clear();
+
         if (seasonRequest.getEpisodes() != null) {
-            for (var item : seasonRequest.getEpisodes()) {
-            item.setSeason(existing);
-            existing.getEpisodes().add(item);
-            }
+        List<Episode> managedEpisodes = new ArrayList<>();
+
+        for (var item : seasonRequest.getEpisodes()) {
+        if (item.getId() != null) {
+        Episode existingItem = episodesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Episode not found"));
+        existingItem.setSeason(existing);
+        managedEpisodes.add(existingItem);
+        } else {
+        item.setSeason(existing);
+        managedEpisodes.add(item);
+        }
+        }
+        existing.setEpisodes(managedEpisodes);
         }
 
     
@@ -78,4 +120,6 @@ public class SeasonService extends BaseService<Season> {
 
         return seasonRepository.save(existing);
     }
+
+
 }

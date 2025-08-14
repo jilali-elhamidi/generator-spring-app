@@ -51,22 +51,27 @@ public class FeatureFlagController {
         return ResponseEntity.created(location).body(featureflagMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<FeatureFlagDto> updateFeatureFlag(
-            @PathVariable Long id,
-            @Valid @RequestBody FeatureFlagDto featureflagDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<FeatureFlagDto> updateFeatureFlag(
+                @PathVariable Long id,
+                @Valid @RequestBody FeatureFlagDto featureflagDto) {
 
-        try {
-            FeatureFlag updatedEntity = featureflagService.update(
-                    id,
-                    featureflagMapper.toEntity(featureflagDto)
-            );
-            return ResponseEntity.ok(featureflagMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                FeatureFlag existing = featureflagService.findById(id)
+                .orElseThrow(() -> new RuntimeException("FeatureFlag not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                featureflagMapper.updateEntityFromDto(featureflagDto, existing);
+
+                // Sauvegarde
+                FeatureFlag updatedEntity = featureflagService.save(existing);
+
+                return ResponseEntity.ok(featureflagMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFeatureFlag(@PathVariable Long id) {
         featureflagService.deleteById(id);

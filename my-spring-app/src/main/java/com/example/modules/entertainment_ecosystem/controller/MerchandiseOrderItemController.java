@@ -51,22 +51,27 @@ public class MerchandiseOrderItemController {
         return ResponseEntity.created(location).body(merchandiseorderitemMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<MerchandiseOrderItemDto> updateMerchandiseOrderItem(
-            @PathVariable Long id,
-            @Valid @RequestBody MerchandiseOrderItemDto merchandiseorderitemDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<MerchandiseOrderItemDto> updateMerchandiseOrderItem(
+                @PathVariable Long id,
+                @Valid @RequestBody MerchandiseOrderItemDto merchandiseorderitemDto) {
 
-        try {
-            MerchandiseOrderItem updatedEntity = merchandiseorderitemService.update(
-                    id,
-                    merchandiseorderitemMapper.toEntity(merchandiseorderitemDto)
-            );
-            return ResponseEntity.ok(merchandiseorderitemMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                MerchandiseOrderItem existing = merchandiseorderitemService.findById(id)
+                .orElseThrow(() -> new RuntimeException("MerchandiseOrderItem not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                merchandiseorderitemMapper.updateEntityFromDto(merchandiseorderitemDto, existing);
+
+                // Sauvegarde
+                MerchandiseOrderItem updatedEntity = merchandiseorderitemService.save(existing);
+
+                return ResponseEntity.ok(merchandiseorderitemMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMerchandiseOrderItem(@PathVariable Long id) {
         merchandiseorderitemService.deleteById(id);

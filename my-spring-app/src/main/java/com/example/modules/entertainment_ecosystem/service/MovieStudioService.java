@@ -4,31 +4,54 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.MovieStudio;
 import com.example.modules.entertainment_ecosystem.repository.MovieStudioRepository;
 import com.example.modules.entertainment_ecosystem.model.Movie;
+import com.example.modules.entertainment_ecosystem.repository.MovieRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MovieStudioService extends BaseService<MovieStudio> {
 
     protected final MovieStudioRepository moviestudioRepository;
+    private final MovieRepository moviesRepository;
 
-    public MovieStudioService(MovieStudioRepository repository)
+    public MovieStudioService(MovieStudioRepository repository,MovieRepository moviesRepository)
     {
         super(repository);
         this.moviestudioRepository = repository;
+        this.moviesRepository = moviesRepository;
     }
 
     @Override
     public MovieStudio save(MovieStudio moviestudio) {
 
-        if (moviestudio.getMovies() != null) {
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (moviestudio.getMovies() != null) {
+            List<Movie> managedMovies = new ArrayList<>();
             for (Movie item : moviestudio.getMovies()) {
+            if (item.getId() != null) {
+            Movie existingItem = moviesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Movie not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setMovieStudio(moviestudio);
+            managedMovies.add(existingItem);
+            } else {
             item.setMovieStudio(moviestudio);
+            managedMovies.add(item);
             }
-        }
+            }
+            moviestudio.setMovies(managedMovies);
+            }
+        
+    
+
+    
 
         return moviestudioRepository.save(moviestudio);
     }
@@ -47,13 +70,23 @@ public class MovieStudioService extends BaseService<MovieStudio> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getMovies().clear();
+
         if (moviestudioRequest.getMovies() != null) {
-            for (var item : moviestudioRequest.getMovies()) {
-            item.setMovieStudio(existing);
-            existing.getMovies().add(item);
-            }
+        List<Movie> managedMovies = new ArrayList<>();
+
+        for (var item : moviestudioRequest.getMovies()) {
+        if (item.getId() != null) {
+        Movie existingItem = moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        existingItem.setMovieStudio(existing);
+        managedMovies.add(existingItem);
+        } else {
+        item.setMovieStudio(existing);
+        managedMovies.add(item);
+        }
+        }
+        existing.setMovies(managedMovies);
         }
 
     
@@ -61,4 +94,6 @@ public class MovieStudioService extends BaseService<MovieStudio> {
 
         return moviestudioRepository.save(existing);
     }
+
+
 }

@@ -51,22 +51,27 @@ public class SponsorController {
         return ResponseEntity.created(location).body(sponsorMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SponsorDto> updateSponsor(
-            @PathVariable Long id,
-            @Valid @RequestBody SponsorDto sponsorDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<SponsorDto> updateSponsor(
+                @PathVariable Long id,
+                @Valid @RequestBody SponsorDto sponsorDto) {
 
-        try {
-            Sponsor updatedEntity = sponsorService.update(
-                    id,
-                    sponsorMapper.toEntity(sponsorDto)
-            );
-            return ResponseEntity.ok(sponsorMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Sponsor existing = sponsorService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sponsor not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                sponsorMapper.updateEntityFromDto(sponsorDto, existing);
+
+                // Sauvegarde
+                Sponsor updatedEntity = sponsorService.save(existing);
+
+                return ResponseEntity.ok(sponsorMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSponsor(@PathVariable Long id) {
         sponsorService.deleteById(id);

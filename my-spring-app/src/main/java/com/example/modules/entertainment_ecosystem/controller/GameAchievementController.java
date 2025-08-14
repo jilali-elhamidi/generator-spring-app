@@ -51,22 +51,27 @@ public class GameAchievementController {
         return ResponseEntity.created(location).body(gameachievementMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<GameAchievementDto> updateGameAchievement(
-            @PathVariable Long id,
-            @Valid @RequestBody GameAchievementDto gameachievementDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<GameAchievementDto> updateGameAchievement(
+                @PathVariable Long id,
+                @Valid @RequestBody GameAchievementDto gameachievementDto) {
 
-        try {
-            GameAchievement updatedEntity = gameachievementService.update(
-                    id,
-                    gameachievementMapper.toEntity(gameachievementDto)
-            );
-            return ResponseEntity.ok(gameachievementMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                GameAchievement existing = gameachievementService.findById(id)
+                .orElseThrow(() -> new RuntimeException("GameAchievement not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                gameachievementMapper.updateEntityFromDto(gameachievementDto, existing);
+
+                // Sauvegarde
+                GameAchievement updatedEntity = gameachievementService.save(existing);
+
+                return ResponseEntity.ok(gameachievementMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGameAchievement(@PathVariable Long id) {
         gameachievementService.deleteById(id);

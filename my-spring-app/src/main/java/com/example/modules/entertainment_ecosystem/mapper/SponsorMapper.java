@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface SponsorMapper {
     List<SponsorDto> toDtoList(List<Sponsor> sponsorList);
 
     List<Sponsor> toEntityList(List<SponsorDto> sponsorDtoList);
+
+    void updateEntityFromDto(SponsorDto dto, @MappingTarget Sponsor entity);
 
 }

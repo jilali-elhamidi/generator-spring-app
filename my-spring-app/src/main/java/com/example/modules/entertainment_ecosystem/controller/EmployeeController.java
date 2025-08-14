@@ -51,22 +51,27 @@ public class EmployeeController {
         return ResponseEntity.created(location).body(employeeMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<EmployeeDto> updateEmployee(
-            @PathVariable Long id,
-            @Valid @RequestBody EmployeeDto employeeDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<EmployeeDto> updateEmployee(
+                @PathVariable Long id,
+                @Valid @RequestBody EmployeeDto employeeDto) {
 
-        try {
-            Employee updatedEntity = employeeService.update(
-                    id,
-                    employeeMapper.toEntity(employeeDto)
-            );
-            return ResponseEntity.ok(employeeMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Employee existing = employeeService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                employeeMapper.updateEntityFromDto(employeeDto, existing);
+
+                // Sauvegarde
+                Employee updatedEntity = employeeService.save(existing);
+
+                return ResponseEntity.ok(employeeMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         employeeService.deleteById(id);

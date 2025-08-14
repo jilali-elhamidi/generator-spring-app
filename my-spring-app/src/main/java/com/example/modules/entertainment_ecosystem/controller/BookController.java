@@ -51,22 +51,27 @@ public class BookController {
         return ResponseEntity.created(location).body(bookMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<BookDto> updateBook(
-            @PathVariable Long id,
-            @Valid @RequestBody BookDto bookDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<BookDto> updateBook(
+                @PathVariable Long id,
+                @Valid @RequestBody BookDto bookDto) {
 
-        try {
-            Book updatedEntity = bookService.update(
-                    id,
-                    bookMapper.toEntity(bookDto)
-            );
-            return ResponseEntity.ok(bookMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Book existing = bookService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                bookMapper.updateEntityFromDto(bookDto, existing);
+
+                // Sauvegarde
+                Book updatedEntity = bookService.save(existing);
+
+                return ResponseEntity.ok(bookMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteById(id);

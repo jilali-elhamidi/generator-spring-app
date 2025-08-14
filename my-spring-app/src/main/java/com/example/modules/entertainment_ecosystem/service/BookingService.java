@@ -4,6 +4,7 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.Booking;
 import com.example.modules.entertainment_ecosystem.repository.BookingRepository;
 import com.example.modules.entertainment_ecosystem.model.Ticket;
+import com.example.modules.entertainment_ecosystem.repository.TicketRepository;
 import com.example.modules.entertainment_ecosystem.model.Payment;
 import com.example.modules.entertainment_ecosystem.repository.PaymentRepository;
 
@@ -11,28 +12,53 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class BookingService extends BaseService<Booking> {
 
     protected final BookingRepository bookingRepository;
+    private final TicketRepository ticketsRepository;
     private final PaymentRepository paymentRepository;
 
-    public BookingService(BookingRepository repository,PaymentRepository paymentRepository)
+    public BookingService(BookingRepository repository,TicketRepository ticketsRepository,PaymentRepository paymentRepository)
     {
         super(repository);
         this.bookingRepository = repository;
-            this.paymentRepository = paymentRepository;
+        this.ticketsRepository = ticketsRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @Override
     public Booking save(Booking booking) {
 
-        if (booking.getTickets() != null) {
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (booking.getTickets() != null) {
+            List<Ticket> managedTickets = new ArrayList<>();
             for (Ticket item : booking.getTickets()) {
+            if (item.getId() != null) {
+            Ticket existingItem = ticketsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setBooking(booking);
+            managedTickets.add(existingItem);
+            } else {
             item.setBooking(booking);
+            managedTickets.add(item);
             }
-        }
+            }
+            booking.setTickets(managedTickets);
+            }
+        
+    
+
+    
+
+    
+    
         if (booking.getPayment() != null) {
         
         
@@ -62,13 +88,23 @@ public class BookingService extends BaseService<Booking> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getTickets().clear();
+
         if (bookingRequest.getTickets() != null) {
-            for (var item : bookingRequest.getTickets()) {
-            item.setBooking(existing);
-            existing.getTickets().add(item);
-            }
+        List<Ticket> managedTickets = new ArrayList<>();
+
+        for (var item : bookingRequest.getTickets()) {
+        if (item.getId() != null) {
+        Ticket existingItem = ticketsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Ticket not found"));
+        existingItem.setBooking(existing);
+        managedTickets.add(existingItem);
+        } else {
+        item.setBooking(existing);
+        managedTickets.add(item);
+        }
+        }
+        existing.setTickets(managedTickets);
         }
 
     
@@ -96,4 +132,6 @@ public class BookingService extends BaseService<Booking> {
 
         return bookingRepository.save(existing);
     }
+
+
 }

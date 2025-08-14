@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Employee;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "productioncompany_tbl")
@@ -34,17 +36,20 @@ public class ProductionCompany extends BaseEntity {
 
 // === Relations ===
 
-    @OneToMany(mappedBy = "productionCompany", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("productionCompany")
-    private List<Movie> movies;
     
-    @OneToMany(mappedBy = "productionCompany", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("productionCompany")
-    private List<TVShow> tvShows;
+    @OneToMany(mappedBy = "productionCompany", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Movie> movies;
     
-    @OneToMany(mappedBy = "productionCompany", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("productionCompany")
-    private List<Employee> staff;
+    
+    @OneToMany(mappedBy = "productionCompany", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<TVShow> tvShows;
+    
+    
+    @OneToMany(mappedBy = "productionCompany", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Employee> staff;
     
 
 }

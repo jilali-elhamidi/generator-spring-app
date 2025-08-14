@@ -51,22 +51,27 @@ public class OnlineEventController {
         return ResponseEntity.created(location).body(onlineeventMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OnlineEventDto> updateOnlineEvent(
-            @PathVariable Long id,
-            @Valid @RequestBody OnlineEventDto onlineeventDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<OnlineEventDto> updateOnlineEvent(
+                @PathVariable Long id,
+                @Valid @RequestBody OnlineEventDto onlineeventDto) {
 
-        try {
-            OnlineEvent updatedEntity = onlineeventService.update(
-                    id,
-                    onlineeventMapper.toEntity(onlineeventDto)
-            );
-            return ResponseEntity.ok(onlineeventMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                OnlineEvent existing = onlineeventService.findById(id)
+                .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                onlineeventMapper.updateEntityFromDto(onlineeventDto, existing);
+
+                // Sauvegarde
+                OnlineEvent updatedEntity = onlineeventService.save(existing);
+
+                return ResponseEntity.ok(onlineeventMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOnlineEvent(@PathVariable Long id) {
         onlineeventService.deleteById(id);

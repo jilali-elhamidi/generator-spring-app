@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "videogamerating_tbl")
@@ -32,10 +34,12 @@ public class VideoGameRating extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "game_id")
-    @JsonIgnoreProperties("ratings")
-    private VideoGame game;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "game_id")
+        
+        private VideoGame game;
+    
     
 
 }

@@ -51,22 +51,27 @@ public class TVShowStudioController {
         return ResponseEntity.created(location).body(tvshowstudioMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<TVShowStudioDto> updateTVShowStudio(
-            @PathVariable Long id,
-            @Valid @RequestBody TVShowStudioDto tvshowstudioDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<TVShowStudioDto> updateTVShowStudio(
+                @PathVariable Long id,
+                @Valid @RequestBody TVShowStudioDto tvshowstudioDto) {
 
-        try {
-            TVShowStudio updatedEntity = tvshowstudioService.update(
-                    id,
-                    tvshowstudioMapper.toEntity(tvshowstudioDto)
-            );
-            return ResponseEntity.ok(tvshowstudioMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                TVShowStudio existing = tvshowstudioService.findById(id)
+                .orElseThrow(() -> new RuntimeException("TVShowStudio not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                tvshowstudioMapper.updateEntityFromDto(tvshowstudioDto, existing);
+
+                // Sauvegarde
+                TVShowStudio updatedEntity = tvshowstudioService.save(existing);
+
+                return ResponseEntity.ok(tvshowstudioMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTVShowStudio(@PathVariable Long id) {
         tvshowstudioService.deleteById(id);

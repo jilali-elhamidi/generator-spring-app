@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "podcastguest_tbl")
@@ -32,10 +34,13 @@ public class PodcastGuest extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "podcast_id")
-    @JsonIgnoreProperties("guests")
-    private Podcast podcast;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "podcast_id")
+        
+        private Podcast podcast;
+    
+    
     
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "podcast_guest_appearances",

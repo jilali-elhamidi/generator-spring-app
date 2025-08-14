@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class UserAchievementService extends BaseService<UserAchievement> {
@@ -31,17 +32,27 @@ public class UserAchievementService extends BaseService<UserAchievement> {
     @Override
     public UserAchievement save(UserAchievement userachievement) {
 
-        if (userachievement.getUser() != null && userachievement.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(userachievement.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userachievement.setUser(user);
-        }
 
-        if (userachievement.getAchievement() != null && userachievement.getAchievement().getId() != null) {
-        GameAchievement achievement = achievementRepository.findById(userachievement.getAchievement().getId())
-                .orElseThrow(() -> new RuntimeException("GameAchievement not found"));
-        userachievement.setAchievement(achievement);
+    
+
+    
+
+    if (userachievement.getUser() != null
+        && userachievement.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        userachievement.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        userachievement.setUser(existingUser);
         }
+    
+    if (userachievement.getAchievement() != null
+        && userachievement.getAchievement().getId() != null) {
+        GameAchievement existingAchievement = achievementRepository.findById(
+        userachievement.getAchievement().getId()
+        ).orElseThrow(() -> new RuntimeException("GameAchievement not found"));
+        userachievement.setAchievement(existingAchievement);
+        }
+    
 
         return userachievementRepository.save(userachievement);
     }
@@ -55,17 +66,27 @@ public class UserAchievementService extends BaseService<UserAchievement> {
         existing.setCompletionDate(userachievementRequest.getCompletionDate());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (userachievementRequest.getUser() != null &&
+        userachievementRequest.getUser().getId() != null) {
 
-        if (userachievementRequest.getUser() != null && userachievementRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(userachievementRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        userachievementRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
+        if (userachievementRequest.getAchievement() != null &&
+        userachievementRequest.getAchievement().getId() != null) {
 
-        if (userachievementRequest.getAchievement() != null && userachievementRequest.getAchievement().getId() != null) {
-        GameAchievement achievement = achievementRepository.findById(userachievementRequest.getAchievement().getId())
-                .orElseThrow(() -> new RuntimeException("GameAchievement not found"));
-        existing.setAchievement(achievement);
+        GameAchievement existingAchievement = achievementRepository.findById(
+        userachievementRequest.getAchievement().getId()
+        ).orElseThrow(() -> new RuntimeException("GameAchievement not found"));
+
+        existing.setAchievement(existingAchievement);
+        } else {
+        existing.setAchievement(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -79,4 +100,6 @@ public class UserAchievementService extends BaseService<UserAchievement> {
 
         return userachievementRepository.save(existing);
     }
+
+
 }

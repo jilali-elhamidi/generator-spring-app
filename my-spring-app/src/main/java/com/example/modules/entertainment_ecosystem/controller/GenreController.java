@@ -51,22 +51,27 @@ public class GenreController {
         return ResponseEntity.created(location).body(genreMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<GenreDto> updateGenre(
-            @PathVariable Long id,
-            @Valid @RequestBody GenreDto genreDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<GenreDto> updateGenre(
+                @PathVariable Long id,
+                @Valid @RequestBody GenreDto genreDto) {
 
-        try {
-            Genre updatedEntity = genreService.update(
-                    id,
-                    genreMapper.toEntity(genreDto)
-            );
-            return ResponseEntity.ok(genreMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Genre existing = genreService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Genre not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                genreMapper.updateEntityFromDto(genreDto, existing);
+
+                // Sauvegarde
+                Genre updatedEntity = genreService.save(existing);
+
+                return ResponseEntity.ok(genreMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGenre(@PathVariable Long id) {
         genreService.deleteById(id);

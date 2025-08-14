@@ -4,31 +4,54 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.DevelopmentStudio;
 import com.example.modules.entertainment_ecosystem.repository.DevelopmentStudioRepository;
 import com.example.modules.entertainment_ecosystem.model.VideoGame;
+import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
 
     protected final DevelopmentStudioRepository developmentstudioRepository;
+    private final VideoGameRepository gamesRepository;
 
-    public DevelopmentStudioService(DevelopmentStudioRepository repository)
+    public DevelopmentStudioService(DevelopmentStudioRepository repository,VideoGameRepository gamesRepository)
     {
         super(repository);
         this.developmentstudioRepository = repository;
+        this.gamesRepository = gamesRepository;
     }
 
     @Override
     public DevelopmentStudio save(DevelopmentStudio developmentstudio) {
 
-        if (developmentstudio.getGames() != null) {
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (developmentstudio.getGames() != null) {
+            List<VideoGame> managedGames = new ArrayList<>();
             for (VideoGame item : developmentstudio.getGames()) {
+            if (item.getId() != null) {
+            VideoGame existingItem = gamesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setDeveloperStudio(developmentstudio);
+            managedGames.add(existingItem);
+            } else {
             item.setDeveloperStudio(developmentstudio);
+            managedGames.add(item);
             }
-        }
+            }
+            developmentstudio.setGames(managedGames);
+            }
+        
+    
+
+    
 
         return developmentstudioRepository.save(developmentstudio);
     }
@@ -46,13 +69,23 @@ public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getGames().clear();
+
         if (developmentstudioRequest.getGames() != null) {
-            for (var item : developmentstudioRequest.getGames()) {
-            item.setDeveloperStudio(existing);
-            existing.getGames().add(item);
-            }
+        List<VideoGame> managedGames = new ArrayList<>();
+
+        for (var item : developmentstudioRequest.getGames()) {
+        if (item.getId() != null) {
+        VideoGame existingItem = gamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        existingItem.setDeveloperStudio(existing);
+        managedGames.add(existingItem);
+        } else {
+        item.setDeveloperStudio(existing);
+        managedGames.add(item);
+        }
+        }
+        existing.setGames(managedGames);
         }
 
     
@@ -60,4 +93,6 @@ public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
 
         return developmentstudioRepository.save(existing);
     }
+
+
 }

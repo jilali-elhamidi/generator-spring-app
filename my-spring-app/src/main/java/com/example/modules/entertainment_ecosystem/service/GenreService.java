@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class GenreService extends BaseService<Genre> {
@@ -50,6 +51,29 @@ public class GenreService extends BaseService<Genre> {
 
     @Override
     public Genre save(Genre genre) {
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
 
         return genreRepository.save(genre);
     }
@@ -148,4 +172,6 @@ public class GenreService extends BaseService<Genre> {
 
         return genreRepository.save(existing);
     }
+
+
 }

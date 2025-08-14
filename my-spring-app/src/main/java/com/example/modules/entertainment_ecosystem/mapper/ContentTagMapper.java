@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface ContentTagMapper {
     List<ContentTagDto> toDtoList(List<ContentTag> contenttagList);
 
     List<ContentTag> toEntityList(List<ContentTagDto> contenttagDtoList);
+
+    void updateEntityFromDto(ContentTagDto dto, @MappingTarget ContentTag entity);
 
 }

@@ -51,22 +51,27 @@ public class StreamingPlatformController {
         return ResponseEntity.created(location).body(streamingplatformMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<StreamingPlatformDto> updateStreamingPlatform(
-            @PathVariable Long id,
-            @Valid @RequestBody StreamingPlatformDto streamingplatformDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<StreamingPlatformDto> updateStreamingPlatform(
+                @PathVariable Long id,
+                @Valid @RequestBody StreamingPlatformDto streamingplatformDto) {
 
-        try {
-            StreamingPlatform updatedEntity = streamingplatformService.update(
-                    id,
-                    streamingplatformMapper.toEntity(streamingplatformDto)
-            );
-            return ResponseEntity.ok(streamingplatformMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                StreamingPlatform existing = streamingplatformService.findById(id)
+                .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                streamingplatformMapper.updateEntityFromDto(streamingplatformDto, existing);
+
+                // Sauvegarde
+                StreamingPlatform updatedEntity = streamingplatformService.save(existing);
+
+                return ResponseEntity.ok(streamingplatformMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStreamingPlatform(@PathVariable Long id) {
         streamingplatformService.deleteById(id);

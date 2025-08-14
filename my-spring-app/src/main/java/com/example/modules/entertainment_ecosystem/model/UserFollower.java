@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "userfollower_tbl")
@@ -29,15 +31,19 @@ public class UserFollower extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "follower_id")
-    @JsonIgnoreProperties("following")
-    private UserProfile follower;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "followed_id")
-    @JsonIgnoreProperties("followers")
-    private UserProfile followed;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "follower_id")
+        
+        private UserProfile follower;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "followed_id")
+        
+        private UserProfile followed;
+    
     
 
 }

@@ -51,22 +51,27 @@ public class ManagerController {
         return ResponseEntity.created(location).body(managerMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ManagerDto> updateManager(
-            @PathVariable Long id,
-            @Valid @RequestBody ManagerDto managerDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ManagerDto> updateManager(
+                @PathVariable Long id,
+                @Valid @RequestBody ManagerDto managerDto) {
 
-        try {
-            Manager updatedEntity = managerService.update(
-                    id,
-                    managerMapper.toEntity(managerDto)
-            );
-            return ResponseEntity.ok(managerMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Manager existing = managerService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Manager not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                managerMapper.updateEntityFromDto(managerDto, existing);
+
+                // Sauvegarde
+                Manager updatedEntity = managerService.save(existing);
+
+                return ResponseEntity.ok(managerMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteManager(@PathVariable Long id) {
         managerService.deleteById(id);

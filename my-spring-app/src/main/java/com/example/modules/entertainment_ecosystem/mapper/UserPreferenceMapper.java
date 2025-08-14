@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface UserPreferenceMapper {
     List<UserPreferenceDto> toDtoList(List<UserPreference> userpreferenceList);
 
     List<UserPreference> toEntityList(List<UserPreferenceDto> userpreferenceDtoList);
+
+    void updateEntityFromDto(UserPreferenceDto dto, @MappingTarget UserPreference entity);
 
 }

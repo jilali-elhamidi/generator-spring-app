@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class UserMessageService extends BaseService<UserMessage> {
@@ -35,23 +36,37 @@ public class UserMessageService extends BaseService<UserMessage> {
     @Override
     public UserMessage save(UserMessage usermessage) {
 
-        if (usermessage.getSender() != null && usermessage.getSender().getId() != null) {
-        UserProfile sender = senderRepository.findById(usermessage.getSender().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        usermessage.setSender(sender);
-        }
 
-        if (usermessage.getReceiver() != null && usermessage.getReceiver().getId() != null) {
-        UserProfile receiver = receiverRepository.findById(usermessage.getReceiver().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        usermessage.setReceiver(receiver);
-        }
+    
 
-        if (usermessage.getThread() != null && usermessage.getThread().getId() != null) {
-        MessageThread thread = threadRepository.findById(usermessage.getThread().getId())
-                .orElseThrow(() -> new RuntimeException("MessageThread not found"));
-        usermessage.setThread(thread);
+    
+
+    
+
+    if (usermessage.getSender() != null
+        && usermessage.getSender().getId() != null) {
+        UserProfile existingSender = senderRepository.findById(
+        usermessage.getSender().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        usermessage.setSender(existingSender);
         }
+    
+    if (usermessage.getReceiver() != null
+        && usermessage.getReceiver().getId() != null) {
+        UserProfile existingReceiver = receiverRepository.findById(
+        usermessage.getReceiver().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        usermessage.setReceiver(existingReceiver);
+        }
+    
+    if (usermessage.getThread() != null
+        && usermessage.getThread().getId() != null) {
+        MessageThread existingThread = threadRepository.findById(
+        usermessage.getThread().getId()
+        ).orElseThrow(() -> new RuntimeException("MessageThread not found"));
+        usermessage.setThread(existingThread);
+        }
+    
 
         return usermessageRepository.save(usermessage);
     }
@@ -68,23 +83,38 @@ public class UserMessageService extends BaseService<UserMessage> {
         existing.setIsRead(usermessageRequest.getIsRead());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (usermessageRequest.getSender() != null &&
+        usermessageRequest.getSender().getId() != null) {
 
-        if (usermessageRequest.getSender() != null && usermessageRequest.getSender().getId() != null) {
-        UserProfile sender = senderRepository.findById(usermessageRequest.getSender().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setSender(sender);
+        UserProfile existingSender = senderRepository.findById(
+        usermessageRequest.getSender().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setSender(existingSender);
+        } else {
+        existing.setSender(null);
         }
+        if (usermessageRequest.getReceiver() != null &&
+        usermessageRequest.getReceiver().getId() != null) {
 
-        if (usermessageRequest.getReceiver() != null && usermessageRequest.getReceiver().getId() != null) {
-        UserProfile receiver = receiverRepository.findById(usermessageRequest.getReceiver().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setReceiver(receiver);
+        UserProfile existingReceiver = receiverRepository.findById(
+        usermessageRequest.getReceiver().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setReceiver(existingReceiver);
+        } else {
+        existing.setReceiver(null);
         }
+        if (usermessageRequest.getThread() != null &&
+        usermessageRequest.getThread().getId() != null) {
 
-        if (usermessageRequest.getThread() != null && usermessageRequest.getThread().getId() != null) {
-        MessageThread thread = threadRepository.findById(usermessageRequest.getThread().getId())
-                .orElseThrow(() -> new RuntimeException("MessageThread not found"));
-        existing.setThread(thread);
+        MessageThread existingThread = threadRepository.findById(
+        usermessageRequest.getThread().getId()
+        ).orElseThrow(() -> new RuntimeException("MessageThread not found"));
+
+        existing.setThread(existingThread);
+        } else {
+        existing.setThread(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -100,4 +130,6 @@ public class UserMessageService extends BaseService<UserMessage> {
 
         return usermessageRepository.save(existing);
     }
+
+
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class GamePlatformService extends BaseService<GamePlatform> {
@@ -26,6 +27,11 @@ public class GamePlatformService extends BaseService<GamePlatform> {
 
     @Override
     public GamePlatform save(GamePlatform gameplatform) {
+
+
+    
+
+    
 
         return gameplatformRepository.save(gameplatform);
     }
@@ -58,4 +64,6 @@ public class GamePlatformService extends BaseService<GamePlatform> {
 
         return gameplatformRepository.save(existing);
     }
+
+
 }

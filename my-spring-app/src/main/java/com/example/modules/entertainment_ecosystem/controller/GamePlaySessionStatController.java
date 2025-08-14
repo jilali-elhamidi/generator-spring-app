@@ -51,22 +51,27 @@ public class GamePlaySessionStatController {
         return ResponseEntity.created(location).body(gameplaysessionstatMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<GamePlaySessionStatDto> updateGamePlaySessionStat(
-            @PathVariable Long id,
-            @Valid @RequestBody GamePlaySessionStatDto gameplaysessionstatDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<GamePlaySessionStatDto> updateGamePlaySessionStat(
+                @PathVariable Long id,
+                @Valid @RequestBody GamePlaySessionStatDto gameplaysessionstatDto) {
 
-        try {
-            GamePlaySessionStat updatedEntity = gameplaysessionstatService.update(
-                    id,
-                    gameplaysessionstatMapper.toEntity(gameplaysessionstatDto)
-            );
-            return ResponseEntity.ok(gameplaysessionstatMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                GamePlaySessionStat existing = gameplaysessionstatService.findById(id)
+                .orElseThrow(() -> new RuntimeException("GamePlaySessionStat not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                gameplaysessionstatMapper.updateEntityFromDto(gameplaysessionstatDto, existing);
+
+                // Sauvegarde
+                GamePlaySessionStat updatedEntity = gameplaysessionstatService.save(existing);
+
+                return ResponseEntity.ok(gameplaysessionstatMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGamePlaySessionStat(@PathVariable Long id) {
         gameplaysessionstatService.deleteById(id);

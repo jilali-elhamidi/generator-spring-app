@@ -51,22 +51,27 @@ public class LiveEventController {
         return ResponseEntity.created(location).body(liveeventMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<LiveEventDto> updateLiveEvent(
-            @PathVariable Long id,
-            @Valid @RequestBody LiveEventDto liveeventDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<LiveEventDto> updateLiveEvent(
+                @PathVariable Long id,
+                @Valid @RequestBody LiveEventDto liveeventDto) {
 
-        try {
-            LiveEvent updatedEntity = liveeventService.update(
-                    id,
-                    liveeventMapper.toEntity(liveeventDto)
-            );
-            return ResponseEntity.ok(liveeventMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                LiveEvent existing = liveeventService.findById(id)
+                .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                liveeventMapper.updateEntityFromDto(liveeventDto, existing);
+
+                // Sauvegarde
+                LiveEvent updatedEntity = liveeventService.save(existing);
+
+                return ResponseEntity.ok(liveeventMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLiveEvent(@PathVariable Long id) {
         liveeventService.deleteById(id);

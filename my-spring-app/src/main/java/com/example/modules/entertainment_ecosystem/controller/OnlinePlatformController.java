@@ -51,22 +51,27 @@ public class OnlinePlatformController {
         return ResponseEntity.created(location).body(onlineplatformMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OnlinePlatformDto> updateOnlinePlatform(
-            @PathVariable Long id,
-            @Valid @RequestBody OnlinePlatformDto onlineplatformDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<OnlinePlatformDto> updateOnlinePlatform(
+                @PathVariable Long id,
+                @Valid @RequestBody OnlinePlatformDto onlineplatformDto) {
 
-        try {
-            OnlinePlatform updatedEntity = onlineplatformService.update(
-                    id,
-                    onlineplatformMapper.toEntity(onlineplatformDto)
-            );
-            return ResponseEntity.ok(onlineplatformMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                OnlinePlatform existing = onlineplatformService.findById(id)
+                .orElseThrow(() -> new RuntimeException("OnlinePlatform not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                onlineplatformMapper.updateEntityFromDto(onlineplatformDto, existing);
+
+                // Sauvegarde
+                OnlinePlatform updatedEntity = onlineplatformService.save(existing);
+
+                return ResponseEntity.ok(onlineplatformMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOnlinePlatform(@PathVariable Long id) {
         onlineplatformService.deleteById(id);

@@ -6,46 +6,93 @@ import com.example.modules.entertainment_ecosystem.repository.EmployeeRepository
 import com.example.modules.entertainment_ecosystem.model.ProductionCompany;
 import com.example.modules.entertainment_ecosystem.repository.ProductionCompanyRepository;
 import com.example.modules.entertainment_ecosystem.model.Shift;
+import com.example.modules.entertainment_ecosystem.repository.ShiftRepository;
 import com.example.modules.entertainment_ecosystem.model.EventLocation;
+import com.example.modules.entertainment_ecosystem.repository.EventLocationRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class EmployeeService extends BaseService<Employee> {
 
     protected final EmployeeRepository employeeRepository;
     private final ProductionCompanyRepository productionCompanyRepository;
+    private final ShiftRepository shiftsRepository;
+    private final EventLocationRepository managedLocationsRepository;
 
-    public EmployeeService(EmployeeRepository repository,ProductionCompanyRepository productionCompanyRepository)
+    public EmployeeService(EmployeeRepository repository,ProductionCompanyRepository productionCompanyRepository,ShiftRepository shiftsRepository,EventLocationRepository managedLocationsRepository)
     {
         super(repository);
         this.employeeRepository = repository;
         this.productionCompanyRepository = productionCompanyRepository;
+        this.shiftsRepository = shiftsRepository;
+        this.managedLocationsRepository = managedLocationsRepository;
     }
 
     @Override
     public Employee save(Employee employee) {
 
-        if (employee.getProductionCompany() != null && employee.getProductionCompany().getId() != null) {
-        ProductionCompany productionCompany = productionCompanyRepository.findById(employee.getProductionCompany().getId())
-                .orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-        employee.setProductionCompany(productionCompany);
-        }
 
-        if (employee.getShifts() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (employee.getShifts() != null) {
+            List<Shift> managedShifts = new ArrayList<>();
             for (Shift item : employee.getShifts()) {
+            if (item.getId() != null) {
+            Shift existingItem = shiftsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Shift not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setEmployee(employee);
+            managedShifts.add(existingItem);
+            } else {
             item.setEmployee(employee);
+            managedShifts.add(item);
             }
-        }
+            }
+            employee.setShifts(managedShifts);
+            }
+        
+    
 
-        if (employee.getManagedLocations() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (employee.getManagedLocations() != null) {
+            List<EventLocation> managedManagedLocations = new ArrayList<>();
             for (EventLocation item : employee.getManagedLocations()) {
+            if (item.getId() != null) {
+            EventLocation existingItem = managedLocationsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("EventLocation not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setContactPerson(employee);
+            managedManagedLocations.add(existingItem);
+            } else {
             item.setContactPerson(employee);
+            managedManagedLocations.add(item);
             }
+            }
+            employee.setManagedLocations(managedManagedLocations);
+            }
+        
+    
+
+    if (employee.getProductionCompany() != null
+        && employee.getProductionCompany().getId() != null) {
+        ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+        employee.getProductionCompany().getId()
+        ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
+        employee.setProductionCompany(existingProductionCompany);
         }
+    
+    
+    
 
         return employeeRepository.save(employee);
     }
@@ -62,31 +109,56 @@ public class EmployeeService extends BaseService<Employee> {
         existing.setPosition(employeeRequest.getPosition());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (employeeRequest.getProductionCompany() != null &&
+        employeeRequest.getProductionCompany().getId() != null) {
 
-        if (employeeRequest.getProductionCompany() != null && employeeRequest.getProductionCompany().getId() != null) {
-        ProductionCompany productionCompany = productionCompanyRepository.findById(employeeRequest.getProductionCompany().getId())
-                .orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-        existing.setProductionCompany(productionCompany);
+        ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+        employeeRequest.getProductionCompany().getId()
+        ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
+
+        existing.setProductionCompany(existingProductionCompany);
+        } else {
+        existing.setProductionCompany(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getShifts().clear();
-        if (employeeRequest.getShifts() != null) {
-            for (var item : employeeRequest.getShifts()) {
-            item.setEmployee(existing);
-            existing.getShifts().add(item);
-            }
-        }
 
+        if (employeeRequest.getShifts() != null) {
+        List<Shift> managedShifts = new ArrayList<>();
+
+        for (var item : employeeRequest.getShifts()) {
+        if (item.getId() != null) {
+        Shift existingItem = shiftsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Shift not found"));
+        existingItem.setEmployee(existing);
+        managedShifts.add(existingItem);
+        } else {
+        item.setEmployee(existing);
+        managedShifts.add(item);
+        }
+        }
+        existing.setShifts(managedShifts);
+        }
         existing.getManagedLocations().clear();
+
         if (employeeRequest.getManagedLocations() != null) {
-            for (var item : employeeRequest.getManagedLocations()) {
-            item.setContactPerson(existing);
-            existing.getManagedLocations().add(item);
-            }
+        List<EventLocation> managedManagedLocations = new ArrayList<>();
+
+        for (var item : employeeRequest.getManagedLocations()) {
+        if (item.getId() != null) {
+        EventLocation existingItem = managedLocationsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("EventLocation not found"));
+        existingItem.setContactPerson(existing);
+        managedManagedLocations.add(existingItem);
+        } else {
+        item.setContactPerson(existing);
+        managedManagedLocations.add(item);
+        }
+        }
+        existing.setManagedLocations(managedManagedLocations);
         }
 
     
@@ -98,4 +170,6 @@ public class EmployeeService extends BaseService<Employee> {
 
         return employeeRepository.save(existing);
     }
+
+
 }

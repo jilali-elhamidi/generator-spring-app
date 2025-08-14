@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Album;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.PlaylistItem;import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;import com.example.modules.entertainment_ecosystem.model.MusicFormat;import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;import com.example.modules.entertainment_ecosystem.model.ContentProvider;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "musictrack_tbl")
@@ -35,32 +37,42 @@ public class MusicTrack extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "album_id")
-    @JsonIgnoreProperties("tracks")
-    private Album album;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "artist_id")
-    @JsonIgnoreProperties("composedMusic")
-    private Artist artist;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "album_id")
+        
+        private Album album;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "genre_id")
-    @JsonIgnoreProperties("musicTracks")
-    private Genre genre;
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "artist_id")
+        
+        private Artist artist;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "genre_id")
+        
+        private Genre genre;
+    
+    
     
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<UserProfile> listenedByUsers;
         
-    @OneToMany(mappedBy = "track", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("track")
-    private List<PlaylistItem> playlistItems;
     
-    @OneToMany(mappedBy = "musicTrack", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("musicTrack")
-    private List<DigitalPurchase> purchases;
+    @OneToMany(mappedBy = "track", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<PlaylistItem> playlistItems;
+    
+    
+    @OneToMany(mappedBy = "musicTrack", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<DigitalPurchase> purchases;
+    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "music_formats",
@@ -69,14 +81,17 @@ public class MusicTrack extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<MusicFormat> formats;
             
-    @OneToMany(mappedBy = "musicTrack", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("musicTrack")
-    private List<StreamingContentLicense> streamingLicenses;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "provider_id")
-    @JsonIgnoreProperties("providedMusicTracks")
-    private ContentProvider provider;
+    @OneToMany(mappedBy = "musicTrack", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<StreamingContentLicense> streamingLicenses;
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "provider_id")
+        
+        private ContentProvider provider;
+    
     
 
 }

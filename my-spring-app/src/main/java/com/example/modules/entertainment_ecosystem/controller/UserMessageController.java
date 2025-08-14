@@ -51,22 +51,27 @@ public class UserMessageController {
         return ResponseEntity.created(location).body(usermessageMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserMessageDto> updateUserMessage(
-            @PathVariable Long id,
-            @Valid @RequestBody UserMessageDto usermessageDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<UserMessageDto> updateUserMessage(
+                @PathVariable Long id,
+                @Valid @RequestBody UserMessageDto usermessageDto) {
 
-        try {
-            UserMessage updatedEntity = usermessageService.update(
-                    id,
-                    usermessageMapper.toEntity(usermessageDto)
-            );
-            return ResponseEntity.ok(usermessageMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                UserMessage existing = usermessageService.findById(id)
+                .orElseThrow(() -> new RuntimeException("UserMessage not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                usermessageMapper.updateEntityFromDto(usermessageDto, existing);
+
+                // Sauvegarde
+                UserMessage updatedEntity = usermessageService.save(existing);
+
+                return ResponseEntity.ok(usermessageMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserMessage(@PathVariable Long id) {
         usermessageService.deleteById(id);

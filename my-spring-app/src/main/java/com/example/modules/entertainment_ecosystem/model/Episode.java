@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Season;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "episode_tbl")
@@ -38,23 +40,28 @@ public class Episode extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "season_id")
-    @JsonIgnoreProperties("episodes")
-    private Season season;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "season_id")
+        
+        private Season season;
+    
+    
     
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<UserProfile> watchedByUsers;
         
+    
     @OneToOne
     @JoinColumn(name = "")
     @JsonIgnoreProperties("relatedEpisode")
     private PodcastEpisode relatedPodcastEpisode;
             
-    @OneToMany(mappedBy = "episode", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("episode")
-    private List<EpisodeCredit> credits;
+    
+    @OneToMany(mappedBy = "episode", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<EpisodeCredit> credits;
     
 
 }

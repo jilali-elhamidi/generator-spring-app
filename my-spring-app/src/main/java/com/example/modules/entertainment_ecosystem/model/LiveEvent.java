@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Ticket;import com.example.modules.entertainment_ecosystem.model.EventType;import com.example.modules.entertainment_ecosystem.model.EventLocation;import com.example.modules.entertainment_ecosystem.model.Sponsor;import com.example.modules.entertainment_ecosystem.model.EventAudience;import com.example.modules.entertainment_ecosystem.model.EventSponsorship;import com.example.modules.entertainment_ecosystem.model.ContentTag;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "liveevent_tbl")
@@ -35,6 +37,7 @@ public class LiveEvent extends BaseEntity {
 
 // === Relations ===
 
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "event_performers",
             joinColumns = @JoinColumn(name = "event_id"),
@@ -42,33 +45,43 @@ public class LiveEvent extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Artist> performers;
             
-    @OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("event")
-    private List<Ticket> tickets;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "event_type_id")
-    @JsonIgnoreProperties("events")
-    private EventType eventType;
+    @OneToMany(mappedBy = "event", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Ticket> tickets;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "location_id")
-    @JsonIgnoreProperties("liveEvents")
-    private EventLocation location;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "sponsor_id")
-    @JsonIgnoreProperties("sponsoredEvents")
-    private Sponsor sponsor;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "eventType_id")
+        
+        private EventType eventType;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "location_id")
+        
+        private EventLocation location;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "sponsor_id")
+        
+        private Sponsor sponsor;
+    
+    
     
     @OneToOne
     @JoinColumn(name = "audience_id")
     @JsonIgnoreProperties("event")
     private EventAudience audience;
             
-    @OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("event")
-    private List<EventSponsorship> sponsorships;
+    
+    @OneToMany(mappedBy = "event", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<EventSponsorship> sponsorships;
+    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "event_tags",

@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Review;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.ProductionCompany;import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;import com.example.modules.entertainment_ecosystem.model.MovieFormat;import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;import com.example.modules.entertainment_ecosystem.model.ContentProvider;import com.example.modules.entertainment_ecosystem.model.MovieStudio;import com.example.modules.entertainment_ecosystem.model.ContentRating;import com.example.modules.entertainment_ecosystem.model.ContentTag;import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "movie_tbl")
@@ -41,6 +43,7 @@ public class Movie extends BaseEntity {
 
 // === Relations ===
 
+    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "movie_cast",
             joinColumns = @JoinColumn(name = "movie_id"),
@@ -48,14 +51,18 @@ public class Movie extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Artist> cast;
             
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "director_id")
-    @JsonIgnoreProperties("directedMovies")
-    private Artist director;
     
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("movie")
-    private List<Review> reviews;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "director_id")
+        
+        private Artist director;
+    
+    
+    
+    @OneToMany(mappedBy = "movie", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Review> reviews;
+    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "movie_genres",
@@ -64,22 +71,28 @@ public class Movie extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Genre> genres;
             
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<UserProfile> watchlistUsers;
         
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<Merchandise> relatedMerchandise;
         
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "company_id")
-    @JsonIgnoreProperties("movies")
-    private ProductionCompany productionCompany;
     
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("movie")
-    private List<DigitalPurchase> purchases;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "productionCompany_id")
+        
+        private ProductionCompany productionCompany;
+    
+    
+    
+    @OneToMany(mappedBy = "movie", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<DigitalPurchase> purchases;
+    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "movie_formats",
@@ -88,24 +101,32 @@ public class Movie extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<MovieFormat> formats;
             
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("movie")
-    private List<StreamingContentLicense> streamingLicenses;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "provider_id")
-    @JsonIgnoreProperties("providedMovies")
-    private ContentProvider provider;
+    @OneToMany(mappedBy = "movie", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<StreamingContentLicense> streamingLicenses;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "movie_studio_id")
-    @JsonIgnoreProperties("movies")
-    private MovieStudio movieStudio;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "content_rating_id")
-    @JsonIgnoreProperties("ratedMovies")
-    private ContentRating contentRating;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "provider_id")
+        
+        private ContentProvider provider;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "movieStudio_id")
+        
+        private MovieStudio movieStudio;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "contentRating_id")
+        
+        private ContentRating contentRating;
+    
+    
     
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "movie_tags",
@@ -114,6 +135,7 @@ public class Movie extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<ContentTag> tags;
             
+    
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "movie_languages",
             joinColumns = @JoinColumn(name = "movie_id"),

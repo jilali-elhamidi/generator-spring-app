@@ -51,22 +51,27 @@ public class ForumPostController {
         return ResponseEntity.created(location).body(forumpostMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ForumPostDto> updateForumPost(
-            @PathVariable Long id,
-            @Valid @RequestBody ForumPostDto forumpostDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ForumPostDto> updateForumPost(
+                @PathVariable Long id,
+                @Valid @RequestBody ForumPostDto forumpostDto) {
 
-        try {
-            ForumPost updatedEntity = forumpostService.update(
-                    id,
-                    forumpostMapper.toEntity(forumpostDto)
-            );
-            return ResponseEntity.ok(forumpostMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                ForumPost existing = forumpostService.findById(id)
+                .orElseThrow(() -> new RuntimeException("ForumPost not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                forumpostMapper.updateEntityFromDto(forumpostDto, existing);
+
+                // Sauvegarde
+                ForumPost updatedEntity = forumpostService.save(existing);
+
+                return ResponseEntity.ok(forumpostMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteForumPost(@PathVariable Long id) {
         forumpostService.deleteById(id);

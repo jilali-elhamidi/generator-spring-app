@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "developmentstudio_tbl")
@@ -29,9 +31,10 @@ public class DevelopmentStudio extends BaseEntity {
 
 // === Relations ===
 
-    @OneToMany(mappedBy = "developerStudio", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("developerStudio")
-    private List<VideoGame> games;
+    
+    @OneToMany(mappedBy = "developerStudio", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<VideoGame> games;
     
 
 }

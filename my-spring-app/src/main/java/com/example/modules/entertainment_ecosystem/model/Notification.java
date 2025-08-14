@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "notification_tbl")
@@ -38,10 +40,12 @@ public class Notification extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("notifications")
-    private UserProfile recipient;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "recipient_id")
+        
+        private UserProfile recipient;
+    
     
 
 }

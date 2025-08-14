@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface StreamingServiceMapper {
     List<StreamingServiceDto> toDtoList(List<StreamingService> streamingserviceList);
 
     List<StreamingService> toEntityList(List<StreamingServiceDto> streamingserviceDtoList);
+
+    void updateEntityFromDto(StreamingServiceDto dto, @MappingTarget StreamingService entity);
 
 }

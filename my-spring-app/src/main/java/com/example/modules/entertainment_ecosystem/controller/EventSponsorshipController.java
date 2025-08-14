@@ -51,22 +51,27 @@ public class EventSponsorshipController {
         return ResponseEntity.created(location).body(eventsponsorshipMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<EventSponsorshipDto> updateEventSponsorship(
-            @PathVariable Long id,
-            @Valid @RequestBody EventSponsorshipDto eventsponsorshipDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<EventSponsorshipDto> updateEventSponsorship(
+                @PathVariable Long id,
+                @Valid @RequestBody EventSponsorshipDto eventsponsorshipDto) {
 
-        try {
-            EventSponsorship updatedEntity = eventsponsorshipService.update(
-                    id,
-                    eventsponsorshipMapper.toEntity(eventsponsorshipDto)
-            );
-            return ResponseEntity.ok(eventsponsorshipMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                EventSponsorship existing = eventsponsorshipService.findById(id)
+                .orElseThrow(() -> new RuntimeException("EventSponsorship not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                eventsponsorshipMapper.updateEntityFromDto(eventsponsorshipDto, existing);
+
+                // Sauvegarde
+                EventSponsorship updatedEntity = eventsponsorshipService.save(existing);
+
+                return ResponseEntity.ok(eventsponsorshipMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEventSponsorship(@PathVariable Long id) {
         eventsponsorshipService.deleteById(id);

@@ -51,22 +51,27 @@ public class StreamingContentLicenseController {
         return ResponseEntity.created(location).body(streamingcontentlicenseMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<StreamingContentLicenseDto> updateStreamingContentLicense(
-            @PathVariable Long id,
-            @Valid @RequestBody StreamingContentLicenseDto streamingcontentlicenseDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<StreamingContentLicenseDto> updateStreamingContentLicense(
+                @PathVariable Long id,
+                @Valid @RequestBody StreamingContentLicenseDto streamingcontentlicenseDto) {
 
-        try {
-            StreamingContentLicense updatedEntity = streamingcontentlicenseService.update(
-                    id,
-                    streamingcontentlicenseMapper.toEntity(streamingcontentlicenseDto)
-            );
-            return ResponseEntity.ok(streamingcontentlicenseMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                StreamingContentLicense existing = streamingcontentlicenseService.findById(id)
+                .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                streamingcontentlicenseMapper.updateEntityFromDto(streamingcontentlicenseDto, existing);
+
+                // Sauvegarde
+                StreamingContentLicense updatedEntity = streamingcontentlicenseService.save(existing);
+
+                return ResponseEntity.ok(streamingcontentlicenseMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStreamingContentLicense(@PathVariable Long id) {
         streamingcontentlicenseService.deleteById(id);

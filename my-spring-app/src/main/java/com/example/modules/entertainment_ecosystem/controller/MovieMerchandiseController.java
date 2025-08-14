@@ -51,22 +51,27 @@ public class MovieMerchandiseController {
         return ResponseEntity.created(location).body(moviemerchandiseMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<MovieMerchandiseDto> updateMovieMerchandise(
-            @PathVariable Long id,
-            @Valid @RequestBody MovieMerchandiseDto moviemerchandiseDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<MovieMerchandiseDto> updateMovieMerchandise(
+                @PathVariable Long id,
+                @Valid @RequestBody MovieMerchandiseDto moviemerchandiseDto) {
 
-        try {
-            MovieMerchandise updatedEntity = moviemerchandiseService.update(
-                    id,
-                    moviemerchandiseMapper.toEntity(moviemerchandiseDto)
-            );
-            return ResponseEntity.ok(moviemerchandiseMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                MovieMerchandise existing = moviemerchandiseService.findById(id)
+                .orElseThrow(() -> new RuntimeException("MovieMerchandise not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                moviemerchandiseMapper.updateEntityFromDto(moviemerchandiseDto, existing);
+
+                // Sauvegarde
+                MovieMerchandise updatedEntity = moviemerchandiseService.save(existing);
+
+                return ResponseEntity.ok(moviemerchandiseMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovieMerchandise(@PathVariable Long id) {
         moviemerchandiseService.deleteById(id);

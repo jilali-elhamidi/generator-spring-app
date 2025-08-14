@@ -4,6 +4,7 @@ import com.example.core.service.BaseService;
 import com.example.modules.entertainment_ecosystem.model.EventLocation;
 import com.example.modules.entertainment_ecosystem.repository.EventLocationRepository;
 import com.example.modules.entertainment_ecosystem.model.LiveEvent;
+import com.example.modules.entertainment_ecosystem.repository.LiveEventRepository;
 import com.example.modules.entertainment_ecosystem.model.Employee;
 import com.example.modules.entertainment_ecosystem.repository.EmployeeRepository;
 
@@ -11,34 +12,60 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class EventLocationService extends BaseService<EventLocation> {
 
     protected final EventLocationRepository eventlocationRepository;
+    private final LiveEventRepository liveEventsRepository;
     private final EmployeeRepository contactPersonRepository;
 
-    public EventLocationService(EventLocationRepository repository,EmployeeRepository contactPersonRepository)
+    public EventLocationService(EventLocationRepository repository,LiveEventRepository liveEventsRepository,EmployeeRepository contactPersonRepository)
     {
         super(repository);
         this.eventlocationRepository = repository;
+        this.liveEventsRepository = liveEventsRepository;
         this.contactPersonRepository = contactPersonRepository;
     }
 
     @Override
     public EventLocation save(EventLocation eventlocation) {
 
-        if (eventlocation.getContactPerson() != null && eventlocation.getContactPerson().getId() != null) {
-        Employee contactPerson = contactPersonRepository.findById(eventlocation.getContactPerson().getId())
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-        eventlocation.setContactPerson(contactPerson);
-        }
 
-        if (eventlocation.getLiveEvents() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (eventlocation.getLiveEvents() != null) {
+            List<LiveEvent> managedLiveEvents = new ArrayList<>();
             for (LiveEvent item : eventlocation.getLiveEvents()) {
+            if (item.getId() != null) {
+            LiveEvent existingItem = liveEventsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setLocation(eventlocation);
+            managedLiveEvents.add(existingItem);
+            } else {
             item.setLocation(eventlocation);
+            managedLiveEvents.add(item);
             }
+            }
+            eventlocation.setLiveEvents(managedLiveEvents);
+            }
+        
+    
+
+    
+
+    
+    if (eventlocation.getContactPerson() != null
+        && eventlocation.getContactPerson().getId() != null) {
+        Employee existingContactPerson = contactPersonRepository.findById(
+        eventlocation.getContactPerson().getId()
+        ).orElseThrow(() -> new RuntimeException("Employee not found"));
+        eventlocation.setContactPerson(existingContactPerson);
         }
+    
 
         return eventlocationRepository.save(eventlocation);
     }
@@ -53,23 +80,38 @@ public class EventLocationService extends BaseService<EventLocation> {
         existing.setAddress(eventlocationRequest.getAddress());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (eventlocationRequest.getContactPerson() != null &&
+        eventlocationRequest.getContactPerson().getId() != null) {
 
-        if (eventlocationRequest.getContactPerson() != null && eventlocationRequest.getContactPerson().getId() != null) {
-        Employee contactPerson = contactPersonRepository.findById(eventlocationRequest.getContactPerson().getId())
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-        existing.setContactPerson(contactPerson);
+        Employee existingContactPerson = contactPersonRepository.findById(
+        eventlocationRequest.getContactPerson().getId()
+        ).orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        existing.setContactPerson(existingContactPerson);
+        } else {
+        existing.setContactPerson(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getLiveEvents().clear();
+
         if (eventlocationRequest.getLiveEvents() != null) {
-            for (var item : eventlocationRequest.getLiveEvents()) {
-            item.setLocation(existing);
-            existing.getLiveEvents().add(item);
-            }
+        List<LiveEvent> managedLiveEvents = new ArrayList<>();
+
+        for (var item : eventlocationRequest.getLiveEvents()) {
+        if (item.getId() != null) {
+        LiveEvent existingItem = liveEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+        existingItem.setLocation(existing);
+        managedLiveEvents.add(existingItem);
+        } else {
+        item.setLocation(existing);
+        managedLiveEvents.add(item);
+        }
+        }
+        existing.setLiveEvents(managedLiveEvents);
         }
 
     
@@ -79,4 +121,6 @@ public class EventLocationService extends BaseService<EventLocation> {
 
         return eventlocationRepository.save(existing);
     }
+
+
 }

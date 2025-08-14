@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class TransactionService extends BaseService<Transaction> {
@@ -28,18 +29,30 @@ public class TransactionService extends BaseService<Transaction> {
         super(repository);
         this.transactionRepository = repository;
         this.walletRepository = walletRepository;
-            this.relatedInvoiceRepository = relatedInvoiceRepository;
-            this.digitalPurchaseRepository = digitalPurchaseRepository;
+        this.relatedInvoiceRepository = relatedInvoiceRepository;
+        this.digitalPurchaseRepository = digitalPurchaseRepository;
     }
 
     @Override
     public Transaction save(Transaction transaction) {
 
-        if (transaction.getWallet() != null && transaction.getWallet().getId() != null) {
-        UserWallet wallet = walletRepository.findById(transaction.getWallet().getId())
-                .orElseThrow(() -> new RuntimeException("UserWallet not found"));
-        transaction.setWallet(wallet);
+
+    
+
+    
+
+    
+
+    if (transaction.getWallet() != null
+        && transaction.getWallet().getId() != null) {
+        UserWallet existingWallet = walletRepository.findById(
+        transaction.getWallet().getId()
+        ).orElseThrow(() -> new RuntimeException("UserWallet not found"));
+        transaction.setWallet(existingWallet);
         }
+    
+    
+    
         if (transaction.getRelatedInvoice() != null) {
         
         
@@ -77,11 +90,16 @@ public class TransactionService extends BaseService<Transaction> {
         existing.setType(transactionRequest.getType());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (transactionRequest.getWallet() != null &&
+        transactionRequest.getWallet().getId() != null) {
 
-        if (transactionRequest.getWallet() != null && transactionRequest.getWallet().getId() != null) {
-        UserWallet wallet = walletRepository.findById(transactionRequest.getWallet().getId())
-                .orElseThrow(() -> new RuntimeException("UserWallet not found"));
-        existing.setWallet(wallet);
+        UserWallet existingWallet = walletRepository.findById(
+        transactionRequest.getWallet().getId()
+        ).orElseThrow(() -> new RuntimeException("UserWallet not found"));
+
+        existing.setWallet(existingWallet);
+        } else {
+        existing.setWallet(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -133,4 +151,6 @@ public class TransactionService extends BaseService<Transaction> {
 
         return transactionRepository.save(existing);
     }
+
+
 }

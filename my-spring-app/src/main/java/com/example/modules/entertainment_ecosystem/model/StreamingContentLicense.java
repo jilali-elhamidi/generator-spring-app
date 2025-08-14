@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.SubscriptionPlan;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.MusicTrack;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "streamingcontentlicense_tbl")
@@ -35,25 +37,33 @@ public class StreamingContentLicense extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "plan_id")
-    @JsonIgnoreProperties("includedStreamingContentLicenses")
-    private SubscriptionPlan subscriptionPlan;
     
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "movie_id")
-    @JsonIgnoreProperties("streamingLicenses")
-    private Movie movie;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "subscriptionPlan_id")
+        
+        private SubscriptionPlan subscriptionPlan;
     
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "tvshow_id")
-    @JsonIgnoreProperties("streamingLicenses")
-    private TVShow tvShow;
     
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "music_track_id")
-    @JsonIgnoreProperties("streamingLicenses")
-    private MusicTrack musicTrack;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "movie_id")
+        
+        private Movie movie;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "tvShow_id")
+        
+        private TVShow tvShow;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "musicTrack_id")
+        
+        private MusicTrack musicTrack;
+    
     
 
 }

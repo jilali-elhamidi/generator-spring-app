@@ -51,22 +51,27 @@ public class TransactionController {
         return ResponseEntity.created(location).body(transactionMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<TransactionDto> updateTransaction(
-            @PathVariable Long id,
-            @Valid @RequestBody TransactionDto transactionDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<TransactionDto> updateTransaction(
+                @PathVariable Long id,
+                @Valid @RequestBody TransactionDto transactionDto) {
 
-        try {
-            Transaction updatedEntity = transactionService.update(
-                    id,
-                    transactionMapper.toEntity(transactionDto)
-            );
-            return ResponseEntity.ok(transactionMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Transaction existing = transactionService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                transactionMapper.updateEntityFromDto(transactionDto, existing);
+
+                // Sauvegarde
+                Transaction updatedEntity = transactionService.save(existing);
+
+                return ResponseEntity.ok(transactionMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
         transactionService.deleteById(id);

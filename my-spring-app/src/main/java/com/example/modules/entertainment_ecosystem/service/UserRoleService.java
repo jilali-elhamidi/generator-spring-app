@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class UserRoleService extends BaseService<UserRole> {
@@ -26,6 +27,11 @@ public class UserRoleService extends BaseService<UserRole> {
 
     @Override
     public UserRole save(UserRole userrole) {
+
+
+    
+
+    
 
         return userroleRepository.save(userrole);
     }
@@ -58,4 +64,6 @@ public class UserRoleService extends BaseService<UserRole> {
 
         return userroleRepository.save(existing);
     }
+
+
 }

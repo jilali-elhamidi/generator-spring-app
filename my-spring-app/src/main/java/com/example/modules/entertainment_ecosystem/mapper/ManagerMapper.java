@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface ManagerMapper {
     List<ManagerDto> toDtoList(List<Manager> managerList);
 
     List<Manager> toEntityList(List<ManagerDto> managerDtoList);
+
+    void updateEntityFromDto(ManagerDto dto, @MappingTarget Manager entity);
 
 }

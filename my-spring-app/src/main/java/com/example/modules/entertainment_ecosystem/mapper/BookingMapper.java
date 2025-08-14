@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface BookingMapper {
     List<BookingDto> toDtoList(List<Booking> bookingList);
 
     List<Booking> toEntityList(List<BookingDto> bookingDtoList);
+
+    void updateEntityFromDto(BookingDto dto, @MappingTarget Booking entity);
 
 }

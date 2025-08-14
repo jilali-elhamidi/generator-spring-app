@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface MovieStudioMapper {
     List<MovieStudioDto> toDtoList(List<MovieStudio> moviestudioList);
 
     List<MovieStudio> toEntityList(List<MovieStudioDto> moviestudioDtoList);
+
+    void updateEntityFromDto(MovieStudioDto dto, @MappingTarget MovieStudio entity);
 
 }

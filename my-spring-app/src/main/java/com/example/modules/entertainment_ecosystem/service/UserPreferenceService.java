@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class UserPreferenceService extends BaseService<UserPreference> {
@@ -27,11 +28,17 @@ public class UserPreferenceService extends BaseService<UserPreference> {
     @Override
     public UserPreference save(UserPreference userpreference) {
 
-        if (userpreference.getUser() != null && userpreference.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(userpreference.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userpreference.setUser(user);
+
+    
+
+    if (userpreference.getUser() != null
+        && userpreference.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        userpreference.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        userpreference.setUser(existingUser);
         }
+    
 
         return userpreferenceRepository.save(userpreference);
     }
@@ -46,11 +53,16 @@ public class UserPreferenceService extends BaseService<UserPreference> {
         existing.setPreferenceValue(userpreferenceRequest.getPreferenceValue());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (userpreferenceRequest.getUser() != null &&
+        userpreferenceRequest.getUser().getId() != null) {
 
-        if (userpreferenceRequest.getUser() != null && userpreferenceRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(userpreferenceRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        userpreferenceRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -62,4 +74,6 @@ public class UserPreferenceService extends BaseService<UserPreference> {
 
         return userpreferenceRepository.save(existing);
     }
+
+
 }

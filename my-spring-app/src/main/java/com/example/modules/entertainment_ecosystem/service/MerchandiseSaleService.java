@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
@@ -31,17 +32,27 @@ public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
     @Override
     public MerchandiseSale save(MerchandiseSale merchandisesale) {
 
-        if (merchandisesale.getMerchandiseItem() != null && merchandisesale.getMerchandiseItem().getId() != null) {
-        Merchandise merchandiseItem = merchandiseItemRepository.findById(merchandisesale.getMerchandiseItem().getId())
-                .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        merchandisesale.setMerchandiseItem(merchandiseItem);
-        }
 
-        if (merchandisesale.getUser() != null && merchandisesale.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(merchandisesale.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        merchandisesale.setUser(user);
+    
+
+    
+
+    if (merchandisesale.getMerchandiseItem() != null
+        && merchandisesale.getMerchandiseItem().getId() != null) {
+        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+        merchandisesale.getMerchandiseItem().getId()
+        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+        merchandisesale.setMerchandiseItem(existingMerchandiseItem);
         }
+    
+    if (merchandisesale.getUser() != null
+        && merchandisesale.getUser().getId() != null) {
+        UserProfile existingUser = userRepository.findById(
+        merchandisesale.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        merchandisesale.setUser(existingUser);
+        }
+    
 
         return merchandisesaleRepository.save(merchandisesale);
     }
@@ -56,17 +67,27 @@ public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
         existing.setQuantity(merchandisesaleRequest.getQuantity());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (merchandisesaleRequest.getMerchandiseItem() != null &&
+        merchandisesaleRequest.getMerchandiseItem().getId() != null) {
 
-        if (merchandisesaleRequest.getMerchandiseItem() != null && merchandisesaleRequest.getMerchandiseItem().getId() != null) {
-        Merchandise merchandiseItem = merchandiseItemRepository.findById(merchandisesaleRequest.getMerchandiseItem().getId())
-                .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        existing.setMerchandiseItem(merchandiseItem);
+        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+        merchandisesaleRequest.getMerchandiseItem().getId()
+        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+
+        existing.setMerchandiseItem(existingMerchandiseItem);
+        } else {
+        existing.setMerchandiseItem(null);
         }
+        if (merchandisesaleRequest.getUser() != null &&
+        merchandisesaleRequest.getUser().getId() != null) {
 
-        if (merchandisesaleRequest.getUser() != null && merchandisesaleRequest.getUser().getId() != null) {
-        UserProfile user = userRepository.findById(merchandisesaleRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setUser(user);
+        UserProfile existingUser = userRepository.findById(
+        merchandisesaleRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -80,4 +101,6 @@ public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
 
         return merchandisesaleRepository.save(existing);
     }
+
+
 }

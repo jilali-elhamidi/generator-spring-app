@@ -51,22 +51,27 @@ public class MediaFileController {
         return ResponseEntity.created(location).body(mediafileMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<MediaFileDto> updateMediaFile(
-            @PathVariable Long id,
-            @Valid @RequestBody MediaFileDto mediafileDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<MediaFileDto> updateMediaFile(
+                @PathVariable Long id,
+                @Valid @RequestBody MediaFileDto mediafileDto) {
 
-        try {
-            MediaFile updatedEntity = mediafileService.update(
-                    id,
-                    mediafileMapper.toEntity(mediafileDto)
-            );
-            return ResponseEntity.ok(mediafileMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                MediaFile existing = mediafileService.findById(id)
+                .orElseThrow(() -> new RuntimeException("MediaFile not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                mediafileMapper.updateEntityFromDto(mediafileDto, existing);
+
+                // Sauvegarde
+                MediaFile updatedEntity = mediafileService.save(existing);
+
+                return ResponseEntity.ok(mediafileMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMediaFile(@PathVariable Long id) {
         mediafileService.deleteById(id);

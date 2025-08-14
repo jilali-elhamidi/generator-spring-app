@@ -12,6 +12,8 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Transaction;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "invoice_tbl")
@@ -32,6 +34,7 @@ public class Invoice extends BaseEntity {
 
 // === Relations ===
 
+    
     @OneToOne
     @JoinColumn(name = "transaction_id")
     @JsonIgnoreProperties("relatedInvoice")

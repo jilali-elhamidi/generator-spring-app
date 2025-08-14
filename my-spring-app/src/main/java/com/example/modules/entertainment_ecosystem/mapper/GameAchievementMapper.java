@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface GameAchievementMapper {
     List<GameAchievementDto> toDtoList(List<GameAchievement> gameachievementList);
 
     List<GameAchievement> toEntityList(List<GameAchievementDto> gameachievementDtoList);
+
+    void updateEntityFromDto(GameAchievementDto dto, @MappingTarget GameAchievement entity);
 
 }

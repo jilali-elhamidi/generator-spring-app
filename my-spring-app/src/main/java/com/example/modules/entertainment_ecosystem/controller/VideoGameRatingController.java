@@ -51,22 +51,27 @@ public class VideoGameRatingController {
         return ResponseEntity.created(location).body(videogameratingMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<VideoGameRatingDto> updateVideoGameRating(
-            @PathVariable Long id,
-            @Valid @RequestBody VideoGameRatingDto videogameratingDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<VideoGameRatingDto> updateVideoGameRating(
+                @PathVariable Long id,
+                @Valid @RequestBody VideoGameRatingDto videogameratingDto) {
 
-        try {
-            VideoGameRating updatedEntity = videogameratingService.update(
-                    id,
-                    videogameratingMapper.toEntity(videogameratingDto)
-            );
-            return ResponseEntity.ok(videogameratingMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                VideoGameRating existing = videogameratingService.findById(id)
+                .orElseThrow(() -> new RuntimeException("VideoGameRating not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                videogameratingMapper.updateEntityFromDto(videogameratingDto, existing);
+
+                // Sauvegarde
+                VideoGameRating updatedEntity = videogameratingService.save(existing);
+
+                return ResponseEntity.ok(videogameratingMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVideoGameRating(@PathVariable Long id) {
         videogameratingService.deleteById(id);

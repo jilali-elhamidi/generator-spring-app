@@ -6,39 +6,66 @@ import com.example.modules.entertainment_ecosystem.repository.PlaylistRepository
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.PlaylistItem;
+import com.example.modules.entertainment_ecosystem.repository.PlaylistItemRepository;
 
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class PlaylistService extends BaseService<Playlist> {
 
     protected final PlaylistRepository playlistRepository;
     private final UserProfileRepository ownerRepository;
+    private final PlaylistItemRepository itemsRepository;
 
-    public PlaylistService(PlaylistRepository repository,UserProfileRepository ownerRepository)
+    public PlaylistService(PlaylistRepository repository,UserProfileRepository ownerRepository,PlaylistItemRepository itemsRepository)
     {
         super(repository);
         this.playlistRepository = repository;
         this.ownerRepository = ownerRepository;
+        this.itemsRepository = itemsRepository;
     }
 
     @Override
     public Playlist save(Playlist playlist) {
 
-        if (playlist.getOwner() != null && playlist.getOwner().getId() != null) {
-        UserProfile owner = ownerRepository.findById(playlist.getOwner().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        playlist.setOwner(owner);
-        }
 
-        if (playlist.getItems() != null) {
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (playlist.getItems() != null) {
+            List<PlaylistItem> managedItems = new ArrayList<>();
             for (PlaylistItem item : playlist.getItems()) {
+            if (item.getId() != null) {
+            PlaylistItem existingItem = itemsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("PlaylistItem not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setPlaylist(playlist);
+            managedItems.add(existingItem);
+            } else {
             item.setPlaylist(playlist);
+            managedItems.add(item);
             }
+            }
+            playlist.setItems(managedItems);
+            }
+        
+    
+
+    if (playlist.getOwner() != null
+        && playlist.getOwner().getId() != null) {
+        UserProfile existingOwner = ownerRepository.findById(
+        playlist.getOwner().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        playlist.setOwner(existingOwner);
         }
+    
+    
 
         return playlistRepository.save(playlist);
     }
@@ -54,23 +81,38 @@ public class PlaylistService extends BaseService<Playlist> {
         existing.setIsPublic(playlistRequest.getIsPublic());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (playlistRequest.getOwner() != null &&
+        playlistRequest.getOwner().getId() != null) {
 
-        if (playlistRequest.getOwner() != null && playlistRequest.getOwner().getId() != null) {
-        UserProfile owner = ownerRepository.findById(playlistRequest.getOwner().getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        existing.setOwner(owner);
+        UserProfile existingOwner = ownerRepository.findById(
+        playlistRequest.getOwner().getId()
+        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+        existing.setOwner(existingOwner);
+        } else {
+        existing.setOwner(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getItems().clear();
+
         if (playlistRequest.getItems() != null) {
-            for (var item : playlistRequest.getItems()) {
-            item.setPlaylist(existing);
-            existing.getItems().add(item);
-            }
+        List<PlaylistItem> managedItems = new ArrayList<>();
+
+        for (var item : playlistRequest.getItems()) {
+        if (item.getId() != null) {
+        PlaylistItem existingItem = itemsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PlaylistItem not found"));
+        existingItem.setPlaylist(existing);
+        managedItems.add(existingItem);
+        } else {
+        item.setPlaylist(existing);
+        managedItems.add(item);
+        }
+        }
+        existing.setItems(managedItems);
         }
 
     
@@ -80,4 +122,6 @@ public class PlaylistService extends BaseService<Playlist> {
 
         return playlistRepository.save(existing);
     }
+
+
 }

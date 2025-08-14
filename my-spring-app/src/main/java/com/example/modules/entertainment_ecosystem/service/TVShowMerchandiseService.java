@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
@@ -27,11 +28,17 @@ public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
     @Override
     public TVShowMerchandise save(TVShowMerchandise tvshowmerchandise) {
 
-        if (tvshowmerchandise.getTvShow() != null && tvshowmerchandise.getTvShow().getId() != null) {
-        TVShow tvShow = tvShowRepository.findById(tvshowmerchandise.getTvShow().getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        tvshowmerchandise.setTvShow(tvShow);
+
+    
+
+    if (tvshowmerchandise.getTvShow() != null
+        && tvshowmerchandise.getTvShow().getId() != null) {
+        TVShow existingTvShow = tvShowRepository.findById(
+        tvshowmerchandise.getTvShow().getId()
+        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
+        tvshowmerchandise.setTvShow(existingTvShow);
         }
+    
 
         return tvshowmerchandiseRepository.save(tvshowmerchandise);
     }
@@ -46,11 +53,16 @@ public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
         existing.setPrice(tvshowmerchandiseRequest.getPrice());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (tvshowmerchandiseRequest.getTvShow() != null &&
+        tvshowmerchandiseRequest.getTvShow().getId() != null) {
 
-        if (tvshowmerchandiseRequest.getTvShow() != null && tvshowmerchandiseRequest.getTvShow().getId() != null) {
-        TVShow tvShow = tvShowRepository.findById(tvshowmerchandiseRequest.getTvShow().getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        existing.setTvShow(tvShow);
+        TVShow existingTvShow = tvShowRepository.findById(
+        tvshowmerchandiseRequest.getTvShow().getId()
+        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
+
+        existing.setTvShow(existingTvShow);
+        } else {
+        existing.setTvShow(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -62,4 +74,6 @@ public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
 
         return tvshowmerchandiseRepository.save(existing);
     }
+
+
 }

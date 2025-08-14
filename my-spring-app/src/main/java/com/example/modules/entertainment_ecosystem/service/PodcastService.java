@@ -6,6 +6,7 @@ import com.example.modules.entertainment_ecosystem.repository.PodcastRepository;
 import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;
+import com.example.modules.entertainment_ecosystem.repository.PodcastEpisodeRepository;
 import com.example.modules.entertainment_ecosystem.model.Genre;
 import com.example.modules.entertainment_ecosystem.repository.GenreRepository;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
@@ -15,6 +16,7 @@ import com.example.modules.entertainment_ecosystem.repository.PublisherRepositor
 import com.example.modules.entertainment_ecosystem.model.PodcastCategory;
 import com.example.modules.entertainment_ecosystem.repository.PodcastCategoryRepository;
 import com.example.modules.entertainment_ecosystem.model.PodcastGuest;
+import com.example.modules.entertainment_ecosystem.repository.PodcastGuestRepository;
 import com.example.modules.entertainment_ecosystem.model.ContentProvider;
 import com.example.modules.entertainment_ecosystem.repository.ContentProviderRepository;
 import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
@@ -24,28 +26,33 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class PodcastService extends BaseService<Podcast> {
 
     protected final PodcastRepository podcastRepository;
     private final ArtistRepository hostRepository;
+    private final PodcastEpisodeRepository episodesRepository;
     private final GenreRepository genresRepository;
     private final UserProfileRepository listenersRepository;
     private final PublisherRepository publisherRepository;
     private final PodcastCategoryRepository categoriesRepository;
+    private final PodcastGuestRepository guestsRepository;
     private final ContentProviderRepository providerRepository;
     private final ContentLanguageRepository languagesRepository;
 
-    public PodcastService(PodcastRepository repository,ArtistRepository hostRepository,GenreRepository genresRepository,UserProfileRepository listenersRepository,PublisherRepository publisherRepository,PodcastCategoryRepository categoriesRepository,ContentProviderRepository providerRepository,ContentLanguageRepository languagesRepository)
+    public PodcastService(PodcastRepository repository,ArtistRepository hostRepository,PodcastEpisodeRepository episodesRepository,GenreRepository genresRepository,UserProfileRepository listenersRepository,PublisherRepository publisherRepository,PodcastCategoryRepository categoriesRepository,PodcastGuestRepository guestsRepository,ContentProviderRepository providerRepository,ContentLanguageRepository languagesRepository)
     {
         super(repository);
         this.podcastRepository = repository;
         this.hostRepository = hostRepository;
+        this.episodesRepository = episodesRepository;
         this.genresRepository = genresRepository;
         this.listenersRepository = listenersRepository;
         this.publisherRepository = publisherRepository;
         this.categoriesRepository = categoriesRepository;
+        this.guestsRepository = guestsRepository;
         this.providerRepository = providerRepository;
         this.languagesRepository = languagesRepository;
     }
@@ -53,35 +60,95 @@ public class PodcastService extends BaseService<Podcast> {
     @Override
     public Podcast save(Podcast podcast) {
 
-        if (podcast.getHost() != null && podcast.getHost().getId() != null) {
-        Artist host = hostRepository.findById(podcast.getHost().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        podcast.setHost(host);
-        }
 
-        if (podcast.getPublisher() != null && podcast.getPublisher().getId() != null) {
-        Publisher publisher = publisherRepository.findById(podcast.getPublisher().getId())
-                .orElseThrow(() -> new RuntimeException("Publisher not found"));
-        podcast.setPublisher(publisher);
-        }
+    
 
-        if (podcast.getProvider() != null && podcast.getProvider().getId() != null) {
-        ContentProvider provider = providerRepository.findById(podcast.getProvider().getId())
-                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-        podcast.setProvider(provider);
-        }
-
-        if (podcast.getEpisodes() != null) {
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (podcast.getEpisodes() != null) {
+            List<PodcastEpisode> managedEpisodes = new ArrayList<>();
             for (PodcastEpisode item : podcast.getEpisodes()) {
+            if (item.getId() != null) {
+            PodcastEpisode existingItem = episodesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("PodcastEpisode not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setPodcast(podcast);
+            managedEpisodes.add(existingItem);
+            } else {
             item.setPodcast(podcast);
+            managedEpisodes.add(item);
             }
-        }
+            }
+            podcast.setEpisodes(managedEpisodes);
+            }
+        
+    
 
-        if (podcast.getGuests() != null) {
+    
+
+    
+
+    
+
+    
+
+    
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (podcast.getGuests() != null) {
+            List<PodcastGuest> managedGuests = new ArrayList<>();
             for (PodcastGuest item : podcast.getGuests()) {
+            if (item.getId() != null) {
+            PodcastGuest existingItem = guestsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("PodcastGuest not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setPodcast(podcast);
+            managedGuests.add(existingItem);
+            } else {
             item.setPodcast(podcast);
+            managedGuests.add(item);
             }
+            }
+            podcast.setGuests(managedGuests);
+            }
+        
+    
+
+    
+
+    
+
+    if (podcast.getHost() != null
+        && podcast.getHost().getId() != null) {
+        Artist existingHost = hostRepository.findById(
+        podcast.getHost().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+        podcast.setHost(existingHost);
         }
+    
+    
+    
+    
+    if (podcast.getPublisher() != null
+        && podcast.getPublisher().getId() != null) {
+        Publisher existingPublisher = publisherRepository.findById(
+        podcast.getPublisher().getId()
+        ).orElseThrow(() -> new RuntimeException("Publisher not found"));
+        podcast.setPublisher(existingPublisher);
+        }
+    
+    
+    
+    if (podcast.getProvider() != null
+        && podcast.getProvider().getId() != null) {
+        ContentProvider existingProvider = providerRepository.findById(
+        podcast.getProvider().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+        podcast.setProvider(existingProvider);
+        }
+    
+    
 
         return podcastRepository.save(podcast);
     }
@@ -97,23 +164,38 @@ public class PodcastService extends BaseService<Podcast> {
         existing.setTotalEpisodes(podcastRequest.getTotalEpisodes());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (podcastRequest.getHost() != null &&
+        podcastRequest.getHost().getId() != null) {
 
-        if (podcastRequest.getHost() != null && podcastRequest.getHost().getId() != null) {
-        Artist host = hostRepository.findById(podcastRequest.getHost().getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existing.setHost(host);
+        Artist existingHost = hostRepository.findById(
+        podcastRequest.getHost().getId()
+        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+        existing.setHost(existingHost);
+        } else {
+        existing.setHost(null);
         }
+        if (podcastRequest.getPublisher() != null &&
+        podcastRequest.getPublisher().getId() != null) {
 
-        if (podcastRequest.getPublisher() != null && podcastRequest.getPublisher().getId() != null) {
-        Publisher publisher = publisherRepository.findById(podcastRequest.getPublisher().getId())
-                .orElseThrow(() -> new RuntimeException("Publisher not found"));
-        existing.setPublisher(publisher);
+        Publisher existingPublisher = publisherRepository.findById(
+        podcastRequest.getPublisher().getId()
+        ).orElseThrow(() -> new RuntimeException("Publisher not found"));
+
+        existing.setPublisher(existingPublisher);
+        } else {
+        existing.setPublisher(null);
         }
+        if (podcastRequest.getProvider() != null &&
+        podcastRequest.getProvider().getId() != null) {
 
-        if (podcastRequest.getProvider() != null && podcastRequest.getProvider().getId() != null) {
-        ContentProvider provider = providerRepository.findById(podcastRequest.getProvider().getId())
-                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-        existing.setProvider(provider);
+        ContentProvider existingProvider = providerRepository.findById(
+        podcastRequest.getProvider().getId()
+        ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+
+        existing.setProvider(existingProvider);
+        } else {
+        existing.setProvider(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -155,21 +237,41 @@ public class PodcastService extends BaseService<Podcast> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
-
         existing.getEpisodes().clear();
-        if (podcastRequest.getEpisodes() != null) {
-            for (var item : podcastRequest.getEpisodes()) {
-            item.setPodcast(existing);
-            existing.getEpisodes().add(item);
-            }
-        }
 
+        if (podcastRequest.getEpisodes() != null) {
+        List<PodcastEpisode> managedEpisodes = new ArrayList<>();
+
+        for (var item : podcastRequest.getEpisodes()) {
+        if (item.getId() != null) {
+        PodcastEpisode existingItem = episodesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastEpisode not found"));
+        existingItem.setPodcast(existing);
+        managedEpisodes.add(existingItem);
+        } else {
+        item.setPodcast(existing);
+        managedEpisodes.add(item);
+        }
+        }
+        existing.setEpisodes(managedEpisodes);
+        }
         existing.getGuests().clear();
+
         if (podcastRequest.getGuests() != null) {
-            for (var item : podcastRequest.getGuests()) {
-            item.setPodcast(existing);
-            existing.getGuests().add(item);
-            }
+        List<PodcastGuest> managedGuests = new ArrayList<>();
+
+        for (var item : podcastRequest.getGuests()) {
+        if (item.getId() != null) {
+        PodcastGuest existingItem = guestsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastGuest not found"));
+        existingItem.setPodcast(existing);
+        managedGuests.add(existingItem);
+        } else {
+        item.setPodcast(existing);
+        managedGuests.add(item);
+        }
+        }
+        existing.setGuests(managedGuests);
         }
 
     
@@ -193,4 +295,6 @@ public class PodcastService extends BaseService<Podcast> {
 
         return podcastRepository.save(existing);
     }
+
+
 }

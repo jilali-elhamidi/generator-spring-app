@@ -51,22 +51,27 @@ public class ContractController {
         return ResponseEntity.created(location).body(contractMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ContractDto> updateContract(
-            @PathVariable Long id,
-            @Valid @RequestBody ContractDto contractDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ContractDto> updateContract(
+                @PathVariable Long id,
+                @Valid @RequestBody ContractDto contractDto) {
 
-        try {
-            Contract updatedEntity = contractService.update(
-                    id,
-                    contractMapper.toEntity(contractDto)
-            );
-            return ResponseEntity.ok(contractMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                Contract existing = contractService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contract not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                contractMapper.updateEntityFromDto(contractDto, existing);
+
+                // Sauvegarde
+                Contract updatedEntity = contractService.save(existing);
+
+                return ResponseEntity.ok(contractMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
         contractService.deleteById(id);

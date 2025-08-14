@@ -51,22 +51,27 @@ public class MusicTrackController {
         return ResponseEntity.created(location).body(musictrackMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<MusicTrackDto> updateMusicTrack(
-            @PathVariable Long id,
-            @Valid @RequestBody MusicTrackDto musictrackDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<MusicTrackDto> updateMusicTrack(
+                @PathVariable Long id,
+                @Valid @RequestBody MusicTrackDto musictrackDto) {
 
-        try {
-            MusicTrack updatedEntity = musictrackService.update(
-                    id,
-                    musictrackMapper.toEntity(musictrackDto)
-            );
-            return ResponseEntity.ok(musictrackMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                MusicTrack existing = musictrackService.findById(id)
+                .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                musictrackMapper.updateEntityFromDto(musictrackDto, existing);
+
+                // Sauvegarde
+                MusicTrack updatedEntity = musictrackService.save(existing);
+
+                return ResponseEntity.ok(musictrackMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMusicTrack(@PathVariable Long id) {
         musictrackService.deleteById(id);

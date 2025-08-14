@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.DigitalAssetType;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.License;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "digitalasset_tbl")
@@ -32,15 +34,20 @@ public class DigitalAsset extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "type_id")
-    @JsonIgnoreProperties("assets")
-    private DigitalAssetType assetType;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "artist_id")
-    @JsonIgnoreProperties("managedAssets")
-    private Artist artist;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "assetType_id")
+        
+        private DigitalAssetType assetType;
+    
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "artist_id")
+        
+        private Artist artist;
+    
+    
     
     @OneToOne(mappedBy = "asset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnoreProperties("asset")

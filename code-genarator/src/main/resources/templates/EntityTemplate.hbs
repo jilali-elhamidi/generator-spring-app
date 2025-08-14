@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 {{#each relationships}}import com.example.modules.{{../module}}.model.{{type}};{{/each}}
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "{{entityNameLowercase}}_tbl")
@@ -43,16 +45,16 @@ public class {{entityName}} extends BaseEntity {
 
 // === Relations ===
 {{#each relationships}}
-    {{#if (eq relationType "ManyToOne")~}}
-        @ManyToOne(fetch = FetchType.{{fetch}}, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "{{joinColumn}}")
-    @JsonIgnoreProperties("{{inverseField}}")
-    private {{type}} {{name}};
-    {{/if~}}
+    {{#if (eq relationType "ManyToOne")}}
+        @ManyToOne(fetch = FetchType.EAGER{{#if cascade}}, cascade = {CascadeType.MERGE}{{/if}})
+        @JoinColumn(name = "{{name}}_id")
+        {{#if jsonIgnore}}@JsonBackReference{{/if}}
+        private {{type}} {{name}};
+    {{/if}}
     {{#if (eq relationType "OneToMany")~}}
-        @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.{{fetch}})
-    @JsonIgnoreProperties("{{mappedBy}}")
-    private List<{{type}}> {{name}};
+        @OneToMany(mappedBy = "{{mappedBy}}", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.{{fetch}})
+        @JsonManagedReference
+        private List<{{type}}> {{name}};
     {{/if~}}
     {{#if (eq relationType "OneToOne")~}}
         {{#if owner~}}

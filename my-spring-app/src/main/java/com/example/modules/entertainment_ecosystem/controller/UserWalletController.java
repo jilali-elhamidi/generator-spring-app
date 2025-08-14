@@ -51,22 +51,27 @@ public class UserWalletController {
         return ResponseEntity.created(location).body(userwalletMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserWalletDto> updateUserWallet(
-            @PathVariable Long id,
-            @Valid @RequestBody UserWalletDto userwalletDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<UserWalletDto> updateUserWallet(
+                @PathVariable Long id,
+                @Valid @RequestBody UserWalletDto userwalletDto) {
 
-        try {
-            UserWallet updatedEntity = userwalletService.update(
-                    id,
-                    userwalletMapper.toEntity(userwalletDto)
-            );
-            return ResponseEntity.ok(userwalletMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                try {
+                // Récupérer l'entité existante avec Optional
+                UserWallet existing = userwalletService.findById(id)
+                .orElseThrow(() -> new RuntimeException("UserWallet not found"));
 
+                // Appliquer les champs simples du DTO à l'entité existante
+                userwalletMapper.updateEntityFromDto(userwalletDto, existing);
+
+                // Sauvegarde
+                UserWallet updatedEntity = userwalletService.save(existing);
+
+                return ResponseEntity.ok(userwalletMapper.toDto(updatedEntity));
+                } catch (RuntimeException e) {
+                return ResponseEntity.notFound().build();
+                }
+                }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserWallet(@PathVariable Long id) {
         userwalletService.deleteById(id);

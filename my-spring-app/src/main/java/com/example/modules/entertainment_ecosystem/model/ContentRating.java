@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.ContentRatingBoard;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "contentrating_tbl")
@@ -32,22 +34,27 @@ public class ContentRating extends BaseEntity {
 
 // === Relations ===
 
-    @OneToMany(mappedBy = "contentRating", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("contentRating")
-    private List<Movie> ratedMovies;
     
-    @OneToMany(mappedBy = "contentRating", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("contentRating")
-    private List<TVShow> ratedTvShows;
+    @OneToMany(mappedBy = "contentRating", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<Movie> ratedMovies;
     
-    @OneToMany(mappedBy = "contentRating", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("contentRating")
-    private List<VideoGame> ratedVideoGames;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "board_id")
-    @JsonIgnoreProperties("ratings")
-    private ContentRatingBoard board;
+    @OneToMany(mappedBy = "contentRating", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<TVShow> ratedTvShows;
+    
+    
+    @OneToMany(mappedBy = "contentRating", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<VideoGame> ratedVideoGames;
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "board_id")
+        
+        private ContentRatingBoard board;
+    
     
 
 }

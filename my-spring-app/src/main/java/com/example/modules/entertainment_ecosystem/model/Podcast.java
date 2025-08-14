@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Publisher;import com.example.modules.entertainment_ecosystem.model.PodcastCategory;import com.example.modules.entertainment_ecosystem.model.PodcastGuest;import com.example.modules.entertainment_ecosystem.model.ContentProvider;import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "podcast_tbl")
@@ -35,27 +37,35 @@ public class Podcast extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "host_id")
-    @JsonIgnoreProperties("hostedPodcasts")
-    private Artist host;
     
-    @OneToMany(mappedBy = "podcast", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("podcast")
-    private List<PodcastEpisode> episodes;
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "host_id")
+        
+        private Artist host;
+    
+    
+    
+    @OneToMany(mappedBy = "podcast", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<PodcastEpisode> episodes;
+    
     
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<Genre> genres;
         
+    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<UserProfile> listeners;
         
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "publisher_id")
-    @JsonIgnoreProperties("podcasts")
-    private Publisher publisher;
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "publisher_id")
+        
+        private Publisher publisher;
+    
+    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "podcast_categories",
@@ -64,14 +74,18 @@ public class Podcast extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<PodcastCategory> categories;
             
-    @OneToMany(mappedBy = "podcast", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("podcast")
-    private List<PodcastGuest> guests;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "provider_id")
-    @JsonIgnoreProperties("providedPodcasts")
-    private ContentProvider provider;
+    @OneToMany(mappedBy = "podcast", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+        @JsonManagedReference
+        private List<PodcastGuest> guests;
+    
+    
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "provider_id")
+        
+        private ContentProvider provider;
+    
+    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "podcast_languages",
