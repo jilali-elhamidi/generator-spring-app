@@ -67,9 +67,16 @@ public class ForumPostController {
 
                 return ResponseEntity.ok(updatedDto);
                 }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteForumPost(@PathVariable Long id) {
-        forumpostService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteForumPost(@PathVariable Long id) {
+                    boolean deleted = forumpostService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

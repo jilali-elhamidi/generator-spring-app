@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -39,6 +40,9 @@ public class AchievementService extends BaseService<Achievement> {
         achievement.setUser(existingUser);
         }
     
+
+    
+
 
         return achievementRepository.save(achievement);
     }
@@ -75,6 +79,38 @@ public class AchievementService extends BaseService<Achievement> {
 
         return achievementRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Achievement> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Achievement entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

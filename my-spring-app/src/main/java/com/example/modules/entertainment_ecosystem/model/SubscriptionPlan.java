@@ -38,7 +38,7 @@ public class SubscriptionPlan extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "plan", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "plan", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Subscription> subscriptions;
     
@@ -50,7 +50,7 @@ public class SubscriptionPlan extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "subscriptionPlan", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "subscriptionPlan", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<StreamingContentLicense> includedStreamingContentLicenses;
     

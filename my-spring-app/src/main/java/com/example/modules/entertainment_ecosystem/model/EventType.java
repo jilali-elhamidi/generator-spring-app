@@ -32,7 +32,7 @@ public class EventType extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "eventType", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "eventType", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<LiveEvent> events;
     

@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.Payment;
 import com.example.modules.entertainment_ecosystem.repository.PaymentRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -70,6 +71,11 @@ public class BookingService extends BaseService<Booking> {
         
         booking.getPayment().setBooking(booking);
         }
+
+    
+
+    
+
 
         return bookingRepository.save(booking);
     }
@@ -134,6 +140,58 @@ public class BookingService extends BaseService<Booking> {
 
         return bookingRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Booking> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Booking entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getTickets() != null) {
+        for (var child : entity.getTickets()) {
+        
+            child.setBooking(null); // retirer la référence inverse
+        
+        }
+        entity.getTickets().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+        if (entity.getPayment() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getPayment().setBooking(null);
+        // Dissocier côté direct
+        entity.setPayment(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.ForumCategory;
 import com.example.modules.entertainment_ecosystem.repository.ForumCategoryRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -80,6 +81,13 @@ public class ForumThreadService extends BaseService<ForumThread> {
         forumthread.setCategory(existingCategory);
         }
     
+
+    
+
+    
+
+    
+
 
         return forumthreadRepository.save(forumthread);
     }
@@ -151,6 +159,67 @@ public class ForumThreadService extends BaseService<ForumThread> {
 
         return forumthreadRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ForumThread> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ForumThread entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getForumPosts() != null) {
+        for (var child : entity.getForumPosts()) {
+        
+            child.setThread(null); // retirer la référence inverse
+        
+        }
+        entity.getForumPosts().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getAuthor() != null) {
+        entity.setAuthor(null);
+        }
+    
+
+    
+
+    
+        if (entity.getCategory() != null) {
+        entity.setCategory(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

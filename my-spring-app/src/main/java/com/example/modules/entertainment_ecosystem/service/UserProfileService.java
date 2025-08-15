@@ -85,6 +85,7 @@ import com.example.modules.entertainment_ecosystem.model.UserMessage;
 import com.example.modules.entertainment_ecosystem.repository.UserMessageRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -877,6 +878,241 @@ public class UserProfileService extends BaseService<UserProfile> {
         userprofile.getWallet().setUser(userprofile);
         }
 
+    
+
+    
+        if (userprofile.getWatchlistMovies() != null) {
+        List<Movie> managedWatchlistMovies = new ArrayList<>();
+        for (Movie item : userprofile.getWatchlistMovies()) {
+        if (item.getId() != null) {
+        Movie existingItem = watchlistMoviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        managedWatchlistMovies.add(existingItem);
+        } else {
+        managedWatchlistMovies.add(item);
+        }
+        }
+        userprofile.setWatchlistMovies(managedWatchlistMovies);
+        }
+    
+
+    
+        if (userprofile.getFavoriteArtists() != null) {
+        List<Artist> managedFavoriteArtists = new ArrayList<>();
+        for (Artist item : userprofile.getFavoriteArtists()) {
+        if (item.getId() != null) {
+        Artist existingItem = favoriteArtistsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found"));
+        managedFavoriteArtists.add(existingItem);
+        } else {
+        managedFavoriteArtists.add(item);
+        }
+        }
+        userprofile.setFavoriteArtists(managedFavoriteArtists);
+        }
+    
+
+    
+        if (userprofile.getFollowedUsers() != null) {
+        List<UserProfile> managedFollowedUsers = new ArrayList<>();
+        for (UserProfile item : userprofile.getFollowedUsers()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = followedUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedFollowedUsers.add(existingItem);
+        } else {
+        managedFollowedUsers.add(item);
+        }
+        }
+        userprofile.setFollowedUsers(managedFollowedUsers);
+        }
+    
+
+    
+        if (userprofile.getFollowingUsers() != null) {
+        List<UserProfile> managedFollowingUsers = new ArrayList<>();
+        for (UserProfile item : userprofile.getFollowingUsers()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = followingUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedFollowingUsers.add(existingItem);
+        } else {
+        managedFollowingUsers.add(item);
+        }
+        }
+        userprofile.setFollowingUsers(managedFollowingUsers);
+        }
+    
+
+    
+        if (userprofile.getFavoriteGenres() != null) {
+        List<Genre> managedFavoriteGenres = new ArrayList<>();
+        for (Genre item : userprofile.getFavoriteGenres()) {
+        if (item.getId() != null) {
+        Genre existingItem = favoriteGenresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found"));
+        managedFavoriteGenres.add(existingItem);
+        } else {
+        managedFavoriteGenres.add(item);
+        }
+        }
+        userprofile.setFavoriteGenres(managedFavoriteGenres);
+        }
+    
+
+    
+
+    
+        if (userprofile.getWatchedEpisodes() != null) {
+        List<Episode> managedWatchedEpisodes = new ArrayList<>();
+        for (Episode item : userprofile.getWatchedEpisodes()) {
+        if (item.getId() != null) {
+        Episode existingItem = watchedEpisodesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Episode not found"));
+        managedWatchedEpisodes.add(existingItem);
+        } else {
+        managedWatchedEpisodes.add(item);
+        }
+        }
+        userprofile.setWatchedEpisodes(managedWatchedEpisodes);
+        }
+    
+
+    
+        if (userprofile.getPlayedGames() != null) {
+        List<VideoGame> managedPlayedGames = new ArrayList<>();
+        for (VideoGame item : userprofile.getPlayedGames()) {
+        if (item.getId() != null) {
+        VideoGame existingItem = playedGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        managedPlayedGames.add(existingItem);
+        } else {
+        managedPlayedGames.add(item);
+        }
+        }
+        userprofile.setPlayedGames(managedPlayedGames);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (userprofile.getAttendedOnlineEvents() != null) {
+        List<OnlineEvent> managedAttendedOnlineEvents = new ArrayList<>();
+        for (OnlineEvent item : userprofile.getAttendedOnlineEvents()) {
+        if (item.getId() != null) {
+        OnlineEvent existingItem = attendedOnlineEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
+        managedAttendedOnlineEvents.add(existingItem);
+        } else {
+        managedAttendedOnlineEvents.add(item);
+        }
+        }
+        userprofile.setAttendedOnlineEvents(managedAttendedOnlineEvents);
+        }
+    
+
+    
+        if (userprofile.getOwnedMerchandise() != null) {
+        List<Merchandise> managedOwnedMerchandise = new ArrayList<>();
+        for (Merchandise item : userprofile.getOwnedMerchandise()) {
+        if (item.getId() != null) {
+        Merchandise existingItem = ownedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found"));
+        managedOwnedMerchandise.add(existingItem);
+        } else {
+        managedOwnedMerchandise.add(item);
+        }
+        }
+        userprofile.setOwnedMerchandise(managedOwnedMerchandise);
+        }
+    
+
+    
+        if (userprofile.getLibraryPodcasts() != null) {
+        List<Podcast> managedLibraryPodcasts = new ArrayList<>();
+        for (Podcast item : userprofile.getLibraryPodcasts()) {
+        if (item.getId() != null) {
+        Podcast existingItem = libraryPodcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found"));
+        managedLibraryPodcasts.add(existingItem);
+        } else {
+        managedLibraryPodcasts.add(item);
+        }
+        }
+        userprofile.setLibraryPodcasts(managedLibraryPodcasts);
+        }
+    
+
+    
+        if (userprofile.getListenedMusic() != null) {
+        List<MusicTrack> managedListenedMusic = new ArrayList<>();
+        for (MusicTrack item : userprofile.getListenedMusic()) {
+        if (item.getId() != null) {
+        MusicTrack existingItem = listenedMusicRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+        managedListenedMusic.add(existingItem);
+        } else {
+        managedListenedMusic.add(item);
+        }
+        }
+        userprofile.setListenedMusic(managedListenedMusic);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
         return userprofileRepository.save(userprofile);
     }
 
@@ -1662,6 +1898,649 @@ public class UserProfileService extends BaseService<UserProfile> {
 
         return userprofileRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<UserProfile> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+UserProfile entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getReviews() != null) {
+        for (var child : entity.getReviews()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getReviews().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getSubscriptions() != null) {
+        for (var child : entity.getSubscriptions()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getSubscriptions().clear();
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getForumThreads() != null) {
+        for (var child : entity.getForumThreads()) {
+        
+            child.setAuthor(null); // retirer la référence inverse
+        
+        }
+        entity.getForumThreads().clear();
+        }
+    
+
+    
+        if (entity.getForumPosts() != null) {
+        for (var child : entity.getForumPosts()) {
+        
+            child.setAuthor(null); // retirer la référence inverse
+        
+        }
+        entity.getForumPosts().clear();
+        }
+    
+
+    
+        if (entity.getAchievements() != null) {
+        for (var child : entity.getAchievements()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getAchievements().clear();
+        }
+    
+
+    
+        if (entity.getHostedOnlineEvents() != null) {
+        for (var child : entity.getHostedOnlineEvents()) {
+        
+            child.setHost(null); // retirer la référence inverse
+        
+        }
+        entity.getHostedOnlineEvents().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getPlaylists() != null) {
+        for (var child : entity.getPlaylists()) {
+        
+            child.setOwner(null); // retirer la référence inverse
+        
+        }
+        entity.getPlaylists().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getDigitalPurchases() != null) {
+        for (var child : entity.getDigitalPurchases()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getDigitalPurchases().clear();
+        }
+    
+
+    
+        if (entity.getGameSessions() != null) {
+        for (var child : entity.getGameSessions()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getGameSessions().clear();
+        }
+    
+
+    
+        if (entity.getGameReviewComments() != null) {
+        for (var child : entity.getGameReviewComments()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getGameReviewComments().clear();
+        }
+    
+
+    
+        if (entity.getUserPlaylists() != null) {
+        for (var child : entity.getUserPlaylists()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getUserPlaylists().clear();
+        }
+    
+
+    
+        if (entity.getUserPlaylistItems() != null) {
+        for (var child : entity.getUserPlaylistItems()) {
+        
+            child.setAddedBy(null); // retirer la référence inverse
+        
+        }
+        entity.getUserPlaylistItems().clear();
+        }
+    
+
+    
+        if (entity.getGivenRatings() != null) {
+        for (var child : entity.getGivenRatings()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getGivenRatings().clear();
+        }
+    
+
+    
+        if (entity.getLikedReviews() != null) {
+        for (var child : entity.getLikedReviews()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getLikedReviews().clear();
+        }
+    
+
+    
+        if (entity.getActivityLogs() != null) {
+        for (var child : entity.getActivityLogs()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getActivityLogs().clear();
+        }
+    
+
+    
+        if (entity.getSettings() != null) {
+        for (var child : entity.getSettings()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getSettings().clear();
+        }
+    
+
+    
+        if (entity.getFollowers() != null) {
+        for (var child : entity.getFollowers()) {
+        
+            child.setFollowed(null); // retirer la référence inverse
+        
+        }
+        entity.getFollowers().clear();
+        }
+    
+
+    
+        if (entity.getFollowing() != null) {
+        for (var child : entity.getFollowing()) {
+        
+            child.setFollower(null); // retirer la référence inverse
+        
+        }
+        entity.getFollowing().clear();
+        }
+    
+
+    
+        if (entity.getUserAchievements() != null) {
+        for (var child : entity.getUserAchievements()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getUserAchievements().clear();
+        }
+    
+
+    
+        if (entity.getNotifications() != null) {
+        for (var child : entity.getNotifications()) {
+        
+            child.setRecipient(null); // retirer la référence inverse
+        
+        }
+        entity.getNotifications().clear();
+        }
+    
+
+    
+        if (entity.getMerchandiseReviews() != null) {
+        for (var child : entity.getMerchandiseReviews()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getMerchandiseReviews().clear();
+        }
+    
+
+    
+        if (entity.getPreferences() != null) {
+        for (var child : entity.getPreferences()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getPreferences().clear();
+        }
+    
+
+    
+        if (entity.getMerchandiseSales() != null) {
+        for (var child : entity.getMerchandiseSales()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getMerchandiseSales().clear();
+        }
+    
+
+    
+        if (entity.getGamePlaySessions() != null) {
+        for (var child : entity.getGamePlaySessions()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getGamePlaySessions().clear();
+        }
+    
+
+    
+        if (entity.getGameReviewUpvotes() != null) {
+        for (var child : entity.getGameReviewUpvotes()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getGameReviewUpvotes().clear();
+        }
+    
+
+    
+        if (entity.getGameReviewDownvotes() != null) {
+        for (var child : entity.getGameReviewDownvotes()) {
+        
+            child.setUser(null); // retirer la référence inverse
+        
+        }
+        entity.getGameReviewDownvotes().clear();
+        }
+    
+
+    
+        if (entity.getSentMessages() != null) {
+        for (var child : entity.getSentMessages()) {
+        
+            child.setSender(null); // retirer la référence inverse
+        
+        }
+        entity.getSentMessages().clear();
+        }
+    
+
+    
+        if (entity.getReceivedMessages() != null) {
+        for (var child : entity.getReceivedMessages()) {
+        
+            child.setReceiver(null); // retirer la référence inverse
+        
+        }
+        entity.getReceivedMessages().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+        if (entity.getWatchlistMovies() != null) {
+        entity.getWatchlistMovies().clear();
+        }
+    
+
+    
+        if (entity.getFavoriteArtists() != null) {
+        entity.getFavoriteArtists().clear();
+        }
+    
+
+    
+        if (entity.getFollowedUsers() != null) {
+        entity.getFollowedUsers().clear();
+        }
+    
+
+    
+        if (entity.getFollowingUsers() != null) {
+        entity.getFollowingUsers().clear();
+        }
+    
+
+    
+        if (entity.getFavoriteGenres() != null) {
+        entity.getFavoriteGenres().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getWatchedEpisodes() != null) {
+        entity.getWatchedEpisodes().clear();
+        }
+    
+
+    
+        if (entity.getPlayedGames() != null) {
+        entity.getPlayedGames().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getAttendedOnlineEvents() != null) {
+        entity.getAttendedOnlineEvents().clear();
+        }
+    
+
+    
+        if (entity.getOwnedMerchandise() != null) {
+        entity.getOwnedMerchandise().clear();
+        }
+    
+
+    
+        if (entity.getLibraryPodcasts() != null) {
+        entity.getLibraryPodcasts().clear();
+        }
+    
+
+    
+        if (entity.getListenedMusic() != null) {
+        entity.getListenedMusic().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getWallet() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getWallet().setUser(null);
+        // Dissocier côté direct
+        entity.setWallet(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

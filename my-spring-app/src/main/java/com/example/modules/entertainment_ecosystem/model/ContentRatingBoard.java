@@ -35,7 +35,7 @@ public class ContentRatingBoard extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "board", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ContentRating> ratings;
     

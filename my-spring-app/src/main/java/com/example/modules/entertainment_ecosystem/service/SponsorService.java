@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.AdCampaign;
 import com.example.modules.entertainment_ecosystem.repository.AdCampaignRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -107,6 +108,13 @@ public class SponsorService extends BaseService<Sponsor> {
     
     
 
+    
+
+    
+
+    
+
+
         return sponsorRepository.save(sponsor);
     }
 
@@ -195,6 +203,77 @@ public class SponsorService extends BaseService<Sponsor> {
 
         return sponsorRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Sponsor> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Sponsor entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getSponsoredEvents() != null) {
+        for (var child : entity.getSponsoredEvents()) {
+        
+            child.setSponsor(null); // retirer la référence inverse
+        
+        }
+        entity.getSponsoredEvents().clear();
+        }
+    
+
+    
+        if (entity.getSponsorships() != null) {
+        for (var child : entity.getSponsorships()) {
+        
+            child.setSponsor(null); // retirer la référence inverse
+        
+        }
+        entity.getSponsorships().clear();
+        }
+    
+
+    
+        if (entity.getAdCampaigns() != null) {
+        for (var child : entity.getAdCampaigns()) {
+        
+            child.setAdvertiser(null); // retirer la référence inverse
+        
+        }
+        entity.getAdCampaigns().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

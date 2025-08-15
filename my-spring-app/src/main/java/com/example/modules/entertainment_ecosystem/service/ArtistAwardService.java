@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -39,6 +40,9 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
         artistaward.setArtist(existingArtist);
         }
     
+
+    
+
 
         return artistawardRepository.save(artistaward);
     }
@@ -74,6 +78,38 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
 
         return artistawardRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ArtistAward> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ArtistAward entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getArtist() != null) {
+        entity.setArtist(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

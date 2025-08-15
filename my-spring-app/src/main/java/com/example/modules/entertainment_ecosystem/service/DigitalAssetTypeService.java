@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.DigitalAsset;
 import com.example.modules.entertainment_ecosystem.repository.DigitalAssetRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
 
     
 
+    
+
+
         return digitalassettypeRepository.save(digitalassettype);
     }
 
@@ -95,6 +99,43 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
 
         return digitalassettypeRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<DigitalAssetType> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+DigitalAssetType entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getAssets() != null) {
+        for (var child : entity.getAssets()) {
+        
+            child.setAssetType(null); // retirer la référence inverse
+        
+        }
+        entity.getAssets().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

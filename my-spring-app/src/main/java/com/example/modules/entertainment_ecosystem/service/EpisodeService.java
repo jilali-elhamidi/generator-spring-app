@@ -13,6 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 import com.example.modules.entertainment_ecosystem.repository.EpisodeCreditRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -91,6 +92,29 @@ public class EpisodeService extends BaseService<Episode> {
         
         episode.getRelatedPodcastEpisode().setRelatedEpisode(episode);
         }
+
+    
+
+    
+        if (episode.getWatchedByUsers() != null) {
+        List<UserProfile> managedWatchedByUsers = new ArrayList<>();
+        for (UserProfile item : episode.getWatchedByUsers()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = watchedByUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedWatchedByUsers.add(existingItem);
+        } else {
+        managedWatchedByUsers.add(item);
+        }
+        }
+        episode.setWatchedByUsers(managedWatchedByUsers);
+        }
+    
+
+    
+
+    
+
 
         return episodeRepository.save(episode);
     }
@@ -181,6 +205,82 @@ public class EpisodeService extends BaseService<Episode> {
 
         return episodeRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Episode> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Episode entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+
+    
+        if (entity.getCredits() != null) {
+        for (var child : entity.getCredits()) {
+        
+            child.setEpisode(null); // retirer la référence inverse
+        
+        }
+        entity.getCredits().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+        if (entity.getWatchedByUsers() != null) {
+        entity.getWatchedByUsers().clear();
+        }
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+        if (entity.getRelatedPodcastEpisode() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getRelatedPodcastEpisode().setRelatedEpisode(null);
+        // Dissocier côté direct
+        entity.setRelatedPodcastEpisode(null);
+        }
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getSeason() != null) {
+        entity.setSeason(null);
+        }
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

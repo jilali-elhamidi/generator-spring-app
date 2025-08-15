@@ -13,6 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.ForumPost;
 import com.example.modules.entertainment_ecosystem.repository.ForumPostRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -94,6 +95,15 @@ public class ForumPostService extends BaseService<ForumPost> {
         forumpost.setParentPost(existingParentPost);
         }
     
+
+    
+
+    
+
+    
+
+    
+
 
         return forumpostRepository.save(forumpost);
     }
@@ -177,6 +187,79 @@ public class ForumPostService extends BaseService<ForumPost> {
 
         return forumpostRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ForumPost> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ForumPost entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+        if (entity.getReplies() != null) {
+        for (var child : entity.getReplies()) {
+        
+            child.setParentPost(null); // retirer la référence inverse
+        
+        }
+        entity.getReplies().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getAuthor() != null) {
+        entity.setAuthor(null);
+        }
+    
+
+    
+        if (entity.getThread() != null) {
+        entity.setThread(null);
+        }
+    
+
+    
+
+    
+        if (entity.getParentPost() != null) {
+        entity.setParentPost(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

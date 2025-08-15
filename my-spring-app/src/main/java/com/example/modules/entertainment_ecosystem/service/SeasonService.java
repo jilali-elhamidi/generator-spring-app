@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.Episode;
 import com.example.modules.entertainment_ecosystem.repository.EpisodeRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -67,6 +68,11 @@ public class SeasonService extends BaseService<Season> {
     
     
 
+    
+
+    
+
+
         return seasonRepository.save(season);
     }
 
@@ -122,6 +128,55 @@ public class SeasonService extends BaseService<Season> {
 
         return seasonRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Season> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Season entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getEpisodes() != null) {
+        for (var child : entity.getEpisodes()) {
+        
+            child.setSeason(null); // retirer la référence inverse
+        
+        }
+        entity.getEpisodes().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getShow() != null) {
+        entity.setShow(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

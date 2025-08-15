@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.MerchandiseOrder;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseOrderRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -57,6 +58,11 @@ public class MerchandiseShippingService extends BaseService<MerchandiseShipping>
         
         merchandiseshipping.getOrder().setShippingDetails(merchandiseshipping);
         }
+
+    
+
+    
+
 
         return merchandiseshippingRepository.save(merchandiseshipping);
     }
@@ -113,6 +119,53 @@ public class MerchandiseShippingService extends BaseService<MerchandiseShipping>
 
         return merchandiseshippingRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MerchandiseShipping> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MerchandiseShipping entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+        if (entity.getOrder() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getOrder().setShippingDetails(null);
+        // Dissocier côté direct
+        entity.setOrder(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getMerchandiseItem() != null) {
+        entity.setMerchandiseItem(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

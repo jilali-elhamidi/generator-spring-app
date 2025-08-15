@@ -35,7 +35,7 @@ public class Booking extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "booking", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Ticket> tickets;
     

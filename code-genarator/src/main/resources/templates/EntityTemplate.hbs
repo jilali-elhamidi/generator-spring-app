@@ -46,13 +46,13 @@ public class {{entityName}} extends BaseEntity {
 // === Relations ===
 {{#each relationships}}
     {{#if (eq relationType "ManyToOne")}}
-        @ManyToOne(fetch = FetchType.EAGER{{#if cascade}}, cascade = {CascadeType.MERGE}{{/if}})
+        @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "{{name}}_id")
         {{#if jsonIgnore}}@JsonBackReference{{/if}}
         private {{type}} {{name}};
     {{/if}}
     {{#if (eq relationType "OneToMany")~}}
-        @OneToMany(mappedBy = "{{mappedBy}}", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.{{fetch}})
+        @OneToMany(mappedBy = "{{mappedBy}}", fetch = FetchType.{{fetch}})
         @JsonManagedReference
         private List<{{type}}> {{name}};
     {{/if~}}
@@ -63,7 +63,7 @@ public class {{entityName}} extends BaseEntity {
     @JsonIgnoreProperties("{{inverseField}}")
     private {{type}} {{name}};
             {{else~}}
-            @OneToOne(mappedBy = "{{mappedBy}}", fetch = FetchType.{{fetch}}, cascade = CascadeType.ALL)
+            @OneToOne(mappedBy = "{{mappedBy}}", fetch = FetchType.{{fetch}})
     @JsonIgnoreProperties("{{inverseField}}")
     private {{type}} {{name}};
         {{/if~}}

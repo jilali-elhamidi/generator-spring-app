@@ -35,7 +35,7 @@ public class Warehouse extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "warehouse", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MerchandiseInventory> inventoryItems;
     

@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.ContentRating;
 import com.example.modules.entertainment_ecosystem.repository.ContentRatingRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
 
     
 
+    
+
+
         return contentratingboardRepository.save(contentratingboard);
     }
 
@@ -96,6 +100,43 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
 
         return contentratingboardRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ContentRatingBoard> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ContentRatingBoard entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getRatings() != null) {
+        for (var child : entity.getRatings()) {
+        
+            child.setBoard(null); // retirer la référence inverse
+        
+        }
+        entity.getRatings().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

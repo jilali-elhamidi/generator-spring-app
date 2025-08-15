@@ -32,12 +32,12 @@ public class UserWallet extends BaseEntity {
 // === Relations ===
 
     
-    @OneToOne(mappedBy = "wallet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "wallet", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("wallet")
     private UserProfile user;
         
     
-    @OneToMany(mappedBy = "wallet", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "wallet", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Transaction> transactions;
     

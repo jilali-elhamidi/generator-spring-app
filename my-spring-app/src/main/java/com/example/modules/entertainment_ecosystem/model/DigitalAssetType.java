@@ -32,7 +32,7 @@ public class DigitalAssetType extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "assetType", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "assetType", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<DigitalAsset> assets;
     

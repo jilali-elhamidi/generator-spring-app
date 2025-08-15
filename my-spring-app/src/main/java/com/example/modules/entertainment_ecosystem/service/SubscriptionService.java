@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.SubscriptionPlan;
 import com.example.modules.entertainment_ecosystem.repository.SubscriptionPlanRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -67,6 +68,13 @@ public class SubscriptionService extends BaseService<Subscription> {
         subscription.setPlan(existingPlan);
         }
     
+
+    
+
+    
+
+    
+
 
         return subscriptionRepository.save(subscription);
     }
@@ -129,6 +137,62 @@ public class SubscriptionService extends BaseService<Subscription> {
 
         return subscriptionRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Subscription> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Subscription entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getPlatform() != null) {
+        entity.setPlatform(null);
+        }
+    
+
+    
+        if (entity.getPlan() != null) {
+        entity.setPlan(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

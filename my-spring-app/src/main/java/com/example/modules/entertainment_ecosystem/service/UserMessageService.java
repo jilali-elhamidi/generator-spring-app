@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.MessageThread;
 import com.example.modules.entertainment_ecosystem.repository.MessageThreadRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -67,6 +68,13 @@ public class UserMessageService extends BaseService<UserMessage> {
         usermessage.setThread(existingThread);
         }
     
+
+    
+
+    
+
+    
+
 
         return usermessageRepository.save(usermessage);
     }
@@ -130,6 +138,62 @@ public class UserMessageService extends BaseService<UserMessage> {
 
         return usermessageRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<UserMessage> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+UserMessage entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getSender() != null) {
+        entity.setSender(null);
+        }
+    
+
+    
+        if (entity.getReceiver() != null) {
+        entity.setReceiver(null);
+        }
+    
+
+    
+        if (entity.getThread() != null) {
+        entity.setThread(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

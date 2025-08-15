@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Employee;
 import com.example.modules.entertainment_ecosystem.repository.EmployeeRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -39,6 +40,9 @@ public class ShiftService extends BaseService<Shift> {
         shift.setEmployee(existingEmployee);
         }
     
+
+    
+
 
         return shiftRepository.save(shift);
     }
@@ -75,6 +79,38 @@ public class ShiftService extends BaseService<Shift> {
 
         return shiftRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Shift> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Shift entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getEmployee() != null) {
+        entity.setEmployee(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

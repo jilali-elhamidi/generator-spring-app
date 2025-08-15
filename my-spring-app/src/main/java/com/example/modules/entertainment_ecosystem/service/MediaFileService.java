@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Review;
 import com.example.modules.entertainment_ecosystem.repository.ReviewRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -43,6 +44,9 @@ public class MediaFileService extends BaseService<MediaFile> {
         
         mediafile.getReview().setMediaFile(mediafile);
         }
+
+    
+
 
         return mediafileRepository.save(mediafile);
     }
@@ -85,6 +89,41 @@ public class MediaFileService extends BaseService<MediaFile> {
 
         return mediafileRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MediaFile> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MediaFile entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+        if (entity.getReview() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getReview().setMediaFile(null);
+        // Dissocier côté direct
+        entity.setReview(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

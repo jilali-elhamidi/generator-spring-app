@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.GameReview;
 import com.example.modules.entertainment_ecosystem.repository.GameReviewRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,11 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
         gamereviewdownvote.setReview(existingReview);
         }
     
+
+    
+
+    
+
 
         return gamereviewdownvoteRepository.save(gamereviewdownvote);
     }
@@ -100,6 +106,50 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
 
         return gamereviewdownvoteRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<GameReviewDownvote> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+GameReviewDownvote entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getReview() != null) {
+        entity.setReview(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

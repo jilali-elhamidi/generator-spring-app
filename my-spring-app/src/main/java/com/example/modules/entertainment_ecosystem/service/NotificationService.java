@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -39,6 +40,9 @@ public class NotificationService extends BaseService<Notification> {
         notification.setRecipient(existingRecipient);
         }
     
+
+    
+
 
         return notificationRepository.save(notification);
     }
@@ -76,6 +80,38 @@ public class NotificationService extends BaseService<Notification> {
 
         return notificationRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Notification> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Notification entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getRecipient() != null) {
+        entity.setRecipient(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

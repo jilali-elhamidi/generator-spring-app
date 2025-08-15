@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
 
     
 
+    
+
+
         return developmentstudioRepository.save(developmentstudio);
     }
 
@@ -95,6 +99,43 @@ public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
 
         return developmentstudioRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<DevelopmentStudio> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+DevelopmentStudio entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getGames() != null) {
+        for (var child : entity.getGames()) {
+        
+            child.setDeveloperStudio(null); // retirer la référence inverse
+        
+        }
+        entity.getGames().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

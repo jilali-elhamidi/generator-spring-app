@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.UserAchievement;
 import com.example.modules.entertainment_ecosystem.repository.UserAchievementRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -73,6 +74,27 @@ public class GameAchievementService extends BaseService<GameAchievement> {
     
     
     
+
+    
+
+    
+        if (gameachievement.getEarnedBy() != null) {
+        List<UserProfile> managedEarnedBy = new ArrayList<>();
+        for (UserProfile item : gameachievement.getEarnedBy()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = earnedByRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedEarnedBy.add(existingItem);
+        } else {
+        managedEarnedBy.add(item);
+        }
+        }
+        gameachievement.setEarnedBy(managedEarnedBy);
+        }
+    
+
+    
+
 
         return gameachievementRepository.save(gameachievement);
     }
@@ -142,6 +164,67 @@ public class GameAchievementService extends BaseService<GameAchievement> {
 
         return gameachievementRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<GameAchievement> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+GameAchievement entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+        if (entity.getUserAchievements() != null) {
+        for (var child : entity.getUserAchievements()) {
+        
+            child.setAchievement(null); // retirer la référence inverse
+        
+        }
+        entity.getUserAchievements().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+        if (entity.getEarnedBy() != null) {
+        entity.getEarnedBy().clear();
+        }
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getGame() != null) {
+        entity.setGame(null);
+        }
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

@@ -32,7 +32,7 @@ public class TicketStatus extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "status", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "status", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Ticket> tickets;
     

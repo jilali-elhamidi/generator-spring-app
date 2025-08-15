@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -67,6 +68,13 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
         playlistitem.setAddedBy(existingAddedBy);
         }
     
+
+    
+
+    
+
+    
+
 
         return playlistitemRepository.save(playlistitem);
     }
@@ -127,6 +135,62 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
 
         return playlistitemRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<PlaylistItem> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+PlaylistItem entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getPlaylist() != null) {
+        entity.setPlaylist(null);
+        }
+    
+
+    
+        if (entity.getTrack() != null) {
+        entity.setTrack(null);
+        }
+    
+
+    
+        if (entity.getAddedBy() != null) {
+        entity.setAddedBy(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

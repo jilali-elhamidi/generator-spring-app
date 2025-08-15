@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Album;
 import com.example.modules.entertainment_ecosystem.repository.AlbumRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class MusicLabelService extends BaseService<MusicLabel> {
 
     
 
+    
+
+
         return musiclabelRepository.save(musiclabel);
     }
 
@@ -95,6 +99,43 @@ public class MusicLabelService extends BaseService<MusicLabel> {
 
         return musiclabelRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MusicLabel> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MusicLabel entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getAlbums() != null) {
+        for (var child : entity.getAlbums()) {
+        
+            child.setMusicLabel(null); // retirer la référence inverse
+        
+        }
+        entity.getAlbums().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

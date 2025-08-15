@@ -35,7 +35,7 @@ public class EventLocation extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "location", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "location", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<LiveEvent> liveEvents;
     

@@ -44,7 +44,7 @@ public class ForumThread extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "thread", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "thread", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ForumPost> forumPosts;
     

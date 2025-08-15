@@ -35,7 +35,7 @@ public class MediaFile extends BaseEntity {
 // === Relations ===
 
     
-    @OneToOne(mappedBy = "mediaFile", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "mediaFile", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("mediaFile")
     private Review review;
         

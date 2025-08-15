@@ -35,12 +35,12 @@ public class StreamingService extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "streamingService", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "streamingService", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<StreamingPlatform> platforms;
     
     
-    @OneToMany(mappedBy = "service", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "service", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<SubscriptionPlan> plans;
     

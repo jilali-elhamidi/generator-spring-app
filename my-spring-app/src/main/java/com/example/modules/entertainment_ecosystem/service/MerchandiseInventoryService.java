@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.Warehouse;
 import com.example.modules.entertainment_ecosystem.repository.WarehouseRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -57,6 +58,11 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
         
         merchandiseinventory.getMerchandiseItem().setInventory(merchandiseinventory);
         }
+
+    
+
+    
+
 
         return merchandiseinventoryRepository.save(merchandiseinventory);
     }
@@ -112,6 +118,53 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
 
         return merchandiseinventoryRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MerchandiseInventory> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MerchandiseInventory entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+        if (entity.getMerchandiseItem() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getMerchandiseItem().setInventory(null);
+        // Dissocier côté direct
+        entity.setMerchandiseItem(null);
+        }
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+        if (entity.getWarehouse() != null) {
+        entity.setWarehouse(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

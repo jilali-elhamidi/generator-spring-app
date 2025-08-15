@@ -13,6 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.GameReviewComment;
 import com.example.modules.entertainment_ecosystem.repository.GameReviewCommentRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -94,6 +95,15 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
         gamereviewcomment.setParentComment(existingParentComment);
         }
     
+
+    
+
+    
+
+    
+
+    
+
 
         return gamereviewcommentRepository.save(gamereviewcomment);
     }
@@ -177,6 +187,79 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
 
         return gamereviewcommentRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<GameReviewComment> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+GameReviewComment entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+        if (entity.getReplies() != null) {
+        for (var child : entity.getReplies()) {
+        
+            child.setParentComment(null); // retirer la référence inverse
+        
+        }
+        entity.getReplies().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getReview() != null) {
+        entity.setReview(null);
+        }
+    
+
+    
+
+    
+        if (entity.getParentComment() != null) {
+        entity.setParentComment(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

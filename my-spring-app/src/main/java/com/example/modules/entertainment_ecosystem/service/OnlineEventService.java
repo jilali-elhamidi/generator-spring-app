@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.OnlineEventType;
 import com.example.modules.entertainment_ecosystem.repository.OnlineEventTypeRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -60,6 +61,27 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
         onlineevent.setType(existingType);
         }
     
+
+    
+
+    
+        if (onlineevent.getAttendees() != null) {
+        List<UserProfile> managedAttendees = new ArrayList<>();
+        for (UserProfile item : onlineevent.getAttendees()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = attendeesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedAttendees.add(existingItem);
+        } else {
+        managedAttendees.add(item);
+        }
+        }
+        onlineevent.setAttendees(managedAttendees);
+        }
+    
+
+    
+
 
         return onlineeventRepository.save(onlineevent);
     }
@@ -121,6 +143,62 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
 
         return onlineeventRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<OnlineEvent> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+OnlineEvent entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+        if (entity.getAttendees() != null) {
+        entity.getAttendees().clear();
+        }
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getHost() != null) {
+        entity.setHost(null);
+        }
+    
+
+    
+
+    
+        if (entity.getType() != null) {
+        entity.setType(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

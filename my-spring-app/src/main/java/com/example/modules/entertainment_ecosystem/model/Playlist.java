@@ -45,7 +45,7 @@ public class Playlist extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "playlist", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "playlist", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<PlaylistItem> items;
     

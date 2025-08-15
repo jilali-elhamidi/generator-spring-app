@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Merchandise;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class MerchandiseSupplierService extends BaseService<MerchandiseSupplier>
 
     
 
+    
+
+
         return merchandisesupplierRepository.save(merchandisesupplier);
     }
 
@@ -96,6 +100,43 @@ public class MerchandiseSupplierService extends BaseService<MerchandiseSupplier>
 
         return merchandisesupplierRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MerchandiseSupplier> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MerchandiseSupplier entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getSuppliedMerchandise() != null) {
+        for (var child : entity.getSuppliedMerchandise()) {
+        
+            child.setSupplier(null); // retirer la référence inverse
+        
+        }
+        entity.getSuppliedMerchandise().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

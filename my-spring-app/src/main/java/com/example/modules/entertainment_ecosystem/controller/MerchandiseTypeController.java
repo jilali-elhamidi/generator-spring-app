@@ -67,9 +67,16 @@ public class MerchandiseTypeController {
 
                 return ResponseEntity.ok(updatedDto);
                 }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMerchandiseType(@PathVariable Long id) {
-        merchandisetypeService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteMerchandiseType(@PathVariable Long id) {
+                    boolean deleted = merchandisetypeService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

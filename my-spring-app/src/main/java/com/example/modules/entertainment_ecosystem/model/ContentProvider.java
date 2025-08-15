@@ -35,22 +35,22 @@ public class ContentProvider extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "provider", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "provider", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Movie> providedMovies;
     
     
-    @OneToMany(mappedBy = "provider", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "provider", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<TVShow> providedTvShows;
     
     
-    @OneToMany(mappedBy = "provider", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "provider", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MusicTrack> providedMusicTracks;
     
     
-    @OneToMany(mappedBy = "provider", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "provider", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Podcast> providedPodcasts;
     

@@ -13,6 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.MusicLabel;
 import com.example.modules.entertainment_ecosystem.repository.MusicLabelRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -87,6 +88,29 @@ public class AlbumService extends BaseService<Album> {
         album.setMusicLabel(existingMusicLabel);
         }
     
+
+    
+
+    
+
+    
+        if (album.getGenres() != null) {
+        List<Genre> managedGenres = new ArrayList<>();
+        for (Genre item : album.getGenres()) {
+        if (item.getId() != null) {
+        Genre existingItem = genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found"));
+        managedGenres.add(existingItem);
+        } else {
+        managedGenres.add(item);
+        }
+        }
+        album.setGenres(managedGenres);
+        }
+    
+
+    
+
 
         return albumRepository.save(album);
     }
@@ -168,6 +192,79 @@ public class AlbumService extends BaseService<Album> {
 
         return albumRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Album> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Album entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getTracks() != null) {
+        for (var child : entity.getTracks()) {
+        
+            child.setAlbum(null); // retirer la référence inverse
+        
+        }
+        entity.getTracks().clear();
+        }
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+        if (entity.getGenres() != null) {
+        entity.getGenres().clear();
+        }
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getArtist() != null) {
+        entity.setArtist(null);
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getMusicLabel() != null) {
+        entity.setMusicLabel(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

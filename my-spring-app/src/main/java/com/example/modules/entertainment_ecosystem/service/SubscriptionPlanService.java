@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense
 import com.example.modules.entertainment_ecosystem.repository.StreamingContentLicenseRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -94,6 +95,13 @@ public class SubscriptionPlanService extends BaseService<SubscriptionPlan> {
     
     
 
+    
+
+    
+
+    
+
+
         return subscriptionplanRepository.save(subscriptionplan);
     }
 
@@ -173,6 +181,72 @@ public class SubscriptionPlanService extends BaseService<SubscriptionPlan> {
 
         return subscriptionplanRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<SubscriptionPlan> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+SubscriptionPlan entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getSubscriptions() != null) {
+        for (var child : entity.getSubscriptions()) {
+        
+            child.setPlan(null); // retirer la référence inverse
+        
+        }
+        entity.getSubscriptions().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getIncludedStreamingContentLicenses() != null) {
+        for (var child : entity.getIncludedStreamingContentLicenses()) {
+        
+            child.setSubscriptionPlan(null); // retirer la référence inverse
+        
+        }
+        entity.getIncludedStreamingContentLicenses().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+        if (entity.getService() != null) {
+        entity.setService(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

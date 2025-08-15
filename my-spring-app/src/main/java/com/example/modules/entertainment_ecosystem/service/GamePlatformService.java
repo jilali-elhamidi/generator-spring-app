@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -32,6 +33,23 @@ public class GamePlatformService extends BaseService<GamePlatform> {
     
 
     
+
+    
+        if (gameplatform.getVideoGames() != null) {
+        List<VideoGame> managedVideoGames = new ArrayList<>();
+        for (VideoGame item : gameplatform.getVideoGames()) {
+        if (item.getId() != null) {
+        VideoGame existingItem = videoGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        managedVideoGames.add(existingItem);
+        } else {
+        managedVideoGames.add(item);
+        }
+        }
+        gameplatform.setVideoGames(managedVideoGames);
+        }
+    
+
 
         return gameplatformRepository.save(gameplatform);
     }
@@ -64,6 +82,38 @@ public class GamePlatformService extends BaseService<GamePlatform> {
 
         return gameplatformRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<GamePlatform> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+GamePlatform entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getVideoGames() != null) {
+        entity.getVideoGames().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

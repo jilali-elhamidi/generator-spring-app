@@ -13,6 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.Genre;
 import com.example.modules.entertainment_ecosystem.repository.GenreRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -87,6 +88,29 @@ public class BookService extends BaseService<Book> {
     
     
     
+
+    
+
+    
+
+    
+
+    
+        if (book.getGenres() != null) {
+        List<Genre> managedGenres = new ArrayList<>();
+        for (Genre item : book.getGenres()) {
+        if (item.getId() != null) {
+        Genre existingItem = genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found"));
+        managedGenres.add(existingItem);
+        } else {
+        managedGenres.add(item);
+        }
+        }
+        book.setGenres(managedGenres);
+        }
+    
+
 
         return bookRepository.save(book);
     }
@@ -170,6 +194,79 @@ public class BookService extends BaseService<Book> {
 
         return bookRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Book> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Book entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+        if (entity.getReviews() != null) {
+        for (var child : entity.getReviews()) {
+        
+            child.setBook(null); // retirer la référence inverse
+        
+        }
+        entity.getReviews().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+        if (entity.getGenres() != null) {
+        entity.getGenres().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getAuthor() != null) {
+        entity.setAuthor(null);
+        }
+    
+
+    
+        if (entity.getPublisher() != null) {
+        entity.setPublisher(null);
+        }
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

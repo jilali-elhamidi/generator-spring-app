@@ -35,7 +35,7 @@ public class Contract extends BaseEntity {
 // === Relations ===
 
     
-    @OneToOne(mappedBy = "contract", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "contract", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("contract")
     private EventSponsorship sponsorship;
         

@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Podcast;
 import com.example.modules.entertainment_ecosystem.repository.PodcastRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -32,6 +33,23 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
     
 
     
+
+    
+        if (podcastcategory.getPodcasts() != null) {
+        List<Podcast> managedPodcasts = new ArrayList<>();
+        for (Podcast item : podcastcategory.getPodcasts()) {
+        if (item.getId() != null) {
+        Podcast existingItem = podcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found"));
+        managedPodcasts.add(existingItem);
+        } else {
+        managedPodcasts.add(item);
+        }
+        }
+        podcastcategory.setPodcasts(managedPodcasts);
+        }
+    
+
 
         return podcastcategoryRepository.save(podcastcategory);
     }
@@ -64,6 +82,38 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
 
         return podcastcategoryRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<PodcastCategory> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+PodcastCategory entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getPodcasts() != null) {
+        entity.getPodcasts().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

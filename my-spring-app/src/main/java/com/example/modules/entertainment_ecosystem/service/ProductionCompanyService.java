@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.Employee;
 import com.example.modules.entertainment_ecosystem.repository.EmployeeRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -107,6 +108,13 @@ public class ProductionCompanyService extends BaseService<ProductionCompany> {
     
     
 
+    
+
+    
+
+    
+
+
         return productioncompanyRepository.save(productioncompany);
     }
 
@@ -195,6 +203,77 @@ public class ProductionCompanyService extends BaseService<ProductionCompany> {
 
         return productioncompanyRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ProductionCompany> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ProductionCompany entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getMovies() != null) {
+        for (var child : entity.getMovies()) {
+        
+            child.setProductionCompany(null); // retirer la référence inverse
+        
+        }
+        entity.getMovies().clear();
+        }
+    
+
+    
+        if (entity.getTvShows() != null) {
+        for (var child : entity.getTvShows()) {
+        
+            child.setProductionCompany(null); // retirer la référence inverse
+        
+        }
+        entity.getTvShows().clear();
+        }
+    
+
+    
+        if (entity.getStaff() != null) {
+        for (var child : entity.getStaff()) {
+        
+            child.setProductionCompany(null); // retirer la référence inverse
+        
+        }
+        entity.getStaff().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

@@ -15,6 +15,7 @@ import com.example.modules.entertainment_ecosystem.model.GameReviewDownvote;
 import com.example.modules.entertainment_ecosystem.repository.GameReviewDownvoteRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -135,6 +136,17 @@ public class GameReviewService extends BaseService<GameReview> {
     
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+
         return gamereviewRepository.save(gamereview);
     }
 
@@ -248,6 +260,101 @@ public class GameReviewService extends BaseService<GameReview> {
 
         return gamereviewRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<GameReview> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+GameReview entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+        if (entity.getComments() != null) {
+        for (var child : entity.getComments()) {
+        
+            child.setReview(null); // retirer la référence inverse
+        
+        }
+        entity.getComments().clear();
+        }
+    
+
+    
+        if (entity.getUpvotes() != null) {
+        for (var child : entity.getUpvotes()) {
+        
+            child.setReview(null); // retirer la référence inverse
+        
+        }
+        entity.getUpvotes().clear();
+        }
+    
+
+    
+        if (entity.getDownvotes() != null) {
+        for (var child : entity.getDownvotes()) {
+        
+            child.setReview(null); // retirer la référence inverse
+        
+        }
+        entity.getDownvotes().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getGame() != null) {
+        entity.setGame(null);
+        }
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

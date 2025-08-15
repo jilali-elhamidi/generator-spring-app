@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -32,6 +33,23 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
     
 
     
+
+    
+        if (featureflag.getEnabledForUsers() != null) {
+        List<UserProfile> managedEnabledForUsers = new ArrayList<>();
+        for (UserProfile item : featureflag.getEnabledForUsers()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = enabledForUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedEnabledForUsers.add(existingItem);
+        } else {
+        managedEnabledForUsers.add(item);
+        }
+        }
+        featureflag.setEnabledForUsers(managedEnabledForUsers);
+        }
+    
+
 
         return featureflagRepository.save(featureflag);
     }
@@ -66,6 +84,38 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
 
         return featureflagRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<FeatureFlag> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+FeatureFlag entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getEnabledForUsers() != null) {
+        entity.getEnabledForUsers().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

@@ -35,6 +35,7 @@ import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import com.example.modules.entertainment_ecosystem.repository.ContentLanguageRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -225,6 +226,135 @@ public class MovieService extends BaseService<Movie> {
     
     
     
+
+    
+        if (movie.getCast() != null) {
+        List<Artist> managedCast = new ArrayList<>();
+        for (Artist item : movie.getCast()) {
+        if (item.getId() != null) {
+        Artist existingItem = castRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found"));
+        managedCast.add(existingItem);
+        } else {
+        managedCast.add(item);
+        }
+        }
+        movie.setCast(managedCast);
+        }
+    
+
+    
+
+    
+
+    
+        if (movie.getGenres() != null) {
+        List<Genre> managedGenres = new ArrayList<>();
+        for (Genre item : movie.getGenres()) {
+        if (item.getId() != null) {
+        Genre existingItem = genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found"));
+        managedGenres.add(existingItem);
+        } else {
+        managedGenres.add(item);
+        }
+        }
+        movie.setGenres(managedGenres);
+        }
+    
+
+    
+        if (movie.getWatchlistUsers() != null) {
+        List<UserProfile> managedWatchlistUsers = new ArrayList<>();
+        for (UserProfile item : movie.getWatchlistUsers()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = watchlistUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedWatchlistUsers.add(existingItem);
+        } else {
+        managedWatchlistUsers.add(item);
+        }
+        }
+        movie.setWatchlistUsers(managedWatchlistUsers);
+        }
+    
+
+    
+        if (movie.getRelatedMerchandise() != null) {
+        List<Merchandise> managedRelatedMerchandise = new ArrayList<>();
+        for (Merchandise item : movie.getRelatedMerchandise()) {
+        if (item.getId() != null) {
+        Merchandise existingItem = relatedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found"));
+        managedRelatedMerchandise.add(existingItem);
+        } else {
+        managedRelatedMerchandise.add(item);
+        }
+        }
+        movie.setRelatedMerchandise(managedRelatedMerchandise);
+        }
+    
+
+    
+
+    
+
+    
+        if (movie.getFormats() != null) {
+        List<MovieFormat> managedFormats = new ArrayList<>();
+        for (MovieFormat item : movie.getFormats()) {
+        if (item.getId() != null) {
+        MovieFormat existingItem = formatsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MovieFormat not found"));
+        managedFormats.add(existingItem);
+        } else {
+        managedFormats.add(item);
+        }
+        }
+        movie.setFormats(managedFormats);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (movie.getTags() != null) {
+        List<ContentTag> managedTags = new ArrayList<>();
+        for (ContentTag item : movie.getTags()) {
+        if (item.getId() != null) {
+        ContentTag existingItem = tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found"));
+        managedTags.add(existingItem);
+        } else {
+        managedTags.add(item);
+        }
+        }
+        movie.setTags(managedTags);
+        }
+    
+
+    
+        if (movie.getLanguages() != null) {
+        List<ContentLanguage> managedLanguages = new ArrayList<>();
+        for (ContentLanguage item : movie.getLanguages()) {
+        if (item.getId() != null) {
+        ContentLanguage existingItem = languagesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentLanguage not found"));
+        managedLanguages.add(existingItem);
+        } else {
+        managedLanguages.add(item);
+        }
+        }
+        movie.setLanguages(managedLanguages);
+        }
+    
+
 
         return movieRepository.save(movie);
     }
@@ -458,6 +588,221 @@ public class MovieService extends BaseService<Movie> {
 
         return movieRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Movie> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Movie entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+        if (entity.getReviews() != null) {
+        for (var child : entity.getReviews()) {
+        
+            child.setMovie(null); // retirer la référence inverse
+        
+        }
+        entity.getReviews().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getPurchases() != null) {
+        for (var child : entity.getPurchases()) {
+        
+            child.setMovie(null); // retirer la référence inverse
+        
+        }
+        entity.getPurchases().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getStreamingLicenses() != null) {
+        for (var child : entity.getStreamingLicenses()) {
+        
+            child.setMovie(null); // retirer la référence inverse
+        
+        }
+        entity.getStreamingLicenses().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getCast() != null) {
+        entity.getCast().clear();
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getGenres() != null) {
+        entity.getGenres().clear();
+        }
+    
+
+    
+        if (entity.getWatchlistUsers() != null) {
+        entity.getWatchlistUsers().clear();
+        }
+    
+
+    
+        if (entity.getRelatedMerchandise() != null) {
+        entity.getRelatedMerchandise().clear();
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getFormats() != null) {
+        entity.getFormats().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getTags() != null) {
+        entity.getTags().clear();
+        }
+    
+
+    
+        if (entity.getLanguages() != null) {
+        entity.getLanguages().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+        if (entity.getDirector() != null) {
+        entity.setDirector(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getProductionCompany() != null) {
+        entity.setProductionCompany(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getProvider() != null) {
+        entity.setProvider(null);
+        }
+    
+
+    
+        if (entity.getMovieStudio() != null) {
+        entity.setMovieStudio(null);
+        }
+    
+
+    
+        if (entity.getContentRating() != null) {
+        entity.setContentRating(null);
+        }
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

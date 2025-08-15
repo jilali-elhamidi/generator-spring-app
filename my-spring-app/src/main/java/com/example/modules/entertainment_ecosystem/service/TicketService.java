@@ -15,6 +15,7 @@ import com.example.modules.entertainment_ecosystem.model.EventTicketType;
 import com.example.modules.entertainment_ecosystem.repository.EventTicketTypeRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -95,6 +96,17 @@ public class TicketService extends BaseService<Ticket> {
         ticket.setType(existingType);
         }
     
+
+    
+
+    
+
+    
+
+    
+
+    
+
 
         return ticketRepository.save(ticket);
     }
@@ -183,6 +195,86 @@ public class TicketService extends BaseService<Ticket> {
 
         return ticketRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Ticket> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Ticket entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getEvent() != null) {
+        entity.setEvent(null);
+        }
+    
+
+    
+        if (entity.getStatus() != null) {
+        entity.setStatus(null);
+        }
+    
+
+    
+        if (entity.getBooking() != null) {
+        entity.setBooking(null);
+        }
+    
+
+    
+        if (entity.getType() != null) {
+        entity.setType(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

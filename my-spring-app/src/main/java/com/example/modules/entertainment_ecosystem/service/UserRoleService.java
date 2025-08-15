@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -32,6 +33,23 @@ public class UserRoleService extends BaseService<UserRole> {
     
 
     
+
+    
+        if (userrole.getUsers() != null) {
+        List<UserProfile> managedUsers = new ArrayList<>();
+        for (UserProfile item : userrole.getUsers()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = usersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedUsers.add(existingItem);
+        } else {
+        managedUsers.add(item);
+        }
+        }
+        userrole.setUsers(managedUsers);
+        }
+    
+
 
         return userroleRepository.save(userrole);
     }
@@ -64,6 +82,38 @@ public class UserRoleService extends BaseService<UserRole> {
 
         return userroleRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<UserRole> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+UserRole entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getUsers() != null) {
+        entity.getUsers().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

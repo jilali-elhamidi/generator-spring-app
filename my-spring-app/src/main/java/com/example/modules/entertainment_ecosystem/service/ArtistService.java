@@ -39,6 +39,7 @@ import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 import com.example.modules.entertainment_ecosystem.repository.EpisodeCreditRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -374,6 +375,97 @@ public class ArtistService extends BaseService<Artist> {
     
     
     
+
+    
+        if (artist.getFavoriteArtists() != null) {
+        List<UserProfile> managedFavoriteArtists = new ArrayList<>();
+        for (UserProfile item : artist.getFavoriteArtists()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = favoriteArtistsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedFavoriteArtists.add(existingItem);
+        } else {
+        managedFavoriteArtists.add(item);
+        }
+        }
+        artist.setFavoriteArtists(managedFavoriteArtists);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (artist.getParticipatedInEvents() != null) {
+        List<LiveEvent> managedParticipatedInEvents = new ArrayList<>();
+        for (LiveEvent item : artist.getParticipatedInEvents()) {
+        if (item.getId() != null) {
+        LiveEvent existingItem = participatedInEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+        managedParticipatedInEvents.add(existingItem);
+        } else {
+        managedParticipatedInEvents.add(item);
+        }
+        }
+        artist.setParticipatedInEvents(managedParticipatedInEvents);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (artist.getActedInMovies() != null) {
+        List<Movie> managedActedInMovies = new ArrayList<>();
+        for (Movie item : artist.getActedInMovies()) {
+        if (item.getId() != null) {
+        Movie existingItem = actedInMoviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        managedActedInMovies.add(existingItem);
+        } else {
+        managedActedInMovies.add(item);
+        }
+        }
+        artist.setActedInMovies(managedActedInMovies);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (artist.getActedInShows() != null) {
+        List<TVShow> managedActedInShows = new ArrayList<>();
+        for (TVShow item : artist.getActedInShows()) {
+        if (item.getId() != null) {
+        TVShow existingItem = actedInShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+        managedActedInShows.add(existingItem);
+        } else {
+        managedActedInShows.add(item);
+        }
+        }
+        artist.setActedInShows(managedActedInShows);
+        }
+    
+
+    
+
+    
+
 
         return artistRepository.save(artist);
     }
@@ -719,6 +811,290 @@ public class ArtistService extends BaseService<Artist> {
 
         return artistRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Artist> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Artist entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getComposedMusic() != null) {
+        for (var child : entity.getComposedMusic()) {
+        
+            child.setArtist(null); // retirer la référence inverse
+        
+        }
+        entity.getComposedMusic().clear();
+        }
+    
+
+    
+        if (entity.getAlbums() != null) {
+        for (var child : entity.getAlbums()) {
+        
+            child.setArtist(null); // retirer la référence inverse
+        
+        }
+        entity.getAlbums().clear();
+        }
+    
+
+    
+        if (entity.getBooksAuthored() != null) {
+        for (var child : entity.getBooksAuthored()) {
+        
+            child.setAuthor(null); // retirer la référence inverse
+        
+        }
+        entity.getBooksAuthored().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getHostedPodcasts() != null) {
+        for (var child : entity.getHostedPodcasts()) {
+        
+            child.setHost(null); // retirer la référence inverse
+        
+        }
+        entity.getHostedPodcasts().clear();
+        }
+    
+
+    
+        if (entity.getManagedMerchandise() != null) {
+        for (var child : entity.getManagedMerchandise()) {
+        
+            child.setArtist(null); // retirer la référence inverse
+        
+        }
+        entity.getManagedMerchandise().clear();
+        }
+    
+
+    
+        if (entity.getManagedGames() != null) {
+        for (var child : entity.getManagedGames()) {
+        
+            child.setDeveloper(null); // retirer la référence inverse
+        
+        }
+        entity.getManagedGames().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getAwards() != null) {
+        for (var child : entity.getAwards()) {
+        
+            child.setArtist(null); // retirer la référence inverse
+        
+        }
+        entity.getAwards().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getDirectedMovies() != null) {
+        for (var child : entity.getDirectedMovies()) {
+        
+            child.setDirector(null); // retirer la référence inverse
+        
+        }
+        entity.getDirectedMovies().clear();
+        }
+    
+
+    
+        if (entity.getDirectedShows() != null) {
+        for (var child : entity.getDirectedShows()) {
+        
+            child.setDirector(null); // retirer la référence inverse
+        
+        }
+        entity.getDirectedShows().clear();
+        }
+    
+
+    
+        if (entity.getManagedAssets() != null) {
+        for (var child : entity.getManagedAssets()) {
+        
+            child.setArtist(null); // retirer la référence inverse
+        
+        }
+        entity.getManagedAssets().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getSocialMediaLinks() != null) {
+        for (var child : entity.getSocialMediaLinks()) {
+        
+            child.setArtist(null); // retirer la référence inverse
+        
+        }
+        entity.getSocialMediaLinks().clear();
+        }
+    
+
+    
+        if (entity.getEpisodeCredits() != null) {
+        for (var child : entity.getEpisodeCredits()) {
+        
+            child.setArtist(null); // retirer la référence inverse
+        
+        }
+        entity.getEpisodeCredits().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getFavoriteArtists() != null) {
+        entity.getFavoriteArtists().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getParticipatedInEvents() != null) {
+        entity.getParticipatedInEvents().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getActedInMovies() != null) {
+        entity.getActedInMovies().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getActedInShows() != null) {
+        entity.getActedInShows().clear();
+        }
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getManager() != null) {
+        entity.setManager(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

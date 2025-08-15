@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class ManagerService extends BaseService<Manager> {
 
     
 
+    
+
+
         return managerRepository.save(manager);
     }
 
@@ -96,6 +100,43 @@ public class ManagerService extends BaseService<Manager> {
 
         return managerRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Manager> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Manager entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getArtists() != null) {
+        for (var child : entity.getArtists()) {
+        
+            child.setManager(null); // retirer la référence inverse
+        
+        }
+        entity.getArtists().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

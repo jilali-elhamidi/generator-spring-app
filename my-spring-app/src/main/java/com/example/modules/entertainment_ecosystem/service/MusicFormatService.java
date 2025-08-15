@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.MusicTrack;
 import com.example.modules.entertainment_ecosystem.repository.MusicTrackRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -32,6 +33,23 @@ public class MusicFormatService extends BaseService<MusicFormat> {
     
 
     
+
+    
+        if (musicformat.getMusicTracks() != null) {
+        List<MusicTrack> managedMusicTracks = new ArrayList<>();
+        for (MusicTrack item : musicformat.getMusicTracks()) {
+        if (item.getId() != null) {
+        MusicTrack existingItem = musicTracksRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+        managedMusicTracks.add(existingItem);
+        } else {
+        managedMusicTracks.add(item);
+        }
+        }
+        musicformat.setMusicTracks(managedMusicTracks);
+        }
+    
+
 
         return musicformatRepository.save(musicformat);
     }
@@ -64,6 +82,38 @@ public class MusicFormatService extends BaseService<MusicFormat> {
 
         return musicformatRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MusicFormat> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MusicFormat entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getMusicTracks() != null) {
+        entity.getMusicTracks().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

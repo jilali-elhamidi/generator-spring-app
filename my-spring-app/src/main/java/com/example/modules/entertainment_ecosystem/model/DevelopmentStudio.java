@@ -32,7 +32,7 @@ public class DevelopmentStudio extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "developerStudio", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "developerStudio", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<VideoGame> games;
     

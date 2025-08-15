@@ -45,7 +45,7 @@ public class MerchandiseShipping extends BaseEntity {
     
     
     
-    @OneToOne(mappedBy = "shippingDetails", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "shippingDetails", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("shippingDetails")
     private MerchandiseOrder order;
         

@@ -38,17 +38,17 @@ public class Sponsor extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "sponsor", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sponsor", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<LiveEvent> sponsoredEvents;
     
     
-    @OneToMany(mappedBy = "sponsor", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sponsor", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<EventSponsorship> sponsorships;
     
     
-    @OneToMany(mappedBy = "advertiser", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "advertiser", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<AdCampaign> adCampaigns;
     

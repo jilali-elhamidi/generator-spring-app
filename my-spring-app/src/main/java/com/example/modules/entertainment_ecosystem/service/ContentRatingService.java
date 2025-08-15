@@ -13,6 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.ContentRatingBoard;
 import com.example.modules.entertainment_ecosystem.repository.ContentRatingBoardRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -121,6 +122,15 @@ public class ContentRatingService extends BaseService<ContentRating> {
         }
     
 
+    
+
+    
+
+    
+
+    
+
+
         return contentratingRepository.save(contentrating);
     }
 
@@ -221,6 +231,89 @@ public class ContentRatingService extends BaseService<ContentRating> {
 
         return contentratingRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ContentRating> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ContentRating entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getRatedMovies() != null) {
+        for (var child : entity.getRatedMovies()) {
+        
+            child.setContentRating(null); // retirer la référence inverse
+        
+        }
+        entity.getRatedMovies().clear();
+        }
+    
+
+    
+        if (entity.getRatedTvShows() != null) {
+        for (var child : entity.getRatedTvShows()) {
+        
+            child.setContentRating(null); // retirer la référence inverse
+        
+        }
+        entity.getRatedTvShows().clear();
+        }
+    
+
+    
+        if (entity.getRatedVideoGames() != null) {
+        for (var child : entity.getRatedVideoGames()) {
+        
+            child.setContentRating(null); // retirer la référence inverse
+        
+        }
+        entity.getRatedVideoGames().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+    
+        if (entity.getBoard() != null) {
+        entity.setBoard(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

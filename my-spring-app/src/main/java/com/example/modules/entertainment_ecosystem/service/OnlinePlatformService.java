@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
 import com.example.modules.entertainment_ecosystem.repository.StreamingPlatformRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
 
     
 
+    
+
+
         return onlineplatformRepository.save(onlineplatform);
     }
 
@@ -95,6 +99,43 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
 
         return onlineplatformRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<OnlinePlatform> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+OnlinePlatform entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getStreams() != null) {
+        for (var child : entity.getStreams()) {
+        
+            child.setOnlinePlatform(null); // retirer la référence inverse
+        
+        }
+        entity.getStreams().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

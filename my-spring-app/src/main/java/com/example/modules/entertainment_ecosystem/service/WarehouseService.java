@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.MerchandiseInventory;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseInventoryRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class WarehouseService extends BaseService<Warehouse> {
 
     
 
+    
+
+
         return warehouseRepository.save(warehouse);
     }
 
@@ -96,6 +100,43 @@ public class WarehouseService extends BaseService<Warehouse> {
 
         return warehouseRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Warehouse> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Warehouse entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getInventoryItems() != null) {
+        for (var child : entity.getInventoryItems()) {
+        
+            child.setWarehouse(null); // retirer la référence inverse
+        
+        }
+        entity.getInventoryItems().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

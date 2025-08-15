@@ -17,6 +17,7 @@ import com.example.modules.entertainment_ecosystem.model.AdCampaign;
 import com.example.modules.entertainment_ecosystem.repository.AdCampaignRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -101,6 +102,61 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         }
     
     
+
+    
+        if (streamingplatform.getMovies() != null) {
+        List<Movie> managedMovies = new ArrayList<>();
+        for (Movie item : streamingplatform.getMovies()) {
+        if (item.getId() != null) {
+        Movie existingItem = moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        managedMovies.add(existingItem);
+        } else {
+        managedMovies.add(item);
+        }
+        }
+        streamingplatform.setMovies(managedMovies);
+        }
+    
+
+    
+        if (streamingplatform.getTvShows() != null) {
+        List<TVShow> managedTvShows = new ArrayList<>();
+        for (TVShow item : streamingplatform.getTvShows()) {
+        if (item.getId() != null) {
+        TVShow existingItem = tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+        managedTvShows.add(existingItem);
+        } else {
+        managedTvShows.add(item);
+        }
+        }
+        streamingplatform.setTvShows(managedTvShows);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (streamingplatform.getAdCampaigns() != null) {
+        List<AdCampaign> managedAdCampaigns = new ArrayList<>();
+        for (AdCampaign item : streamingplatform.getAdCampaigns()) {
+        if (item.getId() != null) {
+        AdCampaign existingItem = adCampaignsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("AdCampaign not found"));
+        managedAdCampaigns.add(existingItem);
+        } else {
+        managedAdCampaigns.add(item);
+        }
+        }
+        streamingplatform.setAdCampaigns(managedAdCampaigns);
+        }
+    
+
 
         return streamingplatformRepository.save(streamingplatform);
     }
@@ -204,6 +260,103 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
 
         return streamingplatformRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<StreamingPlatform> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+StreamingPlatform entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+        if (entity.getSubscriptions() != null) {
+        for (var child : entity.getSubscriptions()) {
+        
+            child.setPlatform(null); // retirer la référence inverse
+        
+        }
+        entity.getSubscriptions().clear();
+        }
+    
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getMovies() != null) {
+        entity.getMovies().clear();
+        }
+    
+
+    
+        if (entity.getTvShows() != null) {
+        entity.getTvShows().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getAdCampaigns() != null) {
+        entity.getAdCampaigns().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+    
+        if (entity.getStreamingService() != null) {
+        entity.setStreamingService(null);
+        }
+    
+
+    
+        if (entity.getOnlinePlatform() != null) {
+        entity.setOnlinePlatform(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

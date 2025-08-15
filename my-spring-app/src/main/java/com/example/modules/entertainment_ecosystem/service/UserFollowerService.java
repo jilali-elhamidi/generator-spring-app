@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,11 @@ public class UserFollowerService extends BaseService<UserFollower> {
         userfollower.setFollowed(existingFollowed);
         }
     
+
+    
+
+    
+
 
         return userfollowerRepository.save(userfollower);
     }
@@ -100,6 +106,50 @@ public class UserFollowerService extends BaseService<UserFollower> {
 
         return userfollowerRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<UserFollower> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+UserFollower entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getFollower() != null) {
+        entity.setFollower(null);
+        }
+    
+
+    
+        if (entity.getFollowed() != null) {
+        entity.setFollowed(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

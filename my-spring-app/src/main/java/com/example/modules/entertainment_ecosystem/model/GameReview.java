@@ -49,17 +49,17 @@ public class GameReview extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReviewComment> comments;
     
     
-    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReviewUpvote> upvotes;
     
     
-    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReviewDownvote> downvotes;
     

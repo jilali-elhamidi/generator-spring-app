@@ -46,17 +46,17 @@ public class Artist extends BaseEntity {
             private List<UserProfile> favoriteArtists;
         
     
-    @OneToMany(mappedBy = "artist", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MusicTrack> composedMusic;
     
     
-    @OneToMany(mappedBy = "artist", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Album> albums;
     
     
-    @OneToMany(mappedBy = "author", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Book> booksAuthored;
     
@@ -66,17 +66,17 @@ public class Artist extends BaseEntity {
             private List<LiveEvent> participatedInEvents;
         
     
-    @OneToMany(mappedBy = "host", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "host", fetch = FetchType.EAGER)
         @JsonManagedReference
         private List<Podcast> hostedPodcasts;
     
     
-    @OneToMany(mappedBy = "artist", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Merchandise> managedMerchandise;
     
     
-    @OneToMany(mappedBy = "developer", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "developer", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<VideoGame> managedGames;
     
@@ -88,7 +88,7 @@ public class Artist extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "artist", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ArtistAward> awards;
     
@@ -98,17 +98,17 @@ public class Artist extends BaseEntity {
             private List<Movie> actedInMovies;
         
     
-    @OneToMany(mappedBy = "director", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "director", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Movie> directedMovies;
     
     
-    @OneToMany(mappedBy = "director", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "director", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<TVShow> directedShows;
     
     
-    @OneToMany(mappedBy = "artist", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<DigitalAsset> managedAssets;
     
@@ -118,12 +118,12 @@ public class Artist extends BaseEntity {
             private List<TVShow> actedInShows;
         
     
-    @OneToMany(mappedBy = "artist", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ArtistSocialMedia> socialMediaLinks;
     
     
-    @OneToMany(mappedBy = "artist", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<EpisodeCredit> episodeCredits;
     

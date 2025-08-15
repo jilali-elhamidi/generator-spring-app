@@ -49,7 +49,7 @@ public class GameReviewComment extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "parentComment", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parentComment", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReviewComment> replies;
     

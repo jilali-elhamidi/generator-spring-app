@@ -21,6 +21,7 @@ import com.example.modules.entertainment_ecosystem.model.ContentTag;
 import com.example.modules.entertainment_ecosystem.repository.ContentTagRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -153,6 +154,51 @@ public class LiveEventService extends BaseService<LiveEvent> {
         
         liveevent.getAudience().setEvent(liveevent);
         }
+
+    
+        if (liveevent.getPerformers() != null) {
+        List<Artist> managedPerformers = new ArrayList<>();
+        for (Artist item : liveevent.getPerformers()) {
+        if (item.getId() != null) {
+        Artist existingItem = performersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found"));
+        managedPerformers.add(existingItem);
+        } else {
+        managedPerformers.add(item);
+        }
+        }
+        liveevent.setPerformers(managedPerformers);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (liveevent.getTags() != null) {
+        List<ContentTag> managedTags = new ArrayList<>();
+        for (ContentTag item : liveevent.getTags()) {
+        if (item.getId() != null) {
+        ContentTag existingItem = tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found"));
+        managedTags.add(existingItem);
+        } else {
+        managedTags.add(item);
+        }
+        }
+        liveevent.setTags(managedTags);
+        }
+    
+
 
         return liveeventRepository.save(liveevent);
     }
@@ -301,6 +347,135 @@ public class LiveEventService extends BaseService<LiveEvent> {
 
         return liveeventRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<LiveEvent> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+LiveEvent entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getTickets() != null) {
+        for (var child : entity.getTickets()) {
+        
+            child.setEvent(null); // retirer la référence inverse
+        
+        }
+        entity.getTickets().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getSponsorships() != null) {
+        for (var child : entity.getSponsorships()) {
+        
+            child.setEvent(null); // retirer la référence inverse
+        
+        }
+        entity.getSponsorships().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getPerformers() != null) {
+        entity.getPerformers().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getTags() != null) {
+        entity.getTags().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getAudience() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getAudience().setEvent(null);
+        // Dissocier côté direct
+        entity.setAudience(null);
+        }
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+        if (entity.getEventType() != null) {
+        entity.setEventType(null);
+        }
+    
+
+    
+        if (entity.getLocation() != null) {
+        entity.setLocation(null);
+        }
+    
+
+    
+        if (entity.getSponsor() != null) {
+        entity.setSponsor(null);
+        }
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

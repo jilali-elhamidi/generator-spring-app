@@ -45,7 +45,7 @@ public class StreamingPlatform extends BaseEntity {
             private List<TVShow> tvShows;
         
     
-    @OneToMany(mappedBy = "platform", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "platform", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Subscription> subscriptions;
     

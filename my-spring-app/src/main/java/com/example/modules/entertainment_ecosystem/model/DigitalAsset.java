@@ -49,7 +49,7 @@ public class DigitalAsset extends BaseEntity {
     
     
     
-    @OneToOne(mappedBy = "asset", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "asset", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("asset")
     private License license;
         

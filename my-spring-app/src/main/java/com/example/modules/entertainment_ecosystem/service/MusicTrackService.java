@@ -23,6 +23,7 @@ import com.example.modules.entertainment_ecosystem.model.ContentProvider;
 import com.example.modules.entertainment_ecosystem.repository.ContentProviderRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -176,6 +177,53 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         musictrack.setProvider(existingProvider);
         }
     
+
+    
+
+    
+
+    
+
+    
+        if (musictrack.getListenedByUsers() != null) {
+        List<UserProfile> managedListenedByUsers = new ArrayList<>();
+        for (UserProfile item : musictrack.getListenedByUsers()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = listenedByUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedListenedByUsers.add(existingItem);
+        } else {
+        managedListenedByUsers.add(item);
+        }
+        }
+        musictrack.setListenedByUsers(managedListenedByUsers);
+        }
+    
+
+    
+
+    
+
+    
+        if (musictrack.getFormats() != null) {
+        List<MusicFormat> managedFormats = new ArrayList<>();
+        for (MusicFormat item : musictrack.getFormats()) {
+        if (item.getId() != null) {
+        MusicFormat existingItem = formatsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicFormat not found"));
+        managedFormats.add(existingItem);
+        } else {
+        managedFormats.add(item);
+        }
+        }
+        musictrack.setFormats(managedFormats);
+        }
+    
+
+    
+
+    
+
 
         return musictrackRepository.save(musictrack);
     }
@@ -339,6 +387,149 @@ public class MusicTrackService extends BaseService<MusicTrack> {
 
         return musictrackRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MusicTrack> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MusicTrack entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getPlaylistItems() != null) {
+        for (var child : entity.getPlaylistItems()) {
+        
+            child.setTrack(null); // retirer la référence inverse
+        
+        }
+        entity.getPlaylistItems().clear();
+        }
+    
+
+    
+        if (entity.getPurchases() != null) {
+        for (var child : entity.getPurchases()) {
+        
+            child.setMusicTrack(null); // retirer la référence inverse
+        
+        }
+        entity.getPurchases().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getStreamingLicenses() != null) {
+        for (var child : entity.getStreamingLicenses()) {
+        
+            child.setMusicTrack(null); // retirer la référence inverse
+        
+        }
+        entity.getStreamingLicenses().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+        if (entity.getListenedByUsers() != null) {
+        entity.getListenedByUsers().clear();
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getFormats() != null) {
+        entity.getFormats().clear();
+        }
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getAlbum() != null) {
+        entity.setAlbum(null);
+        }
+    
+
+    
+        if (entity.getArtist() != null) {
+        entity.setArtist(null);
+        }
+    
+
+    
+        if (entity.getGenre() != null) {
+        entity.setGenre(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getProvider() != null) {
+        entity.setProvider(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

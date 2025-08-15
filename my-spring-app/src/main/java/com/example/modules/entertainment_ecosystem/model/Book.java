@@ -55,7 +55,7 @@ public class Book extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "book", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Review> reviews;
     

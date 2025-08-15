@@ -73,17 +73,17 @@ public class Merchandise extends BaseEntity {
     
     
     
-    @OneToOne(mappedBy = "merchandiseItem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "merchandiseItem", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("merchandiseItem")
     private MerchandiseInventory inventory;
         
     
-    @OneToMany(mappedBy = "merchandise", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "merchandise", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MerchandiseReview> reviews;
     
     
-    @OneToMany(mappedBy = "merchandiseItem", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "merchandiseItem", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MerchandiseSale> sales;
     
@@ -95,12 +95,12 @@ public class Merchandise extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "merchandiseItem", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "merchandiseItem", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MerchandiseShipping> shipments;
     
     
-    @OneToMany(mappedBy = "merchandiseItem", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "merchandiseItem", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MerchandiseOrderItem> orderItems;
     

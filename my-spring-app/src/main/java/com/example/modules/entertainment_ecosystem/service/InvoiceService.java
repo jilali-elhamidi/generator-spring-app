@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Transaction;
 import com.example.modules.entertainment_ecosystem.repository.TransactionRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -43,6 +44,9 @@ public class InvoiceService extends BaseService<Invoice> {
         
         invoice.getTransaction().setRelatedInvoice(invoice);
         }
+
+    
+
 
         return invoiceRepository.save(invoice);
     }
@@ -85,6 +89,41 @@ public class InvoiceService extends BaseService<Invoice> {
 
         return invoiceRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Invoice> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Invoice entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+        if (entity.getTransaction() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getTransaction().setRelatedInvoice(null);
+        // Dissocier côté direct
+        entity.setTransaction(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

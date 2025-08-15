@@ -45,12 +45,12 @@ public class Transaction extends BaseEntity {
     
     
     
-    @OneToOne(mappedBy = "transaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "transaction", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("transaction")
     private Invoice relatedInvoice;
         
     
-    @OneToOne(mappedBy = "transaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "transaction", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("transaction")
     private DigitalPurchase digitalPurchase;
         

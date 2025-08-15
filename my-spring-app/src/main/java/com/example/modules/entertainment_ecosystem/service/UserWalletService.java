@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.Transaction;
 import com.example.modules.entertainment_ecosystem.repository.TransactionRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -70,6 +71,11 @@ public class UserWalletService extends BaseService<UserWallet> {
         
         userwallet.getUser().setWallet(userwallet);
         }
+
+    
+
+    
+
 
         return userwalletRepository.save(userwallet);
     }
@@ -133,6 +139,58 @@ public class UserWalletService extends BaseService<UserWallet> {
 
         return userwalletRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<UserWallet> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+UserWallet entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getTransactions() != null) {
+        for (var child : entity.getTransactions()) {
+        
+            child.setWallet(null); // retirer la référence inverse
+        
+        }
+        entity.getTransactions().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+        if (entity.getUser() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getUser().setWallet(null);
+        // Dissocier côté direct
+        entity.setUser(null);
+        }
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

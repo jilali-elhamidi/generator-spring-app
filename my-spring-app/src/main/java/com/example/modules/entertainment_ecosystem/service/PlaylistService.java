@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.PlaylistItem;
 import com.example.modules.entertainment_ecosystem.repository.PlaylistItemRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -67,6 +68,11 @@ public class PlaylistService extends BaseService<Playlist> {
     
     
 
+    
+
+    
+
+
         return playlistRepository.save(playlist);
     }
 
@@ -124,6 +130,55 @@ public class PlaylistService extends BaseService<Playlist> {
 
         return playlistRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Playlist> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Playlist entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getItems() != null) {
+        for (var child : entity.getItems()) {
+        
+            child.setPlaylist(null); // retirer la référence inverse
+        
+        }
+        entity.getItems().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getOwner() != null) {
+        entity.setOwner(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

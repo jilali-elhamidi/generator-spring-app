@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -39,6 +40,9 @@ public class UserSettingService extends BaseService<UserSetting> {
         usersetting.setUser(existingUser);
         }
     
+
+    
+
 
         return usersettingRepository.save(usersetting);
     }
@@ -74,6 +78,38 @@ public class UserSettingService extends BaseService<UserSetting> {
 
         return usersettingRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<UserSetting> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+UserSetting entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

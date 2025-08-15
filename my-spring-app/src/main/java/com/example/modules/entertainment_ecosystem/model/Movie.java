@@ -59,7 +59,7 @@ public class Movie extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "movie", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Review> reviews;
     
@@ -89,7 +89,7 @@ public class Movie extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "movie", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<DigitalPurchase> purchases;
     
@@ -102,7 +102,7 @@ public class Movie extends BaseEntity {
             private List<MovieFormat> formats;
             
     
-    @OneToMany(mappedBy = "movie", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<StreamingContentLicense> streamingLicenses;
     

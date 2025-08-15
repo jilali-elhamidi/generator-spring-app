@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,11 @@ public class EpisodeCreditService extends BaseService<EpisodeCredit> {
         episodecredit.setArtist(existingArtist);
         }
     
+
+    
+
+    
+
 
         return episodecreditRepository.save(episodecredit);
     }
@@ -100,6 +106,50 @@ public class EpisodeCreditService extends BaseService<EpisodeCredit> {
 
         return episodecreditRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<EpisodeCredit> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+EpisodeCredit entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getEpisode() != null) {
+        entity.setEpisode(null);
+        }
+    
+
+    
+        if (entity.getArtist() != null) {
+        entity.setArtist(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

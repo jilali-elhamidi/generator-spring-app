@@ -13,6 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.LiveEvent;
 import com.example.modules.entertainment_ecosystem.repository.LiveEventRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,71 @@ public class ContentTagService extends BaseService<ContentTag> {
     
     
     
+
+    
+        if (contenttag.getMovies() != null) {
+        List<Movie> managedMovies = new ArrayList<>();
+        for (Movie item : contenttag.getMovies()) {
+        if (item.getId() != null) {
+        Movie existingItem = moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        managedMovies.add(existingItem);
+        } else {
+        managedMovies.add(item);
+        }
+        }
+        contenttag.setMovies(managedMovies);
+        }
+    
+
+    
+        if (contenttag.getTvShows() != null) {
+        List<TVShow> managedTvShows = new ArrayList<>();
+        for (TVShow item : contenttag.getTvShows()) {
+        if (item.getId() != null) {
+        TVShow existingItem = tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+        managedTvShows.add(existingItem);
+        } else {
+        managedTvShows.add(item);
+        }
+        }
+        contenttag.setTvShows(managedTvShows);
+        }
+    
+
+    
+        if (contenttag.getVideoGames() != null) {
+        List<VideoGame> managedVideoGames = new ArrayList<>();
+        for (VideoGame item : contenttag.getVideoGames()) {
+        if (item.getId() != null) {
+        VideoGame existingItem = videoGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        managedVideoGames.add(existingItem);
+        } else {
+        managedVideoGames.add(item);
+        }
+        }
+        contenttag.setVideoGames(managedVideoGames);
+        }
+    
+
+    
+        if (contenttag.getLiveEvents() != null) {
+        List<LiveEvent> managedLiveEvents = new ArrayList<>();
+        for (LiveEvent item : contenttag.getLiveEvents()) {
+        if (item.getId() != null) {
+        LiveEvent existingItem = liveEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+        managedLiveEvents.add(existingItem);
+        } else {
+        managedLiveEvents.add(item);
+        }
+        }
+        contenttag.setLiveEvents(managedLiveEvents);
+        }
+    
+
 
         return contenttagRepository.save(contenttag);
     }
@@ -118,6 +184,74 @@ public class ContentTagService extends BaseService<ContentTag> {
 
         return contenttagRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ContentTag> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ContentTag entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getMovies() != null) {
+        entity.getMovies().clear();
+        }
+    
+
+    
+        if (entity.getTvShows() != null) {
+        entity.getTvShows().clear();
+        }
+    
+
+    
+        if (entity.getVideoGames() != null) {
+        entity.getVideoGames().clear();
+        }
+    
+
+    
+        if (entity.getLiveEvents() != null) {
+        entity.getLiveEvents().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

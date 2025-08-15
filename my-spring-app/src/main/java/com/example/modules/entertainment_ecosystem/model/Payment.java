@@ -38,7 +38,7 @@ public class Payment extends BaseEntity {
 // === Relations ===
 
     
-    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("payment")
     private Booking booking;
         

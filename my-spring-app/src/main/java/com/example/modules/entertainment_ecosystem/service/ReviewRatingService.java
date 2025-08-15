@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.Review;
 import com.example.modules.entertainment_ecosystem.repository.ReviewRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,11 @@ public class ReviewRatingService extends BaseService<ReviewRating> {
         reviewrating.setReview(existingReview);
         }
     
+
+    
+
+    
+
 
         return reviewratingRepository.save(reviewrating);
     }
@@ -101,6 +107,50 @@ public class ReviewRatingService extends BaseService<ReviewRating> {
 
         return reviewratingRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ReviewRating> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ReviewRating entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getReview() != null) {
+        entity.setReview(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

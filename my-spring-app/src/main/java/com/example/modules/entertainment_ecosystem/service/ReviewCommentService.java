@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.Review;
 import com.example.modules.entertainment_ecosystem.repository.ReviewRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,11 @@ public class ReviewCommentService extends BaseService<ReviewComment> {
         reviewcomment.setReview(existingReview);
         }
     
+
+    
+
+    
+
 
         return reviewcommentRepository.save(reviewcomment);
     }
@@ -101,6 +107,50 @@ public class ReviewCommentService extends BaseService<ReviewComment> {
 
         return reviewcommentRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ReviewComment> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ReviewComment entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getReview() != null) {
+        entity.setReview(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

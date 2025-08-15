@@ -67,9 +67,16 @@ public class MusicLabelController {
 
                 return ResponseEntity.ok(updatedDto);
                 }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMusicLabel(@PathVariable Long id) {
-        musiclabelService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteMusicLabel(@PathVariable Long id) {
+                    boolean deleted = musiclabelService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

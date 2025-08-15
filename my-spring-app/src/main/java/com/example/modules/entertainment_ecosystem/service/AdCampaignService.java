@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
 import com.example.modules.entertainment_ecosystem.repository.StreamingPlatformRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -46,6 +47,25 @@ public class AdCampaignService extends BaseService<AdCampaign> {
         }
     
     
+
+    
+
+    
+        if (adcampaign.getDisplayedOnPlatforms() != null) {
+        List<StreamingPlatform> managedDisplayedOnPlatforms = new ArrayList<>();
+        for (StreamingPlatform item : adcampaign.getDisplayedOnPlatforms()) {
+        if (item.getId() != null) {
+        StreamingPlatform existingItem = displayedOnPlatformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
+        managedDisplayedOnPlatforms.add(existingItem);
+        } else {
+        managedDisplayedOnPlatforms.add(item);
+        }
+        }
+        adcampaign.setDisplayedOnPlatforms(managedDisplayedOnPlatforms);
+        }
+    
+
 
         return adcampaignRepository.save(adcampaign);
     }
@@ -94,6 +114,50 @@ public class AdCampaignService extends BaseService<AdCampaign> {
 
         return adcampaignRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<AdCampaign> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+AdCampaign entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+        if (entity.getDisplayedOnPlatforms() != null) {
+        entity.getDisplayedOnPlatforms().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getAdvertiser() != null) {
+        entity.setAdvertiser(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

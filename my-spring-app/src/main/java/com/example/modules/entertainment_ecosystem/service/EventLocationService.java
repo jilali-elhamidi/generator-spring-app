@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.Employee;
 import com.example.modules.entertainment_ecosystem.repository.EmployeeRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -67,6 +68,11 @@ public class EventLocationService extends BaseService<EventLocation> {
         }
     
 
+    
+
+    
+
+
         return eventlocationRepository.save(eventlocation);
     }
 
@@ -123,6 +129,55 @@ public class EventLocationService extends BaseService<EventLocation> {
 
         return eventlocationRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<EventLocation> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+EventLocation entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getLiveEvents() != null) {
+        for (var child : entity.getLiveEvents()) {
+        
+            child.setLocation(null); // retirer la référence inverse
+        
+        }
+        entity.getLiveEvents().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+        if (entity.getContactPerson() != null) {
+        entity.setContactPerson(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

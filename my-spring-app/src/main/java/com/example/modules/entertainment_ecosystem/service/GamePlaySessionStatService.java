@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.GamePlaySession;
 import com.example.modules.entertainment_ecosystem.repository.GamePlaySessionRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -39,6 +40,9 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
         gameplaysessionstat.setGamePlaySession(existingGamePlaySession);
         }
     
+
+    
+
 
         return gameplaysessionstatRepository.save(gameplaysessionstat);
     }
@@ -74,6 +78,38 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
 
         return gameplaysessionstatRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<GamePlaySessionStat> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+GamePlaySessionStat entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getGamePlaySession() != null) {
+        entity.setGamePlaySession(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

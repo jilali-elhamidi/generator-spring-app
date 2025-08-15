@@ -37,6 +37,7 @@ import com.example.modules.entertainment_ecosystem.model.ContentRatingBoard;
 import com.example.modules.entertainment_ecosystem.repository.ContentRatingBoardRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -321,6 +322,95 @@ public class VideoGameService extends BaseService<VideoGame> {
         videogame.setContentRatingBoard(existingContentRatingBoard);
         }
     
+
+    
+        if (videogame.getGenres() != null) {
+        List<Genre> managedGenres = new ArrayList<>();
+        for (Genre item : videogame.getGenres()) {
+        if (item.getId() != null) {
+        Genre existingItem = genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found"));
+        managedGenres.add(existingItem);
+        } else {
+        managedGenres.add(item);
+        }
+        }
+        videogame.setGenres(managedGenres);
+        }
+    
+
+    
+
+    
+
+    
+        if (videogame.getPlayedBy() != null) {
+        List<UserProfile> managedPlayedBy = new ArrayList<>();
+        for (UserProfile item : videogame.getPlayedBy()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = playedByRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedPlayedBy.add(existingItem);
+        } else {
+        managedPlayedBy.add(item);
+        }
+        }
+        videogame.setPlayedBy(managedPlayedBy);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (videogame.getPlatforms() != null) {
+        List<GamePlatform> managedPlatforms = new ArrayList<>();
+        for (GamePlatform item : videogame.getPlatforms()) {
+        if (item.getId() != null) {
+        GamePlatform existingItem = platformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("GamePlatform not found"));
+        managedPlatforms.add(existingItem);
+        } else {
+        managedPlatforms.add(item);
+        }
+        }
+        videogame.setPlatforms(managedPlatforms);
+        }
+    
+
+    
+
+    
+        if (videogame.getTags() != null) {
+        List<ContentTag> managedTags = new ArrayList<>();
+        for (ContentTag item : videogame.getTags()) {
+        if (item.getId() != null) {
+        ContentTag existingItem = tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found"));
+        managedTags.add(existingItem);
+        } else {
+        managedTags.add(item);
+        }
+        }
+        videogame.setTags(managedTags);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
 
         return videogameRepository.save(videogame);
     }
@@ -627,6 +717,263 @@ public class VideoGameService extends BaseService<VideoGame> {
 
         return videogameRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<VideoGame> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+VideoGame entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getGeneralReviews() != null) {
+        for (var child : entity.getGeneralReviews()) {
+        
+            child.setVideoGame(null); // retirer la référence inverse
+        
+        }
+        entity.getGeneralReviews().clear();
+        }
+    
+
+    
+        if (entity.getGameReviews() != null) {
+        for (var child : entity.getGameReviews()) {
+        
+            child.setGame(null); // retirer la référence inverse
+        
+        }
+        entity.getGameReviews().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getAchievements() != null) {
+        for (var child : entity.getAchievements()) {
+        
+            child.setGame(null); // retirer la référence inverse
+        
+        }
+        entity.getAchievements().clear();
+        }
+    
+
+    
+        if (entity.getSessions() != null) {
+        for (var child : entity.getSessions()) {
+        
+            child.setGame(null); // retirer la référence inverse
+        
+        }
+        entity.getSessions().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getPurchases() != null) {
+        for (var child : entity.getPurchases()) {
+        
+            child.setVideoGame(null); // retirer la référence inverse
+        
+        }
+        entity.getPurchases().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getRatings() != null) {
+        for (var child : entity.getRatings()) {
+        
+            child.setGame(null); // retirer la référence inverse
+        
+        }
+        entity.getRatings().clear();
+        }
+    
+
+    
+        if (entity.getGamePlaySessions() != null) {
+        for (var child : entity.getGamePlaySessions()) {
+        
+            child.setGame(null); // retirer la référence inverse
+        
+        }
+        entity.getGamePlaySessions().clear();
+        }
+    
+
+    
+        if (entity.getGameReviewUpvotes() != null) {
+        for (var child : entity.getGameReviewUpvotes()) {
+        
+            child.setGame(null); // retirer la référence inverse
+        
+        }
+        entity.getGameReviewUpvotes().clear();
+        }
+    
+
+    
+        if (entity.getGameReviewDownvotes() != null) {
+        for (var child : entity.getGameReviewDownvotes()) {
+        
+            child.setGame(null); // retirer la référence inverse
+        
+        }
+        entity.getGameReviewDownvotes().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getGenres() != null) {
+        entity.getGenres().clear();
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getPlayedBy() != null) {
+        entity.getPlayedBy().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getPlatforms() != null) {
+        entity.getPlatforms().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getTags() != null) {
+        entity.getTags().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getDeveloperStudio() != null) {
+        entity.setDeveloperStudio(null);
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getContentRating() != null) {
+        entity.setContentRating(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getContentRatingBoard() != null) {
+        entity.setContentRatingBoard(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

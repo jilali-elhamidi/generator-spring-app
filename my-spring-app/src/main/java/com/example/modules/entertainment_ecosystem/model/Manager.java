@@ -35,7 +35,7 @@ public class Manager extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "manager", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "manager", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Artist> artists;
     

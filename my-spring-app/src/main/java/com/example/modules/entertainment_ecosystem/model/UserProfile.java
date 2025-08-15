@@ -55,7 +55,7 @@ public class UserProfile extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Review> reviews;
     
@@ -97,7 +97,7 @@ public class UserProfile extends BaseEntity {
             private List<Genre> favoriteGenres;
             
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Subscription> subscriptions;
     
@@ -118,22 +118,22 @@ public class UserProfile extends BaseEntity {
             private List<VideoGame> playedGames;
             
     
-    @OneToMany(mappedBy = "author", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ForumThread> forumThreads;
     
     
-    @OneToMany(mappedBy = "author", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ForumPost> forumPosts;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Achievement> achievements;
     
     
-    @OneToMany(mappedBy = "host", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "host", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<OnlineEvent> hostedOnlineEvents;
     
@@ -167,7 +167,7 @@ public class UserProfile extends BaseEntity {
             private List<MusicTrack> listenedMusic;
             
     
-    @OneToMany(mappedBy = "owner", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Playlist> playlists;
     
@@ -178,107 +178,107 @@ public class UserProfile extends BaseEntity {
     private UserWallet wallet;
             
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<DigitalPurchase> digitalPurchases;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameSession> gameSessions;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReviewComment> gameReviewComments;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserPlaylist> userPlaylists;
     
     
-    @OneToMany(mappedBy = "addedBy", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "addedBy", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserPlaylistItem> userPlaylistItems;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ReviewRating> givenRatings;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ReviewLike> likedReviews;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
         @JsonManagedReference
         private List<UserActivityLog> activityLogs;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserSetting> settings;
     
     
-    @OneToMany(mappedBy = "followed", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "followed", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserFollower> followers;
     
     
-    @OneToMany(mappedBy = "follower", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserFollower> following;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserAchievement> userAchievements;
     
     
-    @OneToMany(mappedBy = "recipient", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "recipient", fetch = FetchType.EAGER)
         @JsonManagedReference
         private List<Notification> notifications;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MerchandiseReview> merchandiseReviews;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserPreference> preferences;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MerchandiseSale> merchandiseSales;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GamePlaySession> gamePlaySessions;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReviewUpvote> gameReviewUpvotes;
     
     
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReviewDownvote> gameReviewDownvotes;
     
     
-    @OneToMany(mappedBy = "sender", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserMessage> sentMessages;
     
     
-    @OneToMany(mappedBy = "receiver", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserMessage> receivedMessages;
     

@@ -41,7 +41,7 @@ public class TVShow extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "show", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "show", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Season> seasons;
     
@@ -81,7 +81,7 @@ public class TVShow extends BaseEntity {
             private List<Artist> cast;
             
     
-    @OneToMany(mappedBy = "tvShow", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tvShow", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<StreamingContentLicense> streamingLicenses;
     

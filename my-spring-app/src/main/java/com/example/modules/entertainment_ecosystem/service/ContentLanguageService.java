@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.Podcast;
 import com.example.modules.entertainment_ecosystem.repository.PodcastRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -46,6 +47,55 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
     
     
     
+
+    
+        if (contentlanguage.getMovies() != null) {
+        List<Movie> managedMovies = new ArrayList<>();
+        for (Movie item : contentlanguage.getMovies()) {
+        if (item.getId() != null) {
+        Movie existingItem = moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        managedMovies.add(existingItem);
+        } else {
+        managedMovies.add(item);
+        }
+        }
+        contentlanguage.setMovies(managedMovies);
+        }
+    
+
+    
+        if (contentlanguage.getTvShows() != null) {
+        List<TVShow> managedTvShows = new ArrayList<>();
+        for (TVShow item : contentlanguage.getTvShows()) {
+        if (item.getId() != null) {
+        TVShow existingItem = tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+        managedTvShows.add(existingItem);
+        } else {
+        managedTvShows.add(item);
+        }
+        }
+        contentlanguage.setTvShows(managedTvShows);
+        }
+    
+
+    
+        if (contentlanguage.getPodcasts() != null) {
+        List<Podcast> managedPodcasts = new ArrayList<>();
+        for (Podcast item : contentlanguage.getPodcasts()) {
+        if (item.getId() != null) {
+        Podcast existingItem = podcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found"));
+        managedPodcasts.add(existingItem);
+        } else {
+        managedPodcasts.add(item);
+        }
+        }
+        contentlanguage.setPodcasts(managedPodcasts);
+        }
+    
+
 
         return contentlanguageRepository.save(contentlanguage);
     }
@@ -101,6 +151,62 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
 
         return contentlanguageRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ContentLanguage> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ContentLanguage entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getMovies() != null) {
+        entity.getMovies().clear();
+        }
+    
+
+    
+        if (entity.getTvShows() != null) {
+        entity.getTvShows().clear();
+        }
+    
+
+    
+        if (entity.getPodcasts() != null) {
+        entity.getPodcasts().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

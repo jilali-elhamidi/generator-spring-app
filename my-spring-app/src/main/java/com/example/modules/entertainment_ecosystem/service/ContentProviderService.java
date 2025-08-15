@@ -13,6 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.Podcast;
 import com.example.modules.entertainment_ecosystem.repository.PodcastRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -134,6 +135,15 @@ public class ContentProviderService extends BaseService<ContentProvider> {
     
     
 
+    
+
+    
+
+    
+
+    
+
+
         return contentproviderRepository.save(contentprovider);
     }
 
@@ -243,6 +253,94 @@ public class ContentProviderService extends BaseService<ContentProvider> {
 
         return contentproviderRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ContentProvider> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ContentProvider entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getProvidedMovies() != null) {
+        for (var child : entity.getProvidedMovies()) {
+        
+            child.setProvider(null); // retirer la référence inverse
+        
+        }
+        entity.getProvidedMovies().clear();
+        }
+    
+
+    
+        if (entity.getProvidedTvShows() != null) {
+        for (var child : entity.getProvidedTvShows()) {
+        
+            child.setProvider(null); // retirer la référence inverse
+        
+        }
+        entity.getProvidedTvShows().clear();
+        }
+    
+
+    
+        if (entity.getProvidedMusicTracks() != null) {
+        for (var child : entity.getProvidedMusicTracks()) {
+        
+            child.setProvider(null); // retirer la référence inverse
+        
+        }
+        entity.getProvidedMusicTracks().clear();
+        }
+    
+
+    
+        if (entity.getProvidedPodcasts() != null) {
+        for (var child : entity.getProvidedPodcasts()) {
+        
+            child.setProvider(null); // retirer la référence inverse
+        
+        }
+        entity.getProvidedPodcasts().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

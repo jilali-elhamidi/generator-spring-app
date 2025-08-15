@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.LiveEvent;
 import com.example.modules.entertainment_ecosystem.repository.LiveEventRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class EventTypeService extends BaseService<EventType> {
 
     
 
+    
+
+
         return eventtypeRepository.save(eventtype);
     }
 
@@ -95,6 +99,43 @@ public class EventTypeService extends BaseService<EventType> {
 
         return eventtypeRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<EventType> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+EventType entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getEvents() != null) {
+        for (var child : entity.getEvents()) {
+        
+            child.setEventType(null); // retirer la référence inverse
+        
+        }
+        entity.getEvents().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

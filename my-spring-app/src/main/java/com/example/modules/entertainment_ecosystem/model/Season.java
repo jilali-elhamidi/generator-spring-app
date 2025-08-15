@@ -39,7 +39,7 @@ public class Season extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "season", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "season", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Episode> episodes;
     

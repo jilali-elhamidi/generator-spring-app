@@ -29,6 +29,7 @@ import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import com.example.modules.entertainment_ecosystem.repository.ContentLanguageRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -184,6 +185,101 @@ public class TVShowService extends BaseService<TVShow> {
     
     
     
+
+    
+
+    
+
+    
+        if (tvshow.getGenres() != null) {
+        List<Genre> managedGenres = new ArrayList<>();
+        for (Genre item : tvshow.getGenres()) {
+        if (item.getId() != null) {
+        Genre existingItem = genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found"));
+        managedGenres.add(existingItem);
+        } else {
+        managedGenres.add(item);
+        }
+        }
+        tvshow.setGenres(managedGenres);
+        }
+    
+
+    
+        if (tvshow.getRelatedMerchandise() != null) {
+        List<Merchandise> managedRelatedMerchandise = new ArrayList<>();
+        for (Merchandise item : tvshow.getRelatedMerchandise()) {
+        if (item.getId() != null) {
+        Merchandise existingItem = relatedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found"));
+        managedRelatedMerchandise.add(existingItem);
+        } else {
+        managedRelatedMerchandise.add(item);
+        }
+        }
+        tvshow.setRelatedMerchandise(managedRelatedMerchandise);
+        }
+    
+
+    
+
+    
+        if (tvshow.getCast() != null) {
+        List<Artist> managedCast = new ArrayList<>();
+        for (Artist item : tvshow.getCast()) {
+        if (item.getId() != null) {
+        Artist existingItem = castRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found"));
+        managedCast.add(existingItem);
+        } else {
+        managedCast.add(item);
+        }
+        }
+        tvshow.setCast(managedCast);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (tvshow.getTags() != null) {
+        List<ContentTag> managedTags = new ArrayList<>();
+        for (ContentTag item : tvshow.getTags()) {
+        if (item.getId() != null) {
+        ContentTag existingItem = tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found"));
+        managedTags.add(existingItem);
+        } else {
+        managedTags.add(item);
+        }
+        }
+        tvshow.setTags(managedTags);
+        }
+    
+
+    
+        if (tvshow.getLanguages() != null) {
+        List<ContentLanguage> managedLanguages = new ArrayList<>();
+        for (ContentLanguage item : tvshow.getLanguages()) {
+        if (item.getId() != null) {
+        ContentLanguage existingItem = languagesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentLanguage not found"));
+        managedLanguages.add(existingItem);
+        } else {
+        managedLanguages.add(item);
+        }
+        }
+        tvshow.setLanguages(managedLanguages);
+        }
+    
+
 
         return tvshowRepository.save(tvshow);
     }
@@ -372,6 +468,180 @@ public class TVShowService extends BaseService<TVShow> {
 
         return tvshowRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<TVShow> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+TVShow entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getSeasons() != null) {
+        for (var child : entity.getSeasons()) {
+        
+            child.setShow(null); // retirer la référence inverse
+        
+        }
+        entity.getSeasons().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getStreamingLicenses() != null) {
+        for (var child : entity.getStreamingLicenses()) {
+        
+            child.setTvShow(null); // retirer la référence inverse
+        
+        }
+        entity.getStreamingLicenses().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+        if (entity.getGenres() != null) {
+        entity.getGenres().clear();
+        }
+    
+
+    
+        if (entity.getRelatedMerchandise() != null) {
+        entity.getRelatedMerchandise().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getCast() != null) {
+        entity.getCast().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getTags() != null) {
+        entity.getTags().clear();
+        }
+    
+
+    
+        if (entity.getLanguages() != null) {
+        entity.getLanguages().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+        if (entity.getDirector() != null) {
+        entity.setDirector(null);
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getProductionCompany() != null) {
+        entity.setProductionCompany(null);
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getProvider() != null) {
+        entity.setProvider(null);
+        }
+    
+
+    
+        if (entity.getTvShowStudio() != null) {
+        entity.setTvShowStudio(null);
+        }
+    
+
+    
+        if (entity.getContentRating() != null) {
+        entity.setContentRating(null);
+        }
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

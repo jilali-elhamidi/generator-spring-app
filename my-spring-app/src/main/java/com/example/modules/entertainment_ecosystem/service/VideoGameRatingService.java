@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -39,6 +40,9 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
         videogamerating.setGame(existingGame);
         }
     
+
+    
+
 
         return videogameratingRepository.save(videogamerating);
     }
@@ -74,6 +78,38 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
 
         return videogameratingRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<VideoGameRating> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+VideoGameRating entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getGame() != null) {
+        entity.setGame(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

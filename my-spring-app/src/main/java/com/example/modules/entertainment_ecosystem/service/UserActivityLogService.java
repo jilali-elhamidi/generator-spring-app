@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -39,6 +40,9 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
         useractivitylog.setUser(existingUser);
         }
     
+
+    
+
 
         return useractivitylogRepository.save(useractivitylog);
     }
@@ -75,6 +79,38 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
 
         return useractivitylogRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<UserActivityLog> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+UserActivityLog entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

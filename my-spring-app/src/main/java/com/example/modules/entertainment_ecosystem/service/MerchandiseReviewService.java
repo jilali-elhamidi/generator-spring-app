@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.Merchandise;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,11 @@ public class MerchandiseReviewService extends BaseService<MerchandiseReview> {
         merchandisereview.setMerchandise(existingMerchandise);
         }
     
+
+    
+
+    
+
 
         return merchandisereviewRepository.save(merchandisereview);
     }
@@ -102,6 +108,50 @@ public class MerchandiseReviewService extends BaseService<MerchandiseReview> {
 
         return merchandisereviewRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MerchandiseReview> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MerchandiseReview entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getMerchandise() != null) {
+        entity.setMerchandise(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

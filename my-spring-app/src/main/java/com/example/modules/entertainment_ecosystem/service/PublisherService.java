@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -89,6 +90,13 @@ public class PublisherService extends BaseService<Publisher> {
     
     
     
+
+    
+
+    
+
+    
+
 
         return publisherRepository.save(publisher);
     }
@@ -177,6 +185,77 @@ public class PublisherService extends BaseService<Publisher> {
 
         return publisherRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Publisher> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Publisher entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getBooks() != null) {
+        for (var child : entity.getBooks()) {
+        
+            child.setPublisher(null); // retirer la référence inverse
+        
+        }
+        entity.getBooks().clear();
+        }
+    
+
+    
+        if (entity.getPodcasts() != null) {
+        for (var child : entity.getPodcasts()) {
+        
+            child.setPublisher(null); // retirer la référence inverse
+        
+        }
+        entity.getPodcasts().clear();
+        }
+    
+
+    
+        if (entity.getVideoGames() != null) {
+        for (var child : entity.getVideoGames()) {
+        
+            child.setPublisher(null); // retirer la référence inverse
+        
+        }
+        entity.getVideoGames().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

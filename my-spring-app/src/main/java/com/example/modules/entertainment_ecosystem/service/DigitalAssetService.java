@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.License;
 import com.example.modules.entertainment_ecosystem.repository.LicenseRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -71,6 +72,13 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
         
         digitalasset.getLicense().setAsset(digitalasset);
         }
+
+    
+
+    
+
+    
+
 
         return digitalassetRepository.save(digitalasset);
     }
@@ -139,6 +147,65 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
 
         return digitalassetRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<DigitalAsset> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+DigitalAsset entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+        if (entity.getLicense() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getLicense().setAsset(null);
+        // Dissocier côté direct
+        entity.setLicense(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getAssetType() != null) {
+        entity.setAssetType(null);
+        }
+    
+
+    
+        if (entity.getArtist() != null) {
+        entity.setArtist(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

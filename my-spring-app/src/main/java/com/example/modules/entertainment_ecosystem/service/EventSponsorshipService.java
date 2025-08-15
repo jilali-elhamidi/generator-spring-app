@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.Contract;
 import com.example.modules.entertainment_ecosystem.repository.ContractRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -71,6 +72,13 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
         
         eventsponsorship.getContract().setSponsorship(eventsponsorship);
         }
+
+    
+
+    
+
+    
+
 
         return eventsponsorshipRepository.save(eventsponsorship);
     }
@@ -140,6 +148,65 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
 
         return eventsponsorshipRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<EventSponsorship> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+EventSponsorship entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+        if (entity.getContract() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getContract().setSponsorship(null);
+        // Dissocier côté direct
+        entity.setContract(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getEvent() != null) {
+        entity.setEvent(null);
+        }
+    
+
+    
+        if (entity.getSponsor() != null) {
+        entity.setSponsor(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

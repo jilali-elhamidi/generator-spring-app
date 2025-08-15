@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.UserMessage;
 import com.example.modules.entertainment_ecosystem.repository.UserMessageRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -59,6 +60,25 @@ public class MessageThreadService extends BaseService<MessageThread> {
 
     
     
+
+    
+        if (messagethread.getParticipants() != null) {
+        List<UserProfile> managedParticipants = new ArrayList<>();
+        for (UserProfile item : messagethread.getParticipants()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = participantsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedParticipants.add(existingItem);
+        } else {
+        managedParticipants.add(item);
+        }
+        }
+        messagethread.setParticipants(managedParticipants);
+        }
+    
+
+    
+
 
         return messagethreadRepository.save(messagethread);
     }
@@ -114,6 +134,55 @@ public class MessageThreadService extends BaseService<MessageThread> {
 
         return messagethreadRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MessageThread> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MessageThread entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getMessages() != null) {
+        for (var child : entity.getMessages()) {
+        
+            child.setThread(null); // retirer la référence inverse
+        
+        }
+        entity.getMessages().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getParticipants() != null) {
+        entity.getParticipants().clear();
+        }
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

@@ -50,12 +50,12 @@ public class VideoGame extends BaseEntity {
             private List<Genre> genres;
             
     
-    @OneToMany(mappedBy = "videoGame", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "videoGame", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Review> generalReviews;
     
     
-    @OneToMany(mappedBy = "game", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReview> gameReviews;
     
@@ -65,12 +65,12 @@ public class VideoGame extends BaseEntity {
             private List<UserProfile> playedBy;
         
     
-    @OneToMany(mappedBy = "game", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameAchievement> achievements;
     
     
-    @OneToMany(mappedBy = "game", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameSession> sessions;
     
@@ -82,7 +82,7 @@ public class VideoGame extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "videoGame", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "videoGame", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<DigitalPurchase> purchases;
     
@@ -110,22 +110,22 @@ public class VideoGame extends BaseEntity {
             private List<ContentTag> tags;
             
     
-    @OneToMany(mappedBy = "game", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<VideoGameRating> ratings;
     
     
-    @OneToMany(mappedBy = "game", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GamePlaySession> gamePlaySessions;
     
     
-    @OneToMany(mappedBy = "game", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReviewUpvote> gameReviewUpvotes;
     
     
-    @OneToMany(mappedBy = "game", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<GameReviewDownvote> gameReviewDownvotes;
     

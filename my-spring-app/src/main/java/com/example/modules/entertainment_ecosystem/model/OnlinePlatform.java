@@ -32,7 +32,7 @@ public class OnlinePlatform extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "onlinePlatform", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "onlinePlatform", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<StreamingPlatform> streams;
     

@@ -32,7 +32,7 @@ public class MusicLabel extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "musicLabel", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "musicLabel", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Album> albums;
     

@@ -67,9 +67,16 @@ public class SubscriptionPlanController {
 
                 return ResponseEntity.ok(updatedDto);
                 }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSubscriptionPlan(@PathVariable Long id) {
-        subscriptionplanService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteSubscriptionPlan(@PathVariable Long id) {
+                    boolean deleted = subscriptionplanService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

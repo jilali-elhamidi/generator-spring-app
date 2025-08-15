@@ -42,7 +42,7 @@ public class Album extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "album", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "album", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MusicTrack> tracks;
     

@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Artist;
 import com.example.modules.entertainment_ecosystem.repository.ArtistRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -39,6 +40,9 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
         artistsocialmedia.setArtist(existingArtist);
         }
     
+
+    
+
 
         return artistsocialmediaRepository.save(artistsocialmedia);
     }
@@ -74,6 +78,38 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
 
         return artistsocialmediaRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<ArtistSocialMedia> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+ArtistSocialMedia entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getArtist() != null) {
+        entity.setArtist(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

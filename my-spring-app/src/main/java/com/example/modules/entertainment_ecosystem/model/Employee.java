@@ -48,12 +48,12 @@ public class Employee extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "employee", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Shift> shifts;
     
     
-    @OneToMany(mappedBy = "contactPerson", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "contactPerson", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<EventLocation> managedLocations;
     

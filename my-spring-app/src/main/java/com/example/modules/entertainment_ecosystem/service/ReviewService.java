@@ -21,6 +21,7 @@ import com.example.modules.entertainment_ecosystem.model.ReviewLike;
 import com.example.modules.entertainment_ecosystem.repository.ReviewLikeRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -180,6 +181,23 @@ public class ReviewService extends BaseService<Review> {
         
         review.getMediaFile().setReview(review);
         }
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
 
         return reviewRepository.save(review);
     }
@@ -341,6 +359,140 @@ public class ReviewService extends BaseService<Review> {
 
         return reviewRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Review> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Review entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getReviewComments() != null) {
+        for (var child : entity.getReviewComments()) {
+        
+            child.setReview(null); // retirer la référence inverse
+        
+        }
+        entity.getReviewComments().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getRatings() != null) {
+        for (var child : entity.getRatings()) {
+        
+            child.setReview(null); // retirer la référence inverse
+        
+        }
+        entity.getRatings().clear();
+        }
+    
+
+    
+        if (entity.getLikes() != null) {
+        for (var child : entity.getLikes()) {
+        
+            child.setReview(null); // retirer la référence inverse
+        
+        }
+        entity.getLikes().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getMediaFile() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getMediaFile().setReview(null);
+        // Dissocier côté direct
+        entity.setMediaFile(null);
+        }
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getMovie() != null) {
+        entity.setMovie(null);
+        }
+    
+
+    
+        if (entity.getBook() != null) {
+        entity.setBook(null);
+        }
+    
+
+    
+        if (entity.getVideoGame() != null) {
+        entity.setVideoGame(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

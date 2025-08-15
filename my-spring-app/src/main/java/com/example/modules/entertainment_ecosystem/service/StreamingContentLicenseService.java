@@ -13,6 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.MusicTrack;
 import com.example.modules.entertainment_ecosystem.repository.MusicTrackRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -81,6 +82,15 @@ public class StreamingContentLicenseService extends BaseService<StreamingContent
         streamingcontentlicense.setMusicTrack(existingMusicTrack);
         }
     
+
+    
+
+    
+
+    
+
+    
+
 
         return streamingcontentlicenseRepository.save(streamingcontentlicense);
     }
@@ -156,6 +166,74 @@ public class StreamingContentLicenseService extends BaseService<StreamingContent
 
         return streamingcontentlicenseRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<StreamingContentLicense> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+StreamingContentLicense entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getSubscriptionPlan() != null) {
+        entity.setSubscriptionPlan(null);
+        }
+    
+
+    
+        if (entity.getMovie() != null) {
+        entity.setMovie(null);
+        }
+    
+
+    
+        if (entity.getTvShow() != null) {
+        entity.setTvShow(null);
+        }
+    
+
+    
+        if (entity.getMusicTrack() != null) {
+        entity.setMusicTrack(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

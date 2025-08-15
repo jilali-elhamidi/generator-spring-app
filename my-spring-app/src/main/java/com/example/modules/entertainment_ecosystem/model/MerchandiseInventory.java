@@ -39,9 +39,10 @@ public class MerchandiseInventory extends BaseEntity {
     @JoinColumn(name = "merchandise_id") // clé étrangère
     @JsonIgnoreProperties("inventory")
     private Merchandise merchandiseItem;
-        
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+
+
+
+    @ManyToOne(fetch = FetchType.EAGER)
         @JoinColumn(name = "warehouse_id")
         
         private Warehouse warehouse;

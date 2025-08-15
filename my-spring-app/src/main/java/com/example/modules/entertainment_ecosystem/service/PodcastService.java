@@ -23,6 +23,7 @@ import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import com.example.modules.entertainment_ecosystem.repository.ContentLanguageRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -149,6 +150,81 @@ public class PodcastService extends BaseService<Podcast> {
         }
     
     
+
+    
+
+    
+
+    
+        if (podcast.getGenres() != null) {
+        List<Genre> managedGenres = new ArrayList<>();
+        for (Genre item : podcast.getGenres()) {
+        if (item.getId() != null) {
+        Genre existingItem = genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found"));
+        managedGenres.add(existingItem);
+        } else {
+        managedGenres.add(item);
+        }
+        }
+        podcast.setGenres(managedGenres);
+        }
+    
+
+    
+        if (podcast.getListeners() != null) {
+        List<UserProfile> managedListeners = new ArrayList<>();
+        for (UserProfile item : podcast.getListeners()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = listenersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedListeners.add(existingItem);
+        } else {
+        managedListeners.add(item);
+        }
+        }
+        podcast.setListeners(managedListeners);
+        }
+    
+
+    
+
+    
+        if (podcast.getCategories() != null) {
+        List<PodcastCategory> managedCategories = new ArrayList<>();
+        for (PodcastCategory item : podcast.getCategories()) {
+        if (item.getId() != null) {
+        PodcastCategory existingItem = categoriesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastCategory not found"));
+        managedCategories.add(existingItem);
+        } else {
+        managedCategories.add(item);
+        }
+        }
+        podcast.setCategories(managedCategories);
+        }
+    
+
+    
+
+    
+
+    
+        if (podcast.getLanguages() != null) {
+        List<ContentLanguage> managedLanguages = new ArrayList<>();
+        for (ContentLanguage item : podcast.getLanguages()) {
+        if (item.getId() != null) {
+        ContentLanguage existingItem = languagesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentLanguage not found"));
+        managedLanguages.add(existingItem);
+        } else {
+        managedLanguages.add(item);
+        }
+        }
+        podcast.setLanguages(managedLanguages);
+        }
+    
+
 
         return podcastRepository.save(podcast);
     }
@@ -299,6 +375,144 @@ public class PodcastService extends BaseService<Podcast> {
 
         return podcastRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Podcast> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Podcast entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getEpisodes() != null) {
+        for (var child : entity.getEpisodes()) {
+        
+            child.setPodcast(null); // retirer la référence inverse
+        
+        }
+        entity.getEpisodes().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getGuests() != null) {
+        for (var child : entity.getGuests()) {
+        
+            child.setPodcast(null); // retirer la référence inverse
+        
+        }
+        entity.getGuests().clear();
+        }
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+        if (entity.getGenres() != null) {
+        entity.getGenres().clear();
+        }
+    
+
+    
+        if (entity.getListeners() != null) {
+        entity.getListeners().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getCategories() != null) {
+        entity.getCategories().clear();
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getLanguages() != null) {
+        entity.getLanguages().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getHost() != null) {
+        entity.setHost(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getPublisher() != null) {
+        entity.setPublisher(null);
+        }
+    
+
+    
+
+    
+
+    
+        if (entity.getProvider() != null) {
+        entity.setProvider(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.SubscriptionPlan;
 import com.example.modules.entertainment_ecosystem.repository.SubscriptionPlanRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -80,6 +81,11 @@ public class StreamingServiceService extends BaseService<StreamingService> {
     
     
 
+    
+
+    
+
+
         return streamingserviceRepository.save(streamingservice);
     }
 
@@ -145,6 +151,60 @@ public class StreamingServiceService extends BaseService<StreamingService> {
 
         return streamingserviceRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<StreamingService> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+StreamingService entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getPlatforms() != null) {
+        for (var child : entity.getPlatforms()) {
+        
+            child.setStreamingService(null); // retirer la référence inverse
+        
+        }
+        entity.getPlatforms().clear();
+        }
+    
+
+    
+        if (entity.getPlans() != null) {
+        for (var child : entity.getPlans()) {
+        
+            child.setService(null); // retirer la référence inverse
+        
+        }
+        entity.getPlans().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

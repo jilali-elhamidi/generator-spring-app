@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.MerchandiseShipping;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseShippingRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -84,6 +85,13 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
         
         merchandiseorder.getShippingDetails().setOrder(merchandiseorder);
         }
+
+    
+
+    
+
+    
+
 
         return merchandiseorderRepository.save(merchandiseorder);
     }
@@ -161,6 +169,70 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
 
         return merchandiseorderRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MerchandiseOrder> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MerchandiseOrder entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getItems() != null) {
+        for (var child : entity.getItems()) {
+        
+            child.setOrder(null); // retirer la référence inverse
+        
+        }
+        entity.getItems().clear();
+        }
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+        if (entity.getShippingDetails() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getShippingDetails().setOrder(null);
+        // Dissocier côté direct
+        entity.setShippingDetails(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

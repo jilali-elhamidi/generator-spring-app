@@ -43,7 +43,7 @@ public class MessageThread extends BaseEntity {
             private List<UserProfile> participants;
             
     
-    @OneToMany(mappedBy = "thread", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "thread", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserMessage> messages;
     

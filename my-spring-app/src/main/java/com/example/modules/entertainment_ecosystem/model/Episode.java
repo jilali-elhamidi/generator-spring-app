@@ -59,7 +59,7 @@ public class Episode extends BaseEntity {
     private PodcastEpisode relatedPodcastEpisode;
             
     
-    @OneToMany(mappedBy = "episode", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "episode", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<EpisodeCredit> credits;
     

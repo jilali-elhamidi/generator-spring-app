@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Booking;
 import com.example.modules.entertainment_ecosystem.repository.BookingRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -43,6 +44,9 @@ public class PaymentService extends BaseService<Payment> {
         
         payment.getBooking().setPayment(payment);
         }
+
+    
+
 
         return paymentRepository.save(payment);
     }
@@ -86,6 +90,41 @@ public class PaymentService extends BaseService<Payment> {
 
         return paymentRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Payment> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Payment entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+        if (entity.getBooking() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getBooking().setPayment(null);
+        // Dissocier côté direct
+        entity.setBooking(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

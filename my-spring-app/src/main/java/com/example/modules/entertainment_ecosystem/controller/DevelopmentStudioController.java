@@ -67,9 +67,16 @@ public class DevelopmentStudioController {
 
                 return ResponseEntity.ok(updatedDto);
                 }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDevelopmentStudio(@PathVariable Long id) {
-        developmentstudioService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteDevelopmentStudio(@PathVariable Long id) {
+                    boolean deleted = developmentstudioService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

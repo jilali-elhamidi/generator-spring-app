@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;
 import com.example.modules.entertainment_ecosystem.repository.DigitalPurchaseRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -75,6 +76,13 @@ public class TransactionService extends BaseService<Transaction> {
         
         transaction.getDigitalPurchase().setTransaction(transaction);
         }
+
+    
+
+    
+
+    
+
 
         return transactionRepository.save(transaction);
     }
@@ -151,6 +159,68 @@ public class TransactionService extends BaseService<Transaction> {
 
         return transactionRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Transaction> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Transaction entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+        if (entity.getRelatedInvoice() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getRelatedInvoice().setTransaction(null);
+        // Dissocier côté direct
+        entity.setRelatedInvoice(null);
+        }
+    
+
+    
+        if (entity.getDigitalPurchase() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getDigitalPurchase().setTransaction(null);
+        // Dissocier côté direct
+        entity.setDigitalPurchase(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getWallet() != null) {
+        entity.setWallet(null);
+        }
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

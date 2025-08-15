@@ -11,6 +11,7 @@ import com.example.modules.entertainment_ecosystem.model.PodcastGuest;
 import com.example.modules.entertainment_ecosystem.repository.PodcastGuestRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -64,6 +65,27 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
         
         podcastepisode.getRelatedEpisode().setRelatedPodcastEpisode(podcastepisode);
         }
+
+    
+
+    
+
+    
+        if (podcastepisode.getGuestAppearances() != null) {
+        List<PodcastGuest> managedGuestAppearances = new ArrayList<>();
+        for (PodcastGuest item : podcastepisode.getGuestAppearances()) {
+        if (item.getId() != null) {
+        PodcastGuest existingItem = guestAppearancesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastGuest not found"));
+        managedGuestAppearances.add(existingItem);
+        } else {
+        managedGuestAppearances.add(item);
+        }
+        }
+        podcastepisode.setGuestAppearances(managedGuestAppearances);
+        }
+    
+
 
         return podcastepisodeRepository.save(podcastepisode);
     }
@@ -131,6 +153,65 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
 
         return podcastepisodeRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<PodcastEpisode> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+PodcastEpisode entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+        if (entity.getGuestAppearances() != null) {
+        entity.getGuestAppearances().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+        if (entity.getRelatedEpisode() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getRelatedEpisode().setRelatedPodcastEpisode(null);
+        // Dissocier côté direct
+        entity.setRelatedEpisode(null);
+        }
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getPodcast() != null) {
+        entity.setPodcast(null);
+        }
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

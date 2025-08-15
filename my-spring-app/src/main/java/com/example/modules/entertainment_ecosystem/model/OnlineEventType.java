@@ -32,7 +32,7 @@ public class OnlineEventType extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "type", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "type", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<OnlineEvent> events;
     

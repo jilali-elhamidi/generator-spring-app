@@ -9,6 +9,7 @@ import com.example.modules.entertainment_ecosystem.model.GameAchievement;
 import com.example.modules.entertainment_ecosystem.repository.GameAchievementRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,11 @@ public class UserAchievementService extends BaseService<UserAchievement> {
         userachievement.setAchievement(existingAchievement);
         }
     
+
+    
+
+    
+
 
         return userachievementRepository.save(userachievement);
     }
@@ -100,6 +106,50 @@ public class UserAchievementService extends BaseService<UserAchievement> {
 
         return userachievementRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<UserAchievement> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+UserAchievement entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getAchievement() != null) {
+        entity.setAchievement(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

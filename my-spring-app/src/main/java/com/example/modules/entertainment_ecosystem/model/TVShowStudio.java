@@ -35,7 +35,7 @@ public class TVShowStudio extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "tvShowStudio", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tvShowStudio", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<TVShow> tvShows;
     

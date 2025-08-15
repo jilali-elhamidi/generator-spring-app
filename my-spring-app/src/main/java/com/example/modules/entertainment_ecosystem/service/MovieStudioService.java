@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Movie;
 import com.example.modules.entertainment_ecosystem.repository.MovieRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class MovieStudioService extends BaseService<MovieStudio> {
 
     
 
+    
+
+
         return moviestudioRepository.save(moviestudio);
     }
 
@@ -96,6 +100,43 @@ public class MovieStudioService extends BaseService<MovieStudio> {
 
         return moviestudioRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MovieStudio> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MovieStudio entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getMovies() != null) {
+        for (var child : entity.getMovies()) {
+        
+            child.setMovieStudio(null); // retirer la référence inverse
+        
+        }
+        entity.getMovies().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

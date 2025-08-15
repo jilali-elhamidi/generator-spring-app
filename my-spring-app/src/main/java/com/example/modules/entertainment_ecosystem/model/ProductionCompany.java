@@ -37,17 +37,17 @@ public class ProductionCompany extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "productionCompany", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "productionCompany", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Movie> movies;
     
     
-    @OneToMany(mappedBy = "productionCompany", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "productionCompany", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<TVShow> tvShows;
     
     
-    @OneToMany(mappedBy = "productionCompany", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "productionCompany", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Employee> staff;
     

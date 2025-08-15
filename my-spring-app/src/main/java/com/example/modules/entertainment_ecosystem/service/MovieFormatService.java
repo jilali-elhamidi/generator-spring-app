@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.Movie;
 import com.example.modules.entertainment_ecosystem.repository.MovieRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -32,6 +33,23 @@ public class MovieFormatService extends BaseService<MovieFormat> {
     
 
     
+
+    
+        if (movieformat.getMovies() != null) {
+        List<Movie> managedMovies = new ArrayList<>();
+        for (Movie item : movieformat.getMovies()) {
+        if (item.getId() != null) {
+        Movie existingItem = moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        managedMovies.add(existingItem);
+        } else {
+        managedMovies.add(item);
+        }
+        }
+        movieformat.setMovies(managedMovies);
+        }
+    
+
 
         return movieformatRepository.save(movieformat);
     }
@@ -64,6 +82,38 @@ public class MovieFormatService extends BaseService<MovieFormat> {
 
         return movieformatRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<MovieFormat> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+MovieFormat entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getMovies() != null) {
+        entity.getMovies().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

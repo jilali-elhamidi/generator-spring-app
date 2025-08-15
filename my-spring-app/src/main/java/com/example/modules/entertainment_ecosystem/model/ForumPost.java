@@ -49,7 +49,7 @@ public class ForumPost extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "parentPost", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parentPost", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ForumPost> replies;
     

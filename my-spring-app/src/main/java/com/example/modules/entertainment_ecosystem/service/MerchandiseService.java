@@ -27,6 +27,7 @@ import com.example.modules.entertainment_ecosystem.model.MerchandiseOrderItem;
 import com.example.modules.entertainment_ecosystem.repository.MerchandiseOrderItemRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -214,6 +215,71 @@ public class MerchandiseService extends BaseService<Merchandise> {
         
         merchandise.getInventory().setMerchandiseItem(merchandise);
         }
+
+    
+
+    
+        if (merchandise.getRelatedMovies() != null) {
+        List<Movie> managedRelatedMovies = new ArrayList<>();
+        for (Movie item : merchandise.getRelatedMovies()) {
+        if (item.getId() != null) {
+        Movie existingItem = relatedMoviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        managedRelatedMovies.add(existingItem);
+        } else {
+        managedRelatedMovies.add(item);
+        }
+        }
+        merchandise.setRelatedMovies(managedRelatedMovies);
+        }
+    
+
+    
+        if (merchandise.getRelatedShows() != null) {
+        List<TVShow> managedRelatedShows = new ArrayList<>();
+        for (TVShow item : merchandise.getRelatedShows()) {
+        if (item.getId() != null) {
+        TVShow existingItem = relatedShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+        managedRelatedShows.add(existingItem);
+        } else {
+        managedRelatedShows.add(item);
+        }
+        }
+        merchandise.setRelatedShows(managedRelatedShows);
+        }
+    
+
+    
+        if (merchandise.getOwnedByUsers() != null) {
+        List<UserProfile> managedOwnedByUsers = new ArrayList<>();
+        for (UserProfile item : merchandise.getOwnedByUsers()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = ownedByUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedOwnedByUsers.add(existingItem);
+        } else {
+        managedOwnedByUsers.add(item);
+        }
+        }
+        merchandise.setOwnedByUsers(managedOwnedByUsers);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
 
         return merchandiseRepository.save(merchandise);
     }
@@ -417,6 +483,181 @@ public class MerchandiseService extends BaseService<Merchandise> {
 
         return merchandiseRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Merchandise> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Merchandise entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getReviews() != null) {
+        for (var child : entity.getReviews()) {
+        
+            child.setMerchandise(null); // retirer la référence inverse
+        
+        }
+        entity.getReviews().clear();
+        }
+    
+
+    
+        if (entity.getSales() != null) {
+        for (var child : entity.getSales()) {
+        
+            child.setMerchandiseItem(null); // retirer la référence inverse
+        
+        }
+        entity.getSales().clear();
+        }
+    
+
+    
+
+    
+        if (entity.getShipments() != null) {
+        for (var child : entity.getShipments()) {
+        
+            child.setMerchandiseItem(null); // retirer la référence inverse
+        
+        }
+        entity.getShipments().clear();
+        }
+    
+
+    
+        if (entity.getOrderItems() != null) {
+        for (var child : entity.getOrderItems()) {
+        
+            child.setMerchandiseItem(null); // retirer la référence inverse
+        
+        }
+        entity.getOrderItems().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+        if (entity.getRelatedMovies() != null) {
+        entity.getRelatedMovies().clear();
+        }
+    
+
+    
+        if (entity.getRelatedShows() != null) {
+        entity.getRelatedShows().clear();
+        }
+    
+
+    
+        if (entity.getOwnedByUsers() != null) {
+        entity.getOwnedByUsers().clear();
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getInventory() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getInventory().setMerchandiseItem(null);
+        // Dissocier côté direct
+        entity.setInventory(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getArtist() != null) {
+        entity.setArtist(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getProductType() != null) {
+        entity.setProductType(null);
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getSupplier() != null) {
+        entity.setSupplier(null);
+        }
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

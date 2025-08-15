@@ -50,7 +50,7 @@ public class GameAchievement extends BaseEntity {
             private List<UserProfile> earnedBy;
         
     
-    @OneToMany(mappedBy = "achievement", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "achievement", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<UserAchievement> userAchievements;
     

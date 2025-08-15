@@ -20,6 +20,7 @@ import com.example.modules.{{../module}}.repository.{{type}}Repository;
 {{~/each}}
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -118,6 +119,23 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         }
 {{~/if}}
 {{~/each}}
+{{#each relationships}}
+    {{#if (eq relationType "ManyToMany")}}
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
+        List<{{type}}> managed{{capitalize name}} = new ArrayList<>();
+        for ({{type}} item : {{../entityNameLowercase}}.get{{capitalize name}}()) {
+        if (item.getId() != null) {
+        {{type}} existingItem = {{name}}Repository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("{{type}} not found"));
+        managed{{capitalize name}}.add(existingItem);
+        } else {
+        managed{{capitalize name}}.add(item);
+        }
+        }
+        {{../entityNameLowercase}}.set{{capitalize name}}(managed{{capitalize name}});
+        }
+    {{/if}}
+{{/each}}
 
         return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
     }
@@ -216,6 +234,58 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 
         return {{entityNameLowercase}}Repository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<{{entityName}}> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
 
+{{entityName}} entity = entityOpt.get();
 
+// --- Dissocier OneToMany ---
+{{#each relationships}}
+    {{#if (eq relationType "OneToMany")}}
+        if (entity.get{{capitalize name}}() != null) {
+        for (var child : entity.get{{capitalize name}}()) {
+        {{#if mappedBy}}
+            child.set{{capitalize mappedBy}}(null); // retirer la référence inverse
+        {{/if}}
+        }
+        entity.get{{capitalize name}}().clear();
+        }
+    {{/if}}
+{{/each}}
+
+// --- Dissocier ManyToMany ---
+{{#each relationships}}
+    {{#if (eq relationType "ManyToMany")}}
+        if (entity.get{{capitalize name}}() != null) {
+        entity.get{{capitalize name}}().clear();
+        }
+    {{/if}}
+{{/each}}
+
+// --- Dissocier OneToOne ---
+{{#each relationships}}
+    {{#if (eq relationType "OneToOne")}}
+        if (entity.get{{capitalize name}}() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.get{{capitalize name}}().set{{capitalize inverseField}}(null);
+        // Dissocier côté direct
+        entity.set{{capitalize name}}(null);
+        }
+    {{/if}}
+{{/each}}
+
+// --- Dissocier ManyToOne ---
+{{#each relationships}}
+    {{#if (eq relationType "ManyToOne")}}
+        if (entity.get{{capitalize name}}() != null) {
+        entity.set{{capitalize name}}(null);
+        }
+    {{/if}}
+{{/each}}
+
+repository.delete(entity);
+return true;
+}
 }

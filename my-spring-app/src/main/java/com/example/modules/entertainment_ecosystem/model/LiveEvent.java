@@ -46,7 +46,7 @@ public class LiveEvent extends BaseEntity {
             private List<Artist> performers;
             
     
-    @OneToMany(mappedBy = "event", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<Ticket> tickets;
     
@@ -78,7 +78,7 @@ public class LiveEvent extends BaseEntity {
     private EventAudience audience;
             
     
-    @OneToMany(mappedBy = "event", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<EventSponsorship> sponsorships;
     

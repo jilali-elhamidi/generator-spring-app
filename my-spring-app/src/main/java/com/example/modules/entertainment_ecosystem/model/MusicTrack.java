@@ -64,12 +64,12 @@ public class MusicTrack extends BaseEntity {
             private List<UserProfile> listenedByUsers;
         
     
-    @OneToMany(mappedBy = "track", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "track", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<PlaylistItem> playlistItems;
     
     
-    @OneToMany(mappedBy = "musicTrack", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "musicTrack", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<DigitalPurchase> purchases;
     
@@ -82,7 +82,7 @@ public class MusicTrack extends BaseEntity {
             private List<MusicFormat> formats;
             
     
-    @OneToMany(mappedBy = "musicTrack", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "musicTrack", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<StreamingContentLicense> streamingLicenses;
     

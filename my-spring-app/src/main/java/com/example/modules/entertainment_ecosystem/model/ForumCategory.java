@@ -32,7 +32,7 @@ public class ForumCategory extends BaseEntity {
 // === Relations ===
 
     
-    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ForumThread> threads;
     
@@ -44,7 +44,7 @@ public class ForumCategory extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "parentCategory", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "parentCategory", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ForumCategory> childCategories;
     

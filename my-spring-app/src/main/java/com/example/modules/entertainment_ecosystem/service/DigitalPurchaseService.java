@@ -15,6 +15,7 @@ import com.example.modules.entertainment_ecosystem.model.Transaction;
 import com.example.modules.entertainment_ecosystem.repository.TransactionRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -99,6 +100,17 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
         
         digitalpurchase.getTransaction().setDigitalPurchase(digitalpurchase);
         }
+
+    
+
+    
+
+    
+
+    
+
+    
+
 
         return digitalpurchaseRepository.save(digitalpurchase);
     }
@@ -193,6 +205,89 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
 
         return digitalpurchaseRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<DigitalPurchase> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+DigitalPurchase entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (entity.getTransaction() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getTransaction().setDigitalPurchase(null);
+        // Dissocier côté direct
+        entity.setTransaction(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+        if (entity.getMovie() != null) {
+        entity.setMovie(null);
+        }
+    
+
+    
+        if (entity.getMusicTrack() != null) {
+        entity.setMusicTrack(null);
+        }
+    
+
+    
+        if (entity.getVideoGame() != null) {
+        entity.setVideoGame(null);
+        }
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

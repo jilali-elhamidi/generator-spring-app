@@ -7,6 +7,7 @@ import com.example.modules.entertainment_ecosystem.model.TVShow;
 import com.example.modules.entertainment_ecosystem.repository.TVShowRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -53,6 +54,9 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
 
     
 
+    
+
+
         return tvshowstudioRepository.save(tvshowstudio);
     }
 
@@ -96,6 +100,43 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
 
         return tvshowstudioRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<TVShowStudio> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+TVShowStudio entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getTvShows() != null) {
+        for (var child : entity.getTvShows()) {
+        
+            child.setTvShowStudio(null); // retirer la référence inverse
+        
+        }
+        entity.getTvShows().clear();
+        }
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

@@ -45,7 +45,7 @@ public class Podcast extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "podcast", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "podcast", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<PodcastEpisode> episodes;
     
@@ -75,7 +75,7 @@ public class Podcast extends BaseEntity {
             private List<PodcastCategory> categories;
             
     
-    @OneToMany(mappedBy = "podcast", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "podcast", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<PodcastGuest> guests;
     

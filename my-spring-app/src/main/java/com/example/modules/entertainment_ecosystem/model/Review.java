@@ -66,7 +66,7 @@ public class Review extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ReviewComment> reviewComments;
     
@@ -77,12 +77,12 @@ public class Review extends BaseEntity {
     private MediaFile mediaFile;
             
     
-    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ReviewRating> ratings;
     
     
-    @OneToMany(mappedBy = "review", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<ReviewLike> likes;
     

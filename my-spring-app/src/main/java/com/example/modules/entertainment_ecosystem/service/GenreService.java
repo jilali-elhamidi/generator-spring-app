@@ -19,6 +19,7 @@ import com.example.modules.entertainment_ecosystem.model.Podcast;
 import com.example.modules.entertainment_ecosystem.repository.PodcastRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -74,6 +75,119 @@ public class GenreService extends BaseService<Genre> {
     
     
     
+
+    
+        if (genre.getMovies() != null) {
+        List<Movie> managedMovies = new ArrayList<>();
+        for (Movie item : genre.getMovies()) {
+        if (item.getId() != null) {
+        Movie existingItem = moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found"));
+        managedMovies.add(existingItem);
+        } else {
+        managedMovies.add(item);
+        }
+        }
+        genre.setMovies(managedMovies);
+        }
+    
+
+    
+        if (genre.getTvShows() != null) {
+        List<TVShow> managedTvShows = new ArrayList<>();
+        for (TVShow item : genre.getTvShows()) {
+        if (item.getId() != null) {
+        TVShow existingItem = tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+        managedTvShows.add(existingItem);
+        } else {
+        managedTvShows.add(item);
+        }
+        }
+        genre.setTvShows(managedTvShows);
+        }
+    
+
+    
+        if (genre.getBookGenres() != null) {
+        List<Book> managedBookGenres = new ArrayList<>();
+        for (Book item : genre.getBookGenres()) {
+        if (item.getId() != null) {
+        Book existingItem = bookGenresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Book not found"));
+        managedBookGenres.add(existingItem);
+        } else {
+        managedBookGenres.add(item);
+        }
+        }
+        genre.setBookGenres(managedBookGenres);
+        }
+    
+
+    
+        if (genre.getMusicTracks() != null) {
+        List<MusicTrack> managedMusicTracks = new ArrayList<>();
+        for (MusicTrack item : genre.getMusicTracks()) {
+        if (item.getId() != null) {
+        MusicTrack existingItem = musicTracksRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+        managedMusicTracks.add(existingItem);
+        } else {
+        managedMusicTracks.add(item);
+        }
+        }
+        genre.setMusicTracks(managedMusicTracks);
+        }
+    
+
+    
+        if (genre.getFavoriteUsers() != null) {
+        List<UserProfile> managedFavoriteUsers = new ArrayList<>();
+        for (UserProfile item : genre.getFavoriteUsers()) {
+        if (item.getId() != null) {
+        UserProfile existingItem = favoriteUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        managedFavoriteUsers.add(existingItem);
+        } else {
+        managedFavoriteUsers.add(item);
+        }
+        }
+        genre.setFavoriteUsers(managedFavoriteUsers);
+        }
+    
+
+    
+        if (genre.getVideoGames() != null) {
+        List<VideoGame> managedVideoGames = new ArrayList<>();
+        for (VideoGame item : genre.getVideoGames()) {
+        if (item.getId() != null) {
+        VideoGame existingItem = videoGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        managedVideoGames.add(existingItem);
+        } else {
+        managedVideoGames.add(item);
+        }
+        }
+        genre.setVideoGames(managedVideoGames);
+        }
+    
+
+    
+        if (genre.getPodcasts() != null) {
+        List<Podcast> managedPodcasts = new ArrayList<>();
+        for (Podcast item : genre.getPodcasts()) {
+        if (item.getId() != null) {
+        Podcast existingItem = podcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found"));
+        managedPodcasts.add(existingItem);
+        } else {
+        managedPodcasts.add(item);
+        }
+        }
+        genre.setPodcasts(managedPodcasts);
+        }
+    
+
 
         return genreRepository.save(genre);
     }
@@ -172,6 +286,110 @@ public class GenreService extends BaseService<Genre> {
 
         return genreRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Genre> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Genre entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
 
+// --- Dissocier ManyToMany ---
+
+    
+        if (entity.getMovies() != null) {
+        entity.getMovies().clear();
+        }
+    
+
+    
+        if (entity.getTvShows() != null) {
+        entity.getTvShows().clear();
+        }
+    
+
+    
+        if (entity.getBookGenres() != null) {
+        entity.getBookGenres().clear();
+        }
+    
+
+    
+        if (entity.getMusicTracks() != null) {
+        entity.getMusicTracks().clear();
+        }
+    
+
+    
+        if (entity.getFavoriteUsers() != null) {
+        entity.getFavoriteUsers().clear();
+        }
+    
+
+    
+        if (entity.getVideoGames() != null) {
+        entity.getVideoGames().clear();
+        }
+    
+
+    
+        if (entity.getPodcasts() != null) {
+        entity.getPodcasts().clear();
+        }
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

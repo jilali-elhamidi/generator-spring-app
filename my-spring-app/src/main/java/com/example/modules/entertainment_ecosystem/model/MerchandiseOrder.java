@@ -42,7 +42,7 @@ public class MerchandiseOrder extends BaseEntity {
     
     
     
-    @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
         @JsonManagedReference
         private List<MerchandiseOrderItem> items;
     
