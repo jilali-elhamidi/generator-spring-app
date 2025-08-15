@@ -119,23 +119,6 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         }
 {{~/if}}
 {{~/each}}
-{{#each relationships}}
-    {{#if (eq relationType "ManyToMany")}}
-        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
-        List<{{type}}> managed{{capitalize name}} = new ArrayList<>();
-        for ({{type}} item : {{../entityNameLowercase}}.get{{capitalize name}}()) {
-        if (item.getId() != null) {
-        {{type}} existingItem = {{name}}Repository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("{{type}} not found"));
-        managed{{capitalize name}}.add(existingItem);
-        } else {
-        managed{{capitalize name}}.add(item);
-        }
-        }
-        {{../entityNameLowercase}}.set{{capitalize name}}(managed{{capitalize name}});
-        }
-    {{/if}}
-{{/each}}
 
         return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
     }
