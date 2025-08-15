@@ -95,24 +95,26 @@ public class UserPlaylistService extends BaseService<UserPlaylist> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getItems().clear();
 
         if (userplaylistRequest.getItems() != null) {
-        List<UserPlaylistItem> managedItems = new ArrayList<>();
-
         for (var item : userplaylistRequest.getItems()) {
+        UserPlaylistItem existingItem;
         if (item.getId() != null) {
-        UserPlaylistItem existingItem = itemsRepository.findById(item.getId())
+        existingItem = itemsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserPlaylistItem not found"));
-        existingItem.setPlaylist(existing);
-        managedItems.add(existingItem);
         } else {
-        item.setPlaylist(existing);
-        managedItems.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setPlaylist(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getItems().add(existingItem);
         }
         }
-        existing.setItems(managedItems);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

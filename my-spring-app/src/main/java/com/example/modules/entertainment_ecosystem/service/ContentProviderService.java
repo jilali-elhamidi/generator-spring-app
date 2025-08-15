@@ -151,78 +151,86 @@ public class ContentProviderService extends BaseService<ContentProvider> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getProvidedMovies().clear();
 
         if (contentproviderRequest.getProvidedMovies() != null) {
-        List<Movie> managedProvidedMovies = new ArrayList<>();
-
         for (var item : contentproviderRequest.getProvidedMovies()) {
+        Movie existingItem;
         if (item.getId() != null) {
-        Movie existingItem = providedMoviesRepository.findById(item.getId())
+        existingItem = providedMoviesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Movie not found"));
-        existingItem.setProvider(existing);
-        managedProvidedMovies.add(existingItem);
         } else {
-        item.setProvider(existing);
-        managedProvidedMovies.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setProvider(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getProvidedMovies().add(existingItem);
         }
         }
-        existing.setProvidedMovies(managedProvidedMovies);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getProvidedTvShows().clear();
 
         if (contentproviderRequest.getProvidedTvShows() != null) {
-        List<TVShow> managedProvidedTvShows = new ArrayList<>();
-
         for (var item : contentproviderRequest.getProvidedTvShows()) {
+        TVShow existingItem;
         if (item.getId() != null) {
-        TVShow existingItem = providedTvShowsRepository.findById(item.getId())
+        existingItem = providedTvShowsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        existingItem.setProvider(existing);
-        managedProvidedTvShows.add(existingItem);
         } else {
-        item.setProvider(existing);
-        managedProvidedTvShows.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setProvider(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getProvidedTvShows().add(existingItem);
         }
         }
-        existing.setProvidedTvShows(managedProvidedTvShows);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getProvidedMusicTracks().clear();
 
         if (contentproviderRequest.getProvidedMusicTracks() != null) {
-        List<MusicTrack> managedProvidedMusicTracks = new ArrayList<>();
-
         for (var item : contentproviderRequest.getProvidedMusicTracks()) {
+        MusicTrack existingItem;
         if (item.getId() != null) {
-        MusicTrack existingItem = providedMusicTracksRepository.findById(item.getId())
+        existingItem = providedMusicTracksRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        existingItem.setProvider(existing);
-        managedProvidedMusicTracks.add(existingItem);
         } else {
-        item.setProvider(existing);
-        managedProvidedMusicTracks.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setProvider(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getProvidedMusicTracks().add(existingItem);
         }
         }
-        existing.setProvidedMusicTracks(managedProvidedMusicTracks);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getProvidedPodcasts().clear();
 
         if (contentproviderRequest.getProvidedPodcasts() != null) {
-        List<Podcast> managedProvidedPodcasts = new ArrayList<>();
-
         for (var item : contentproviderRequest.getProvidedPodcasts()) {
+        Podcast existingItem;
         if (item.getId() != null) {
-        Podcast existingItem = providedPodcastsRepository.findById(item.getId())
+        existingItem = providedPodcastsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        existingItem.setProvider(existing);
-        managedProvidedPodcasts.add(existingItem);
         } else {
-        item.setProvider(existing);
-        managedProvidedPodcasts.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setProvider(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getProvidedPodcasts().add(existingItem);
         }
         }
-        existing.setProvidedPodcasts(managedProvidedPodcasts);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

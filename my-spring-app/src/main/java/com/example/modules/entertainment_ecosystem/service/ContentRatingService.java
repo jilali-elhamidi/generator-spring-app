@@ -149,60 +149,66 @@ public class ContentRatingService extends BaseService<ContentRating> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getRatedMovies().clear();
 
         if (contentratingRequest.getRatedMovies() != null) {
-        List<Movie> managedRatedMovies = new ArrayList<>();
-
         for (var item : contentratingRequest.getRatedMovies()) {
+        Movie existingItem;
         if (item.getId() != null) {
-        Movie existingItem = ratedMoviesRepository.findById(item.getId())
+        existingItem = ratedMoviesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Movie not found"));
-        existingItem.setContentRating(existing);
-        managedRatedMovies.add(existingItem);
         } else {
-        item.setContentRating(existing);
-        managedRatedMovies.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setContentRating(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getRatedMovies().add(existingItem);
         }
         }
-        existing.setRatedMovies(managedRatedMovies);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getRatedTvShows().clear();
 
         if (contentratingRequest.getRatedTvShows() != null) {
-        List<TVShow> managedRatedTvShows = new ArrayList<>();
-
         for (var item : contentratingRequest.getRatedTvShows()) {
+        TVShow existingItem;
         if (item.getId() != null) {
-        TVShow existingItem = ratedTvShowsRepository.findById(item.getId())
+        existingItem = ratedTvShowsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        existingItem.setContentRating(existing);
-        managedRatedTvShows.add(existingItem);
         } else {
-        item.setContentRating(existing);
-        managedRatedTvShows.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setContentRating(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getRatedTvShows().add(existingItem);
         }
         }
-        existing.setRatedTvShows(managedRatedTvShows);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getRatedVideoGames().clear();
 
         if (contentratingRequest.getRatedVideoGames() != null) {
-        List<VideoGame> managedRatedVideoGames = new ArrayList<>();
-
         for (var item : contentratingRequest.getRatedVideoGames()) {
+        VideoGame existingItem;
         if (item.getId() != null) {
-        VideoGame existingItem = ratedVideoGamesRepository.findById(item.getId())
+        existingItem = ratedVideoGamesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        existingItem.setContentRating(existing);
-        managedRatedVideoGames.add(existingItem);
         } else {
-        item.setContentRating(existing);
-        managedRatedVideoGames.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setContentRating(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getRatedVideoGames().add(existingItem);
         }
         }
-        existing.setRatedVideoGames(managedRatedVideoGames);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

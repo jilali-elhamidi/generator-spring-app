@@ -70,24 +70,26 @@ public class EventTicketTypeService extends BaseService<EventTicketType> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getTickets().clear();
 
         if (eventtickettypeRequest.getTickets() != null) {
-        List<Ticket> managedTickets = new ArrayList<>();
-
         for (var item : eventtickettypeRequest.getTickets()) {
+        Ticket existingItem;
         if (item.getId() != null) {
-        Ticket existingItem = ticketsRepository.findById(item.getId())
+        existingItem = ticketsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Ticket not found"));
-        existingItem.setType(existing);
-        managedTickets.add(existingItem);
         } else {
-        item.setType(existing);
-        managedTickets.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setType(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getTickets().add(existingItem);
         }
         }
-        existing.setTickets(managedTickets);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

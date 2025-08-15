@@ -131,24 +131,26 @@ public class EpisodeService extends BaseService<Episode> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getCredits().clear();
 
         if (episodeRequest.getCredits() != null) {
-        List<EpisodeCredit> managedCredits = new ArrayList<>();
-
         for (var item : episodeRequest.getCredits()) {
+        EpisodeCredit existingItem;
         if (item.getId() != null) {
-        EpisodeCredit existingItem = creditsRepository.findById(item.getId())
+        existingItem = creditsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("EpisodeCredit not found"));
-        existingItem.setEpisode(existing);
-        managedCredits.add(existingItem);
         } else {
-        item.setEpisode(existing);
-        managedCredits.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setEpisode(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getCredits().add(existingItem);
         }
         }
-        existing.setCredits(managedCredits);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

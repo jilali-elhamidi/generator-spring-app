@@ -136,24 +136,26 @@ public class AlbumService extends BaseService<Album> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getTracks().clear();
 
         if (albumRequest.getTracks() != null) {
-        List<MusicTrack> managedTracks = new ArrayList<>();
-
         for (var item : albumRequest.getTracks()) {
+        MusicTrack existingItem;
         if (item.getId() != null) {
-        MusicTrack existingItem = tracksRepository.findById(item.getId())
+        existingItem = tracksRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        existingItem.setAlbum(existing);
-        managedTracks.add(existingItem);
         } else {
-        item.setAlbum(existing);
-        managedTracks.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setAlbum(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getTracks().add(existingItem);
         }
         }
-        existing.setTracks(managedTracks);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

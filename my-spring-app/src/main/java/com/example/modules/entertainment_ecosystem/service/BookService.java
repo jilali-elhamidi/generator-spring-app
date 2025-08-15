@@ -138,24 +138,26 @@ public class BookService extends BaseService<Book> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getReviews().clear();
 
         if (bookRequest.getReviews() != null) {
-        List<Review> managedReviews = new ArrayList<>();
-
         for (var item : bookRequest.getReviews()) {
+        Review existingItem;
         if (item.getId() != null) {
-        Review existingItem = reviewsRepository.findById(item.getId())
+        existingItem = reviewsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Review not found"));
-        existingItem.setBook(existing);
-        managedReviews.add(existingItem);
         } else {
-        item.setBook(existing);
-        managedReviews.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setBook(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getReviews().add(existingItem);
         }
         }
-        existing.setReviews(managedReviews);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

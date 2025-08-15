@@ -123,42 +123,46 @@ public class SubscriptionPlanService extends BaseService<SubscriptionPlan> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getSubscriptions().clear();
 
         if (subscriptionplanRequest.getSubscriptions() != null) {
-        List<Subscription> managedSubscriptions = new ArrayList<>();
-
         for (var item : subscriptionplanRequest.getSubscriptions()) {
+        Subscription existingItem;
         if (item.getId() != null) {
-        Subscription existingItem = subscriptionsRepository.findById(item.getId())
+        existingItem = subscriptionsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Subscription not found"));
-        existingItem.setPlan(existing);
-        managedSubscriptions.add(existingItem);
         } else {
-        item.setPlan(existing);
-        managedSubscriptions.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setPlan(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSubscriptions().add(existingItem);
         }
         }
-        existing.setSubscriptions(managedSubscriptions);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getIncludedStreamingContentLicenses().clear();
 
         if (subscriptionplanRequest.getIncludedStreamingContentLicenses() != null) {
-        List<StreamingContentLicense> managedIncludedStreamingContentLicenses = new ArrayList<>();
-
         for (var item : subscriptionplanRequest.getIncludedStreamingContentLicenses()) {
+        StreamingContentLicense existingItem;
         if (item.getId() != null) {
-        StreamingContentLicense existingItem = includedStreamingContentLicensesRepository.findById(item.getId())
+        existingItem = includedStreamingContentLicensesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
-        existingItem.setSubscriptionPlan(existing);
-        managedIncludedStreamingContentLicenses.add(existingItem);
         } else {
-        item.setSubscriptionPlan(existing);
-        managedIncludedStreamingContentLicenses.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setSubscriptionPlan(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getIncludedStreamingContentLicenses().add(existingItem);
         }
         }
-        existing.setIncludedStreamingContentLicenses(managedIncludedStreamingContentLicenses);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

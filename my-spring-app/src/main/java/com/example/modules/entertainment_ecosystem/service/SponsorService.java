@@ -125,60 +125,66 @@ public class SponsorService extends BaseService<Sponsor> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getSponsoredEvents().clear();
 
         if (sponsorRequest.getSponsoredEvents() != null) {
-        List<LiveEvent> managedSponsoredEvents = new ArrayList<>();
-
         for (var item : sponsorRequest.getSponsoredEvents()) {
+        LiveEvent existingItem;
         if (item.getId() != null) {
-        LiveEvent existingItem = sponsoredEventsRepository.findById(item.getId())
+        existingItem = sponsoredEventsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-        existingItem.setSponsor(existing);
-        managedSponsoredEvents.add(existingItem);
         } else {
-        item.setSponsor(existing);
-        managedSponsoredEvents.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setSponsor(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSponsoredEvents().add(existingItem);
         }
         }
-        existing.setSponsoredEvents(managedSponsoredEvents);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getSponsorships().clear();
 
         if (sponsorRequest.getSponsorships() != null) {
-        List<EventSponsorship> managedSponsorships = new ArrayList<>();
-
         for (var item : sponsorRequest.getSponsorships()) {
+        EventSponsorship existingItem;
         if (item.getId() != null) {
-        EventSponsorship existingItem = sponsorshipsRepository.findById(item.getId())
+        existingItem = sponsorshipsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("EventSponsorship not found"));
-        existingItem.setSponsor(existing);
-        managedSponsorships.add(existingItem);
         } else {
-        item.setSponsor(existing);
-        managedSponsorships.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setSponsor(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSponsorships().add(existingItem);
         }
         }
-        existing.setSponsorships(managedSponsorships);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getAdCampaigns().clear();
 
         if (sponsorRequest.getAdCampaigns() != null) {
-        List<AdCampaign> managedAdCampaigns = new ArrayList<>();
-
         for (var item : sponsorRequest.getAdCampaigns()) {
+        AdCampaign existingItem;
         if (item.getId() != null) {
-        AdCampaign existingItem = adCampaignsRepository.findById(item.getId())
+        existingItem = adCampaignsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("AdCampaign not found"));
-        existingItem.setAdvertiser(existing);
-        managedAdCampaigns.add(existingItem);
         } else {
-        item.setAdvertiser(existing);
-        managedAdCampaigns.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setAdvertiser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getAdCampaigns().add(existingItem);
         }
         }
-        existing.setAdCampaigns(managedAdCampaigns);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

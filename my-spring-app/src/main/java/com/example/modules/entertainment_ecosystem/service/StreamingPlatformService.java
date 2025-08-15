@@ -168,24 +168,26 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getSubscriptions().clear();
 
         if (streamingplatformRequest.getSubscriptions() != null) {
-        List<Subscription> managedSubscriptions = new ArrayList<>();
-
         for (var item : streamingplatformRequest.getSubscriptions()) {
+        Subscription existingItem;
         if (item.getId() != null) {
-        Subscription existingItem = subscriptionsRepository.findById(item.getId())
+        existingItem = subscriptionsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Subscription not found"));
-        existingItem.setPlatform(existing);
-        managedSubscriptions.add(existingItem);
         } else {
-        item.setPlatform(existing);
-        managedSubscriptions.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setPlatform(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSubscriptions().add(existingItem);
         }
         }
-        existing.setSubscriptions(managedSubscriptions);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

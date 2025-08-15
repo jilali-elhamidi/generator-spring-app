@@ -243,60 +243,66 @@ public class ReviewService extends BaseService<Review> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getReviewComments().clear();
 
         if (reviewRequest.getReviewComments() != null) {
-        List<ReviewComment> managedReviewComments = new ArrayList<>();
-
         for (var item : reviewRequest.getReviewComments()) {
+        ReviewComment existingItem;
         if (item.getId() != null) {
-        ReviewComment existingItem = reviewCommentsRepository.findById(item.getId())
+        existingItem = reviewCommentsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ReviewComment not found"));
-        existingItem.setReview(existing);
-        managedReviewComments.add(existingItem);
         } else {
-        item.setReview(existing);
-        managedReviewComments.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setReview(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getReviewComments().add(existingItem);
         }
         }
-        existing.setReviewComments(managedReviewComments);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getRatings().clear();
 
         if (reviewRequest.getRatings() != null) {
-        List<ReviewRating> managedRatings = new ArrayList<>();
-
         for (var item : reviewRequest.getRatings()) {
+        ReviewRating existingItem;
         if (item.getId() != null) {
-        ReviewRating existingItem = ratingsRepository.findById(item.getId())
+        existingItem = ratingsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ReviewRating not found"));
-        existingItem.setReview(existing);
-        managedRatings.add(existingItem);
         } else {
-        item.setReview(existing);
-        managedRatings.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setReview(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getRatings().add(existingItem);
         }
         }
-        existing.setRatings(managedRatings);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getLikes().clear();
 
         if (reviewRequest.getLikes() != null) {
-        List<ReviewLike> managedLikes = new ArrayList<>();
-
         for (var item : reviewRequest.getLikes()) {
+        ReviewLike existingItem;
         if (item.getId() != null) {
-        ReviewLike existingItem = likesRepository.findById(item.getId())
+        existingItem = likesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ReviewLike not found"));
-        existingItem.setReview(existing);
-        managedLikes.add(existingItem);
         } else {
-        item.setReview(existing);
-        managedLikes.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setReview(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getLikes().add(existingItem);
         }
         }
-        existing.setLikes(managedLikes);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

@@ -70,24 +70,26 @@ public class WarehouseService extends BaseService<Warehouse> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getInventoryItems().clear();
 
         if (warehouseRequest.getInventoryItems() != null) {
-        List<MerchandiseInventory> managedInventoryItems = new ArrayList<>();
-
         for (var item : warehouseRequest.getInventoryItems()) {
+        MerchandiseInventory existingItem;
         if (item.getId() != null) {
-        MerchandiseInventory existingItem = inventoryItemsRepository.findById(item.getId())
+        existingItem = inventoryItemsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MerchandiseInventory not found"));
-        existingItem.setWarehouse(existing);
-        managedInventoryItems.add(existingItem);
         } else {
-        item.setWarehouse(existing);
-        managedInventoryItems.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setWarehouse(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getInventoryItems().add(existingItem);
         }
         }
-        existing.setInventoryItems(managedInventoryItems);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

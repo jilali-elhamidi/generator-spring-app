@@ -223,42 +223,46 @@ public class LiveEventService extends BaseService<LiveEvent> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getTickets().clear();
 
         if (liveeventRequest.getTickets() != null) {
-        List<Ticket> managedTickets = new ArrayList<>();
-
         for (var item : liveeventRequest.getTickets()) {
+        Ticket existingItem;
         if (item.getId() != null) {
-        Ticket existingItem = ticketsRepository.findById(item.getId())
+        existingItem = ticketsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Ticket not found"));
-        existingItem.setEvent(existing);
-        managedTickets.add(existingItem);
         } else {
-        item.setEvent(existing);
-        managedTickets.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setEvent(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getTickets().add(existingItem);
         }
         }
-        existing.setTickets(managedTickets);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getSponsorships().clear();
 
         if (liveeventRequest.getSponsorships() != null) {
-        List<EventSponsorship> managedSponsorships = new ArrayList<>();
-
         for (var item : liveeventRequest.getSponsorships()) {
+        EventSponsorship existingItem;
         if (item.getId() != null) {
-        EventSponsorship existingItem = sponsorshipsRepository.findById(item.getId())
+        existingItem = sponsorshipsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("EventSponsorship not found"));
-        existingItem.setEvent(existing);
-        managedSponsorships.add(existingItem);
         } else {
-        item.setEvent(existing);
-        managedSponsorships.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setEvent(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSponsorships().add(existingItem);
         }
         }
-        existing.setSponsorships(managedSponsorships);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

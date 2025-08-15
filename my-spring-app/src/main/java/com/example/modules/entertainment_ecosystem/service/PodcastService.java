@@ -237,42 +237,46 @@ public class PodcastService extends BaseService<Podcast> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getEpisodes().clear();
 
         if (podcastRequest.getEpisodes() != null) {
-        List<PodcastEpisode> managedEpisodes = new ArrayList<>();
-
         for (var item : podcastRequest.getEpisodes()) {
+        PodcastEpisode existingItem;
         if (item.getId() != null) {
-        PodcastEpisode existingItem = episodesRepository.findById(item.getId())
+        existingItem = episodesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("PodcastEpisode not found"));
-        existingItem.setPodcast(existing);
-        managedEpisodes.add(existingItem);
         } else {
-        item.setPodcast(existing);
-        managedEpisodes.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setPodcast(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getEpisodes().add(existingItem);
         }
         }
-        existing.setEpisodes(managedEpisodes);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGuests().clear();
 
         if (podcastRequest.getGuests() != null) {
-        List<PodcastGuest> managedGuests = new ArrayList<>();
-
         for (var item : podcastRequest.getGuests()) {
+        PodcastGuest existingItem;
         if (item.getId() != null) {
-        PodcastGuest existingItem = guestsRepository.findById(item.getId())
+        existingItem = guestsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("PodcastGuest not found"));
-        existingItem.setPodcast(existing);
-        managedGuests.add(existingItem);
         } else {
-        item.setPodcast(existing);
-        managedGuests.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setPodcast(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGuests().add(existingItem);
         }
         }
-        existing.setGuests(managedGuests);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

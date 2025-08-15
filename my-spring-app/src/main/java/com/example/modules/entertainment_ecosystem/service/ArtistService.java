@@ -441,222 +441,246 @@ public class ArtistService extends BaseService<Artist> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getComposedMusic().clear();
 
         if (artistRequest.getComposedMusic() != null) {
-        List<MusicTrack> managedComposedMusic = new ArrayList<>();
-
         for (var item : artistRequest.getComposedMusic()) {
+        MusicTrack existingItem;
         if (item.getId() != null) {
-        MusicTrack existingItem = composedMusicRepository.findById(item.getId())
+        existingItem = composedMusicRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        existingItem.setArtist(existing);
-        managedComposedMusic.add(existingItem);
         } else {
-        item.setArtist(existing);
-        managedComposedMusic.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setArtist(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getComposedMusic().add(existingItem);
         }
         }
-        existing.setComposedMusic(managedComposedMusic);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getAlbums().clear();
 
         if (artistRequest.getAlbums() != null) {
-        List<Album> managedAlbums = new ArrayList<>();
-
         for (var item : artistRequest.getAlbums()) {
+        Album existingItem;
         if (item.getId() != null) {
-        Album existingItem = albumsRepository.findById(item.getId())
+        existingItem = albumsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Album not found"));
-        existingItem.setArtist(existing);
-        managedAlbums.add(existingItem);
         } else {
-        item.setArtist(existing);
-        managedAlbums.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setArtist(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getAlbums().add(existingItem);
         }
         }
-        existing.setAlbums(managedAlbums);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getBooksAuthored().clear();
 
         if (artistRequest.getBooksAuthored() != null) {
-        List<Book> managedBooksAuthored = new ArrayList<>();
-
         for (var item : artistRequest.getBooksAuthored()) {
+        Book existingItem;
         if (item.getId() != null) {
-        Book existingItem = booksAuthoredRepository.findById(item.getId())
+        existingItem = booksAuthoredRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Book not found"));
-        existingItem.setAuthor(existing);
-        managedBooksAuthored.add(existingItem);
         } else {
-        item.setAuthor(existing);
-        managedBooksAuthored.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setAuthor(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getBooksAuthored().add(existingItem);
         }
         }
-        existing.setBooksAuthored(managedBooksAuthored);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getHostedPodcasts().clear();
 
         if (artistRequest.getHostedPodcasts() != null) {
-        List<Podcast> managedHostedPodcasts = new ArrayList<>();
-
         for (var item : artistRequest.getHostedPodcasts()) {
+        Podcast existingItem;
         if (item.getId() != null) {
-        Podcast existingItem = hostedPodcastsRepository.findById(item.getId())
+        existingItem = hostedPodcastsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        existingItem.setHost(existing);
-        managedHostedPodcasts.add(existingItem);
         } else {
-        item.setHost(existing);
-        managedHostedPodcasts.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setHost(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getHostedPodcasts().add(existingItem);
         }
         }
-        existing.setHostedPodcasts(managedHostedPodcasts);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getManagedMerchandise().clear();
 
         if (artistRequest.getManagedMerchandise() != null) {
-        List<Merchandise> managedManagedMerchandise = new ArrayList<>();
-
         for (var item : artistRequest.getManagedMerchandise()) {
+        Merchandise existingItem;
         if (item.getId() != null) {
-        Merchandise existingItem = managedMerchandiseRepository.findById(item.getId())
+        existingItem = managedMerchandiseRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        existingItem.setArtist(existing);
-        managedManagedMerchandise.add(existingItem);
         } else {
-        item.setArtist(existing);
-        managedManagedMerchandise.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setArtist(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getManagedMerchandise().add(existingItem);
         }
         }
-        existing.setManagedMerchandise(managedManagedMerchandise);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getManagedGames().clear();
 
         if (artistRequest.getManagedGames() != null) {
-        List<VideoGame> managedManagedGames = new ArrayList<>();
-
         for (var item : artistRequest.getManagedGames()) {
+        VideoGame existingItem;
         if (item.getId() != null) {
-        VideoGame existingItem = managedGamesRepository.findById(item.getId())
+        existingItem = managedGamesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        existingItem.setDeveloper(existing);
-        managedManagedGames.add(existingItem);
         } else {
-        item.setDeveloper(existing);
-        managedManagedGames.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setDeveloper(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getManagedGames().add(existingItem);
         }
         }
-        existing.setManagedGames(managedManagedGames);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getAwards().clear();
 
         if (artistRequest.getAwards() != null) {
-        List<ArtistAward> managedAwards = new ArrayList<>();
-
         for (var item : artistRequest.getAwards()) {
+        ArtistAward existingItem;
         if (item.getId() != null) {
-        ArtistAward existingItem = awardsRepository.findById(item.getId())
+        existingItem = awardsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ArtistAward not found"));
-        existingItem.setArtist(existing);
-        managedAwards.add(existingItem);
         } else {
-        item.setArtist(existing);
-        managedAwards.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setArtist(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getAwards().add(existingItem);
         }
         }
-        existing.setAwards(managedAwards);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getDirectedMovies().clear();
 
         if (artistRequest.getDirectedMovies() != null) {
-        List<Movie> managedDirectedMovies = new ArrayList<>();
-
         for (var item : artistRequest.getDirectedMovies()) {
+        Movie existingItem;
         if (item.getId() != null) {
-        Movie existingItem = directedMoviesRepository.findById(item.getId())
+        existingItem = directedMoviesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Movie not found"));
-        existingItem.setDirector(existing);
-        managedDirectedMovies.add(existingItem);
         } else {
-        item.setDirector(existing);
-        managedDirectedMovies.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setDirector(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getDirectedMovies().add(existingItem);
         }
         }
-        existing.setDirectedMovies(managedDirectedMovies);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getDirectedShows().clear();
 
         if (artistRequest.getDirectedShows() != null) {
-        List<TVShow> managedDirectedShows = new ArrayList<>();
-
         for (var item : artistRequest.getDirectedShows()) {
+        TVShow existingItem;
         if (item.getId() != null) {
-        TVShow existingItem = directedShowsRepository.findById(item.getId())
+        existingItem = directedShowsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        existingItem.setDirector(existing);
-        managedDirectedShows.add(existingItem);
         } else {
-        item.setDirector(existing);
-        managedDirectedShows.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setDirector(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getDirectedShows().add(existingItem);
         }
         }
-        existing.setDirectedShows(managedDirectedShows);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getManagedAssets().clear();
 
         if (artistRequest.getManagedAssets() != null) {
-        List<DigitalAsset> managedManagedAssets = new ArrayList<>();
-
         for (var item : artistRequest.getManagedAssets()) {
+        DigitalAsset existingItem;
         if (item.getId() != null) {
-        DigitalAsset existingItem = managedAssetsRepository.findById(item.getId())
+        existingItem = managedAssetsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
-        existingItem.setArtist(existing);
-        managedManagedAssets.add(existingItem);
         } else {
-        item.setArtist(existing);
-        managedManagedAssets.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setArtist(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getManagedAssets().add(existingItem);
         }
         }
-        existing.setManagedAssets(managedManagedAssets);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getSocialMediaLinks().clear();
 
         if (artistRequest.getSocialMediaLinks() != null) {
-        List<ArtistSocialMedia> managedSocialMediaLinks = new ArrayList<>();
-
         for (var item : artistRequest.getSocialMediaLinks()) {
+        ArtistSocialMedia existingItem;
         if (item.getId() != null) {
-        ArtistSocialMedia existingItem = socialMediaLinksRepository.findById(item.getId())
+        existingItem = socialMediaLinksRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ArtistSocialMedia not found"));
-        existingItem.setArtist(existing);
-        managedSocialMediaLinks.add(existingItem);
         } else {
-        item.setArtist(existing);
-        managedSocialMediaLinks.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setArtist(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSocialMediaLinks().add(existingItem);
         }
         }
-        existing.setSocialMediaLinks(managedSocialMediaLinks);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getEpisodeCredits().clear();
 
         if (artistRequest.getEpisodeCredits() != null) {
-        List<EpisodeCredit> managedEpisodeCredits = new ArrayList<>();
-
         for (var item : artistRequest.getEpisodeCredits()) {
+        EpisodeCredit existingItem;
         if (item.getId() != null) {
-        EpisodeCredit existingItem = episodeCreditsRepository.findById(item.getId())
+        existingItem = episodeCreditsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("EpisodeCredit not found"));
-        existingItem.setArtist(existing);
-        managedEpisodeCredits.add(existingItem);
         } else {
-        item.setArtist(existing);
-        managedEpisodeCredits.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setArtist(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getEpisodeCredits().add(existingItem);
         }
         }
-        existing.setEpisodeCredits(managedEpisodeCredits);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

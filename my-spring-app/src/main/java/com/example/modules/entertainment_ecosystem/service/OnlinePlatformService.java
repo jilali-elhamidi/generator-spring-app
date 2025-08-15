@@ -69,24 +69,26 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getStreams().clear();
 
         if (onlineplatformRequest.getStreams() != null) {
-        List<StreamingPlatform> managedStreams = new ArrayList<>();
-
         for (var item : onlineplatformRequest.getStreams()) {
+        StreamingPlatform existingItem;
         if (item.getId() != null) {
-        StreamingPlatform existingItem = streamsRepository.findById(item.getId())
+        existingItem = streamsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
-        existingItem.setOnlinePlatform(existing);
-        managedStreams.add(existingItem);
         } else {
-        item.setOnlinePlatform(existing);
-        managedStreams.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setOnlinePlatform(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getStreams().add(existingItem);
         }
         }
-        existing.setStreams(managedStreams);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

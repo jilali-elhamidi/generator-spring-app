@@ -124,42 +124,46 @@ public class EmployeeService extends BaseService<Employee> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getShifts().clear();
 
         if (employeeRequest.getShifts() != null) {
-        List<Shift> managedShifts = new ArrayList<>();
-
         for (var item : employeeRequest.getShifts()) {
+        Shift existingItem;
         if (item.getId() != null) {
-        Shift existingItem = shiftsRepository.findById(item.getId())
+        existingItem = shiftsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Shift not found"));
-        existingItem.setEmployee(existing);
-        managedShifts.add(existingItem);
         } else {
-        item.setEmployee(existing);
-        managedShifts.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setEmployee(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getShifts().add(existingItem);
         }
         }
-        existing.setShifts(managedShifts);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getManagedLocations().clear();
 
         if (employeeRequest.getManagedLocations() != null) {
-        List<EventLocation> managedManagedLocations = new ArrayList<>();
-
         for (var item : employeeRequest.getManagedLocations()) {
+        EventLocation existingItem;
         if (item.getId() != null) {
-        EventLocation existingItem = managedLocationsRepository.findById(item.getId())
+        existingItem = managedLocationsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("EventLocation not found"));
-        existingItem.setContactPerson(existing);
-        managedManagedLocations.add(existingItem);
         } else {
-        item.setContactPerson(existing);
-        managedManagedLocations.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setContactPerson(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getManagedLocations().add(existingItem);
         }
         }
-        existing.setManagedLocations(managedManagedLocations);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

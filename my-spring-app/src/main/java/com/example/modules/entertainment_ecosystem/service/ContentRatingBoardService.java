@@ -70,24 +70,26 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getRatings().clear();
 
         if (contentratingboardRequest.getRatings() != null) {
-        List<ContentRating> managedRatings = new ArrayList<>();
-
         for (var item : contentratingboardRequest.getRatings()) {
+        ContentRating existingItem;
         if (item.getId() != null) {
-        ContentRating existingItem = ratingsRepository.findById(item.getId())
+        existingItem = ratingsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ContentRating not found"));
-        existingItem.setBoard(existing);
-        managedRatings.add(existingItem);
         } else {
-        item.setBoard(existing);
-        managedRatings.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setBoard(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getRatings().add(existingItem);
         }
         }
-        existing.setRatings(managedRatings);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

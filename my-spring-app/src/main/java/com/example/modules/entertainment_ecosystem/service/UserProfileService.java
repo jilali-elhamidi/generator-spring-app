@@ -1000,510 +1000,566 @@ public class UserProfileService extends BaseService<UserProfile> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getReviews().clear();
 
         if (userprofileRequest.getReviews() != null) {
-        List<Review> managedReviews = new ArrayList<>();
-
         for (var item : userprofileRequest.getReviews()) {
+        Review existingItem;
         if (item.getId() != null) {
-        Review existingItem = reviewsRepository.findById(item.getId())
+        existingItem = reviewsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Review not found"));
-        existingItem.setUser(existing);
-        managedReviews.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedReviews.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getReviews().add(existingItem);
         }
         }
-        existing.setReviews(managedReviews);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getSubscriptions().clear();
 
         if (userprofileRequest.getSubscriptions() != null) {
-        List<Subscription> managedSubscriptions = new ArrayList<>();
-
         for (var item : userprofileRequest.getSubscriptions()) {
+        Subscription existingItem;
         if (item.getId() != null) {
-        Subscription existingItem = subscriptionsRepository.findById(item.getId())
+        existingItem = subscriptionsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Subscription not found"));
-        existingItem.setUser(existing);
-        managedSubscriptions.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedSubscriptions.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSubscriptions().add(existingItem);
         }
         }
-        existing.setSubscriptions(managedSubscriptions);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getForumThreads().clear();
 
         if (userprofileRequest.getForumThreads() != null) {
-        List<ForumThread> managedForumThreads = new ArrayList<>();
-
         for (var item : userprofileRequest.getForumThreads()) {
+        ForumThread existingItem;
         if (item.getId() != null) {
-        ForumThread existingItem = forumThreadsRepository.findById(item.getId())
+        existingItem = forumThreadsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ForumThread not found"));
-        existingItem.setAuthor(existing);
-        managedForumThreads.add(existingItem);
         } else {
-        item.setAuthor(existing);
-        managedForumThreads.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setAuthor(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getForumThreads().add(existingItem);
         }
         }
-        existing.setForumThreads(managedForumThreads);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getForumPosts().clear();
 
         if (userprofileRequest.getForumPosts() != null) {
-        List<ForumPost> managedForumPosts = new ArrayList<>();
-
         for (var item : userprofileRequest.getForumPosts()) {
+        ForumPost existingItem;
         if (item.getId() != null) {
-        ForumPost existingItem = forumPostsRepository.findById(item.getId())
+        existingItem = forumPostsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ForumPost not found"));
-        existingItem.setAuthor(existing);
-        managedForumPosts.add(existingItem);
         } else {
-        item.setAuthor(existing);
-        managedForumPosts.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setAuthor(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getForumPosts().add(existingItem);
         }
         }
-        existing.setForumPosts(managedForumPosts);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getAchievements().clear();
 
         if (userprofileRequest.getAchievements() != null) {
-        List<Achievement> managedAchievements = new ArrayList<>();
-
         for (var item : userprofileRequest.getAchievements()) {
+        Achievement existingItem;
         if (item.getId() != null) {
-        Achievement existingItem = achievementsRepository.findById(item.getId())
+        existingItem = achievementsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Achievement not found"));
-        existingItem.setUser(existing);
-        managedAchievements.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedAchievements.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getAchievements().add(existingItem);
         }
         }
-        existing.setAchievements(managedAchievements);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getHostedOnlineEvents().clear();
 
         if (userprofileRequest.getHostedOnlineEvents() != null) {
-        List<OnlineEvent> managedHostedOnlineEvents = new ArrayList<>();
-
         for (var item : userprofileRequest.getHostedOnlineEvents()) {
+        OnlineEvent existingItem;
         if (item.getId() != null) {
-        OnlineEvent existingItem = hostedOnlineEventsRepository.findById(item.getId())
+        existingItem = hostedOnlineEventsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
-        existingItem.setHost(existing);
-        managedHostedOnlineEvents.add(existingItem);
         } else {
-        item.setHost(existing);
-        managedHostedOnlineEvents.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setHost(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getHostedOnlineEvents().add(existingItem);
         }
         }
-        existing.setHostedOnlineEvents(managedHostedOnlineEvents);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getPlaylists().clear();
 
         if (userprofileRequest.getPlaylists() != null) {
-        List<Playlist> managedPlaylists = new ArrayList<>();
-
         for (var item : userprofileRequest.getPlaylists()) {
+        Playlist existingItem;
         if (item.getId() != null) {
-        Playlist existingItem = playlistsRepository.findById(item.getId())
+        existingItem = playlistsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Playlist not found"));
-        existingItem.setOwner(existing);
-        managedPlaylists.add(existingItem);
         } else {
-        item.setOwner(existing);
-        managedPlaylists.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setOwner(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getPlaylists().add(existingItem);
         }
         }
-        existing.setPlaylists(managedPlaylists);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getDigitalPurchases().clear();
 
         if (userprofileRequest.getDigitalPurchases() != null) {
-        List<DigitalPurchase> managedDigitalPurchases = new ArrayList<>();
-
         for (var item : userprofileRequest.getDigitalPurchases()) {
+        DigitalPurchase existingItem;
         if (item.getId() != null) {
-        DigitalPurchase existingItem = digitalPurchasesRepository.findById(item.getId())
+        existingItem = digitalPurchasesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
-        existingItem.setUser(existing);
-        managedDigitalPurchases.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedDigitalPurchases.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getDigitalPurchases().add(existingItem);
         }
         }
-        existing.setDigitalPurchases(managedDigitalPurchases);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGameSessions().clear();
 
         if (userprofileRequest.getGameSessions() != null) {
-        List<GameSession> managedGameSessions = new ArrayList<>();
-
         for (var item : userprofileRequest.getGameSessions()) {
+        GameSession existingItem;
         if (item.getId() != null) {
-        GameSession existingItem = gameSessionsRepository.findById(item.getId())
+        existingItem = gameSessionsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameSession not found"));
-        existingItem.setUser(existing);
-        managedGameSessions.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedGameSessions.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGameSessions().add(existingItem);
         }
         }
-        existing.setGameSessions(managedGameSessions);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGameReviewComments().clear();
 
         if (userprofileRequest.getGameReviewComments() != null) {
-        List<GameReviewComment> managedGameReviewComments = new ArrayList<>();
-
         for (var item : userprofileRequest.getGameReviewComments()) {
+        GameReviewComment existingItem;
         if (item.getId() != null) {
-        GameReviewComment existingItem = gameReviewCommentsRepository.findById(item.getId())
+        existingItem = gameReviewCommentsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
-        existingItem.setUser(existing);
-        managedGameReviewComments.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedGameReviewComments.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGameReviewComments().add(existingItem);
         }
         }
-        existing.setGameReviewComments(managedGameReviewComments);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getUserPlaylists().clear();
 
         if (userprofileRequest.getUserPlaylists() != null) {
-        List<UserPlaylist> managedUserPlaylists = new ArrayList<>();
-
         for (var item : userprofileRequest.getUserPlaylists()) {
+        UserPlaylist existingItem;
         if (item.getId() != null) {
-        UserPlaylist existingItem = userPlaylistsRepository.findById(item.getId())
+        existingItem = userPlaylistsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserPlaylist not found"));
-        existingItem.setUser(existing);
-        managedUserPlaylists.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedUserPlaylists.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getUserPlaylists().add(existingItem);
         }
         }
-        existing.setUserPlaylists(managedUserPlaylists);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getUserPlaylistItems().clear();
 
         if (userprofileRequest.getUserPlaylistItems() != null) {
-        List<UserPlaylistItem> managedUserPlaylistItems = new ArrayList<>();
-
         for (var item : userprofileRequest.getUserPlaylistItems()) {
+        UserPlaylistItem existingItem;
         if (item.getId() != null) {
-        UserPlaylistItem existingItem = userPlaylistItemsRepository.findById(item.getId())
+        existingItem = userPlaylistItemsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserPlaylistItem not found"));
-        existingItem.setAddedBy(existing);
-        managedUserPlaylistItems.add(existingItem);
         } else {
-        item.setAddedBy(existing);
-        managedUserPlaylistItems.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setAddedBy(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getUserPlaylistItems().add(existingItem);
         }
         }
-        existing.setUserPlaylistItems(managedUserPlaylistItems);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGivenRatings().clear();
 
         if (userprofileRequest.getGivenRatings() != null) {
-        List<ReviewRating> managedGivenRatings = new ArrayList<>();
-
         for (var item : userprofileRequest.getGivenRatings()) {
+        ReviewRating existingItem;
         if (item.getId() != null) {
-        ReviewRating existingItem = givenRatingsRepository.findById(item.getId())
+        existingItem = givenRatingsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ReviewRating not found"));
-        existingItem.setUser(existing);
-        managedGivenRatings.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedGivenRatings.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGivenRatings().add(existingItem);
         }
         }
-        existing.setGivenRatings(managedGivenRatings);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getLikedReviews().clear();
 
         if (userprofileRequest.getLikedReviews() != null) {
-        List<ReviewLike> managedLikedReviews = new ArrayList<>();
-
         for (var item : userprofileRequest.getLikedReviews()) {
+        ReviewLike existingItem;
         if (item.getId() != null) {
-        ReviewLike existingItem = likedReviewsRepository.findById(item.getId())
+        existingItem = likedReviewsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ReviewLike not found"));
-        existingItem.setUser(existing);
-        managedLikedReviews.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedLikedReviews.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getLikedReviews().add(existingItem);
         }
         }
-        existing.setLikedReviews(managedLikedReviews);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getActivityLogs().clear();
 
         if (userprofileRequest.getActivityLogs() != null) {
-        List<UserActivityLog> managedActivityLogs = new ArrayList<>();
-
         for (var item : userprofileRequest.getActivityLogs()) {
+        UserActivityLog existingItem;
         if (item.getId() != null) {
-        UserActivityLog existingItem = activityLogsRepository.findById(item.getId())
+        existingItem = activityLogsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserActivityLog not found"));
-        existingItem.setUser(existing);
-        managedActivityLogs.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedActivityLogs.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getActivityLogs().add(existingItem);
         }
         }
-        existing.setActivityLogs(managedActivityLogs);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getSettings().clear();
 
         if (userprofileRequest.getSettings() != null) {
-        List<UserSetting> managedSettings = new ArrayList<>();
-
         for (var item : userprofileRequest.getSettings()) {
+        UserSetting existingItem;
         if (item.getId() != null) {
-        UserSetting existingItem = settingsRepository.findById(item.getId())
+        existingItem = settingsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserSetting not found"));
-        existingItem.setUser(existing);
-        managedSettings.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedSettings.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSettings().add(existingItem);
         }
         }
-        existing.setSettings(managedSettings);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getFollowers().clear();
 
         if (userprofileRequest.getFollowers() != null) {
-        List<UserFollower> managedFollowers = new ArrayList<>();
-
         for (var item : userprofileRequest.getFollowers()) {
+        UserFollower existingItem;
         if (item.getId() != null) {
-        UserFollower existingItem = followersRepository.findById(item.getId())
+        existingItem = followersRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserFollower not found"));
-        existingItem.setFollowed(existing);
-        managedFollowers.add(existingItem);
         } else {
-        item.setFollowed(existing);
-        managedFollowers.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setFollowed(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getFollowers().add(existingItem);
         }
         }
-        existing.setFollowers(managedFollowers);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getFollowing().clear();
 
         if (userprofileRequest.getFollowing() != null) {
-        List<UserFollower> managedFollowing = new ArrayList<>();
-
         for (var item : userprofileRequest.getFollowing()) {
+        UserFollower existingItem;
         if (item.getId() != null) {
-        UserFollower existingItem = followingRepository.findById(item.getId())
+        existingItem = followingRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserFollower not found"));
-        existingItem.setFollower(existing);
-        managedFollowing.add(existingItem);
         } else {
-        item.setFollower(existing);
-        managedFollowing.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setFollower(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getFollowing().add(existingItem);
         }
         }
-        existing.setFollowing(managedFollowing);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getUserAchievements().clear();
 
         if (userprofileRequest.getUserAchievements() != null) {
-        List<UserAchievement> managedUserAchievements = new ArrayList<>();
-
         for (var item : userprofileRequest.getUserAchievements()) {
+        UserAchievement existingItem;
         if (item.getId() != null) {
-        UserAchievement existingItem = userAchievementsRepository.findById(item.getId())
+        existingItem = userAchievementsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserAchievement not found"));
-        existingItem.setUser(existing);
-        managedUserAchievements.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedUserAchievements.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getUserAchievements().add(existingItem);
         }
         }
-        existing.setUserAchievements(managedUserAchievements);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getNotifications().clear();
 
         if (userprofileRequest.getNotifications() != null) {
-        List<Notification> managedNotifications = new ArrayList<>();
-
         for (var item : userprofileRequest.getNotifications()) {
+        Notification existingItem;
         if (item.getId() != null) {
-        Notification existingItem = notificationsRepository.findById(item.getId())
+        existingItem = notificationsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Notification not found"));
-        existingItem.setRecipient(existing);
-        managedNotifications.add(existingItem);
         } else {
-        item.setRecipient(existing);
-        managedNotifications.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setRecipient(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getNotifications().add(existingItem);
         }
         }
-        existing.setNotifications(managedNotifications);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getMerchandiseReviews().clear();
 
         if (userprofileRequest.getMerchandiseReviews() != null) {
-        List<MerchandiseReview> managedMerchandiseReviews = new ArrayList<>();
-
         for (var item : userprofileRequest.getMerchandiseReviews()) {
+        MerchandiseReview existingItem;
         if (item.getId() != null) {
-        MerchandiseReview existingItem = merchandiseReviewsRepository.findById(item.getId())
+        existingItem = merchandiseReviewsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MerchandiseReview not found"));
-        existingItem.setUser(existing);
-        managedMerchandiseReviews.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedMerchandiseReviews.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getMerchandiseReviews().add(existingItem);
         }
         }
-        existing.setMerchandiseReviews(managedMerchandiseReviews);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getPreferences().clear();
 
         if (userprofileRequest.getPreferences() != null) {
-        List<UserPreference> managedPreferences = new ArrayList<>();
-
         for (var item : userprofileRequest.getPreferences()) {
+        UserPreference existingItem;
         if (item.getId() != null) {
-        UserPreference existingItem = preferencesRepository.findById(item.getId())
+        existingItem = preferencesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserPreference not found"));
-        existingItem.setUser(existing);
-        managedPreferences.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedPreferences.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getPreferences().add(existingItem);
         }
         }
-        existing.setPreferences(managedPreferences);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getMerchandiseSales().clear();
 
         if (userprofileRequest.getMerchandiseSales() != null) {
-        List<MerchandiseSale> managedMerchandiseSales = new ArrayList<>();
-
         for (var item : userprofileRequest.getMerchandiseSales()) {
+        MerchandiseSale existingItem;
         if (item.getId() != null) {
-        MerchandiseSale existingItem = merchandiseSalesRepository.findById(item.getId())
+        existingItem = merchandiseSalesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MerchandiseSale not found"));
-        existingItem.setUser(existing);
-        managedMerchandiseSales.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedMerchandiseSales.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getMerchandiseSales().add(existingItem);
         }
         }
-        existing.setMerchandiseSales(managedMerchandiseSales);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGamePlaySessions().clear();
 
         if (userprofileRequest.getGamePlaySessions() != null) {
-        List<GamePlaySession> managedGamePlaySessions = new ArrayList<>();
-
         for (var item : userprofileRequest.getGamePlaySessions()) {
+        GamePlaySession existingItem;
         if (item.getId() != null) {
-        GamePlaySession existingItem = gamePlaySessionsRepository.findById(item.getId())
+        existingItem = gamePlaySessionsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
-        existingItem.setUser(existing);
-        managedGamePlaySessions.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedGamePlaySessions.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGamePlaySessions().add(existingItem);
         }
         }
-        existing.setGamePlaySessions(managedGamePlaySessions);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGameReviewUpvotes().clear();
 
         if (userprofileRequest.getGameReviewUpvotes() != null) {
-        List<GameReviewUpvote> managedGameReviewUpvotes = new ArrayList<>();
-
         for (var item : userprofileRequest.getGameReviewUpvotes()) {
+        GameReviewUpvote existingItem;
         if (item.getId() != null) {
-        GameReviewUpvote existingItem = gameReviewUpvotesRepository.findById(item.getId())
+        existingItem = gameReviewUpvotesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReviewUpvote not found"));
-        existingItem.setUser(existing);
-        managedGameReviewUpvotes.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedGameReviewUpvotes.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGameReviewUpvotes().add(existingItem);
         }
         }
-        existing.setGameReviewUpvotes(managedGameReviewUpvotes);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGameReviewDownvotes().clear();
 
         if (userprofileRequest.getGameReviewDownvotes() != null) {
-        List<GameReviewDownvote> managedGameReviewDownvotes = new ArrayList<>();
-
         for (var item : userprofileRequest.getGameReviewDownvotes()) {
+        GameReviewDownvote existingItem;
         if (item.getId() != null) {
-        GameReviewDownvote existingItem = gameReviewDownvotesRepository.findById(item.getId())
+        existingItem = gameReviewDownvotesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReviewDownvote not found"));
-        existingItem.setUser(existing);
-        managedGameReviewDownvotes.add(existingItem);
         } else {
-        item.setUser(existing);
-        managedGameReviewDownvotes.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setUser(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGameReviewDownvotes().add(existingItem);
         }
         }
-        existing.setGameReviewDownvotes(managedGameReviewDownvotes);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getSentMessages().clear();
 
         if (userprofileRequest.getSentMessages() != null) {
-        List<UserMessage> managedSentMessages = new ArrayList<>();
-
         for (var item : userprofileRequest.getSentMessages()) {
+        UserMessage existingItem;
         if (item.getId() != null) {
-        UserMessage existingItem = sentMessagesRepository.findById(item.getId())
+        existingItem = sentMessagesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserMessage not found"));
-        existingItem.setSender(existing);
-        managedSentMessages.add(existingItem);
         } else {
-        item.setSender(existing);
-        managedSentMessages.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setSender(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSentMessages().add(existingItem);
         }
         }
-        existing.setSentMessages(managedSentMessages);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getReceivedMessages().clear();
 
         if (userprofileRequest.getReceivedMessages() != null) {
-        List<UserMessage> managedReceivedMessages = new ArrayList<>();
-
         for (var item : userprofileRequest.getReceivedMessages()) {
+        UserMessage existingItem;
         if (item.getId() != null) {
-        UserMessage existingItem = receivedMessagesRepository.findById(item.getId())
+        existingItem = receivedMessagesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserMessage not found"));
-        existingItem.setReceiver(existing);
-        managedReceivedMessages.add(existingItem);
         } else {
-        item.setReceiver(existing);
-        managedReceivedMessages.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setReceiver(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getReceivedMessages().add(existingItem);
         }
         }
-        existing.setReceivedMessages(managedReceivedMessages);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

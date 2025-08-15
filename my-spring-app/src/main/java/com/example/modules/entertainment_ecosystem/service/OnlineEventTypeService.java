@@ -69,24 +69,26 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getEvents().clear();
 
         if (onlineeventtypeRequest.getEvents() != null) {
-        List<OnlineEvent> managedEvents = new ArrayList<>();
-
         for (var item : onlineeventtypeRequest.getEvents()) {
+        OnlineEvent existingItem;
         if (item.getId() != null) {
-        OnlineEvent existingItem = eventsRepository.findById(item.getId())
+        existingItem = eventsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
-        existingItem.setType(existing);
-        managedEvents.add(existingItem);
         } else {
-        item.setType(existing);
-        managedEvents.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setType(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getEvents().add(existingItem);
         }
         }
-        existing.setEvents(managedEvents);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

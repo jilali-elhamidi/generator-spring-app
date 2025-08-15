@@ -94,24 +94,26 @@ public class SeasonService extends BaseService<Season> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getEpisodes().clear();
 
         if (seasonRequest.getEpisodes() != null) {
-        List<Episode> managedEpisodes = new ArrayList<>();
-
         for (var item : seasonRequest.getEpisodes()) {
+        Episode existingItem;
         if (item.getId() != null) {
-        Episode existingItem = episodesRepository.findById(item.getId())
+        existingItem = episodesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Episode not found"));
-        existingItem.setSeason(existing);
-        managedEpisodes.add(existingItem);
         } else {
-        item.setSeason(existing);
-        managedEpisodes.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setSeason(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getEpisodes().add(existingItem);
         }
         }
-        existing.setEpisodes(managedEpisodes);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

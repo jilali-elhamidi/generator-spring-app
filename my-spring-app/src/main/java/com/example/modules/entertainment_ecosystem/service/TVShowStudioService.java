@@ -70,24 +70,26 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getTvShows().clear();
 
         if (tvshowstudioRequest.getTvShows() != null) {
-        List<TVShow> managedTvShows = new ArrayList<>();
-
         for (var item : tvshowstudioRequest.getTvShows()) {
+        TVShow existingItem;
         if (item.getId() != null) {
-        TVShow existingItem = tvShowsRepository.findById(item.getId())
+        existingItem = tvShowsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        existingItem.setTvShowStudio(existing);
-        managedTvShows.add(existingItem);
         } else {
-        item.setTvShowStudio(existing);
-        managedTvShows.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setTvShowStudio(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getTvShows().add(existingItem);
         }
         }
-        existing.setTvShows(managedTvShows);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

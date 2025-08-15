@@ -97,42 +97,46 @@ public class StreamingServiceService extends BaseService<StreamingService> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getPlatforms().clear();
 
         if (streamingserviceRequest.getPlatforms() != null) {
-        List<StreamingPlatform> managedPlatforms = new ArrayList<>();
-
         for (var item : streamingserviceRequest.getPlatforms()) {
+        StreamingPlatform existingItem;
         if (item.getId() != null) {
-        StreamingPlatform existingItem = platformsRepository.findById(item.getId())
+        existingItem = platformsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
-        existingItem.setStreamingService(existing);
-        managedPlatforms.add(existingItem);
         } else {
-        item.setStreamingService(existing);
-        managedPlatforms.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setStreamingService(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getPlatforms().add(existingItem);
         }
         }
-        existing.setPlatforms(managedPlatforms);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getPlans().clear();
 
         if (streamingserviceRequest.getPlans() != null) {
-        List<SubscriptionPlan> managedPlans = new ArrayList<>();
-
         for (var item : streamingserviceRequest.getPlans()) {
+        SubscriptionPlan existingItem;
         if (item.getId() != null) {
-        SubscriptionPlan existingItem = plansRepository.findById(item.getId())
+        existingItem = plansRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
-        existingItem.setService(existing);
-        managedPlans.add(existingItem);
         } else {
-        item.setService(existing);
-        managedPlans.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setService(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getPlans().add(existingItem);
         }
         }
-        existing.setPlans(managedPlans);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

@@ -293,78 +293,86 @@ public class MerchandiseService extends BaseService<Merchandise> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getReviews().clear();
 
         if (merchandiseRequest.getReviews() != null) {
-        List<MerchandiseReview> managedReviews = new ArrayList<>();
-
         for (var item : merchandiseRequest.getReviews()) {
+        MerchandiseReview existingItem;
         if (item.getId() != null) {
-        MerchandiseReview existingItem = reviewsRepository.findById(item.getId())
+        existingItem = reviewsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MerchandiseReview not found"));
-        existingItem.setMerchandise(existing);
-        managedReviews.add(existingItem);
         } else {
-        item.setMerchandise(existing);
-        managedReviews.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMerchandise(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getReviews().add(existingItem);
         }
         }
-        existing.setReviews(managedReviews);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getSales().clear();
 
         if (merchandiseRequest.getSales() != null) {
-        List<MerchandiseSale> managedSales = new ArrayList<>();
-
         for (var item : merchandiseRequest.getSales()) {
+        MerchandiseSale existingItem;
         if (item.getId() != null) {
-        MerchandiseSale existingItem = salesRepository.findById(item.getId())
+        existingItem = salesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MerchandiseSale not found"));
-        existingItem.setMerchandiseItem(existing);
-        managedSales.add(existingItem);
         } else {
-        item.setMerchandiseItem(existing);
-        managedSales.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMerchandiseItem(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSales().add(existingItem);
         }
         }
-        existing.setSales(managedSales);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getShipments().clear();
 
         if (merchandiseRequest.getShipments() != null) {
-        List<MerchandiseShipping> managedShipments = new ArrayList<>();
-
         for (var item : merchandiseRequest.getShipments()) {
+        MerchandiseShipping existingItem;
         if (item.getId() != null) {
-        MerchandiseShipping existingItem = shipmentsRepository.findById(item.getId())
+        existingItem = shipmentsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
-        existingItem.setMerchandiseItem(existing);
-        managedShipments.add(existingItem);
         } else {
-        item.setMerchandiseItem(existing);
-        managedShipments.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMerchandiseItem(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getShipments().add(existingItem);
         }
         }
-        existing.setShipments(managedShipments);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getOrderItems().clear();
 
         if (merchandiseRequest.getOrderItems() != null) {
-        List<MerchandiseOrderItem> managedOrderItems = new ArrayList<>();
-
         for (var item : merchandiseRequest.getOrderItems()) {
+        MerchandiseOrderItem existingItem;
         if (item.getId() != null) {
-        MerchandiseOrderItem existingItem = orderItemsRepository.findById(item.getId())
+        existingItem = orderItemsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MerchandiseOrderItem not found"));
-        existingItem.setMerchandiseItem(existing);
-        managedOrderItems.add(existingItem);
         } else {
-        item.setMerchandiseItem(existing);
-        managedOrderItems.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMerchandiseItem(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getOrderItems().add(existingItem);
         }
         }
-        existing.setOrderItems(managedOrderItems);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

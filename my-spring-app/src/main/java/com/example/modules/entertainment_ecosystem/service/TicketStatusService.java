@@ -69,24 +69,26 @@ public class TicketStatusService extends BaseService<TicketStatus> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getTickets().clear();
 
         if (ticketstatusRequest.getTickets() != null) {
-        List<Ticket> managedTickets = new ArrayList<>();
-
         for (var item : ticketstatusRequest.getTickets()) {
+        Ticket existingItem;
         if (item.getId() != null) {
-        Ticket existingItem = ticketsRepository.findById(item.getId())
+        existingItem = ticketsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Ticket not found"));
-        existingItem.setStatus(existing);
-        managedTickets.add(existingItem);
         } else {
-        item.setStatus(existing);
-        managedTickets.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setStatus(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getTickets().add(existingItem);
         }
         }
-        existing.setTickets(managedTickets);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

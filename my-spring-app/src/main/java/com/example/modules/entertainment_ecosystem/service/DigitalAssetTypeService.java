@@ -69,24 +69,26 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getAssets().clear();
 
         if (digitalassettypeRequest.getAssets() != null) {
-        List<DigitalAsset> managedAssets = new ArrayList<>();
-
         for (var item : digitalassettypeRequest.getAssets()) {
+        DigitalAsset existingItem;
         if (item.getId() != null) {
-        DigitalAsset existingItem = assetsRepository.findById(item.getId())
+        existingItem = assetsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
-        existingItem.setAssetType(existing);
-        managedAssets.add(existingItem);
         } else {
-        item.setAssetType(existing);
-        managedAssets.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setAssetType(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getAssets().add(existingItem);
         }
         }
-        existing.setAssets(managedAssets);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

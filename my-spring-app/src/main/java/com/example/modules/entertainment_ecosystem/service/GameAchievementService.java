@@ -112,24 +112,26 @@ public class GameAchievementService extends BaseService<GameAchievement> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getUserAchievements().clear();
 
         if (gameachievementRequest.getUserAchievements() != null) {
-        List<UserAchievement> managedUserAchievements = new ArrayList<>();
-
         for (var item : gameachievementRequest.getUserAchievements()) {
+        UserAchievement existingItem;
         if (item.getId() != null) {
-        UserAchievement existingItem = userAchievementsRepository.findById(item.getId())
+        existingItem = userAchievementsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserAchievement not found"));
-        existingItem.setAchievement(existing);
-        managedUserAchievements.add(existingItem);
         } else {
-        item.setAchievement(existing);
-        managedUserAchievements.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setAchievement(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getUserAchievements().add(existingItem);
         }
         }
-        existing.setUserAchievements(managedUserAchievements);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

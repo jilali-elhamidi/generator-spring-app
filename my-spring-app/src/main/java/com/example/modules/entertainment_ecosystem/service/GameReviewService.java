@@ -174,60 +174,66 @@ public class GameReviewService extends BaseService<GameReview> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getComments().clear();
 
         if (gamereviewRequest.getComments() != null) {
-        List<GameReviewComment> managedComments = new ArrayList<>();
-
         for (var item : gamereviewRequest.getComments()) {
+        GameReviewComment existingItem;
         if (item.getId() != null) {
-        GameReviewComment existingItem = commentsRepository.findById(item.getId())
+        existingItem = commentsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
-        existingItem.setReview(existing);
-        managedComments.add(existingItem);
         } else {
-        item.setReview(existing);
-        managedComments.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setReview(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getComments().add(existingItem);
         }
         }
-        existing.setComments(managedComments);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getUpvotes().clear();
 
         if (gamereviewRequest.getUpvotes() != null) {
-        List<GameReviewUpvote> managedUpvotes = new ArrayList<>();
-
         for (var item : gamereviewRequest.getUpvotes()) {
+        GameReviewUpvote existingItem;
         if (item.getId() != null) {
-        GameReviewUpvote existingItem = upvotesRepository.findById(item.getId())
+        existingItem = upvotesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReviewUpvote not found"));
-        existingItem.setReview(existing);
-        managedUpvotes.add(existingItem);
         } else {
-        item.setReview(existing);
-        managedUpvotes.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setReview(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getUpvotes().add(existingItem);
         }
         }
-        existing.setUpvotes(managedUpvotes);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getDownvotes().clear();
 
         if (gamereviewRequest.getDownvotes() != null) {
-        List<GameReviewDownvote> managedDownvotes = new ArrayList<>();
-
         for (var item : gamereviewRequest.getDownvotes()) {
+        GameReviewDownvote existingItem;
         if (item.getId() != null) {
-        GameReviewDownvote existingItem = downvotesRepository.findById(item.getId())
+        existingItem = downvotesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReviewDownvote not found"));
-        existingItem.setReview(existing);
-        managedDownvotes.add(existingItem);
         } else {
-        item.setReview(existing);
-        managedDownvotes.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setReview(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getDownvotes().add(existingItem);
         }
         }
-        existing.setDownvotes(managedDownvotes);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

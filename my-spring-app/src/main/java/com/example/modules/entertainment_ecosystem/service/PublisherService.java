@@ -107,60 +107,66 @@ public class PublisherService extends BaseService<Publisher> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getBooks().clear();
 
         if (publisherRequest.getBooks() != null) {
-        List<Book> managedBooks = new ArrayList<>();
-
         for (var item : publisherRequest.getBooks()) {
+        Book existingItem;
         if (item.getId() != null) {
-        Book existingItem = booksRepository.findById(item.getId())
+        existingItem = booksRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Book not found"));
-        existingItem.setPublisher(existing);
-        managedBooks.add(existingItem);
         } else {
-        item.setPublisher(existing);
-        managedBooks.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setPublisher(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getBooks().add(existingItem);
         }
         }
-        existing.setBooks(managedBooks);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getPodcasts().clear();
 
         if (publisherRequest.getPodcasts() != null) {
-        List<Podcast> managedPodcasts = new ArrayList<>();
-
         for (var item : publisherRequest.getPodcasts()) {
+        Podcast existingItem;
         if (item.getId() != null) {
-        Podcast existingItem = podcastsRepository.findById(item.getId())
+        existingItem = podcastsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        existingItem.setPublisher(existing);
-        managedPodcasts.add(existingItem);
         } else {
-        item.setPublisher(existing);
-        managedPodcasts.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setPublisher(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getPodcasts().add(existingItem);
         }
         }
-        existing.setPodcasts(managedPodcasts);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getVideoGames().clear();
 
         if (publisherRequest.getVideoGames() != null) {
-        List<VideoGame> managedVideoGames = new ArrayList<>();
-
         for (var item : publisherRequest.getVideoGames()) {
+        VideoGame existingItem;
         if (item.getId() != null) {
-        VideoGame existingItem = videoGamesRepository.findById(item.getId())
+        existingItem = videoGamesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        existingItem.setPublisher(existing);
-        managedVideoGames.add(existingItem);
         } else {
-        item.setPublisher(existing);
-        managedVideoGames.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setPublisher(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getVideoGames().add(existingItem);
         }
         }
-        existing.setVideoGames(managedVideoGames);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

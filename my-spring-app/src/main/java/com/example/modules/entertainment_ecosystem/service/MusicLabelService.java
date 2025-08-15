@@ -69,24 +69,26 @@ public class MusicLabelService extends BaseService<MusicLabel> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getAlbums().clear();
 
         if (musiclabelRequest.getAlbums() != null) {
-        List<Album> managedAlbums = new ArrayList<>();
-
         for (var item : musiclabelRequest.getAlbums()) {
+        Album existingItem;
         if (item.getId() != null) {
-        Album existingItem = albumsRepository.findById(item.getId())
+        existingItem = albumsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Album not found"));
-        existingItem.setMusicLabel(existing);
-        managedAlbums.add(existingItem);
         } else {
-        item.setMusicLabel(existing);
-        managedAlbums.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMusicLabel(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getAlbums().add(existingItem);
         }
         }
-        existing.setAlbums(managedAlbums);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

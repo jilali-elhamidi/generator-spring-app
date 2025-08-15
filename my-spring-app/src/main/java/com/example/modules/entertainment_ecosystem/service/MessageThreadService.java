@@ -86,24 +86,26 @@ public class MessageThreadService extends BaseService<MessageThread> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getMessages().clear();
 
         if (messagethreadRequest.getMessages() != null) {
-        List<UserMessage> managedMessages = new ArrayList<>();
-
         for (var item : messagethreadRequest.getMessages()) {
+        UserMessage existingItem;
         if (item.getId() != null) {
-        UserMessage existingItem = messagesRepository.findById(item.getId())
+        existingItem = messagesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("UserMessage not found"));
-        existingItem.setThread(existing);
-        managedMessages.add(existingItem);
         } else {
-        item.setThread(existing);
-        managedMessages.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setThread(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getMessages().add(existingItem);
         }
         }
-        existing.setMessages(managedMessages);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

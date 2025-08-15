@@ -145,24 +145,26 @@ public class ForumPostService extends BaseService<ForumPost> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getReplies().clear();
 
         if (forumpostRequest.getReplies() != null) {
-        List<ForumPost> managedReplies = new ArrayList<>();
-
         for (var item : forumpostRequest.getReplies()) {
+        ForumPost existingItem;
         if (item.getId() != null) {
-        ForumPost existingItem = repliesRepository.findById(item.getId())
+        existingItem = repliesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ForumPost not found"));
-        existingItem.setParentPost(existing);
-        managedReplies.add(existingItem);
         } else {
-        item.setParentPost(existing);
-        managedReplies.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setParentPost(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getReplies().add(existingItem);
         }
         }
-        existing.setReplies(managedReplies);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

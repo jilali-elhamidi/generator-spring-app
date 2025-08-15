@@ -88,24 +88,26 @@ public class BookingService extends BaseService<Booking> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getTickets().clear();
 
         if (bookingRequest.getTickets() != null) {
-        List<Ticket> managedTickets = new ArrayList<>();
-
         for (var item : bookingRequest.getTickets()) {
+        Ticket existingItem;
         if (item.getId() != null) {
-        Ticket existingItem = ticketsRepository.findById(item.getId())
+        existingItem = ticketsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Ticket not found"));
-        existingItem.setBooking(existing);
-        managedTickets.add(existingItem);
         } else {
-        item.setBooking(existing);
-        managedTickets.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setBooking(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getTickets().add(existingItem);
         }
         }
-        existing.setTickets(managedTickets);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

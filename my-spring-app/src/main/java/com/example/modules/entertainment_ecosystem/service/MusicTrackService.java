@@ -257,60 +257,66 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getPlaylistItems().clear();
 
         if (musictrackRequest.getPlaylistItems() != null) {
-        List<PlaylistItem> managedPlaylistItems = new ArrayList<>();
-
         for (var item : musictrackRequest.getPlaylistItems()) {
+        PlaylistItem existingItem;
         if (item.getId() != null) {
-        PlaylistItem existingItem = playlistItemsRepository.findById(item.getId())
+        existingItem = playlistItemsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("PlaylistItem not found"));
-        existingItem.setTrack(existing);
-        managedPlaylistItems.add(existingItem);
         } else {
-        item.setTrack(existing);
-        managedPlaylistItems.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setTrack(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getPlaylistItems().add(existingItem);
         }
         }
-        existing.setPlaylistItems(managedPlaylistItems);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getPurchases().clear();
 
         if (musictrackRequest.getPurchases() != null) {
-        List<DigitalPurchase> managedPurchases = new ArrayList<>();
-
         for (var item : musictrackRequest.getPurchases()) {
+        DigitalPurchase existingItem;
         if (item.getId() != null) {
-        DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
+        existingItem = purchasesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
-        existingItem.setMusicTrack(existing);
-        managedPurchases.add(existingItem);
         } else {
-        item.setMusicTrack(existing);
-        managedPurchases.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMusicTrack(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getPurchases().add(existingItem);
         }
         }
-        existing.setPurchases(managedPurchases);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getStreamingLicenses().clear();
 
         if (musictrackRequest.getStreamingLicenses() != null) {
-        List<StreamingContentLicense> managedStreamingLicenses = new ArrayList<>();
-
         for (var item : musictrackRequest.getStreamingLicenses()) {
+        StreamingContentLicense existingItem;
         if (item.getId() != null) {
-        StreamingContentLicense existingItem = streamingLicensesRepository.findById(item.getId())
+        existingItem = streamingLicensesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
-        existingItem.setMusicTrack(existing);
-        managedStreamingLicenses.add(existingItem);
         } else {
-        item.setMusicTrack(existing);
-        managedStreamingLicenses.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMusicTrack(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getStreamingLicenses().add(existingItem);
         }
         }
-        existing.setStreamingLicenses(managedStreamingLicenses);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

@@ -168,24 +168,26 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 // Relations OneToMany : synchronisation sécurisée
 {{~#each relationships}}
     {{~#if (eq relationType "OneToMany")}}
+        // Vider la collection existante
         existing.get{{capitalize name}}().clear();
 
         if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
-        List<{{type}}> managed{{capitalize name}} = new ArrayList<>();
-
         for (var item : {{entityNameLowercase}}Request.get{{capitalize name}}()) {
+        {{type}} existingItem;
         if (item.getId() != null) {
-        {{type}} existingItem = {{name}}Repository.findById(item.getId())
+        existingItem = {{name}}Repository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("{{type}} not found"));
-        existingItem.set{{capitalize mappedBy}}(existing);
-        managed{{capitalize name}}.add(existingItem);
         } else {
-        item.set{{capitalize mappedBy}}(existing);
-        managed{{capitalize name}}.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.set{{capitalize mappedBy}}(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.get{{capitalize name}}().add(existingItem);
         }
         }
-        existing.set{{capitalize name}}(managed{{capitalize name}});
-        }
+        // NE PLUS FAIRE setCollection()
     {{~/if}}
 {{~/each}}
 {{#each relationships}}

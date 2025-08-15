@@ -70,24 +70,26 @@ public class ManagerService extends BaseService<Manager> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getArtists().clear();
 
         if (managerRequest.getArtists() != null) {
-        List<Artist> managedArtists = new ArrayList<>();
-
         for (var item : managerRequest.getArtists()) {
+        Artist existingItem;
         if (item.getId() != null) {
-        Artist existingItem = artistsRepository.findById(item.getId())
+        existingItem = artistsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Artist not found"));
-        existingItem.setManager(existing);
-        managedArtists.add(existingItem);
         } else {
-        item.setManager(existing);
-        managedArtists.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setManager(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getArtists().add(existingItem);
         }
         }
-        existing.setArtists(managedArtists);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

@@ -69,24 +69,26 @@ public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getGames().clear();
 
         if (developmentstudioRequest.getGames() != null) {
-        List<VideoGame> managedGames = new ArrayList<>();
-
         for (var item : developmentstudioRequest.getGames()) {
+        VideoGame existingItem;
         if (item.getId() != null) {
-        VideoGame existingItem = gamesRepository.findById(item.getId())
+        existingItem = gamesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        existingItem.setDeveloperStudio(existing);
-        managedGames.add(existingItem);
         } else {
-        item.setDeveloperStudio(existing);
-        managedGames.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setDeveloperStudio(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGames().add(existingItem);
         }
         }
-        existing.setGames(managedGames);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

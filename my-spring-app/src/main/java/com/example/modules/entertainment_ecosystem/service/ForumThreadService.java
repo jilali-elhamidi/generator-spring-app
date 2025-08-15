@@ -121,24 +121,26 @@ public class ForumThreadService extends BaseService<ForumThread> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getForumPosts().clear();
 
         if (forumthreadRequest.getForumPosts() != null) {
-        List<ForumPost> managedForumPosts = new ArrayList<>();
-
         for (var item : forumthreadRequest.getForumPosts()) {
+        ForumPost existingItem;
         if (item.getId() != null) {
-        ForumPost existingItem = forumPostsRepository.findById(item.getId())
+        existingItem = forumPostsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ForumPost not found"));
-        existingItem.setThread(existing);
-        managedForumPosts.add(existingItem);
         } else {
-        item.setThread(existing);
-        managedForumPosts.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setThread(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getForumPosts().add(existingItem);
         }
         }
-        existing.setForumPosts(managedForumPosts);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

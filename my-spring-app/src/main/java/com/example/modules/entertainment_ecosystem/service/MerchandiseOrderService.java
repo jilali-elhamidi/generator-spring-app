@@ -113,24 +113,26 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getItems().clear();
 
         if (merchandiseorderRequest.getItems() != null) {
-        List<MerchandiseOrderItem> managedItems = new ArrayList<>();
-
         for (var item : merchandiseorderRequest.getItems()) {
+        MerchandiseOrderItem existingItem;
         if (item.getId() != null) {
-        MerchandiseOrderItem existingItem = itemsRepository.findById(item.getId())
+        existingItem = itemsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("MerchandiseOrderItem not found"));
-        existingItem.setOrder(existing);
-        managedItems.add(existingItem);
         } else {
-        item.setOrder(existing);
-        managedItems.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setOrder(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getItems().add(existingItem);
         }
         }
-        existing.setItems(managedItems);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

@@ -125,60 +125,66 @@ public class ProductionCompanyService extends BaseService<ProductionCompany> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getMovies().clear();
 
         if (productioncompanyRequest.getMovies() != null) {
-        List<Movie> managedMovies = new ArrayList<>();
-
         for (var item : productioncompanyRequest.getMovies()) {
+        Movie existingItem;
         if (item.getId() != null) {
-        Movie existingItem = moviesRepository.findById(item.getId())
+        existingItem = moviesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Movie not found"));
-        existingItem.setProductionCompany(existing);
-        managedMovies.add(existingItem);
         } else {
-        item.setProductionCompany(existing);
-        managedMovies.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setProductionCompany(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getMovies().add(existingItem);
         }
         }
-        existing.setMovies(managedMovies);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getTvShows().clear();
 
         if (productioncompanyRequest.getTvShows() != null) {
-        List<TVShow> managedTvShows = new ArrayList<>();
-
         for (var item : productioncompanyRequest.getTvShows()) {
+        TVShow existingItem;
         if (item.getId() != null) {
-        TVShow existingItem = tvShowsRepository.findById(item.getId())
+        existingItem = tvShowsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        existingItem.setProductionCompany(existing);
-        managedTvShows.add(existingItem);
         } else {
-        item.setProductionCompany(existing);
-        managedTvShows.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setProductionCompany(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getTvShows().add(existingItem);
         }
         }
-        existing.setTvShows(managedTvShows);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getStaff().clear();
 
         if (productioncompanyRequest.getStaff() != null) {
-        List<Employee> managedStaff = new ArrayList<>();
-
         for (var item : productioncompanyRequest.getStaff()) {
+        Employee existingItem;
         if (item.getId() != null) {
-        Employee existingItem = staffRepository.findById(item.getId())
+        existingItem = staffRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Employee not found"));
-        existingItem.setProductionCompany(existing);
-        managedStaff.add(existingItem);
         } else {
-        item.setProductionCompany(existing);
-        managedStaff.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setProductionCompany(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getStaff().add(existingItem);
         }
         }
-        existing.setStaff(managedStaff);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

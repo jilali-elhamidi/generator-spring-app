@@ -304,42 +304,46 @@ public class TVShowService extends BaseService<TVShow> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getSeasons().clear();
 
         if (tvshowRequest.getSeasons() != null) {
-        List<Season> managedSeasons = new ArrayList<>();
-
         for (var item : tvshowRequest.getSeasons()) {
+        Season existingItem;
         if (item.getId() != null) {
-        Season existingItem = seasonsRepository.findById(item.getId())
+        existingItem = seasonsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Season not found"));
-        existingItem.setShow(existing);
-        managedSeasons.add(existingItem);
         } else {
-        item.setShow(existing);
-        managedSeasons.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setShow(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSeasons().add(existingItem);
         }
         }
-        existing.setSeasons(managedSeasons);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getStreamingLicenses().clear();
 
         if (tvshowRequest.getStreamingLicenses() != null) {
-        List<StreamingContentLicense> managedStreamingLicenses = new ArrayList<>();
-
         for (var item : tvshowRequest.getStreamingLicenses()) {
+        StreamingContentLicense existingItem;
         if (item.getId() != null) {
-        StreamingContentLicense existingItem = streamingLicensesRepository.findById(item.getId())
+        existingItem = streamingLicensesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
-        existingItem.setTvShow(existing);
-        managedStreamingLicenses.add(existingItem);
         } else {
-        item.setTvShow(existing);
-        managedStreamingLicenses.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setTvShow(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getStreamingLicenses().add(existingItem);
         }
         }
-        existing.setStreamingLicenses(managedStreamingLicenses);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

@@ -69,24 +69,26 @@ public class EventTypeService extends BaseService<EventType> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getEvents().clear();
 
         if (eventtypeRequest.getEvents() != null) {
-        List<LiveEvent> managedEvents = new ArrayList<>();
-
         for (var item : eventtypeRequest.getEvents()) {
+        LiveEvent existingItem;
         if (item.getId() != null) {
-        LiveEvent existingItem = eventsRepository.findById(item.getId())
+        existingItem = eventsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-        existingItem.setEventType(existing);
-        managedEvents.add(existingItem);
         } else {
-        item.setEventType(existing);
-        managedEvents.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setEventType(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getEvents().add(existingItem);
         }
         }
-        existing.setEvents(managedEvents);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

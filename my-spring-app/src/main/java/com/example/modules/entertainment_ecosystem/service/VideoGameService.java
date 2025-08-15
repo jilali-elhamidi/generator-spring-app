@@ -411,168 +411,186 @@ public class VideoGameService extends BaseService<VideoGame> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getGeneralReviews().clear();
 
         if (videogameRequest.getGeneralReviews() != null) {
-        List<Review> managedGeneralReviews = new ArrayList<>();
-
         for (var item : videogameRequest.getGeneralReviews()) {
+        Review existingItem;
         if (item.getId() != null) {
-        Review existingItem = generalReviewsRepository.findById(item.getId())
+        existingItem = generalReviewsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Review not found"));
-        existingItem.setVideoGame(existing);
-        managedGeneralReviews.add(existingItem);
         } else {
-        item.setVideoGame(existing);
-        managedGeneralReviews.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setVideoGame(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGeneralReviews().add(existingItem);
         }
         }
-        existing.setGeneralReviews(managedGeneralReviews);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGameReviews().clear();
 
         if (videogameRequest.getGameReviews() != null) {
-        List<GameReview> managedGameReviews = new ArrayList<>();
-
         for (var item : videogameRequest.getGameReviews()) {
+        GameReview existingItem;
         if (item.getId() != null) {
-        GameReview existingItem = gameReviewsRepository.findById(item.getId())
+        existingItem = gameReviewsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReview not found"));
-        existingItem.setGame(existing);
-        managedGameReviews.add(existingItem);
         } else {
-        item.setGame(existing);
-        managedGameReviews.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setGame(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGameReviews().add(existingItem);
         }
         }
-        existing.setGameReviews(managedGameReviews);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getAchievements().clear();
 
         if (videogameRequest.getAchievements() != null) {
-        List<GameAchievement> managedAchievements = new ArrayList<>();
-
         for (var item : videogameRequest.getAchievements()) {
+        GameAchievement existingItem;
         if (item.getId() != null) {
-        GameAchievement existingItem = achievementsRepository.findById(item.getId())
+        existingItem = achievementsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameAchievement not found"));
-        existingItem.setGame(existing);
-        managedAchievements.add(existingItem);
         } else {
-        item.setGame(existing);
-        managedAchievements.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setGame(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getAchievements().add(existingItem);
         }
         }
-        existing.setAchievements(managedAchievements);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getSessions().clear();
 
         if (videogameRequest.getSessions() != null) {
-        List<GameSession> managedSessions = new ArrayList<>();
-
         for (var item : videogameRequest.getSessions()) {
+        GameSession existingItem;
         if (item.getId() != null) {
-        GameSession existingItem = sessionsRepository.findById(item.getId())
+        existingItem = sessionsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameSession not found"));
-        existingItem.setGame(existing);
-        managedSessions.add(existingItem);
         } else {
-        item.setGame(existing);
-        managedSessions.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setGame(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSessions().add(existingItem);
         }
         }
-        existing.setSessions(managedSessions);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getPurchases().clear();
 
         if (videogameRequest.getPurchases() != null) {
-        List<DigitalPurchase> managedPurchases = new ArrayList<>();
-
         for (var item : videogameRequest.getPurchases()) {
+        DigitalPurchase existingItem;
         if (item.getId() != null) {
-        DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
+        existingItem = purchasesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
-        existingItem.setVideoGame(existing);
-        managedPurchases.add(existingItem);
         } else {
-        item.setVideoGame(existing);
-        managedPurchases.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setVideoGame(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getPurchases().add(existingItem);
         }
         }
-        existing.setPurchases(managedPurchases);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getRatings().clear();
 
         if (videogameRequest.getRatings() != null) {
-        List<VideoGameRating> managedRatings = new ArrayList<>();
-
         for (var item : videogameRequest.getRatings()) {
+        VideoGameRating existingItem;
         if (item.getId() != null) {
-        VideoGameRating existingItem = ratingsRepository.findById(item.getId())
+        existingItem = ratingsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("VideoGameRating not found"));
-        existingItem.setGame(existing);
-        managedRatings.add(existingItem);
         } else {
-        item.setGame(existing);
-        managedRatings.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setGame(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getRatings().add(existingItem);
         }
         }
-        existing.setRatings(managedRatings);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGamePlaySessions().clear();
 
         if (videogameRequest.getGamePlaySessions() != null) {
-        List<GamePlaySession> managedGamePlaySessions = new ArrayList<>();
-
         for (var item : videogameRequest.getGamePlaySessions()) {
+        GamePlaySession existingItem;
         if (item.getId() != null) {
-        GamePlaySession existingItem = gamePlaySessionsRepository.findById(item.getId())
+        existingItem = gamePlaySessionsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
-        existingItem.setGame(existing);
-        managedGamePlaySessions.add(existingItem);
         } else {
-        item.setGame(existing);
-        managedGamePlaySessions.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setGame(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGamePlaySessions().add(existingItem);
         }
         }
-        existing.setGamePlaySessions(managedGamePlaySessions);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGameReviewUpvotes().clear();
 
         if (videogameRequest.getGameReviewUpvotes() != null) {
-        List<GameReviewUpvote> managedGameReviewUpvotes = new ArrayList<>();
-
         for (var item : videogameRequest.getGameReviewUpvotes()) {
+        GameReviewUpvote existingItem;
         if (item.getId() != null) {
-        GameReviewUpvote existingItem = gameReviewUpvotesRepository.findById(item.getId())
+        existingItem = gameReviewUpvotesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReviewUpvote not found"));
-        existingItem.setGame(existing);
-        managedGameReviewUpvotes.add(existingItem);
         } else {
-        item.setGame(existing);
-        managedGameReviewUpvotes.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setGame(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGameReviewUpvotes().add(existingItem);
         }
         }
-        existing.setGameReviewUpvotes(managedGameReviewUpvotes);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getGameReviewDownvotes().clear();
 
         if (videogameRequest.getGameReviewDownvotes() != null) {
-        List<GameReviewDownvote> managedGameReviewDownvotes = new ArrayList<>();
-
         for (var item : videogameRequest.getGameReviewDownvotes()) {
+        GameReviewDownvote existingItem;
         if (item.getId() != null) {
-        GameReviewDownvote existingItem = gameReviewDownvotesRepository.findById(item.getId())
+        existingItem = gameReviewDownvotesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReviewDownvote not found"));
-        existingItem.setGame(existing);
-        managedGameReviewDownvotes.add(existingItem);
         } else {
-        item.setGame(existing);
-        managedGameReviewDownvotes.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setGame(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getGameReviewDownvotes().add(existingItem);
         }
         }
-        existing.setGameReviewDownvotes(managedGameReviewDownvotes);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

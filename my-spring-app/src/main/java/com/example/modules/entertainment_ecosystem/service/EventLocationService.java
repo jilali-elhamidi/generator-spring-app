@@ -95,24 +95,26 @@ public class EventLocationService extends BaseService<EventLocation> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getLiveEvents().clear();
 
         if (eventlocationRequest.getLiveEvents() != null) {
-        List<LiveEvent> managedLiveEvents = new ArrayList<>();
-
         for (var item : eventlocationRequest.getLiveEvents()) {
+        LiveEvent existingItem;
         if (item.getId() != null) {
-        LiveEvent existingItem = liveEventsRepository.findById(item.getId())
+        existingItem = liveEventsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-        existingItem.setLocation(existing);
-        managedLiveEvents.add(existingItem);
         } else {
-        item.setLocation(existing);
-        managedLiveEvents.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setLocation(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getLiveEvents().add(existingItem);
         }
         }
-        existing.setLiveEvents(managedLiveEvents);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

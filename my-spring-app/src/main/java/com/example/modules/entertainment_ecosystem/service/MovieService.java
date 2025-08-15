@@ -364,60 +364,66 @@ public class MovieService extends BaseService<Movie> {
         }
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getReviews().clear();
 
         if (movieRequest.getReviews() != null) {
-        List<Review> managedReviews = new ArrayList<>();
-
         for (var item : movieRequest.getReviews()) {
+        Review existingItem;
         if (item.getId() != null) {
-        Review existingItem = reviewsRepository.findById(item.getId())
+        existingItem = reviewsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Review not found"));
-        existingItem.setMovie(existing);
-        managedReviews.add(existingItem);
         } else {
-        item.setMovie(existing);
-        managedReviews.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMovie(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getReviews().add(existingItem);
         }
         }
-        existing.setReviews(managedReviews);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getPurchases().clear();
 
         if (movieRequest.getPurchases() != null) {
-        List<DigitalPurchase> managedPurchases = new ArrayList<>();
-
         for (var item : movieRequest.getPurchases()) {
+        DigitalPurchase existingItem;
         if (item.getId() != null) {
-        DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
+        existingItem = purchasesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
-        existingItem.setMovie(existing);
-        managedPurchases.add(existingItem);
         } else {
-        item.setMovie(existing);
-        managedPurchases.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMovie(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getPurchases().add(existingItem);
         }
         }
-        existing.setPurchases(managedPurchases);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getStreamingLicenses().clear();
 
         if (movieRequest.getStreamingLicenses() != null) {
-        List<StreamingContentLicense> managedStreamingLicenses = new ArrayList<>();
-
         for (var item : movieRequest.getStreamingLicenses()) {
+        StreamingContentLicense existingItem;
         if (item.getId() != null) {
-        StreamingContentLicense existingItem = streamingLicensesRepository.findById(item.getId())
+        existingItem = streamingLicensesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
-        existingItem.setMovie(existing);
-        managedStreamingLicenses.add(existingItem);
         } else {
-        item.setMovie(existing);
-        managedStreamingLicenses.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMovie(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getStreamingLicenses().add(existingItem);
         }
         }
-        existing.setStreamingLicenses(managedStreamingLicenses);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

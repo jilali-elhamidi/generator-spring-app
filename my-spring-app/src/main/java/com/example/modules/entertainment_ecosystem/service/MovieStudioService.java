@@ -70,24 +70,26 @@ public class MovieStudioService extends BaseService<MovieStudio> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getMovies().clear();
 
         if (moviestudioRequest.getMovies() != null) {
-        List<Movie> managedMovies = new ArrayList<>();
-
         for (var item : moviestudioRequest.getMovies()) {
+        Movie existingItem;
         if (item.getId() != null) {
-        Movie existingItem = moviesRepository.findById(item.getId())
+        existingItem = moviesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Movie not found"));
-        existingItem.setMovieStudio(existing);
-        managedMovies.add(existingItem);
         } else {
-        item.setMovieStudio(existing);
-        managedMovies.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setMovieStudio(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getMovies().add(existingItem);
         }
         }
-        existing.setMovies(managedMovies);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

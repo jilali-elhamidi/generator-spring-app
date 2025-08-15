@@ -145,24 +145,26 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getReplies().clear();
 
         if (gamereviewcommentRequest.getReplies() != null) {
-        List<GameReviewComment> managedReplies = new ArrayList<>();
-
         for (var item : gamereviewcommentRequest.getReplies()) {
+        GameReviewComment existingItem;
         if (item.getId() != null) {
-        GameReviewComment existingItem = repliesRepository.findById(item.getId())
+        existingItem = repliesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
-        existingItem.setParentComment(existing);
-        managedReplies.add(existingItem);
         } else {
-        item.setParentComment(existing);
-        managedReplies.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setParentComment(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getReplies().add(existingItem);
         }
         }
-        existing.setReplies(managedReplies);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

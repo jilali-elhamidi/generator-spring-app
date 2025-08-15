@@ -70,24 +70,26 @@ public class MerchandiseSupplierService extends BaseService<MerchandiseSupplier>
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getSuppliedMerchandise().clear();
 
         if (merchandisesupplierRequest.getSuppliedMerchandise() != null) {
-        List<Merchandise> managedSuppliedMerchandise = new ArrayList<>();
-
         for (var item : merchandisesupplierRequest.getSuppliedMerchandise()) {
+        Merchandise existingItem;
         if (item.getId() != null) {
-        Merchandise existingItem = suppliedMerchandiseRepository.findById(item.getId())
+        existingItem = suppliedMerchandiseRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        existingItem.setSupplier(existing);
-        managedSuppliedMerchandise.add(existingItem);
         } else {
-        item.setSupplier(existing);
-        managedSuppliedMerchandise.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setSupplier(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getSuppliedMerchandise().add(existingItem);
         }
         }
-        existing.setSuppliedMerchandise(managedSuppliedMerchandise);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

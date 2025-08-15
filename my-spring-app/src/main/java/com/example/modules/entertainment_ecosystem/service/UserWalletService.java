@@ -87,24 +87,26 @@ public class UserWalletService extends BaseService<UserWallet> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getTransactions().clear();
 
         if (userwalletRequest.getTransactions() != null) {
-        List<Transaction> managedTransactions = new ArrayList<>();
-
         for (var item : userwalletRequest.getTransactions()) {
+        Transaction existingItem;
         if (item.getId() != null) {
-        Transaction existingItem = transactionsRepository.findById(item.getId())
+        existingItem = transactionsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("Transaction not found"));
-        existingItem.setWallet(existing);
-        managedTransactions.add(existingItem);
         } else {
-        item.setWallet(existing);
-        managedTransactions.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setWallet(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getTransactions().add(existingItem);
         }
         }
-        existing.setTransactions(managedTransactions);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 

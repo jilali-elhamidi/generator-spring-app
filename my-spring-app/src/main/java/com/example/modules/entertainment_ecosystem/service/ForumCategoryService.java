@@ -121,42 +121,46 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+        // Vider la collection existante
         existing.getThreads().clear();
 
         if (forumcategoryRequest.getThreads() != null) {
-        List<ForumThread> managedThreads = new ArrayList<>();
-
         for (var item : forumcategoryRequest.getThreads()) {
+        ForumThread existingItem;
         if (item.getId() != null) {
-        ForumThread existingItem = threadsRepository.findById(item.getId())
+        existingItem = threadsRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ForumThread not found"));
-        existingItem.setCategory(existing);
-        managedThreads.add(existingItem);
         } else {
-        item.setCategory(existing);
-        managedThreads.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setCategory(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getThreads().add(existingItem);
         }
         }
-        existing.setThreads(managedThreads);
-        }
+        // NE PLUS FAIRE setCollection()
+        // Vider la collection existante
         existing.getChildCategories().clear();
 
         if (forumcategoryRequest.getChildCategories() != null) {
-        List<ForumCategory> managedChildCategories = new ArrayList<>();
-
         for (var item : forumcategoryRequest.getChildCategories()) {
+        ForumCategory existingItem;
         if (item.getId() != null) {
-        ForumCategory existingItem = childCategoriesRepository.findById(item.getId())
+        existingItem = childCategoriesRepository.findById(item.getId())
         .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-        existingItem.setParentCategory(existing);
-        managedChildCategories.add(existingItem);
         } else {
-        item.setParentCategory(existing);
-        managedChildCategories.add(item);
+        existingItem = item; // ou mapper les champs si DTO
+        }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setParentCategory(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getChildCategories().add(existingItem);
         }
         }
-        existing.setChildCategories(managedChildCategories);
-        }
+        // NE PLUS FAIRE setCollection()
 
     
 
