@@ -45,9 +45,6 @@ public class InvoiceService extends BaseService<Invoice> {
         invoice.getTransaction().setRelatedInvoice(invoice);
         }
 
-    
-
-
         return invoiceRepository.save(invoice);
     }
 

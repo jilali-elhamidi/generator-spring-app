@@ -89,29 +89,6 @@ public class BookService extends BaseService<Book> {
     
     
 
-    
-
-    
-
-    
-
-    
-        if (book.getGenres() != null) {
-        List<Genre> managedGenres = new ArrayList<>();
-        for (Genre item : book.getGenres()) {
-        if (item.getId() != null) {
-        Genre existingItem = genresRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Genre not found"));
-        managedGenres.add(existingItem);
-        } else {
-        managedGenres.add(item);
-        }
-        }
-        book.setGenres(managedGenres);
-        }
-    
-
-
         return bookRepository.save(book);
     }
 

@@ -103,61 +103,6 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
     
     
 
-    
-        if (streamingplatform.getMovies() != null) {
-        List<Movie> managedMovies = new ArrayList<>();
-        for (Movie item : streamingplatform.getMovies()) {
-        if (item.getId() != null) {
-        Movie existingItem = moviesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Movie not found"));
-        managedMovies.add(existingItem);
-        } else {
-        managedMovies.add(item);
-        }
-        }
-        streamingplatform.setMovies(managedMovies);
-        }
-    
-
-    
-        if (streamingplatform.getTvShows() != null) {
-        List<TVShow> managedTvShows = new ArrayList<>();
-        for (TVShow item : streamingplatform.getTvShows()) {
-        if (item.getId() != null) {
-        TVShow existingItem = tvShowsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        managedTvShows.add(existingItem);
-        } else {
-        managedTvShows.add(item);
-        }
-        }
-        streamingplatform.setTvShows(managedTvShows);
-        }
-    
-
-    
-
-    
-
-    
-
-    
-        if (streamingplatform.getAdCampaigns() != null) {
-        List<AdCampaign> managedAdCampaigns = new ArrayList<>();
-        for (AdCampaign item : streamingplatform.getAdCampaigns()) {
-        if (item.getId() != null) {
-        AdCampaign existingItem = adCampaignsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("AdCampaign not found"));
-        managedAdCampaigns.add(existingItem);
-        } else {
-        managedAdCampaigns.add(item);
-        }
-        }
-        streamingplatform.setAdCampaigns(managedAdCampaigns);
-        }
-    
-
-
         return streamingplatformRepository.save(streamingplatform);
     }
 

@@ -75,27 +75,6 @@ public class GameAchievementService extends BaseService<GameAchievement> {
     
     
 
-    
-
-    
-        if (gameachievement.getEarnedBy() != null) {
-        List<UserProfile> managedEarnedBy = new ArrayList<>();
-        for (UserProfile item : gameachievement.getEarnedBy()) {
-        if (item.getId() != null) {
-        UserProfile existingItem = earnedByRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        managedEarnedBy.add(existingItem);
-        } else {
-        managedEarnedBy.add(item);
-        }
-        }
-        gameachievement.setEarnedBy(managedEarnedBy);
-        }
-    
-
-    
-
-
         return gameachievementRepository.save(gameachievement);
     }
 

@@ -122,15 +122,6 @@ public class ContentRatingService extends BaseService<ContentRating> {
         }
     
 
-    
-
-    
-
-    
-
-    
-
-
         return contentratingRepository.save(contentrating);
     }
 

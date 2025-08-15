@@ -41,9 +41,6 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
         }
     
 
-    
-
-
         return moviemerchandiseRepository.save(moviemerchandise);
     }
 

@@ -34,23 +34,6 @@ public class MusicFormatService extends BaseService<MusicFormat> {
 
     
 
-    
-        if (musicformat.getMusicTracks() != null) {
-        List<MusicTrack> managedMusicTracks = new ArrayList<>();
-        for (MusicTrack item : musicformat.getMusicTracks()) {
-        if (item.getId() != null) {
-        MusicTrack existingItem = musicTracksRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        managedMusicTracks.add(existingItem);
-        } else {
-        managedMusicTracks.add(item);
-        }
-        }
-        musicformat.setMusicTracks(managedMusicTracks);
-        }
-    
-
-
         return musicformatRepository.save(musicformat);
     }
 

@@ -34,23 +34,6 @@ public class MovieFormatService extends BaseService<MovieFormat> {
 
     
 
-    
-        if (movieformat.getMovies() != null) {
-        List<Movie> managedMovies = new ArrayList<>();
-        for (Movie item : movieformat.getMovies()) {
-        if (item.getId() != null) {
-        Movie existingItem = moviesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Movie not found"));
-        managedMovies.add(existingItem);
-        } else {
-        managedMovies.add(item);
-        }
-        }
-        movieformat.setMovies(managedMovies);
-        }
-    
-
-
         return movieformatRepository.save(movieformat);
     }
 

@@ -54,9 +54,6 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
 
     
 
-    
-
-
         return onlineeventtypeRepository.save(onlineeventtype);
     }
 

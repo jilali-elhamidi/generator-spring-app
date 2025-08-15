@@ -95,13 +95,6 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
     
     
 
-    
-
-    
-
-    
-
-
         return forumcategoryRepository.save(forumcategory);
     }
 

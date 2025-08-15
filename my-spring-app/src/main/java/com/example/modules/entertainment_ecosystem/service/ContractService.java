@@ -45,9 +45,6 @@ public class ContractService extends BaseService<Contract> {
         contract.getSponsorship().setContract(contract);
         }
 
-    
-
-
         return contractRepository.save(contract);
     }
 

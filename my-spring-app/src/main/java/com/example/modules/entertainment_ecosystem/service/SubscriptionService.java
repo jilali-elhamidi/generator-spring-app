@@ -69,13 +69,6 @@ public class SubscriptionService extends BaseService<Subscription> {
         }
     
 
-    
-
-    
-
-    
-
-
         return subscriptionRepository.save(subscription);
     }
 

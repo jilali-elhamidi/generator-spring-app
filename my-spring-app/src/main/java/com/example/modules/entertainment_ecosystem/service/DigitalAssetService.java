@@ -73,13 +73,6 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
         digitalasset.getLicense().setAsset(digitalasset);
         }
 
-    
-
-    
-
-    
-
-
         return digitalassetRepository.save(digitalasset);
     }
 

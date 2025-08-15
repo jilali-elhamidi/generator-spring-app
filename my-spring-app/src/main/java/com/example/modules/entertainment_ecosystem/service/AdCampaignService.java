@@ -48,25 +48,6 @@ public class AdCampaignService extends BaseService<AdCampaign> {
     
     
 
-    
-
-    
-        if (adcampaign.getDisplayedOnPlatforms() != null) {
-        List<StreamingPlatform> managedDisplayedOnPlatforms = new ArrayList<>();
-        for (StreamingPlatform item : adcampaign.getDisplayedOnPlatforms()) {
-        if (item.getId() != null) {
-        StreamingPlatform existingItem = displayedOnPlatformsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found"));
-        managedDisplayedOnPlatforms.add(existingItem);
-        } else {
-        managedDisplayedOnPlatforms.add(item);
-        }
-        }
-        adcampaign.setDisplayedOnPlatforms(managedDisplayedOnPlatforms);
-        }
-    
-
-
         return adcampaignRepository.save(adcampaign);
     }
 

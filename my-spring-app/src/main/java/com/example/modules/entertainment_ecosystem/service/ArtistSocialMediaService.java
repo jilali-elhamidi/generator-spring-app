@@ -41,9 +41,6 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
         }
     
 
-    
-
-
         return artistsocialmediaRepository.save(artistsocialmedia);
     }
 

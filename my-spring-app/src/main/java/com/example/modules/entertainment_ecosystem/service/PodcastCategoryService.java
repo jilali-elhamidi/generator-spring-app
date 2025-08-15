@@ -34,23 +34,6 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
 
     
 
-    
-        if (podcastcategory.getPodcasts() != null) {
-        List<Podcast> managedPodcasts = new ArrayList<>();
-        for (Podcast item : podcastcategory.getPodcasts()) {
-        if (item.getId() != null) {
-        Podcast existingItem = podcastsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        managedPodcasts.add(existingItem);
-        } else {
-        managedPodcasts.add(item);
-        }
-        }
-        podcastcategory.setPodcasts(managedPodcasts);
-        }
-    
-
-
         return podcastcategoryRepository.save(podcastcategory);
     }
 

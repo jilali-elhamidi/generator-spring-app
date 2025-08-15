@@ -34,23 +34,6 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
 
     
 
-    
-        if (featureflag.getEnabledForUsers() != null) {
-        List<UserProfile> managedEnabledForUsers = new ArrayList<>();
-        for (UserProfile item : featureflag.getEnabledForUsers()) {
-        if (item.getId() != null) {
-        UserProfile existingItem = enabledForUsersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        managedEnabledForUsers.add(existingItem);
-        } else {
-        managedEnabledForUsers.add(item);
-        }
-        }
-        featureflag.setEnabledForUsers(managedEnabledForUsers);
-        }
-    
-
-
         return featureflagRepository.save(featureflag);
     }
 

@@ -55,11 +55,6 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
         }
     
 
-    
-
-    
-
-
         return gamereviewdownvoteRepository.save(gamereviewdownvote);
     }
 

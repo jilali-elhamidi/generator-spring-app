@@ -54,9 +54,6 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
 
     
 
-    
-
-
         return contentratingboardRepository.save(contentratingboard);
     }
 

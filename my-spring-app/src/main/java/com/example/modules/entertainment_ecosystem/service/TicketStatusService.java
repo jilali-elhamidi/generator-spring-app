@@ -54,9 +54,6 @@ public class TicketStatusService extends BaseService<TicketStatus> {
 
     
 
-    
-
-
         return ticketstatusRepository.save(ticketstatus);
     }
 

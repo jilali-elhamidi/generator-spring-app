@@ -72,11 +72,6 @@ public class BookingService extends BaseService<Booking> {
         booking.getPayment().setBooking(booking);
         }
 
-    
-
-    
-
-
         return bookingRepository.save(booking);
     }
 

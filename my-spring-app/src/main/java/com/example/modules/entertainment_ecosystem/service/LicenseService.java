@@ -45,9 +45,6 @@ public class LicenseService extends BaseService<License> {
         license.getAsset().setLicense(license);
         }
 
-    
-
-
         return licenseRepository.save(license);
     }
 

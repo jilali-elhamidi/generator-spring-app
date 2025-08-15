@@ -48,25 +48,6 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
     
     
 
-    
-
-    
-        if (podcastguest.getAppearances() != null) {
-        List<PodcastEpisode> managedAppearances = new ArrayList<>();
-        for (PodcastEpisode item : podcastguest.getAppearances()) {
-        if (item.getId() != null) {
-        PodcastEpisode existingItem = appearancesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("PodcastEpisode not found"));
-        managedAppearances.add(existingItem);
-        } else {
-        managedAppearances.add(item);
-        }
-        }
-        podcastguest.setAppearances(managedAppearances);
-        }
-    
-
-
         return podcastguestRepository.save(podcastguest);
     }
 

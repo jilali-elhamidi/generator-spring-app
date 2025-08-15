@@ -48,55 +48,6 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
     
     
 
-    
-        if (contentlanguage.getMovies() != null) {
-        List<Movie> managedMovies = new ArrayList<>();
-        for (Movie item : contentlanguage.getMovies()) {
-        if (item.getId() != null) {
-        Movie existingItem = moviesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Movie not found"));
-        managedMovies.add(existingItem);
-        } else {
-        managedMovies.add(item);
-        }
-        }
-        contentlanguage.setMovies(managedMovies);
-        }
-    
-
-    
-        if (contentlanguage.getTvShows() != null) {
-        List<TVShow> managedTvShows = new ArrayList<>();
-        for (TVShow item : contentlanguage.getTvShows()) {
-        if (item.getId() != null) {
-        TVShow existingItem = tvShowsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        managedTvShows.add(existingItem);
-        } else {
-        managedTvShows.add(item);
-        }
-        }
-        contentlanguage.setTvShows(managedTvShows);
-        }
-    
-
-    
-        if (contentlanguage.getPodcasts() != null) {
-        List<Podcast> managedPodcasts = new ArrayList<>();
-        for (Podcast item : contentlanguage.getPodcasts()) {
-        if (item.getId() != null) {
-        Podcast existingItem = podcastsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        managedPodcasts.add(existingItem);
-        } else {
-        managedPodcasts.add(item);
-        }
-        }
-        contentlanguage.setPodcasts(managedPodcasts);
-        }
-    
-
-
         return contentlanguageRepository.save(contentlanguage);
     }
 

@@ -54,9 +54,6 @@ public class MusicLabelService extends BaseService<MusicLabel> {
 
     
 
-    
-
-
         return musiclabelRepository.save(musiclabel);
     }
 

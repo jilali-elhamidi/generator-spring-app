@@ -86,13 +86,6 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
         merchandiseorder.getShippingDetails().setOrder(merchandiseorder);
         }
 
-    
-
-    
-
-    
-
-
         return merchandiseorderRepository.save(merchandiseorder);
     }
 

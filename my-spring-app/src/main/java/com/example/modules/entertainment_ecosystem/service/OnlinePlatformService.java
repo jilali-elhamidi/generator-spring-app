@@ -54,9 +54,6 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
 
     
 
-    
-
-
         return onlineplatformRepository.save(onlineplatform);
     }
 

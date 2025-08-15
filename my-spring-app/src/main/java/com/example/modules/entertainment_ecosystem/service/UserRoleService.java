@@ -34,23 +34,6 @@ public class UserRoleService extends BaseService<UserRole> {
 
     
 
-    
-        if (userrole.getUsers() != null) {
-        List<UserProfile> managedUsers = new ArrayList<>();
-        for (UserProfile item : userrole.getUsers()) {
-        if (item.getId() != null) {
-        UserProfile existingItem = usersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        managedUsers.add(existingItem);
-        } else {
-        managedUsers.add(item);
-        }
-        }
-        userrole.setUsers(managedUsers);
-        }
-    
-
-
         return userroleRepository.save(userrole);
     }
 

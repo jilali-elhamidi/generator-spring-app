@@ -41,9 +41,6 @@ public class UserPreferenceService extends BaseService<UserPreference> {
         }
     
 
-    
-
-
         return userpreferenceRepository.save(userpreference);
     }
 

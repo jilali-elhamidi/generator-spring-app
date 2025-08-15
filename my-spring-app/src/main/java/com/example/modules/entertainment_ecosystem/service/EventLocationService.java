@@ -68,11 +68,6 @@ public class EventLocationService extends BaseService<EventLocation> {
         }
     
 
-    
-
-    
-
-
         return eventlocationRepository.save(eventlocation);
     }
 

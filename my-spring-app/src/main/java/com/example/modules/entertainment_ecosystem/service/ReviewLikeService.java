@@ -55,11 +55,6 @@ public class ReviewLikeService extends BaseService<ReviewLike> {
         }
     
 
-    
-
-    
-
-
         return reviewlikeRepository.save(reviewlike);
     }
 

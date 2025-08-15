@@ -178,53 +178,6 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         }
     
 
-    
-
-    
-
-    
-
-    
-        if (musictrack.getListenedByUsers() != null) {
-        List<UserProfile> managedListenedByUsers = new ArrayList<>();
-        for (UserProfile item : musictrack.getListenedByUsers()) {
-        if (item.getId() != null) {
-        UserProfile existingItem = listenedByUsersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        managedListenedByUsers.add(existingItem);
-        } else {
-        managedListenedByUsers.add(item);
-        }
-        }
-        musictrack.setListenedByUsers(managedListenedByUsers);
-        }
-    
-
-    
-
-    
-
-    
-        if (musictrack.getFormats() != null) {
-        List<MusicFormat> managedFormats = new ArrayList<>();
-        for (MusicFormat item : musictrack.getFormats()) {
-        if (item.getId() != null) {
-        MusicFormat existingItem = formatsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("MusicFormat not found"));
-        managedFormats.add(existingItem);
-        } else {
-        managedFormats.add(item);
-        }
-        }
-        musictrack.setFormats(managedFormats);
-        }
-    
-
-    
-
-    
-
-
         return musictrackRepository.save(musictrack);
     }
 

@@ -45,9 +45,6 @@ public class EventAudienceService extends BaseService<EventAudience> {
         eventaudience.getEvent().setAudience(eventaudience);
         }
 
-    
-
-
         return eventaudienceRepository.save(eventaudience);
     }
 

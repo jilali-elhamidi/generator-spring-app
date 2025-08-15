@@ -135,15 +135,6 @@ public class ContentProviderService extends BaseService<ContentProvider> {
     
     
 
-    
-
-    
-
-    
-
-    
-
-
         return contentproviderRepository.save(contentprovider);
     }
 

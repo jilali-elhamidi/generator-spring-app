@@ -69,13 +69,6 @@ public class GameReviewUpvoteService extends BaseService<GameReviewUpvote> {
         }
     
 
-    
-
-    
-
-    
-
-
         return gamereviewupvoteRepository.save(gamereviewupvote);
     }
 

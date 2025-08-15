@@ -72,11 +72,6 @@ public class UserWalletService extends BaseService<UserWallet> {
         userwallet.getUser().setWallet(userwallet);
         }
 
-    
-
-    
-
-
         return userwalletRepository.save(userwallet);
     }
 

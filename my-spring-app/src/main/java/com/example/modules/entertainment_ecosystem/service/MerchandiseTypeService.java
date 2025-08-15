@@ -54,9 +54,6 @@ public class MerchandiseTypeService extends BaseService<MerchandiseType> {
 
     
 
-    
-
-
         return merchandisetypeRepository.save(merchandisetype);
     }
 

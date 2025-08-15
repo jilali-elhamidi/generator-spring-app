@@ -73,13 +73,6 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
         eventsponsorship.getContract().setSponsorship(eventsponsorship);
         }
 
-    
-
-    
-
-    
-
-
         return eventsponsorshipRepository.save(eventsponsorship);
     }
 

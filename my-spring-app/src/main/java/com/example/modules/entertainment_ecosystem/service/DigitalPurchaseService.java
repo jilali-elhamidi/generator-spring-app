@@ -101,17 +101,6 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
         digitalpurchase.getTransaction().setDigitalPurchase(digitalpurchase);
         }
 
-    
-
-    
-
-    
-
-    
-
-    
-
-
         return digitalpurchaseRepository.save(digitalpurchase);
     }
 

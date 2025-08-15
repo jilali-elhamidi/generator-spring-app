@@ -34,23 +34,6 @@ public class GamePlatformService extends BaseService<GamePlatform> {
 
     
 
-    
-        if (gameplatform.getVideoGames() != null) {
-        List<VideoGame> managedVideoGames = new ArrayList<>();
-        for (VideoGame item : gameplatform.getVideoGames()) {
-        if (item.getId() != null) {
-        VideoGame existingItem = videoGamesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        managedVideoGames.add(existingItem);
-        } else {
-        managedVideoGames.add(item);
-        }
-        }
-        gameplatform.setVideoGames(managedVideoGames);
-        }
-    
-
-
         return gameplatformRepository.save(gameplatform);
     }
 

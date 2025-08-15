@@ -41,9 +41,6 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
         }
     
 
-    
-
-
         return useractivitylogRepository.save(useractivitylog);
     }
 

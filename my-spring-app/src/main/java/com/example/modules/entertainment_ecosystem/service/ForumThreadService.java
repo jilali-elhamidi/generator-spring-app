@@ -82,13 +82,6 @@ public class ForumThreadService extends BaseService<ForumThread> {
         }
     
 
-    
-
-    
-
-    
-
-
         return forumthreadRepository.save(forumthread);
     }
 

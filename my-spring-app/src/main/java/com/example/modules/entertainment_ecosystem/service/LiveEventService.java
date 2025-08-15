@@ -155,51 +155,6 @@ public class LiveEventService extends BaseService<LiveEvent> {
         liveevent.getAudience().setEvent(liveevent);
         }
 
-    
-        if (liveevent.getPerformers() != null) {
-        List<Artist> managedPerformers = new ArrayList<>();
-        for (Artist item : liveevent.getPerformers()) {
-        if (item.getId() != null) {
-        Artist existingItem = performersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Artist not found"));
-        managedPerformers.add(existingItem);
-        } else {
-        managedPerformers.add(item);
-        }
-        }
-        liveevent.setPerformers(managedPerformers);
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (liveevent.getTags() != null) {
-        List<ContentTag> managedTags = new ArrayList<>();
-        for (ContentTag item : liveevent.getTags()) {
-        if (item.getId() != null) {
-        ContentTag existingItem = tagsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ContentTag not found"));
-        managedTags.add(existingItem);
-        } else {
-        managedTags.add(item);
-        }
-        }
-        liveevent.setTags(managedTags);
-        }
-    
-
-
         return liveeventRepository.save(liveevent);
     }
 

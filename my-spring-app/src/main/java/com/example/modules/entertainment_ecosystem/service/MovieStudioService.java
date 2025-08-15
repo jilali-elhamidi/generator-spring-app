@@ -54,9 +54,6 @@ public class MovieStudioService extends BaseService<MovieStudio> {
 
     
 
-    
-
-
         return moviestudioRepository.save(moviestudio);
     }
 

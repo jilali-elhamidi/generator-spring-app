@@ -41,9 +41,6 @@ public class UserSettingService extends BaseService<UserSetting> {
         }
     
 
-    
-
-
         return usersettingRepository.save(usersetting);
     }
 

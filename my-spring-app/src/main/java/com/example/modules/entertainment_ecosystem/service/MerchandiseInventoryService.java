@@ -59,11 +59,6 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
         merchandiseinventory.getMerchandiseItem().setInventory(merchandiseinventory);
         }
 
-    
-
-    
-
-
         return merchandiseinventoryRepository.save(merchandiseinventory);
     }
 

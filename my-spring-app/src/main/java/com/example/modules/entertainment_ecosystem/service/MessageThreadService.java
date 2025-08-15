@@ -61,25 +61,6 @@ public class MessageThreadService extends BaseService<MessageThread> {
     
     
 
-    
-        if (messagethread.getParticipants() != null) {
-        List<UserProfile> managedParticipants = new ArrayList<>();
-        for (UserProfile item : messagethread.getParticipants()) {
-        if (item.getId() != null) {
-        UserProfile existingItem = participantsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        managedParticipants.add(existingItem);
-        } else {
-        managedParticipants.add(item);
-        }
-        }
-        messagethread.setParticipants(managedParticipants);
-        }
-    
-
-    
-
-
         return messagethreadRepository.save(messagethread);
     }
 

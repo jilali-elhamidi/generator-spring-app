@@ -69,13 +69,6 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
         }
     
 
-    
-
-    
-
-    
-
-
         return playlistitemRepository.save(playlistitem);
     }
 

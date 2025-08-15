@@ -54,9 +54,6 @@ public class EventTicketTypeService extends BaseService<EventTicketType> {
 
     
 
-    
-
-
         return eventtickettypeRepository.save(eventtickettype);
     }
 

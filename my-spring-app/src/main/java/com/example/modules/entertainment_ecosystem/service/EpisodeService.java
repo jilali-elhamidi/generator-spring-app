@@ -93,29 +93,6 @@ public class EpisodeService extends BaseService<Episode> {
         episode.getRelatedPodcastEpisode().setRelatedEpisode(episode);
         }
 
-    
-
-    
-        if (episode.getWatchedByUsers() != null) {
-        List<UserProfile> managedWatchedByUsers = new ArrayList<>();
-        for (UserProfile item : episode.getWatchedByUsers()) {
-        if (item.getId() != null) {
-        UserProfile existingItem = watchedByUsersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        managedWatchedByUsers.add(existingItem);
-        } else {
-        managedWatchedByUsers.add(item);
-        }
-        }
-        episode.setWatchedByUsers(managedWatchedByUsers);
-        }
-    
-
-    
-
-    
-
-
         return episodeRepository.save(episode);
     }
 

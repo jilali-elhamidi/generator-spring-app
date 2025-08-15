@@ -62,27 +62,6 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
         }
     
 
-    
-
-    
-        if (onlineevent.getAttendees() != null) {
-        List<UserProfile> managedAttendees = new ArrayList<>();
-        for (UserProfile item : onlineevent.getAttendees()) {
-        if (item.getId() != null) {
-        UserProfile existingItem = attendeesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        managedAttendees.add(existingItem);
-        } else {
-        managedAttendees.add(item);
-        }
-        }
-        onlineevent.setAttendees(managedAttendees);
-        }
-    
-
-    
-
-
         return onlineeventRepository.save(onlineevent);
     }
 

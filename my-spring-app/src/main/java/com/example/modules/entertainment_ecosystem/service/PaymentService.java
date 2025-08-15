@@ -45,9 +45,6 @@ public class PaymentService extends BaseService<Payment> {
         payment.getBooking().setPayment(payment);
         }
 
-    
-
-
         return paymentRepository.save(payment);
     }
 

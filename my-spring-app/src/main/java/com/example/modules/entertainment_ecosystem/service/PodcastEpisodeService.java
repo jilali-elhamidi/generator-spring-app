@@ -66,27 +66,6 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
         podcastepisode.getRelatedEpisode().setRelatedPodcastEpisode(podcastepisode);
         }
 
-    
-
-    
-
-    
-        if (podcastepisode.getGuestAppearances() != null) {
-        List<PodcastGuest> managedGuestAppearances = new ArrayList<>();
-        for (PodcastGuest item : podcastepisode.getGuestAppearances()) {
-        if (item.getId() != null) {
-        PodcastGuest existingItem = guestAppearancesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("PodcastGuest not found"));
-        managedGuestAppearances.add(existingItem);
-        } else {
-        managedGuestAppearances.add(item);
-        }
-        }
-        podcastepisode.setGuestAppearances(managedGuestAppearances);
-        }
-    
-
-
         return podcastepisodeRepository.save(podcastepisode);
     }
 

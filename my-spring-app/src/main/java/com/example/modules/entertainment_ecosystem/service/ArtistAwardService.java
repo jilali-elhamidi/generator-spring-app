@@ -41,9 +41,6 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
         }
     
 
-    
-
-
         return artistawardRepository.save(artistaward);
     }
 

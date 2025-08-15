@@ -89,29 +89,6 @@ public class AlbumService extends BaseService<Album> {
         }
     
 
-    
-
-    
-
-    
-        if (album.getGenres() != null) {
-        List<Genre> managedGenres = new ArrayList<>();
-        for (Genre item : album.getGenres()) {
-        if (item.getId() != null) {
-        Genre existingItem = genresRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Genre not found"));
-        managedGenres.add(existingItem);
-        } else {
-        managedGenres.add(item);
-        }
-        }
-        album.setGenres(managedGenres);
-        }
-    
-
-    
-
-
         return albumRepository.save(album);
     }
 
