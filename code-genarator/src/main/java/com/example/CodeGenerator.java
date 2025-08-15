@@ -116,6 +116,8 @@ public class CodeGenerator {
             }
 
             boolean generateServicesOnly = options.contains("--services-only");
+            boolean generateControllersOnly = options.contains("--controllers-only");
+            boolean generateMappersOnly = options.contains("--mappers-only"); // Nouvelle option
 
             for (Map<String, Object> entity : this.entities) {
                 String entityName = (String) entity.get("name");
@@ -143,9 +145,14 @@ public class CodeGenerator {
                 }
                 context.put("hasParentReference", hasManyToOne);
 
+                // Logique de génération mise à jour
                 if (generateServicesOnly) {
                     generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
-                } else {
+                } else if (generateControllersOnly) {
+                    generateJavaFile("ControllerTemplate", outputDir, moduleName, entityName, "controller", context);
+                } else if (generateMappersOnly) { // Nouvelle condition pour les mappers
+                    generateJavaFile("MapperTemplate", outputDir, moduleName, entityName, "mapper", context);
+                } else { // Génération par défaut (tous les fichiers)
                     generateJavaFile("EntityTemplate", outputDir, moduleName, entityName, "model", context);
                     generateJavaFile("RepositoryTemplate", outputDir, moduleName, entityName, "repository", context);
                     generateJavaFile("ServiceTemplate", outputDir, moduleName, entityName, "service", context);
@@ -191,7 +198,7 @@ public class CodeGenerator {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
-            System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <répertoire-de-sortie> [--services-only]");
+            System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <répertoire-de-sortie> [--services-only | --controllers-only | --mappers-only]");
             return;
         }
 
@@ -212,7 +219,7 @@ public class CodeGenerator {
         if (!yamlFilePath.isEmpty() && !outputDir.isEmpty()) {
             new CodeGenerator().generateCode(yamlFilePath, outputDir, options);
         } else {
-            System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <répertoire-de-sortie> [--services-only]");
+            System.err.println("Utilisation : java -jar code-generator.jar <chemin-config-yaml> <répertoire-de-sortie> [--services-only | --controllers-only | --mappers-only]");
         }
     }
 }
