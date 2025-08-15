@@ -54,23 +54,18 @@ public class PublisherController {
             @PutMapping("/{id}")
             public ResponseEntity<PublisherDto> updatePublisher(
                 @PathVariable Long id,
-                @Valid @RequestBody PublisherDto publisherDto) {
+                @RequestBody PublisherDto publisherDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Publisher existing = publisherService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Publisher not found"));
+                // Transformer le DTO en entity pour le service
+                Publisher entityToUpdate = publisherMapper.toEntity(publisherDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                publisherMapper.updateEntityFromDto(publisherDto, existing);
+                // Appel du service update
+                Publisher updatedEntity = publisherService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Publisher updatedEntity = publisherService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                PublisherDto updatedDto = publisherMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(publisherMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePublisher(@PathVariable Long id) {

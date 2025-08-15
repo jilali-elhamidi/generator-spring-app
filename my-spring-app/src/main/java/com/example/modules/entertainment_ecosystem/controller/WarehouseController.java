@@ -54,23 +54,18 @@ public class WarehouseController {
             @PutMapping("/{id}")
             public ResponseEntity<WarehouseDto> updateWarehouse(
                 @PathVariable Long id,
-                @Valid @RequestBody WarehouseDto warehouseDto) {
+                @RequestBody WarehouseDto warehouseDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Warehouse existing = warehouseService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Warehouse not found"));
+                // Transformer le DTO en entity pour le service
+                Warehouse entityToUpdate = warehouseMapper.toEntity(warehouseDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                warehouseMapper.updateEntityFromDto(warehouseDto, existing);
+                // Appel du service update
+                Warehouse updatedEntity = warehouseService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Warehouse updatedEntity = warehouseService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                WarehouseDto updatedDto = warehouseMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(warehouseMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWarehouse(@PathVariable Long id) {

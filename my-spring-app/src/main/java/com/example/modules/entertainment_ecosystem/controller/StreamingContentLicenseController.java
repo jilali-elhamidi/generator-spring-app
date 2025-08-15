@@ -54,23 +54,18 @@ public class StreamingContentLicenseController {
             @PutMapping("/{id}")
             public ResponseEntity<StreamingContentLicenseDto> updateStreamingContentLicense(
                 @PathVariable Long id,
-                @Valid @RequestBody StreamingContentLicenseDto streamingcontentlicenseDto) {
+                @RequestBody StreamingContentLicenseDto streamingcontentlicenseDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                StreamingContentLicense existing = streamingcontentlicenseService.findById(id)
-                .orElseThrow(() -> new RuntimeException("StreamingContentLicense not found"));
+                // Transformer le DTO en entity pour le service
+                StreamingContentLicense entityToUpdate = streamingcontentlicenseMapper.toEntity(streamingcontentlicenseDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                streamingcontentlicenseMapper.updateEntityFromDto(streamingcontentlicenseDto, existing);
+                // Appel du service update
+                StreamingContentLicense updatedEntity = streamingcontentlicenseService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                StreamingContentLicense updatedEntity = streamingcontentlicenseService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                StreamingContentLicenseDto updatedDto = streamingcontentlicenseMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(streamingcontentlicenseMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStreamingContentLicense(@PathVariable Long id) {

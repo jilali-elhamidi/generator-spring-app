@@ -54,23 +54,18 @@ public class ShiftController {
             @PutMapping("/{id}")
             public ResponseEntity<ShiftDto> updateShift(
                 @PathVariable Long id,
-                @Valid @RequestBody ShiftDto shiftDto) {
+                @RequestBody ShiftDto shiftDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Shift existing = shiftService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Shift not found"));
+                // Transformer le DTO en entity pour le service
+                Shift entityToUpdate = shiftMapper.toEntity(shiftDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                shiftMapper.updateEntityFromDto(shiftDto, existing);
+                // Appel du service update
+                Shift updatedEntity = shiftService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Shift updatedEntity = shiftService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ShiftDto updatedDto = shiftMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(shiftMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteShift(@PathVariable Long id) {

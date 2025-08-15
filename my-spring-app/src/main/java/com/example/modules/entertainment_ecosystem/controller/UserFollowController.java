@@ -54,23 +54,18 @@ public class UserFollowController {
             @PutMapping("/{id}")
             public ResponseEntity<UserFollowDto> updateUserFollow(
                 @PathVariable Long id,
-                @Valid @RequestBody UserFollowDto userfollowDto) {
+                @RequestBody UserFollowDto userfollowDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                UserFollow existing = userfollowService.findById(id)
-                .orElseThrow(() -> new RuntimeException("UserFollow not found"));
+                // Transformer le DTO en entity pour le service
+                UserFollow entityToUpdate = userfollowMapper.toEntity(userfollowDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                userfollowMapper.updateEntityFromDto(userfollowDto, existing);
+                // Appel du service update
+                UserFollow updatedEntity = userfollowService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                UserFollow updatedEntity = userfollowService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                UserFollowDto updatedDto = userfollowMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(userfollowMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserFollow(@PathVariable Long id) {

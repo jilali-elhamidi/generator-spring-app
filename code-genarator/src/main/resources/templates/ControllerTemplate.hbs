@@ -54,23 +54,18 @@ public class {{entityName}}Controller {
             @PutMapping("/{id}")
             public ResponseEntity<{{entityName}}Dto> update{{entityName}}(
                 @PathVariable Long id,
-                @Valid @RequestBody {{entityName}}Dto {{entityNameLowercase}}Dto) {
+                @RequestBody {{entityName}}Dto {{entityNameLowercase}}Dto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                {{entityName}} existing = {{entityNameLowercase}}Service.findById(id)
-                .orElseThrow(() -> new RuntimeException("{{entityName}} not found"));
+                // Transformer le DTO en entity pour le service
+                {{entityName}} entityToUpdate = {{entityNameLowercase}}Mapper.toEntity({{entityNameLowercase}}Dto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                {{entityNameLowercase}}Mapper.updateEntityFromDto({{entityNameLowercase}}Dto, existing);
+                // Appel du service update
+                {{entityName}} updatedEntity = {{entityNameLowercase}}Service.update(id, entityToUpdate);
 
-                // Sauvegarde
-                {{entityName}} updatedEntity = {{entityNameLowercase}}Service.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                {{entityName}}Dto updatedDto = {{entityNameLowercase}}Mapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok({{entityNameLowercase}}Mapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete{{entityName}}(@PathVariable Long id) {

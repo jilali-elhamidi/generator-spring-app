@@ -54,23 +54,18 @@ public class TransactionController {
             @PutMapping("/{id}")
             public ResponseEntity<TransactionDto> updateTransaction(
                 @PathVariable Long id,
-                @Valid @RequestBody TransactionDto transactionDto) {
+                @RequestBody TransactionDto transactionDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Transaction existing = transactionService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+                // Transformer le DTO en entity pour le service
+                Transaction entityToUpdate = transactionMapper.toEntity(transactionDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                transactionMapper.updateEntityFromDto(transactionDto, existing);
+                // Appel du service update
+                Transaction updatedEntity = transactionService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Transaction updatedEntity = transactionService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                TransactionDto updatedDto = transactionMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(transactionMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {

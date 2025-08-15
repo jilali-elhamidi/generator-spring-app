@@ -54,23 +54,18 @@ public class UserProfileController {
             @PutMapping("/{id}")
             public ResponseEntity<UserProfileDto> updateUserProfile(
                 @PathVariable Long id,
-                @Valid @RequestBody UserProfileDto userprofileDto) {
+                @RequestBody UserProfileDto userprofileDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                UserProfile existing = userprofileService.findById(id)
-                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+                // Transformer le DTO en entity pour le service
+                UserProfile entityToUpdate = userprofileMapper.toEntity(userprofileDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                userprofileMapper.updateEntityFromDto(userprofileDto, existing);
+                // Appel du service update
+                UserProfile updatedEntity = userprofileService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                UserProfile updatedEntity = userprofileService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                UserProfileDto updatedDto = userprofileMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(userprofileMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserProfile(@PathVariable Long id) {

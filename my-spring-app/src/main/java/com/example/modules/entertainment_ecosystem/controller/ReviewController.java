@@ -54,23 +54,18 @@ public class ReviewController {
             @PutMapping("/{id}")
             public ResponseEntity<ReviewDto> updateReview(
                 @PathVariable Long id,
-                @Valid @RequestBody ReviewDto reviewDto) {
+                @RequestBody ReviewDto reviewDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Review existing = reviewService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
+                // Transformer le DTO en entity pour le service
+                Review entityToUpdate = reviewMapper.toEntity(reviewDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                reviewMapper.updateEntityFromDto(reviewDto, existing);
+                // Appel du service update
+                Review updatedEntity = reviewService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Review updatedEntity = reviewService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ReviewDto updatedDto = reviewMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(reviewMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long id) {

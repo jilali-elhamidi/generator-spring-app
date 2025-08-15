@@ -54,23 +54,18 @@ public class LiveEventController {
             @PutMapping("/{id}")
             public ResponseEntity<LiveEventDto> updateLiveEvent(
                 @PathVariable Long id,
-                @Valid @RequestBody LiveEventDto liveeventDto) {
+                @RequestBody LiveEventDto liveeventDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                LiveEvent existing = liveeventService.findById(id)
-                .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+                // Transformer le DTO en entity pour le service
+                LiveEvent entityToUpdate = liveeventMapper.toEntity(liveeventDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                liveeventMapper.updateEntityFromDto(liveeventDto, existing);
+                // Appel du service update
+                LiveEvent updatedEntity = liveeventService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                LiveEvent updatedEntity = liveeventService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                LiveEventDto updatedDto = liveeventMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(liveeventMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLiveEvent(@PathVariable Long id) {

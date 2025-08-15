@@ -54,23 +54,18 @@ public class ContentTagController {
             @PutMapping("/{id}")
             public ResponseEntity<ContentTagDto> updateContentTag(
                 @PathVariable Long id,
-                @Valid @RequestBody ContentTagDto contenttagDto) {
+                @RequestBody ContentTagDto contenttagDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                ContentTag existing = contenttagService.findById(id)
-                .orElseThrow(() -> new RuntimeException("ContentTag not found"));
+                // Transformer le DTO en entity pour le service
+                ContentTag entityToUpdate = contenttagMapper.toEntity(contenttagDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                contenttagMapper.updateEntityFromDto(contenttagDto, existing);
+                // Appel du service update
+                ContentTag updatedEntity = contenttagService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                ContentTag updatedEntity = contenttagService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ContentTagDto updatedDto = contenttagMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(contenttagMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContentTag(@PathVariable Long id) {

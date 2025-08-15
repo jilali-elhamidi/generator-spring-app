@@ -54,23 +54,18 @@ public class ContentProviderController {
             @PutMapping("/{id}")
             public ResponseEntity<ContentProviderDto> updateContentProvider(
                 @PathVariable Long id,
-                @Valid @RequestBody ContentProviderDto contentproviderDto) {
+                @RequestBody ContentProviderDto contentproviderDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                ContentProvider existing = contentproviderService.findById(id)
-                .orElseThrow(() -> new RuntimeException("ContentProvider not found"));
+                // Transformer le DTO en entity pour le service
+                ContentProvider entityToUpdate = contentproviderMapper.toEntity(contentproviderDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                contentproviderMapper.updateEntityFromDto(contentproviderDto, existing);
+                // Appel du service update
+                ContentProvider updatedEntity = contentproviderService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                ContentProvider updatedEntity = contentproviderService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ContentProviderDto updatedDto = contentproviderMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(contentproviderMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContentProvider(@PathVariable Long id) {

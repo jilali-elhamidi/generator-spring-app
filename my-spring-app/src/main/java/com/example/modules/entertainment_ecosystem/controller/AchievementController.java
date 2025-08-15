@@ -54,23 +54,18 @@ public class AchievementController {
             @PutMapping("/{id}")
             public ResponseEntity<AchievementDto> updateAchievement(
                 @PathVariable Long id,
-                @Valid @RequestBody AchievementDto achievementDto) {
+                @RequestBody AchievementDto achievementDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Achievement existing = achievementService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Achievement not found"));
+                // Transformer le DTO en entity pour le service
+                Achievement entityToUpdate = achievementMapper.toEntity(achievementDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                achievementMapper.updateEntityFromDto(achievementDto, existing);
+                // Appel du service update
+                Achievement updatedEntity = achievementService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Achievement updatedEntity = achievementService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                AchievementDto updatedDto = achievementMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(achievementMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAchievement(@PathVariable Long id) {

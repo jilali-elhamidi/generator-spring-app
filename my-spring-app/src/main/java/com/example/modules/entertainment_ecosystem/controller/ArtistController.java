@@ -54,23 +54,18 @@ public class ArtistController {
             @PutMapping("/{id}")
             public ResponseEntity<ArtistDto> updateArtist(
                 @PathVariable Long id,
-                @Valid @RequestBody ArtistDto artistDto) {
+                @RequestBody ArtistDto artistDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Artist existing = artistService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
+                // Transformer le DTO en entity pour le service
+                Artist entityToUpdate = artistMapper.toEntity(artistDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                artistMapper.updateEntityFromDto(artistDto, existing);
+                // Appel du service update
+                Artist updatedEntity = artistService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Artist updatedEntity = artistService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ArtistDto updatedDto = artistMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(artistMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArtist(@PathVariable Long id) {

@@ -54,23 +54,18 @@ public class ForumCategoryController {
             @PutMapping("/{id}")
             public ResponseEntity<ForumCategoryDto> updateForumCategory(
                 @PathVariable Long id,
-                @Valid @RequestBody ForumCategoryDto forumcategoryDto) {
+                @RequestBody ForumCategoryDto forumcategoryDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                ForumCategory existing = forumcategoryService.findById(id)
-                .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+                // Transformer le DTO en entity pour le service
+                ForumCategory entityToUpdate = forumcategoryMapper.toEntity(forumcategoryDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                forumcategoryMapper.updateEntityFromDto(forumcategoryDto, existing);
+                // Appel du service update
+                ForumCategory updatedEntity = forumcategoryService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                ForumCategory updatedEntity = forumcategoryService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ForumCategoryDto updatedDto = forumcategoryMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(forumcategoryMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteForumCategory(@PathVariable Long id) {

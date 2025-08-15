@@ -54,23 +54,18 @@ public class MusicFormatController {
             @PutMapping("/{id}")
             public ResponseEntity<MusicFormatDto> updateMusicFormat(
                 @PathVariable Long id,
-                @Valid @RequestBody MusicFormatDto musicformatDto) {
+                @RequestBody MusicFormatDto musicformatDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                MusicFormat existing = musicformatService.findById(id)
-                .orElseThrow(() -> new RuntimeException("MusicFormat not found"));
+                // Transformer le DTO en entity pour le service
+                MusicFormat entityToUpdate = musicformatMapper.toEntity(musicformatDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                musicformatMapper.updateEntityFromDto(musicformatDto, existing);
+                // Appel du service update
+                MusicFormat updatedEntity = musicformatService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                MusicFormat updatedEntity = musicformatService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                MusicFormatDto updatedDto = musicformatMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(musicformatMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMusicFormat(@PathVariable Long id) {

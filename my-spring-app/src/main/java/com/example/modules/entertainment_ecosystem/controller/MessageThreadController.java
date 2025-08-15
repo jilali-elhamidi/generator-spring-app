@@ -54,23 +54,18 @@ public class MessageThreadController {
             @PutMapping("/{id}")
             public ResponseEntity<MessageThreadDto> updateMessageThread(
                 @PathVariable Long id,
-                @Valid @RequestBody MessageThreadDto messagethreadDto) {
+                @RequestBody MessageThreadDto messagethreadDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                MessageThread existing = messagethreadService.findById(id)
-                .orElseThrow(() -> new RuntimeException("MessageThread not found"));
+                // Transformer le DTO en entity pour le service
+                MessageThread entityToUpdate = messagethreadMapper.toEntity(messagethreadDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                messagethreadMapper.updateEntityFromDto(messagethreadDto, existing);
+                // Appel du service update
+                MessageThread updatedEntity = messagethreadService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                MessageThread updatedEntity = messagethreadService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                MessageThreadDto updatedDto = messagethreadMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(messagethreadMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMessageThread(@PathVariable Long id) {

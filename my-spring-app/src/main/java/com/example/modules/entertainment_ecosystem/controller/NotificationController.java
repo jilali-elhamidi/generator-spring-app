@@ -54,23 +54,18 @@ public class NotificationController {
             @PutMapping("/{id}")
             public ResponseEntity<NotificationDto> updateNotification(
                 @PathVariable Long id,
-                @Valid @RequestBody NotificationDto notificationDto) {
+                @RequestBody NotificationDto notificationDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Notification existing = notificationService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+                // Transformer le DTO en entity pour le service
+                Notification entityToUpdate = notificationMapper.toEntity(notificationDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                notificationMapper.updateEntityFromDto(notificationDto, existing);
+                // Appel du service update
+                Notification updatedEntity = notificationService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Notification updatedEntity = notificationService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                NotificationDto updatedDto = notificationMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(notificationMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {

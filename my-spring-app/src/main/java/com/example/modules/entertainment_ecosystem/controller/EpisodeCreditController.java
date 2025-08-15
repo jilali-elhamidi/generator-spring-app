@@ -54,23 +54,18 @@ public class EpisodeCreditController {
             @PutMapping("/{id}")
             public ResponseEntity<EpisodeCreditDto> updateEpisodeCredit(
                 @PathVariable Long id,
-                @Valid @RequestBody EpisodeCreditDto episodecreditDto) {
+                @RequestBody EpisodeCreditDto episodecreditDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                EpisodeCredit existing = episodecreditService.findById(id)
-                .orElseThrow(() -> new RuntimeException("EpisodeCredit not found"));
+                // Transformer le DTO en entity pour le service
+                EpisodeCredit entityToUpdate = episodecreditMapper.toEntity(episodecreditDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                episodecreditMapper.updateEntityFromDto(episodecreditDto, existing);
+                // Appel du service update
+                EpisodeCredit updatedEntity = episodecreditService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                EpisodeCredit updatedEntity = episodecreditService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                EpisodeCreditDto updatedDto = episodecreditMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(episodecreditMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEpisodeCredit(@PathVariable Long id) {

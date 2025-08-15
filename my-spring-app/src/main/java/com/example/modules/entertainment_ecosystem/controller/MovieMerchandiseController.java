@@ -54,23 +54,18 @@ public class MovieMerchandiseController {
             @PutMapping("/{id}")
             public ResponseEntity<MovieMerchandiseDto> updateMovieMerchandise(
                 @PathVariable Long id,
-                @Valid @RequestBody MovieMerchandiseDto moviemerchandiseDto) {
+                @RequestBody MovieMerchandiseDto moviemerchandiseDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                MovieMerchandise existing = moviemerchandiseService.findById(id)
-                .orElseThrow(() -> new RuntimeException("MovieMerchandise not found"));
+                // Transformer le DTO en entity pour le service
+                MovieMerchandise entityToUpdate = moviemerchandiseMapper.toEntity(moviemerchandiseDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                moviemerchandiseMapper.updateEntityFromDto(moviemerchandiseDto, existing);
+                // Appel du service update
+                MovieMerchandise updatedEntity = moviemerchandiseService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                MovieMerchandise updatedEntity = moviemerchandiseService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                MovieMerchandiseDto updatedDto = moviemerchandiseMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(moviemerchandiseMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovieMerchandise(@PathVariable Long id) {

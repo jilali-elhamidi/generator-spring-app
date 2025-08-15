@@ -54,23 +54,18 @@ public class DevelopmentStudioController {
             @PutMapping("/{id}")
             public ResponseEntity<DevelopmentStudioDto> updateDevelopmentStudio(
                 @PathVariable Long id,
-                @Valid @RequestBody DevelopmentStudioDto developmentstudioDto) {
+                @RequestBody DevelopmentStudioDto developmentstudioDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                DevelopmentStudio existing = developmentstudioService.findById(id)
-                .orElseThrow(() -> new RuntimeException("DevelopmentStudio not found"));
+                // Transformer le DTO en entity pour le service
+                DevelopmentStudio entityToUpdate = developmentstudioMapper.toEntity(developmentstudioDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                developmentstudioMapper.updateEntityFromDto(developmentstudioDto, existing);
+                // Appel du service update
+                DevelopmentStudio updatedEntity = developmentstudioService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                DevelopmentStudio updatedEntity = developmentstudioService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                DevelopmentStudioDto updatedDto = developmentstudioMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(developmentstudioMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevelopmentStudio(@PathVariable Long id) {

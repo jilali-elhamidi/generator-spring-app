@@ -54,23 +54,18 @@ public class TVShowController {
             @PutMapping("/{id}")
             public ResponseEntity<TVShowDto> updateTVShow(
                 @PathVariable Long id,
-                @Valid @RequestBody TVShowDto tvshowDto) {
+                @RequestBody TVShowDto tvshowDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                TVShow existing = tvshowService.findById(id)
-                .orElseThrow(() -> new RuntimeException("TVShow not found"));
+                // Transformer le DTO en entity pour le service
+                TVShow entityToUpdate = tvshowMapper.toEntity(tvshowDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                tvshowMapper.updateEntityFromDto(tvshowDto, existing);
+                // Appel du service update
+                TVShow updatedEntity = tvshowService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                TVShow updatedEntity = tvshowService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                TVShowDto updatedDto = tvshowMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(tvshowMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTVShow(@PathVariable Long id) {

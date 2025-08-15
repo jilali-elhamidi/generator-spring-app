@@ -54,23 +54,18 @@ public class SubscriptionPlanController {
             @PutMapping("/{id}")
             public ResponseEntity<SubscriptionPlanDto> updateSubscriptionPlan(
                 @PathVariable Long id,
-                @Valid @RequestBody SubscriptionPlanDto subscriptionplanDto) {
+                @RequestBody SubscriptionPlanDto subscriptionplanDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                SubscriptionPlan existing = subscriptionplanService.findById(id)
-                .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
+                // Transformer le DTO en entity pour le service
+                SubscriptionPlan entityToUpdate = subscriptionplanMapper.toEntity(subscriptionplanDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                subscriptionplanMapper.updateEntityFromDto(subscriptionplanDto, existing);
+                // Appel du service update
+                SubscriptionPlan updatedEntity = subscriptionplanService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                SubscriptionPlan updatedEntity = subscriptionplanService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                SubscriptionPlanDto updatedDto = subscriptionplanMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(subscriptionplanMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSubscriptionPlan(@PathVariable Long id) {

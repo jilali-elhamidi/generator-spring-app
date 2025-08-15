@@ -54,23 +54,18 @@ public class GameReviewCommentController {
             @PutMapping("/{id}")
             public ResponseEntity<GameReviewCommentDto> updateGameReviewComment(
                 @PathVariable Long id,
-                @Valid @RequestBody GameReviewCommentDto gamereviewcommentDto) {
+                @RequestBody GameReviewCommentDto gamereviewcommentDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                GameReviewComment existing = gamereviewcommentService.findById(id)
-                .orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
+                // Transformer le DTO en entity pour le service
+                GameReviewComment entityToUpdate = gamereviewcommentMapper.toEntity(gamereviewcommentDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                gamereviewcommentMapper.updateEntityFromDto(gamereviewcommentDto, existing);
+                // Appel du service update
+                GameReviewComment updatedEntity = gamereviewcommentService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                GameReviewComment updatedEntity = gamereviewcommentService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                GameReviewCommentDto updatedDto = gamereviewcommentMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(gamereviewcommentMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGameReviewComment(@PathVariable Long id) {

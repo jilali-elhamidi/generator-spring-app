@@ -54,23 +54,18 @@ public class AdCampaignController {
             @PutMapping("/{id}")
             public ResponseEntity<AdCampaignDto> updateAdCampaign(
                 @PathVariable Long id,
-                @Valid @RequestBody AdCampaignDto adcampaignDto) {
+                @RequestBody AdCampaignDto adcampaignDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                AdCampaign existing = adcampaignService.findById(id)
-                .orElseThrow(() -> new RuntimeException("AdCampaign not found"));
+                // Transformer le DTO en entity pour le service
+                AdCampaign entityToUpdate = adcampaignMapper.toEntity(adcampaignDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                adcampaignMapper.updateEntityFromDto(adcampaignDto, existing);
+                // Appel du service update
+                AdCampaign updatedEntity = adcampaignService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                AdCampaign updatedEntity = adcampaignService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                AdCampaignDto updatedDto = adcampaignMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(adcampaignMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAdCampaign(@PathVariable Long id) {

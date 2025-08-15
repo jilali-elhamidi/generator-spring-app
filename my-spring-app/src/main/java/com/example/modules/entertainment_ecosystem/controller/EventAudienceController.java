@@ -54,23 +54,18 @@ public class EventAudienceController {
             @PutMapping("/{id}")
             public ResponseEntity<EventAudienceDto> updateEventAudience(
                 @PathVariable Long id,
-                @Valid @RequestBody EventAudienceDto eventaudienceDto) {
+                @RequestBody EventAudienceDto eventaudienceDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                EventAudience existing = eventaudienceService.findById(id)
-                .orElseThrow(() -> new RuntimeException("EventAudience not found"));
+                // Transformer le DTO en entity pour le service
+                EventAudience entityToUpdate = eventaudienceMapper.toEntity(eventaudienceDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                eventaudienceMapper.updateEntityFromDto(eventaudienceDto, existing);
+                // Appel du service update
+                EventAudience updatedEntity = eventaudienceService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                EventAudience updatedEntity = eventaudienceService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                EventAudienceDto updatedDto = eventaudienceMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(eventaudienceMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEventAudience(@PathVariable Long id) {

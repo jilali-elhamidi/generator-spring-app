@@ -54,23 +54,18 @@ public class PaymentController {
             @PutMapping("/{id}")
             public ResponseEntity<PaymentDto> updatePayment(
                 @PathVariable Long id,
-                @Valid @RequestBody PaymentDto paymentDto) {
+                @RequestBody PaymentDto paymentDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Payment existing = paymentService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                // Transformer le DTO en entity pour le service
+                Payment entityToUpdate = paymentMapper.toEntity(paymentDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                paymentMapper.updateEntityFromDto(paymentDto, existing);
+                // Appel du service update
+                Payment updatedEntity = paymentService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Payment updatedEntity = paymentService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                PaymentDto updatedDto = paymentMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(paymentMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePayment(@PathVariable Long id) {

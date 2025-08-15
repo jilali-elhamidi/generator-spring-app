@@ -54,23 +54,18 @@ public class DigitalAssetController {
             @PutMapping("/{id}")
             public ResponseEntity<DigitalAssetDto> updateDigitalAsset(
                 @PathVariable Long id,
-                @Valid @RequestBody DigitalAssetDto digitalassetDto) {
+                @RequestBody DigitalAssetDto digitalassetDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                DigitalAsset existing = digitalassetService.findById(id)
-                .orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
+                // Transformer le DTO en entity pour le service
+                DigitalAsset entityToUpdate = digitalassetMapper.toEntity(digitalassetDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                digitalassetMapper.updateEntityFromDto(digitalassetDto, existing);
+                // Appel du service update
+                DigitalAsset updatedEntity = digitalassetService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                DigitalAsset updatedEntity = digitalassetService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                DigitalAssetDto updatedDto = digitalassetMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(digitalassetMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDigitalAsset(@PathVariable Long id) {

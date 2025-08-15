@@ -54,23 +54,18 @@ public class SeasonController {
             @PutMapping("/{id}")
             public ResponseEntity<SeasonDto> updateSeason(
                 @PathVariable Long id,
-                @Valid @RequestBody SeasonDto seasonDto) {
+                @RequestBody SeasonDto seasonDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Season existing = seasonService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Season not found"));
+                // Transformer le DTO en entity pour le service
+                Season entityToUpdate = seasonMapper.toEntity(seasonDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                seasonMapper.updateEntityFromDto(seasonDto, existing);
+                // Appel du service update
+                Season updatedEntity = seasonService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Season updatedEntity = seasonService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                SeasonDto updatedDto = seasonMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(seasonMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSeason(@PathVariable Long id) {

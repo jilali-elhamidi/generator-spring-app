@@ -54,23 +54,18 @@ public class InvoiceController {
             @PutMapping("/{id}")
             public ResponseEntity<InvoiceDto> updateInvoice(
                 @PathVariable Long id,
-                @Valid @RequestBody InvoiceDto invoiceDto) {
+                @RequestBody InvoiceDto invoiceDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Invoice existing = invoiceService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                // Transformer le DTO en entity pour le service
+                Invoice entityToUpdate = invoiceMapper.toEntity(invoiceDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                invoiceMapper.updateEntityFromDto(invoiceDto, existing);
+                // Appel du service update
+                Invoice updatedEntity = invoiceService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Invoice updatedEntity = invoiceService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                InvoiceDto updatedDto = invoiceMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(invoiceMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {

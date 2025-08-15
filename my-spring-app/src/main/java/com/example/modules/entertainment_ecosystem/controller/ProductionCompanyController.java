@@ -54,23 +54,18 @@ public class ProductionCompanyController {
             @PutMapping("/{id}")
             public ResponseEntity<ProductionCompanyDto> updateProductionCompany(
                 @PathVariable Long id,
-                @Valid @RequestBody ProductionCompanyDto productioncompanyDto) {
+                @RequestBody ProductionCompanyDto productioncompanyDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                ProductionCompany existing = productioncompanyService.findById(id)
-                .orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
+                // Transformer le DTO en entity pour le service
+                ProductionCompany entityToUpdate = productioncompanyMapper.toEntity(productioncompanyDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                productioncompanyMapper.updateEntityFromDto(productioncompanyDto, existing);
+                // Appel du service update
+                ProductionCompany updatedEntity = productioncompanyService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                ProductionCompany updatedEntity = productioncompanyService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ProductionCompanyDto updatedDto = productioncompanyMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(productioncompanyMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProductionCompany(@PathVariable Long id) {

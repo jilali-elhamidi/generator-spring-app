@@ -54,23 +54,18 @@ public class ReviewCommentController {
             @PutMapping("/{id}")
             public ResponseEntity<ReviewCommentDto> updateReviewComment(
                 @PathVariable Long id,
-                @Valid @RequestBody ReviewCommentDto reviewcommentDto) {
+                @RequestBody ReviewCommentDto reviewcommentDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                ReviewComment existing = reviewcommentService.findById(id)
-                .orElseThrow(() -> new RuntimeException("ReviewComment not found"));
+                // Transformer le DTO en entity pour le service
+                ReviewComment entityToUpdate = reviewcommentMapper.toEntity(reviewcommentDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                reviewcommentMapper.updateEntityFromDto(reviewcommentDto, existing);
+                // Appel du service update
+                ReviewComment updatedEntity = reviewcommentService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                ReviewComment updatedEntity = reviewcommentService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ReviewCommentDto updatedDto = reviewcommentMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(reviewcommentMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReviewComment(@PathVariable Long id) {

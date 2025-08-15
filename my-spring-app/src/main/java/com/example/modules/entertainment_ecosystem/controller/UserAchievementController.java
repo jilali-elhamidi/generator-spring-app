@@ -54,23 +54,18 @@ public class UserAchievementController {
             @PutMapping("/{id}")
             public ResponseEntity<UserAchievementDto> updateUserAchievement(
                 @PathVariable Long id,
-                @Valid @RequestBody UserAchievementDto userachievementDto) {
+                @RequestBody UserAchievementDto userachievementDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                UserAchievement existing = userachievementService.findById(id)
-                .orElseThrow(() -> new RuntimeException("UserAchievement not found"));
+                // Transformer le DTO en entity pour le service
+                UserAchievement entityToUpdate = userachievementMapper.toEntity(userachievementDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                userachievementMapper.updateEntityFromDto(userachievementDto, existing);
+                // Appel du service update
+                UserAchievement updatedEntity = userachievementService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                UserAchievement updatedEntity = userachievementService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                UserAchievementDto updatedDto = userachievementMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(userachievementMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserAchievement(@PathVariable Long id) {

@@ -54,23 +54,18 @@ public class StreamingServiceController {
             @PutMapping("/{id}")
             public ResponseEntity<StreamingServiceDto> updateStreamingService(
                 @PathVariable Long id,
-                @Valid @RequestBody StreamingServiceDto streamingserviceDto) {
+                @RequestBody StreamingServiceDto streamingserviceDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                StreamingService existing = streamingserviceService.findById(id)
-                .orElseThrow(() -> new RuntimeException("StreamingService not found"));
+                // Transformer le DTO en entity pour le service
+                StreamingService entityToUpdate = streamingserviceMapper.toEntity(streamingserviceDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                streamingserviceMapper.updateEntityFromDto(streamingserviceDto, existing);
+                // Appel du service update
+                StreamingService updatedEntity = streamingserviceService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                StreamingService updatedEntity = streamingserviceService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                StreamingServiceDto updatedDto = streamingserviceMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(streamingserviceMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStreamingService(@PathVariable Long id) {

@@ -54,23 +54,18 @@ public class UserMessageController {
             @PutMapping("/{id}")
             public ResponseEntity<UserMessageDto> updateUserMessage(
                 @PathVariable Long id,
-                @Valid @RequestBody UserMessageDto usermessageDto) {
+                @RequestBody UserMessageDto usermessageDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                UserMessage existing = usermessageService.findById(id)
-                .orElseThrow(() -> new RuntimeException("UserMessage not found"));
+                // Transformer le DTO en entity pour le service
+                UserMessage entityToUpdate = usermessageMapper.toEntity(usermessageDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                usermessageMapper.updateEntityFromDto(usermessageDto, existing);
+                // Appel du service update
+                UserMessage updatedEntity = usermessageService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                UserMessage updatedEntity = usermessageService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                UserMessageDto updatedDto = usermessageMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(usermessageMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserMessage(@PathVariable Long id) {

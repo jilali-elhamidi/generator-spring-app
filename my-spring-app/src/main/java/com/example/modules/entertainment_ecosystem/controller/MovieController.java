@@ -54,23 +54,18 @@ public class MovieController {
             @PutMapping("/{id}")
             public ResponseEntity<MovieDto> updateMovie(
                 @PathVariable Long id,
-                @Valid @RequestBody MovieDto movieDto) {
+                @RequestBody MovieDto movieDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Movie existing = movieService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Movie not found"));
+                // Transformer le DTO en entity pour le service
+                Movie entityToUpdate = movieMapper.toEntity(movieDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                movieMapper.updateEntityFromDto(movieDto, existing);
+                // Appel du service update
+                Movie updatedEntity = movieService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Movie updatedEntity = movieService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                MovieDto updatedDto = movieMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(movieMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {

@@ -54,23 +54,18 @@ public class BookController {
             @PutMapping("/{id}")
             public ResponseEntity<BookDto> updateBook(
                 @PathVariable Long id,
-                @Valid @RequestBody BookDto bookDto) {
+                @RequestBody BookDto bookDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Book existing = bookService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                // Transformer le DTO en entity pour le service
+                Book entityToUpdate = bookMapper.toEntity(bookDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                bookMapper.updateEntityFromDto(bookDto, existing);
+                // Appel du service update
+                Book updatedEntity = bookService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Book updatedEntity = bookService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                BookDto updatedDto = bookMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(bookMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {

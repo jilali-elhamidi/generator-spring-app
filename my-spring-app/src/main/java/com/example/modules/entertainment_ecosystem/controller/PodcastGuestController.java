@@ -54,23 +54,18 @@ public class PodcastGuestController {
             @PutMapping("/{id}")
             public ResponseEntity<PodcastGuestDto> updatePodcastGuest(
                 @PathVariable Long id,
-                @Valid @RequestBody PodcastGuestDto podcastguestDto) {
+                @RequestBody PodcastGuestDto podcastguestDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                PodcastGuest existing = podcastguestService.findById(id)
-                .orElseThrow(() -> new RuntimeException("PodcastGuest not found"));
+                // Transformer le DTO en entity pour le service
+                PodcastGuest entityToUpdate = podcastguestMapper.toEntity(podcastguestDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                podcastguestMapper.updateEntityFromDto(podcastguestDto, existing);
+                // Appel du service update
+                PodcastGuest updatedEntity = podcastguestService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                PodcastGuest updatedEntity = podcastguestService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                PodcastGuestDto updatedDto = podcastguestMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(podcastguestMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePodcastGuest(@PathVariable Long id) {

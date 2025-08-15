@@ -54,23 +54,18 @@ public class UserSettingController {
             @PutMapping("/{id}")
             public ResponseEntity<UserSettingDto> updateUserSetting(
                 @PathVariable Long id,
-                @Valid @RequestBody UserSettingDto usersettingDto) {
+                @RequestBody UserSettingDto usersettingDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                UserSetting existing = usersettingService.findById(id)
-                .orElseThrow(() -> new RuntimeException("UserSetting not found"));
+                // Transformer le DTO en entity pour le service
+                UserSetting entityToUpdate = usersettingMapper.toEntity(usersettingDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                usersettingMapper.updateEntityFromDto(usersettingDto, existing);
+                // Appel du service update
+                UserSetting updatedEntity = usersettingService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                UserSetting updatedEntity = usersettingService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                UserSettingDto updatedDto = usersettingMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(usersettingMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserSetting(@PathVariable Long id) {

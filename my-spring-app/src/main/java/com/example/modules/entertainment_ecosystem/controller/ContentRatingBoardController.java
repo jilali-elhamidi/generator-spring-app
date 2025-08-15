@@ -54,23 +54,18 @@ public class ContentRatingBoardController {
             @PutMapping("/{id}")
             public ResponseEntity<ContentRatingBoardDto> updateContentRatingBoard(
                 @PathVariable Long id,
-                @Valid @RequestBody ContentRatingBoardDto contentratingboardDto) {
+                @RequestBody ContentRatingBoardDto contentratingboardDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                ContentRatingBoard existing = contentratingboardService.findById(id)
-                .orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
+                // Transformer le DTO en entity pour le service
+                ContentRatingBoard entityToUpdate = contentratingboardMapper.toEntity(contentratingboardDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                contentratingboardMapper.updateEntityFromDto(contentratingboardDto, existing);
+                // Appel du service update
+                ContentRatingBoard updatedEntity = contentratingboardService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                ContentRatingBoard updatedEntity = contentratingboardService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ContentRatingBoardDto updatedDto = contentratingboardMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(contentratingboardMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContentRatingBoard(@PathVariable Long id) {

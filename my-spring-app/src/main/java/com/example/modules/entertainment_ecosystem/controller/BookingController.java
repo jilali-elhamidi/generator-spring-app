@@ -54,23 +54,18 @@ public class BookingController {
             @PutMapping("/{id}")
             public ResponseEntity<BookingDto> updateBooking(
                 @PathVariable Long id,
-                @Valid @RequestBody BookingDto bookingDto) {
+                @RequestBody BookingDto bookingDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Booking existing = bookingService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                // Transformer le DTO en entity pour le service
+                Booking entityToUpdate = bookingMapper.toEntity(bookingDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                bookingMapper.updateEntityFromDto(bookingDto, existing);
+                // Appel du service update
+                Booking updatedEntity = bookingService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Booking updatedEntity = bookingService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                BookingDto updatedDto = bookingMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(bookingMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {

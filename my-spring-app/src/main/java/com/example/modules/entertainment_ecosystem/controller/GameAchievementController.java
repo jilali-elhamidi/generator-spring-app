@@ -54,23 +54,18 @@ public class GameAchievementController {
             @PutMapping("/{id}")
             public ResponseEntity<GameAchievementDto> updateGameAchievement(
                 @PathVariable Long id,
-                @Valid @RequestBody GameAchievementDto gameachievementDto) {
+                @RequestBody GameAchievementDto gameachievementDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                GameAchievement existing = gameachievementService.findById(id)
-                .orElseThrow(() -> new RuntimeException("GameAchievement not found"));
+                // Transformer le DTO en entity pour le service
+                GameAchievement entityToUpdate = gameachievementMapper.toEntity(gameachievementDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                gameachievementMapper.updateEntityFromDto(gameachievementDto, existing);
+                // Appel du service update
+                GameAchievement updatedEntity = gameachievementService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                GameAchievement updatedEntity = gameachievementService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                GameAchievementDto updatedDto = gameachievementMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(gameachievementMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGameAchievement(@PathVariable Long id) {

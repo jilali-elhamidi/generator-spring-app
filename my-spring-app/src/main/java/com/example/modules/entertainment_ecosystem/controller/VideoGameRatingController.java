@@ -54,23 +54,18 @@ public class VideoGameRatingController {
             @PutMapping("/{id}")
             public ResponseEntity<VideoGameRatingDto> updateVideoGameRating(
                 @PathVariable Long id,
-                @Valid @RequestBody VideoGameRatingDto videogameratingDto) {
+                @RequestBody VideoGameRatingDto videogameratingDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                VideoGameRating existing = videogameratingService.findById(id)
-                .orElseThrow(() -> new RuntimeException("VideoGameRating not found"));
+                // Transformer le DTO en entity pour le service
+                VideoGameRating entityToUpdate = videogameratingMapper.toEntity(videogameratingDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                videogameratingMapper.updateEntityFromDto(videogameratingDto, existing);
+                // Appel du service update
+                VideoGameRating updatedEntity = videogameratingService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                VideoGameRating updatedEntity = videogameratingService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                VideoGameRatingDto updatedDto = videogameratingMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(videogameratingMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVideoGameRating(@PathVariable Long id) {

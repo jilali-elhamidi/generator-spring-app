@@ -54,23 +54,18 @@ public class ContentLanguageController {
             @PutMapping("/{id}")
             public ResponseEntity<ContentLanguageDto> updateContentLanguage(
                 @PathVariable Long id,
-                @Valid @RequestBody ContentLanguageDto contentlanguageDto) {
+                @RequestBody ContentLanguageDto contentlanguageDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                ContentLanguage existing = contentlanguageService.findById(id)
-                .orElseThrow(() -> new RuntimeException("ContentLanguage not found"));
+                // Transformer le DTO en entity pour le service
+                ContentLanguage entityToUpdate = contentlanguageMapper.toEntity(contentlanguageDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                contentlanguageMapper.updateEntityFromDto(contentlanguageDto, existing);
+                // Appel du service update
+                ContentLanguage updatedEntity = contentlanguageService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                ContentLanguage updatedEntity = contentlanguageService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ContentLanguageDto updatedDto = contentlanguageMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(contentlanguageMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContentLanguage(@PathVariable Long id) {

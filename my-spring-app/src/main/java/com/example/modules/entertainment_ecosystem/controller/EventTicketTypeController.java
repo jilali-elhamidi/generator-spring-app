@@ -54,23 +54,18 @@ public class EventTicketTypeController {
             @PutMapping("/{id}")
             public ResponseEntity<EventTicketTypeDto> updateEventTicketType(
                 @PathVariable Long id,
-                @Valid @RequestBody EventTicketTypeDto eventtickettypeDto) {
+                @RequestBody EventTicketTypeDto eventtickettypeDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                EventTicketType existing = eventtickettypeService.findById(id)
-                .orElseThrow(() -> new RuntimeException("EventTicketType not found"));
+                // Transformer le DTO en entity pour le service
+                EventTicketType entityToUpdate = eventtickettypeMapper.toEntity(eventtickettypeDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                eventtickettypeMapper.updateEntityFromDto(eventtickettypeDto, existing);
+                // Appel du service update
+                EventTicketType updatedEntity = eventtickettypeService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                EventTicketType updatedEntity = eventtickettypeService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                EventTicketTypeDto updatedDto = eventtickettypeMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(eventtickettypeMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEventTicketType(@PathVariable Long id) {

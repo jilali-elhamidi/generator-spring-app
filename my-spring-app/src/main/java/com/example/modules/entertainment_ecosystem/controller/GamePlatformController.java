@@ -54,23 +54,18 @@ public class GamePlatformController {
             @PutMapping("/{id}")
             public ResponseEntity<GamePlatformDto> updateGamePlatform(
                 @PathVariable Long id,
-                @Valid @RequestBody GamePlatformDto gameplatformDto) {
+                @RequestBody GamePlatformDto gameplatformDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                GamePlatform existing = gameplatformService.findById(id)
-                .orElseThrow(() -> new RuntimeException("GamePlatform not found"));
+                // Transformer le DTO en entity pour le service
+                GamePlatform entityToUpdate = gameplatformMapper.toEntity(gameplatformDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                gameplatformMapper.updateEntityFromDto(gameplatformDto, existing);
+                // Appel du service update
+                GamePlatform updatedEntity = gameplatformService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                GamePlatform updatedEntity = gameplatformService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                GamePlatformDto updatedDto = gameplatformMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(gameplatformMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGamePlatform(@PathVariable Long id) {

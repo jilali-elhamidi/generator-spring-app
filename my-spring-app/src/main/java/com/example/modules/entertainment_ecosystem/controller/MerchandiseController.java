@@ -54,23 +54,18 @@ public class MerchandiseController {
             @PutMapping("/{id}")
             public ResponseEntity<MerchandiseDto> updateMerchandise(
                 @PathVariable Long id,
-                @Valid @RequestBody MerchandiseDto merchandiseDto) {
+                @RequestBody MerchandiseDto merchandiseDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Merchandise existing = merchandiseService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Merchandise not found"));
+                // Transformer le DTO en entity pour le service
+                Merchandise entityToUpdate = merchandiseMapper.toEntity(merchandiseDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                merchandiseMapper.updateEntityFromDto(merchandiseDto, existing);
+                // Appel du service update
+                Merchandise updatedEntity = merchandiseService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Merchandise updatedEntity = merchandiseService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                MerchandiseDto updatedDto = merchandiseMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(merchandiseMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMerchandise(@PathVariable Long id) {

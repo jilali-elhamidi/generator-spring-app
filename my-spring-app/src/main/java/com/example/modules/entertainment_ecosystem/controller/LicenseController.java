@@ -54,23 +54,18 @@ public class LicenseController {
             @PutMapping("/{id}")
             public ResponseEntity<LicenseDto> updateLicense(
                 @PathVariable Long id,
-                @Valid @RequestBody LicenseDto licenseDto) {
+                @RequestBody LicenseDto licenseDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                License existing = licenseService.findById(id)
-                .orElseThrow(() -> new RuntimeException("License not found"));
+                // Transformer le DTO en entity pour le service
+                License entityToUpdate = licenseMapper.toEntity(licenseDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                licenseMapper.updateEntityFromDto(licenseDto, existing);
+                // Appel du service update
+                License updatedEntity = licenseService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                License updatedEntity = licenseService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                LicenseDto updatedDto = licenseMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(licenseMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLicense(@PathVariable Long id) {

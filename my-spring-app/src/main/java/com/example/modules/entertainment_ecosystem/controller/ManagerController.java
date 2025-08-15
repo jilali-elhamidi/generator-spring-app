@@ -54,23 +54,18 @@ public class ManagerController {
             @PutMapping("/{id}")
             public ResponseEntity<ManagerDto> updateManager(
                 @PathVariable Long id,
-                @Valid @RequestBody ManagerDto managerDto) {
+                @RequestBody ManagerDto managerDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                Manager existing = managerService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Manager not found"));
+                // Transformer le DTO en entity pour le service
+                Manager entityToUpdate = managerMapper.toEntity(managerDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                managerMapper.updateEntityFromDto(managerDto, existing);
+                // Appel du service update
+                Manager updatedEntity = managerService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                Manager updatedEntity = managerService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ManagerDto updatedDto = managerMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(managerMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteManager(@PathVariable Long id) {

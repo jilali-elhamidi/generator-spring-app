@@ -54,23 +54,18 @@ public class DigitalPurchaseController {
             @PutMapping("/{id}")
             public ResponseEntity<DigitalPurchaseDto> updateDigitalPurchase(
                 @PathVariable Long id,
-                @Valid @RequestBody DigitalPurchaseDto digitalpurchaseDto) {
+                @RequestBody DigitalPurchaseDto digitalpurchaseDto) {
 
-                try {
-                // Récupérer l'entité existante avec Optional
-                DigitalPurchase existing = digitalpurchaseService.findById(id)
-                .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+                // Transformer le DTO en entity pour le service
+                DigitalPurchase entityToUpdate = digitalpurchaseMapper.toEntity(digitalpurchaseDto);
 
-                // Appliquer les champs simples du DTO à l'entité existante
-                digitalpurchaseMapper.updateEntityFromDto(digitalpurchaseDto, existing);
+                // Appel du service update
+                DigitalPurchase updatedEntity = digitalpurchaseService.update(id, entityToUpdate);
 
-                // Sauvegarde
-                DigitalPurchase updatedEntity = digitalpurchaseService.save(existing);
+                // Transformer l’entity mise à jour en DTO pour le retour
+                DigitalPurchaseDto updatedDto = digitalpurchaseMapper.toDto(updatedEntity);
 
-                return ResponseEntity.ok(digitalpurchaseMapper.toDto(updatedEntity));
-                } catch (RuntimeException e) {
-                return ResponseEntity.notFound().build();
-                }
+                return ResponseEntity.ok(updatedDto);
                 }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDigitalPurchase(@PathVariable Long id) {
