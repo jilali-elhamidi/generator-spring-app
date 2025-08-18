@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Subscription;import com.example.modules.entertainment_ecosystem.model.StreamingService;import com.example.modules.entertainment_ecosystem.model.OnlinePlatform;import com.example.modules.entertainment_ecosystem.model.AdCampaign;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "streamingplatform_tbl")
@@ -25,48 +24,40 @@ public class StreamingPlatform extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @NotNull@Size(max = 255)
+        @NotNull@Size(max = 255)
     private String website;
 
 
 // === Relations ===
 
-    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<Movie> movies;
+            private List<Movie> movies = new ArrayList<>();
         
-    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<TVShow> tvShows;
+            private List<TVShow> tvShows = new ArrayList<>();
         
-    
-    @OneToMany(mappedBy = "platform", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "platform", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("platform")
         private List<Subscription> subscriptions;
     
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "streamingService_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "service_id")
+        @JsonIgnoreProperties("platforms")
         private StreamingService streamingService;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "onlinePlatform_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "online_platform_id")
+        @JsonIgnoreProperties("streams")
         private OnlinePlatform onlinePlatform;
     
-    
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "displayedOnPlatforms", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<AdCampaign> adCampaigns;
+            private List<AdCampaign> adCampaigns = new ArrayList<>();
         
 
 }

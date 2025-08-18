@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.GameReviewComment;import com.example.modules.entertainment_ecosystem.model.GameReviewUpvote;import com.example.modules.entertainment_ecosystem.model.GameReviewDownvote;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "gamereview_tbl")
@@ -25,42 +24,35 @@ public class GameReview extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Min(1)@Max(10)
+        @NotNull@Min(1)@Max(10)
     private Integer rating;
 
-    @Size(max = 500)
+        @Size(max = 500)
     private String comment;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "user_id")
-        
+        @JsonIgnoreProperties("gameReviews")
         private UserProfile user;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "game_id")
-        
+        @JsonIgnoreProperties("gameReviews")
         private VideoGame game;
     
-    
-    
-    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "review", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("review")
         private List<GameReviewComment> comments;
     
-    
-    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "review", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("review")
         private List<GameReviewUpvote> upvotes;
     
-    
-    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "review", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("review")
         private List<GameReviewDownvote> downvotes;
     
 

@@ -13,6 +13,7 @@ import com.example.modules.ecommerce.model.Shipment;
 import com.example.modules.ecommerce.repository.ShipmentRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -44,35 +45,42 @@ public class OrderService extends BaseService<Order> {
     
 
     
-        if (order.getOrderItems() != null) {
-        List<OrderItem> managedOrderItems = new ArrayList<>();
-        for (OrderItem item : order.getOrderItems()) {
-        if (item.getId() != null) {
-        OrderItem existingItem = orderItemsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("OrderItem not found"));
-        // Set the parent reference on the existing item
-        existingItem.setOrder(order);
-        managedOrderItems.add(existingItem);
-        } else {
-        // Set the parent reference on the new item
-        item.setOrder(order);
-        managedOrderItems.add(item);
-        }
-        }
-        order.setOrderItems(managedOrderItems);
-        }
-    
-
-    
-
-    
-
-
-        if (order.getOrderItems() != null) {
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (order.getOrderItems() != null) {
+            List<OrderItem> managedOrderItems = new ArrayList<>();
             for (OrderItem item : order.getOrderItems()) {
+            if (item.getId() != null) {
+            OrderItem existingItem = orderItemsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("OrderItem not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setOrder(order);
+            managedOrderItems.add(existingItem);
+            } else {
             item.setOrder(order);
+            managedOrderItems.add(item);
             }
+            }
+            order.setOrderItems(managedOrderItems);
+            }
+        
+    
+
+    
+
+    
+
+    if (order.getUser() != null
+        && order.getUser().getId() != null) {
+        User existingUser = userRepository.findById(
+        order.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("User not found"));
+        order.setUser(existingUser);
         }
+    
+    
+    
+    
         if (order.getPayment() != null) {
         
         
@@ -109,24 +117,41 @@ public class OrderService extends BaseService<Order> {
         existing.setStatus(orderRequest.getStatus());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (orderRequest.getUser() != null &&
+        orderRequest.getUser().getId() != null) {
 
-        if (orderRequest.getUser() != null && orderRequest.getUser().getId() != null) {
-        User user = userRepository.findById(orderRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        existing.setUser(user);
+        User existingUser = userRepository.findById(
+        orderRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("User not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
+        // Vider la collection existante
         existing.getOrderItems().clear();
+
         if (orderRequest.getOrderItems() != null) {
-            for (var item : orderRequest.getOrderItems()) {
-            item.setOrder(existing);
-            existing.getOrderItems().add(item);
-            }
+        for (var item : orderRequest.getOrderItems()) {
+        OrderItem existingItem;
+        if (item.getId() != null) {
+        existingItem = orderItemsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("OrderItem not found"));
+        } else {
+        existingItem = item; // ou mapper les champs si DTO
         }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setOrder(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getOrderItems().add(existingItem);
+        }
+        }
+        // NE PLUS FAIRE setCollection()
 
     
 
@@ -175,4 +200,85 @@ public class OrderService extends BaseService<Order> {
 
         return orderRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Order> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Order entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+    
+        if (entity.getOrderItems() != null) {
+        for (var child : entity.getOrderItems()) {
+        
+            child.setOrder(null); // retirer la référence inverse
+        
+        }
+        entity.getOrderItems().clear();
+        }
+    
+
+    
+
+    
+
+
+// --- Dissocier ManyToMany ---
+
+    
+
+    
+
+    
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+    
+
+    
+        if (entity.getPayment() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getPayment().setOrder(null);
+        // Dissocier côté direct
+        entity.setPayment(null);
+        }
+    
+
+    
+        if (entity.getShipment() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getShipment().setOrder(null);
+        // Dissocier côté direct
+        entity.setShipment(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+    
+
+    
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

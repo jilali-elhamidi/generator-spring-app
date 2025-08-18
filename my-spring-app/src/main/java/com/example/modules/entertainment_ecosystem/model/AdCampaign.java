@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Sponsor;import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "adcampaign_tbl")
@@ -25,28 +24,25 @@ public class AdCampaign extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @NotNull
+        @NotNull
     private Date startDate;
 
-    @NotNull
+        @NotNull
     private Date endDate;
 
-    @NotNull
+        @NotNull
     private Double budget;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "advertiser_id")
-        
+        @JsonIgnoreProperties("adCampaigns")
         private Sponsor advertiser;
-    
-    
     
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "ad_campaign_platforms",

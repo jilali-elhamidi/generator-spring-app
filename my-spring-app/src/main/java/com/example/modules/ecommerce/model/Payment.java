@@ -23,21 +23,21 @@ public class Payment extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(max = 50)
+        @NotNull@Size(max = 50)
     private String method;
 
-    @NotNull
+        @NotNull
     private Date paymentDate;
 
-    @NotNull@Min(2)
+        @NotNull@Min(2)
     private Double amount;
 
 
 // === Relations ===
 
     @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("payment")
-    private Order order;
+            @JsonIgnoreProperties("payment")
+            private Order order;
         
 
 }

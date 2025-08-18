@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Ticket;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "ticketstatus_tbl")
@@ -25,15 +24,14 @@ public class TicketStatus extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private String name;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "status", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "status", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("status")
         private List<Ticket> tickets;
     
 

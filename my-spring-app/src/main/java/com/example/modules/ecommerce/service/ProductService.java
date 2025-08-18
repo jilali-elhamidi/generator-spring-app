@@ -7,6 +7,7 @@ import com.example.modules.ecommerce.model.Category;
 import com.example.modules.ecommerce.repository.CategoryRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -31,6 +32,14 @@ public class ProductService extends BaseService<Product> {
 
     
 
+    if (product.getCategory() != null
+        && product.getCategory().getId() != null) {
+        Category existingCategory = categoryRepository.findById(
+        product.getCategory().getId()
+        ).orElseThrow(() -> new RuntimeException("Category not found"));
+        product.setCategory(existingCategory);
+        }
+    
 
         return productRepository.save(product);
     }
@@ -47,11 +56,16 @@ public class ProductService extends BaseService<Product> {
         existing.setDescription(productRequest.getDescription());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (productRequest.getCategory() != null &&
+        productRequest.getCategory().getId() != null) {
 
-        if (productRequest.getCategory() != null && productRequest.getCategory().getId() != null) {
-        Category category = categoryRepository.findById(productRequest.getCategory().getId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        existing.setCategory(category);
+        Category existingCategory = categoryRepository.findById(
+        productRequest.getCategory().getId()
+        ).orElseThrow(() -> new RuntimeException("Category not found"));
+
+        existing.setCategory(existingCategory);
+        } else {
+        existing.setCategory(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -63,4 +77,38 @@ public class ProductService extends BaseService<Product> {
 
         return productRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Product> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Product entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getCategory() != null) {
+        entity.setCategory(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

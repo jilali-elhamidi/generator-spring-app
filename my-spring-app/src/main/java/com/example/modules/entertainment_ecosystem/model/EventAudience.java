@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.LiveEvent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "eventaudience_tbl")
@@ -25,20 +24,19 @@ public class EventAudience extends BaseEntity {
 
 // === Attributs simples ===
 
-    
+        
     private Integer count;
 
-    
+        
     private String audienceType;
 
 
 // === Relations ===
 
-    
     @OneToOne
-    @JoinColumn(name = "event_id")
-    @JsonIgnoreProperties("audience")
-    private LiveEvent event;
+            @JoinColumn(name = "event_id")
+            @JsonIgnoreProperties("audience")
+            private LiveEvent event;
             
 
 }

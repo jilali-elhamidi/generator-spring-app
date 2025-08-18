@@ -144,11 +144,15 @@ OnlineEvent entity = entityOpt.get();
 
     
         if (entity.getAttendees() != null) {
-        entity.getAttendees().clear();
+        for (UserProfile item : new ArrayList<>(entity.getAttendees())) {
+        
+        }
+        entity.getAttendees().clear(); // puis vide côté courant
         }
     
 
     
+
 
 
 // --- Dissocier OneToOne ---

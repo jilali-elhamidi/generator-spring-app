@@ -208,9 +208,13 @@ Book entity = entityOpt.get();
 
     
         if (entity.getGenres() != null) {
-        entity.getGenres().clear();
+        for (Genre item : new ArrayList<>(entity.getGenres())) {
+        
+        }
+        entity.getGenres().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

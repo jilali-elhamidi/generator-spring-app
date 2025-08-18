@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Ticket;import com.example.modules.entertainment_ecosystem.model.Payment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "booking_tbl")
@@ -25,25 +24,23 @@ public class Booking extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Date bookingDate;
 
-    @NotNull
+        @NotNull
     private Double totalAmount;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "booking", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("booking")
         private List<Ticket> tickets;
     
-    
     @OneToOne
-    @JoinColumn(name = "payment_id")
-    @JsonIgnoreProperties("booking")
-    private Payment payment;
+            @JoinColumn(name = "payment_id")
+            @JsonIgnoreProperties("booking")
+            private Payment payment;
             
 
 }

@@ -51,25 +51,32 @@ public class OrderItemController {
         return ResponseEntity.created(location).body(orderitemMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OrderItemDto> updateOrderItem(
-            @PathVariable Long id,
-            @Valid @RequestBody OrderItemDto orderitemDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<OrderItemDto> updateOrderItem(
+                @PathVariable Long id,
+                @RequestBody OrderItemDto orderitemDto) {
 
-        try {
-            OrderItem updatedEntity = orderitemService.update(
-                    id,
-                    orderitemMapper.toEntity(orderitemDto)
-            );
-            return ResponseEntity.ok(orderitemMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                // Transformer le DTO en entity pour le service
+                OrderItem entityToUpdate = orderitemMapper.toEntity(orderitemDto);
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
-        orderitemService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                // Appel du service update
+                OrderItem updatedEntity = orderitemService.update(id, entityToUpdate);
+
+                // Transformer l’entity mise à jour en DTO pour le retour
+                OrderItemDto updatedDto = orderitemMapper.toDto(updatedEntity);
+
+                return ResponseEntity.ok(updatedDto);
+                }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
+                    boolean deleted = orderitemService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

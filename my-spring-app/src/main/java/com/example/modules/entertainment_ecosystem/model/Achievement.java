@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "achievement_tbl")
@@ -25,24 +24,22 @@ public class Achievement extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @NotNull@Size(min = 5, max = 255)
+        @NotNull@Size(min = 5, max = 255)
     private String description;
 
-    @NotNull
+        @NotNull
     private Date achievementDate;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "user_id")
-        
+        @JsonIgnoreProperties("achievements")
         private UserProfile user;
-    
     
 
 }

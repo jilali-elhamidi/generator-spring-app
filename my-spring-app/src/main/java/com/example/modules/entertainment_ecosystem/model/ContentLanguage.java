@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Podcast;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "contentlanguage_tbl")
@@ -25,29 +24,26 @@ public class ContentLanguage extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 50)
+        @NotNull@Size(min = 2, max = 50)
     private String name;
 
-    @NotNull@Size(min = 2, max = 10)
+        @NotNull@Size(min = 2, max = 10)
     private String code;
 
 
 // === Relations ===
 
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<Movie> movies;
+            private List<Movie> movies = new ArrayList<>();
         
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<TVShow> tvShows;
+            private List<TVShow> tvShows = new ArrayList<>();
         
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<Podcast> podcasts;
+            private List<Podcast> podcasts = new ArrayList<>();
         
 
 }

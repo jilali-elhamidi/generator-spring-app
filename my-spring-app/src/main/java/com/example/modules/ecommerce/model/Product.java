@@ -23,25 +23,25 @@ public class Product extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @NotNull
+        @NotNull
     private Integer stock;
 
-    @NotNull@Min(2)
+        @NotNull@Min(2)
     private Double price;
 
-    @Size(max = 500)
+        @Size(max = 500)
     private String description;
 
 
 // === Relations ===
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "category_id")
-    @JsonIgnoreProperties("products")
-    private Category category;
+        @JoinColumn(name = "category_id")
+        @JsonIgnoreProperties("products")
+        private Category category;
     
 
 }

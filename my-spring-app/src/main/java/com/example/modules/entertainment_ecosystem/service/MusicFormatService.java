@@ -81,9 +81,13 @@ MusicFormat entity = entityOpt.get();
 
     
         if (entity.getMusicTracks() != null) {
-        entity.getMusicTracks().clear();
+        for (MusicTrack item : new ArrayList<>(entity.getMusicTracks())) {
+        
+        }
+        entity.getMusicTracks().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

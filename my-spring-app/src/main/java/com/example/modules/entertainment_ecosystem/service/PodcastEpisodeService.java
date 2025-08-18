@@ -156,9 +156,13 @@ PodcastEpisode entity = entityOpt.get();
 
     
         if (entity.getGuestAppearances() != null) {
-        entity.getGuestAppearances().clear();
+        for (PodcastGuest item : new ArrayList<>(entity.getGuestAppearances())) {
+        
+        }
+        entity.getGuestAppearances().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

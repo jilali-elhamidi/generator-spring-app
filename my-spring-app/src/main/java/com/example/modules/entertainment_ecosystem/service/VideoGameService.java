@@ -755,7 +755,10 @@ VideoGame entity = entityOpt.get();
 
     
         if (entity.getGenres() != null) {
-        entity.getGenres().clear();
+        for (Genre item : new ArrayList<>(entity.getGenres())) {
+        
+        }
+        entity.getGenres().clear(); // puis vide côté courant
         }
     
 
@@ -765,7 +768,10 @@ VideoGame entity = entityOpt.get();
 
     
         if (entity.getPlayedBy() != null) {
-        entity.getPlayedBy().clear();
+        for (UserProfile item : new ArrayList<>(entity.getPlayedBy())) {
+        
+        }
+        entity.getPlayedBy().clear(); // puis vide côté courant
         }
     
 
@@ -779,7 +785,10 @@ VideoGame entity = entityOpt.get();
 
     
         if (entity.getPlatforms() != null) {
-        entity.getPlatforms().clear();
+        for (GamePlatform item : new ArrayList<>(entity.getPlatforms())) {
+        
+        }
+        entity.getPlatforms().clear(); // puis vide côté courant
         }
     
 
@@ -787,7 +796,10 @@ VideoGame entity = entityOpt.get();
 
     
         if (entity.getTags() != null) {
-        entity.getTags().clear();
+        for (ContentTag item : new ArrayList<>(entity.getTags())) {
+        
+        }
+        entity.getTags().clear(); // puis vide côté courant
         }
     
 
@@ -800,6 +812,7 @@ VideoGame entity = entityOpt.get();
     
 
     
+
 
 
 // --- Dissocier OneToOne ---

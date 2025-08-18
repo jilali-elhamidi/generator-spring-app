@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "featureflag_tbl")
@@ -25,22 +24,21 @@ public class FeatureFlag extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @NotNull
+        @NotNull
     private Boolean enabled;
 
-    @Max(100)
+        @Max(100)
     private Integer rolloutPercentage;
 
 
 // === Relations ===
 
-    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<UserProfile> enabledForUsers;
+            private List<UserProfile> enabledForUsers = new ArrayList<>();
         
 
 }

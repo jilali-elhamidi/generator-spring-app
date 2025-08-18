@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Booking;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "payment_tbl")
@@ -25,22 +24,21 @@ public class Payment extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Double amount;
 
-    @NotNull
+        @NotNull
     private Date paymentDate;
 
-    @NotNull@Size(min = 2, max = 50)
+        @NotNull@Size(min = 2, max = 50)
     private String method;
 
 
 // === Relations ===
 
-    
-    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("payment")
-    private Booking booking;
+    @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+            @JsonIgnoreProperties("payment")
+            private Booking booking;
         
 
 }

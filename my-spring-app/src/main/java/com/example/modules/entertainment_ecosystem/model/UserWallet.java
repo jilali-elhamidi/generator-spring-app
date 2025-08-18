@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Transaction;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "userwallet_tbl")
@@ -25,20 +24,18 @@ public class UserWallet extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Double balance;
 
 
 // === Relations ===
 
-    
-    @OneToOne(mappedBy = "wallet", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("wallet")
-    private UserProfile user;
+    @OneToOne(mappedBy = "wallet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+            @JsonIgnoreProperties("wallet")
+            private UserProfile user;
         
-    
-    @OneToMany(mappedBy = "wallet", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("wallet")
         private List<Transaction> transactions;
     
 

@@ -81,9 +81,13 @@ PodcastCategory entity = entityOpt.get();
 
     
         if (entity.getPodcasts() != null) {
-        entity.getPodcasts().clear();
+        for (Podcast item : new ArrayList<>(entity.getPodcasts())) {
+        
+        }
+        entity.getPodcasts().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

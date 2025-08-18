@@ -7,6 +7,7 @@ import com.example.modules.ecommerce.model.User;
 import com.example.modules.ecommerce.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -31,6 +32,14 @@ public class AddressService extends BaseService<Address> {
 
     
 
+    if (address.getUser() != null
+        && address.getUser().getId() != null) {
+        User existingUser = userRepository.findById(
+        address.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("User not found"));
+        address.setUser(existingUser);
+        }
+    
 
         return addressRepository.save(address);
     }
@@ -47,11 +56,16 @@ public class AddressService extends BaseService<Address> {
         existing.setCountry(addressRequest.getCountry());
 
 // Relations ManyToOne : mise à jour conditionnelle
+        if (addressRequest.getUser() != null &&
+        addressRequest.getUser().getId() != null) {
 
-        if (addressRequest.getUser() != null && addressRequest.getUser().getId() != null) {
-        User user = userRepository.findById(addressRequest.getUser().getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        existing.setUser(user);
+        User existingUser = userRepository.findById(
+        addressRequest.getUser().getId()
+        ).orElseThrow(() -> new RuntimeException("User not found"));
+
+        existing.setUser(existingUser);
+        } else {
+        existing.setUser(null);
         }
 
 // Relations ManyToMany : synchronisation sécurisée
@@ -63,4 +77,38 @@ public class AddressService extends BaseService<Address> {
 
         return addressRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Address> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Address entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+        if (entity.getUser() != null) {
+        entity.setUser(null);
+        }
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

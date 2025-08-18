@@ -876,7 +876,10 @@ Artist entity = entityOpt.get();
 
     
         if (entity.getFavoriteArtists() != null) {
-        entity.getFavoriteArtists().clear();
+        for (UserProfile item : new ArrayList<>(entity.getFavoriteArtists())) {
+        
+        }
+        entity.getFavoriteArtists().clear(); // puis vide côté courant
         }
     
 
@@ -888,7 +891,10 @@ Artist entity = entityOpt.get();
 
     
         if (entity.getParticipatedInEvents() != null) {
-        entity.getParticipatedInEvents().clear();
+        for (LiveEvent item : new ArrayList<>(entity.getParticipatedInEvents())) {
+        
+        }
+        entity.getParticipatedInEvents().clear(); // puis vide côté courant
         }
     
 
@@ -904,7 +910,10 @@ Artist entity = entityOpt.get();
 
     
         if (entity.getActedInMovies() != null) {
-        entity.getActedInMovies().clear();
+        for (Movie item : new ArrayList<>(entity.getActedInMovies())) {
+        
+        }
+        entity.getActedInMovies().clear(); // puis vide côté courant
         }
     
 
@@ -916,13 +925,17 @@ Artist entity = entityOpt.get();
 
     
         if (entity.getActedInShows() != null) {
-        entity.getActedInShows().clear();
+        for (TVShow item : new ArrayList<>(entity.getActedInShows())) {
+        
+        }
+        entity.getActedInShows().clear(); // puis vide côté courant
         }
     
 
     
 
     
+
 
 
 // --- Dissocier OneToOne ---

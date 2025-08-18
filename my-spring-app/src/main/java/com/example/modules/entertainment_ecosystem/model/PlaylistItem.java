@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Playlist;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "playlistitem_tbl")
@@ -25,32 +24,26 @@ public class PlaylistItem extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Min(1)
+        @NotNull@Min(1)
     private Integer position;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "playlist_id")
-        
+        @JsonIgnoreProperties("items")
         private Playlist playlist;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "track_id")
-        
+        @JsonIgnoreProperties("playlistItems")
         private MusicTrack track;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "addedBy_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "user_id")
+        @JsonIgnoreProperties("playlistItems")
         private UserProfile addedBy;
-    
     
 
 }

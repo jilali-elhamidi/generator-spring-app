@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Review;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "reviewrating_tbl")
@@ -25,28 +24,24 @@ public class ReviewRating extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Min(1)@Max(5)
+        @NotNull@Min(1)@Max(5)
     private Integer score;
 
-    @NotNull
+        @NotNull
     private Date ratingDate;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "user_id")
-        
+        @JsonIgnoreProperties("givenRatings")
         private UserProfile user;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "review_id")
-        
+        @JsonIgnoreProperties("ratings")
         private Review review;
-    
     
 
 }

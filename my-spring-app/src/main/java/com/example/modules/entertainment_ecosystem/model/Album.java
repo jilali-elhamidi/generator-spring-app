@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.MusicLabel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "album_tbl")
@@ -25,27 +24,23 @@ public class Album extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 255)
+        @NotNull@Size(min = 2, max = 255)
     private String title;
 
-    @NotNull
+        @NotNull
     private Date releaseDate;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "artist_id")
-        
+        @JsonIgnoreProperties("albums")
         private Artist artist;
     
-    
-    
-    @OneToMany(mappedBy = "album", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "album", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("album")
         private List<MusicTrack> tracks;
-    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "album_genres",
@@ -54,12 +49,10 @@ public class Album extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Genre> genres;
             
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "musicLabel_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "music_label_id")
+        @JsonIgnoreProperties("albums")
         private MusicLabel musicLabel;
-    
     
 
 }

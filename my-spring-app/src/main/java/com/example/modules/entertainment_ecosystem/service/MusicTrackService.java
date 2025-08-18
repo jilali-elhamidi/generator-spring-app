@@ -405,7 +405,10 @@ MusicTrack entity = entityOpt.get();
 
     
         if (entity.getListenedByUsers() != null) {
-        entity.getListenedByUsers().clear();
+        for (UserProfile item : new ArrayList<>(entity.getListenedByUsers())) {
+        
+        }
+        entity.getListenedByUsers().clear(); // puis vide côté courant
         }
     
 
@@ -415,13 +418,17 @@ MusicTrack entity = entityOpt.get();
 
     
         if (entity.getFormats() != null) {
-        entity.getFormats().clear();
+        for (MusicFormat item : new ArrayList<>(entity.getFormats())) {
+        
+        }
+        entity.getFormats().clear(); // puis vide côté courant
         }
     
 
     
 
     
+
 
 
 // --- Dissocier OneToOne ---

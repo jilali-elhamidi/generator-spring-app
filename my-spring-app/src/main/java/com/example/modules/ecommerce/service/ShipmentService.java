@@ -7,6 +7,7 @@ import com.example.modules.ecommerce.model.Order;
 import com.example.modules.ecommerce.repository.OrderRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ShipmentService extends BaseService<Shipment> {
 
     
 
+    
         if (shipment.getOrder() != null) {
         
         
@@ -85,4 +87,41 @@ public class ShipmentService extends BaseService<Shipment> {
 
         return shipmentRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Shipment> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Shipment entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+
+
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+        if (entity.getOrder() != null) {
+        // Dissocier côté inverse automatiquement
+        entity.getOrder().setShipment(null);
+        // Dissocier côté direct
+        entity.setOrder(null);
+        }
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

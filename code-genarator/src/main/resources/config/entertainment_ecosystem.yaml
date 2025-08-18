@@ -146,6 +146,7 @@ entities:
         joinTable: online_event_attendees
         joinColumns: user_id
         inverseJoinColumns: event_id
+        mappedBy: attendees
         fetch: LAZY
         owner: false
       - name: ownedMerchandise
@@ -448,6 +449,7 @@ entities:
         joinTable: event_performers
         joinColumns: artist_id
         inverseJoinColumns: event_id
+        mappedBy: performers
         fetch: LAZY
         owner: false
       - name: hostedPodcasts
@@ -486,6 +488,7 @@ entities:
         joinTable: movie_cast
         joinColumns: artist_id
         inverseJoinColumns: movie_id
+        mappedBy: cast
         fetch: LAZY
         owner: false
       - name: directedMovies
@@ -619,6 +622,7 @@ entities:
         joinTable: merchandise_movies
         joinColumns: movie_id
         inverseJoinColumns: merchandise_id
+        mappedBy: relatedMovies
         fetch: LAZY
         owner: false
       - name: productionCompany
@@ -733,6 +737,7 @@ entities:
         joinTable: merchandise_shows
         joinColumns: tvshow_id
         inverseJoinColumns: merchandise_id
+        mappedBy: relatedShows
         fetch: LAZY
         owner: false
       - name: productionCompany
@@ -1391,7 +1396,6 @@ entities:
       - name: subscriptions
         type: Subscription
         relationType: OneToMany
-        mappedBy: platform
         inverseField: platform
         fetch: LAZY
       - name: streamingService
@@ -1412,6 +1416,7 @@ entities:
         joinTable: ad_campaign_platforms
         joinColumns: platform_id
         inverseJoinColumns: campaign_id
+        mappedBy: displayedOnPlatforms
         fetch: LAZY
         owner: false
 
@@ -1505,6 +1510,8 @@ entities:
         joinTable: movie_genres
         joinColumns: genre_id
         inverseJoinColumns: movie_id
+        inverseField: genres
+        mappedBy: genres
         fetch: LAZY
         owner: false
       - name: tvShows
@@ -1513,6 +1520,7 @@ entities:
         joinTable: tvshow_genres
         joinColumns: genre_id
         inverseJoinColumns: tvshow_id
+        mappedBy: genres
         fetch: LAZY
         owner: false
       - name: bookGenres
@@ -1521,6 +1529,7 @@ entities:
         joinTable: book_genres
         joinColumns: genre_id
         inverseJoinColumns: book_id
+        mappedBy: genres
         fetch: LAZY
         owner: false
       - name: musicTracks
@@ -1529,6 +1538,7 @@ entities:
         joinTable: genre_music_tracks
         joinColumns: genre_id
         inverseJoinColumns: track_id
+        mappedBy: genres
         fetch: LAZY
         owner: true
       - name: favoriteUsers
@@ -1545,6 +1555,7 @@ entities:
         joinTable: video_game_genres
         joinColumns: genre_id
         inverseJoinColumns: video_game_id
+        mappedBy: genres
         fetch: LAZY
         owner: false
       - name: podcasts
@@ -1553,6 +1564,7 @@ entities:
         joinTable: podcast_genres
         joinColumns: genre_id
         inverseJoinColumns: podcast_id
+        mappedBy: genres
         fetch: LAZY
         owner: true
 
@@ -1799,6 +1811,7 @@ entities:
         joinTable: podcast_genres
         joinColumns: podcast_id
         inverseJoinColumns: genre_id
+        mappedBy: podcasts
         fetch: LAZY
         owner: false
       - name: listeners
@@ -2831,6 +2844,7 @@ entities:
         joinTable: video_game_platforms
         joinColumns: platform_id
         inverseJoinColumns: game_id
+        mappedBy: platforms
         fetch: LAZY
         owner: false
 
@@ -2850,6 +2864,7 @@ entities:
         joinTable: movie_formats
         joinColumns: format_id
         inverseJoinColumns: movie_id
+        mappedBy: formats
         fetch: LAZY
         owner: false
 
@@ -2869,6 +2884,7 @@ entities:
         joinTable: music_formats
         joinColumns: track_id
         inverseJoinColumns: format_id
+        mappedBy: formats
         fetch: LAZY
         owner: false
 
@@ -2888,6 +2904,7 @@ entities:
         joinTable: podcast_categories
         joinColumns: category_id
         inverseJoinColumns: podcast_id
+        mappedBy: categories
         fetch: LAZY
         owner: false
 
@@ -3495,6 +3512,7 @@ entities:
         joinTable: movie_tags
         joinColumns: tag_id
         inverseJoinColumns: movie_id
+        mappedBy: tags
         fetch: LAZY
         owner: false
       - name: tvShows
@@ -3503,6 +3521,7 @@ entities:
         joinTable: tvshow_tags
         joinColumns: tag_id
         inverseJoinColumns: tvshow_id
+        mappedBy: tags
         fetch: LAZY
         owner: false
       - name: videoGames
@@ -3511,6 +3530,7 @@ entities:
         joinTable: videogame_tags
         joinColumns: tag_id
         inverseJoinColumns: game_id
+        mappedBy: tags
         fetch: LAZY
         owner: false
       - name: liveEvents
@@ -3519,6 +3539,7 @@ entities:
         joinTable: event_tags
         joinColumns: tag_id
         inverseJoinColumns: event_id
+        mappedBy: tags
         fetch: LAZY
         owner: false
 
@@ -3799,6 +3820,7 @@ entities:
         joinTable: movie_languages
         joinColumns: language_id
         inverseJoinColumns: movie_id
+        mappedBy: languages
         fetch: LAZY
         owner: false
       - name: tvShows
@@ -3807,6 +3829,7 @@ entities:
         joinTable: tvshow_languages
         joinColumns: language_id
         inverseJoinColumns: tvshow_id
+        mappedBy: languages
         fetch: LAZY
         owner: false
       - name: podcasts
@@ -3815,6 +3838,7 @@ entities:
         joinTable: podcast_languages
         joinColumns: language_id
         inverseJoinColumns: podcast_id
+        mappedBy: languages
         fetch: LAZY
         owner: false
 

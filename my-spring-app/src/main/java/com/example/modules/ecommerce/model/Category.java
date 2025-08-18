@@ -23,18 +23,18 @@ public class Category extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @Size(max = 255)
+        @Size(max = 255)
     private String description;
 
 
 // === Relations ===
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("category")
-    private List<Product> products;
+        @JsonIgnoreProperties("category")
+        private List<Product> products;
     
 
 }

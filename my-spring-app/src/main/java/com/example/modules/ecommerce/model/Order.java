@@ -23,33 +23,33 @@ public class Order extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Date orderDate;
 
-    @NotNull
+        @NotNull
     private String status;
 
 
 // === Relations ===
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("orders")
-    private User user;
+        @JoinColumn(name = "user_id")
+        @JsonIgnoreProperties("orders")
+        private User user;
     
     @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.EAGER)
-    @JsonIgnoreProperties("order")
-    private List<OrderItem> orderItems;
+        @JsonIgnoreProperties("order")
+        private List<OrderItem> orderItems;
     
     @OneToOne
-    @JoinColumn(name = "payment_id")
-    @JsonIgnoreProperties("order")
-    private Payment payment;
+            @JoinColumn(name = "payment_id")
+            @JsonIgnoreProperties("order")
+            private Payment payment;
             
     @OneToOne
-    @JoinColumn(name = "shipment_id")
-    @JsonIgnoreProperties("order")
-    private Shipment shipment;
+            @JoinColumn(name = "shipment_id")
+            @JsonIgnoreProperties("order")
+            private Shipment shipment;
             
 
 }

@@ -12,9 +12,9 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Review;import com.example.modules.entertainment_ecosystem.model.GameReview;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.GameAchievement;import com.example.modules.entertainment_ecosystem.model.GameSession;import com.example.modules.entertainment_ecosystem.model.DevelopmentStudio;import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;import com.example.modules.entertainment_ecosystem.model.GamePlatform;import com.example.modules.entertainment_ecosystem.model.ContentRating;import com.example.modules.entertainment_ecosystem.model.ContentTag;import com.example.modules.entertainment_ecosystem.model.VideoGameRating;import com.example.modules.entertainment_ecosystem.model.GamePlaySession;import com.example.modules.entertainment_ecosystem.model.GameReviewUpvote;import com.example.modules.entertainment_ecosystem.model.GameReviewDownvote;import com.example.modules.entertainment_ecosystem.model.ContentRatingBoard;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
+import java.util.ArrayList;
+import com.example.modules.entertainment_ecosystem.model.Artist;
+import com.example.modules.entertainment_ecosystem.model.Publisher;
 @Entity
 @Table(name = "videogame_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -25,23 +25,22 @@ public class VideoGame extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 255)
+        @NotNull@Size(min = 2, max = 255)
     private String title;
 
-    @NotNull
+        @NotNull
     private Date releaseDate;
 
     private Artist developer;
 
     private Publisher publisher;
 
-    @NotNull
+        @NotNull
     private String platform;
 
 
 // === Relations ===
 
-    
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "video_game_genres",
             joinColumns = @JoinColumn(name = "video_game_id"),
@@ -49,43 +48,34 @@ public class VideoGame extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Genre> genres;
             
-    
-    @OneToMany(mappedBy = "videoGame", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "videoGame", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("videoGame")
         private List<Review> generalReviews;
     
-    
-    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("game")
         private List<GameReview> gameReviews;
-    
     
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<UserProfile> playedBy;
+            private List<UserProfile> playedBy = new ArrayList<>();
         
-    
-    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("game")
         private List<GameAchievement> achievements;
     
-    
-    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("game")
         private List<GameSession> sessions;
     
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "developerStudio_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "studio_id")
+        @JsonIgnoreProperties("games")
         private DevelopmentStudio developerStudio;
     
-    
-    
-    @OneToMany(mappedBy = "videoGame", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "videoGame", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("videoGame")
         private List<DigitalPurchase> purchases;
-    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "video_game_platforms",
@@ -94,13 +84,10 @@ public class VideoGame extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<GamePlatform> platforms;
             
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "contentRating_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "content_rating_id")
+        @JsonIgnoreProperties("ratedVideoGames")
         private ContentRating contentRating;
-    
-    
     
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "videogame_tags",
@@ -109,32 +96,26 @@ public class VideoGame extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<ContentTag> tags;
             
-    
-    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("game")
         private List<VideoGameRating> ratings;
     
-    
-    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("game")
         private List<GamePlaySession> gamePlaySessions;
     
-    
-    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("game")
         private List<GameReviewUpvote> gameReviewUpvotes;
     
-    
-    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("game")
         private List<GameReviewDownvote> gameReviewDownvotes;
     
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "contentRatingBoard_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "rating_board_id")
+        @JsonIgnoreProperties("ratedVideoGames")
         private ContentRatingBoard contentRatingBoard;
-    
     
 
 }

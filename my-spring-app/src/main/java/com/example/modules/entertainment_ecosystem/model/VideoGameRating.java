@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "videogamerating_tbl")
@@ -25,21 +24,19 @@ public class VideoGameRating extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 50)
+        @NotNull@Size(min = 2, max = 50)
     private String ratingSystem;
 
-    @NotNull@Size(min = 1, max = 10)
+        @NotNull@Size(min = 1, max = 10)
     private String rating;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "game_id")
-        
+        @JsonIgnoreProperties("ratings")
         private VideoGame game;
-    
     
 
 }

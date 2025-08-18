@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.GameReview;import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "gamereviewupvote_tbl")
@@ -25,32 +24,26 @@ public class GameReviewUpvote extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Date upvoteDate;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "user_id")
-        
+        @JsonIgnoreProperties("gameReviewUpvotes")
         private UserProfile user;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "review_id")
-        
+        @JsonIgnoreProperties("upvotes")
         private GameReview review;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "game_id")
-        
+        @JsonIgnoreProperties("gameReviewUpvotes")
         private VideoGame game;
-    
     
 
 }

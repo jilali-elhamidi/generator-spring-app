@@ -201,45 +201,69 @@ Genre entity = entityOpt.get();
 
     
         if (entity.getMovies() != null) {
-        entity.getMovies().clear();
+        for (Movie item : new ArrayList<>(entity.getMovies())) {
+        
+            item.getGenres().remove(entity); // retire côté inverse
+        
+        }
+        entity.getMovies().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getTvShows() != null) {
-        entity.getTvShows().clear();
+        for (TVShow item : new ArrayList<>(entity.getTvShows())) {
+        
+        }
+        entity.getTvShows().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getBookGenres() != null) {
-        entity.getBookGenres().clear();
+        for (Book item : new ArrayList<>(entity.getBookGenres())) {
+        
+        }
+        entity.getBookGenres().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getMusicTracks() != null) {
-        entity.getMusicTracks().clear();
+        for (MusicTrack item : new ArrayList<>(entity.getMusicTracks())) {
+        
+        }
+        entity.getMusicTracks().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getFavoriteUsers() != null) {
-        entity.getFavoriteUsers().clear();
+        for (UserProfile item : new ArrayList<>(entity.getFavoriteUsers())) {
+        
+        }
+        entity.getFavoriteUsers().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getVideoGames() != null) {
-        entity.getVideoGames().clear();
+        for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
+        
+        }
+        entity.getVideoGames().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getPodcasts() != null) {
-        entity.getPodcasts().clear();
+        for (Podcast item : new ArrayList<>(entity.getPodcasts())) {
+        
+        }
+        entity.getPodcasts().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

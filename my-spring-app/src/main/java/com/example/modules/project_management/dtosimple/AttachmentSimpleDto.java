@@ -1,0 +1,24 @@
+package com.example.modules.project_management.dtosimple;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
+
+    import java.util.Date;
+
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class AttachmentSimpleDto {
+
+    private Long id;
+
+    private String fileName;
+
+    private String fileUrl;
+
+    private Date uploadDate;
+
+}

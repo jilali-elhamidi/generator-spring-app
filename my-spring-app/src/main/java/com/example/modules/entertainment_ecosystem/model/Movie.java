@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Review;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.ProductionCompany;import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;import com.example.modules.entertainment_ecosystem.model.MovieFormat;import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;import com.example.modules.entertainment_ecosystem.model.ContentProvider;import com.example.modules.entertainment_ecosystem.model.MovieStudio;import com.example.modules.entertainment_ecosystem.model.ContentRating;import com.example.modules.entertainment_ecosystem.model.ContentTag;import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "movie_tbl")
@@ -25,25 +24,24 @@ public class Movie extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 255)
+        @NotNull@Size(min = 2, max = 255)
     private String title;
 
-    @NotNull
+        @NotNull
     private Date releaseDate;
 
-    @NotNull@Min(1)
+        @NotNull@Min(1)
     private Integer durationMinutes;
 
-    @Size(max = 2000)
+        @Size(max = 2000)
     private String synopsis;
 
-    
+        
     private Double boxOfficeRevenue;
 
 
 // === Relations ===
 
-    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "movie_cast",
             joinColumns = @JoinColumn(name = "movie_id"),
@@ -51,18 +49,14 @@ public class Movie extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Artist> cast;
             
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "director_id")
-        
+        @JsonIgnoreProperties("directedMovies")
         private Artist director;
     
-    
-    
-    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("movie")
         private List<Review> reviews;
-    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "movie_genres",
@@ -71,28 +65,22 @@ public class Movie extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Genre> genres;
             
-    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<UserProfile> watchlistUsers;
+            private List<UserProfile> watchlistUsers = new ArrayList<>();
         
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "relatedMovies", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<Merchandise> relatedMerchandise;
+            private List<Merchandise> relatedMerchandise = new ArrayList<>();
         
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "productionCompany_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "company_id")
+        @JsonIgnoreProperties("movies")
         private ProductionCompany productionCompany;
     
-    
-    
-    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("movie")
         private List<DigitalPurchase> purchases;
-    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "movie_formats",
@@ -101,32 +89,24 @@ public class Movie extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<MovieFormat> formats;
             
-    
-    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("movie")
         private List<StreamingContentLicense> streamingLicenses;
     
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "provider_id")
-        
+        @JsonIgnoreProperties("providedMovies")
         private ContentProvider provider;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "movieStudio_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "movie_studio_id")
+        @JsonIgnoreProperties("movies")
         private MovieStudio movieStudio;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "contentRating_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "content_rating_id")
+        @JsonIgnoreProperties("ratedMovies")
         private ContentRating contentRating;
-    
-    
     
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "movie_tags",
@@ -135,7 +115,6 @@ public class Movie extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<ContentTag> tags;
             
-    
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "movie_languages",
             joinColumns = @JoinColumn(name = "movie_id"),

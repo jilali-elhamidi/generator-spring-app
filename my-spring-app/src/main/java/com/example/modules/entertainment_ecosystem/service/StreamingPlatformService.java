@@ -240,13 +240,19 @@ StreamingPlatform entity = entityOpt.get();
 
     
         if (entity.getMovies() != null) {
-        entity.getMovies().clear();
+        for (Movie item : new ArrayList<>(entity.getMovies())) {
+        
+        }
+        entity.getMovies().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getTvShows() != null) {
-        entity.getTvShows().clear();
+        for (TVShow item : new ArrayList<>(entity.getTvShows())) {
+        
+        }
+        entity.getTvShows().clear(); // puis vide côté courant
         }
     
 
@@ -258,9 +264,13 @@ StreamingPlatform entity = entityOpt.get();
 
     
         if (entity.getAdCampaigns() != null) {
-        entity.getAdCampaigns().clear();
+        for (AdCampaign item : new ArrayList<>(entity.getAdCampaigns())) {
+        
+        }
+        entity.getAdCampaigns().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

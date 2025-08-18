@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.MerchandiseType;import com.example.modules.entertainment_ecosystem.model.MerchandiseInventory;import com.example.modules.entertainment_ecosystem.model.MerchandiseReview;import com.example.modules.entertainment_ecosystem.model.MerchandiseSale;import com.example.modules.entertainment_ecosystem.model.MerchandiseSupplier;import com.example.modules.entertainment_ecosystem.model.MerchandiseShipping;import com.example.modules.entertainment_ecosystem.model.MerchandiseOrderItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "merchandise_tbl")
@@ -25,25 +24,22 @@ public class Merchandise extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @Size(max = 500)
+        @Size(max = 500)
     private String description;
 
-    @NotNull
+        @NotNull
     private Double price;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "artist_id")
-        
+        @JsonIgnoreProperties("managedMerchandise")
         private Artist artist;
-    
-    
     
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "merchandise_movies",
@@ -52,7 +48,6 @@ public class Merchandise extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<Movie> relatedMovies;
             
-    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "merchandise_shows",
             joinColumns = @JoinColumn(name = "merchandise_id"),
@@ -60,48 +55,38 @@ public class Merchandise extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<TVShow> relatedShows;
             
-    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<UserProfile> ownedByUsers;
+            private List<UserProfile> ownedByUsers = new ArrayList<>();
         
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "productType_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "type_id")
+        @JsonIgnoreProperties("items")
         private MerchandiseType productType;
     
-    
-    
-    @OneToOne(mappedBy = "merchandiseItem", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("merchandiseItem")
-    private MerchandiseInventory inventory;
+    @OneToOne(mappedBy = "merchandiseItem", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+            @JsonIgnoreProperties("merchandiseItem")
+            private MerchandiseInventory inventory;
         
-    
-    @OneToMany(mappedBy = "merchandise", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "merchandise", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("merchandise")
         private List<MerchandiseReview> reviews;
     
-    
-    @OneToMany(mappedBy = "merchandiseItem", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "merchandiseItem", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("merchandiseItem")
         private List<MerchandiseSale> sales;
     
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "supplier_id")
-        
+        @JsonIgnoreProperties("suppliedMerchandise")
         private MerchandiseSupplier supplier;
     
-    
-    
-    @OneToMany(mappedBy = "merchandiseItem", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "merchandiseItem", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("merchandiseItem")
         private List<MerchandiseShipping> shipments;
     
-    
-    @OneToMany(mappedBy = "merchandiseItem", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "merchandiseItem", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("merchandiseItem")
         private List<MerchandiseOrderItem> orderItems;
     
 

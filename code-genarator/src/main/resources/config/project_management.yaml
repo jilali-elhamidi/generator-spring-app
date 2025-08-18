@@ -1,0 +1,547 @@
+module: project_management
+
+entities:
+  - name: TeamMember
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 100
+      - name: email
+        type: String
+        validation:
+          notNull: true
+          email: true
+      - name: role
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: assignedTasks
+        type: Task
+        relationType: OneToMany
+        mappedBy: assignee
+        inverseField: assignee
+        fetch: LAZY
+      - name: projects
+        type: Project
+        relationType: ManyToMany
+        joinTable: project_members
+        joinColumns: member_id
+        inverseJoinColumns: project_id
+        fetch: LAZY
+        owner: false
+        mappedBy: teamMembers
+        inverseField: teamMembers
+      - name: managedProjects
+        type: Project
+        relationType: OneToMany
+        mappedBy: projectManager
+        inverseField: projectManager
+        fetch: LAZY
+      - name: createdComments
+        type: Comment
+        relationType: OneToMany
+        mappedBy: author
+        inverseField: author
+        fetch: LAZY
+      - name: team
+        type: Team
+        relationType: ManyToOne
+        joinColumn: team_id
+        inverseField: members
+        fetch: EAGER
+      - name: managedTeam
+        type: Team
+        relationType: OneToOne
+        mappedBy: teamLead
+        inverseField: teamLead
+        fetch: LAZY
+        owner: false
+
+  - name: Project
+    fields:
+      - name: projectName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 5
+            max: 200
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 1000
+      - name: startDate
+        type: Date
+        validation:
+          notNull: true
+      - name: deadline
+        type: Date
+        validation:
+          notNull: true
+      - name: status
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Planned|InProgress|Completed|OnHold|Cancelled)$"
+    relationships:
+      - name: tasks
+        type: Task
+        relationType: OneToMany
+        mappedBy: project
+        inverseField: project
+        fetch: LAZY
+      - name: teamMembers
+        type: TeamMember
+        relationType: ManyToMany
+        joinTable: project_members
+        joinColumns: project_id
+        inverseJoinColumns: member_id
+        fetch: LAZY
+        owner: true
+      - name: projectManager
+        type: TeamMember
+        relationType: ManyToOne
+        joinColumn: manager_id
+        inverseField: managedProjects
+        fetch: EAGER
+      - name: documents
+        type: Document
+        relationType: OneToMany
+        mappedBy: project
+        inverseField: project
+        fetch: LAZY
+      - name: milestones
+        type: Milestone
+        relationType: OneToMany
+        mappedBy: project
+        inverseField: project
+        fetch: LAZY
+      - name: client
+        type: Client
+        relationType: ManyToOne
+        joinColumn: client_id
+        inverseField: projects
+        fetch: EAGER
+      - name: team
+        type: Team
+        relationType: ManyToOne
+        joinColumn: team_id
+        inverseField: teamProjects
+        fetch: EAGER
+
+  - name: Task
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 150
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 500
+      - name: dueDate
+        type: Date
+        validation:
+          notNull: true
+      - name: priority
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Low|Medium|High|Urgent)$"
+      - name: status
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(ToDo|InProgress|OnHold|Blocked|Done)$"
+    relationships:
+      - name: project
+        type: Project
+        relationType: ManyToOne
+        joinColumn: project_id
+        inverseField: tasks
+        fetch: EAGER
+      - name: assignee
+        type: TeamMember
+        relationType: ManyToOne
+        joinColumn: assignee_id
+        inverseField: assignedTasks
+        fetch: EAGER
+      - name: subtasks
+        type: Subtask
+        relationType: OneToMany
+        mappedBy: parentTask
+        inverseField: parentTask
+        fetch: LAZY
+      - name: comments
+        type: Comment
+        relationType: OneToMany
+        mappedBy: task
+        inverseField: task
+        fetch: LAZY
+      - name: tags
+        type: Tag
+        relationType: ManyToMany
+        joinTable: task_tags
+        joinColumns: task_id
+        inverseJoinColumns: tag_id
+        fetch: EAGER
+        owner: true
+      - name: attachments
+        type: Attachment
+        relationType: OneToMany
+        mappedBy: task
+        inverseField: task
+        fetch: LAZY
+      - name: log
+        type: TimeLog
+        relationType: OneToMany
+        mappedBy: task
+        inverseField: task
+        fetch: LAZY
+      - name: milestone
+        type: Milestone
+        relationType: ManyToOne
+        joinColumn: milestone_id
+        inverseField: relatedTasks
+        fetch: LAZY
+
+  - name: Subtask
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 3
+            max: 150
+      - name: status
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(ToDo|Done)$"
+    relationships:
+      - name: parentTask
+        type: Task
+        relationType: ManyToOne
+        joinColumn: task_id
+        inverseField: subtasks
+        fetch: EAGER
+      - name: assignee
+        type: TeamMember
+        relationType: ManyToOne
+        joinColumn: assignee_id
+        inverseField: assignedSubtasks
+        fetch: EAGER
+
+  - name: Comment
+    fields:
+      - name: content
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 1
+            max: 500
+      - name: commentDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: author
+        type: TeamMember
+        relationType: ManyToOne
+        joinColumn: author_id
+        inverseField: createdComments
+        fetch: EAGER
+      - name: task
+        type: Task
+        relationType: ManyToOne
+        joinColumn: task_id
+        inverseField: comments
+        fetch: EAGER
+
+  - name: Document
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 200
+      - name: fileUrl
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 500
+      - name: uploadDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: project
+        type: Project
+        relationType: ManyToOne
+        joinColumn: project_id
+        inverseField: documents
+        fetch: EAGER
+      - name: uploadedBy
+        type: TeamMember
+        relationType: ManyToOne
+        joinColumn: uploader_id
+        inverseField: uploadedDocuments
+        fetch: EAGER
+      - name: type
+        type: DocumentType
+        relationType: ManyToOne
+        joinColumn: type_id
+        inverseField: documents
+        fetch: EAGER
+
+  - name: DocumentType
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 50
+    relationships:
+      - name: documents
+        type: Document
+        relationType: OneToMany
+        mappedBy: type
+        inverseField: type
+        fetch: LAZY
+
+  - name: Milestone
+    fields:
+      - name: title
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: dueDate
+        type: Date
+        validation:
+          notNull: true
+      - name: status
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Upcoming|Achieved|Delayed|Cancelled)$"
+    relationships:
+      - name: project
+        type: Project
+        relationType: ManyToOne
+        joinColumn: project_id
+        inverseField: milestones
+        fetch: EAGER
+      - name: relatedTasks
+        type: Task
+        relationType: OneToMany
+        mappedBy: milestone
+        inverseField: milestone
+        fetch: LAZY
+
+  - name: Client
+    fields:
+      - name: companyName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 150
+      - name: contactPerson
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: email
+        type: String
+        validation:
+          notNull: true
+          email: true
+      - name: phoneNumber
+        type: String
+        validation:
+          size:
+            max: 20
+    relationships:
+      - name: projects
+        type: Project
+        relationType: OneToMany
+        mappedBy: client
+        inverseField: client
+        fetch: LAZY
+      - name: invoices
+        type: Invoice
+        relationType: OneToMany
+        mappedBy: client
+        inverseField: client
+        fetch: LAZY
+
+  - name: Invoice
+    fields:
+      - name: invoiceDate
+        type: Date
+        validation:
+          notNull: true
+      - name: amount
+        type: Double
+        validation:
+          notNull: true
+          min: 0
+      - name: status
+        type: String
+        validation:
+          notNull: true
+          pattern: "^(Paid|Pending|Overdue|Cancelled)$"
+    relationships:
+      - name: project
+        type: Project
+        relationType: ManyToOne
+        joinColumn: project_id
+        inverseField: invoices
+        fetch: EAGER
+      - name: client
+        type: Client
+        relationType: ManyToOne
+        joinColumn: client_id
+        inverseField: invoices
+        fetch: EAGER
+
+  - name: TimeLog
+    fields:
+      - name: date
+        type: Date
+        validation:
+          notNull: true
+      - name: hours
+        type: Double
+        validation:
+          notNull: true
+          min: 2
+      - name: description
+        type: String
+        validation:
+          size:
+            max: 255
+    relationships:
+      - name: task
+        type: Task
+        relationType: ManyToOne
+        joinColumn: task_id
+        inverseField: log
+        fetch: EAGER
+      - name: user
+        type: TeamMember
+        relationType: ManyToOne
+        joinColumn: user_id
+        inverseField: logs
+        fetch: EAGER
+
+  - name: Tag
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 1
+            max: 50
+    relationships:
+      - name: tasks
+        type: Task
+        relationType: ManyToMany
+        mappedBy: tags
+        inverseField: tags
+        fetch: LAZY
+
+  - name: Attachment
+    fields:
+      - name: fileName
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 255
+      - name: fileUrl
+        type: String
+        validation:
+          notNull: true
+          size:
+            max: 500
+      - name: uploadDate
+        type: Date
+        validation:
+          notNull: true
+    relationships:
+      - name: task
+        type: Task
+        relationType: ManyToOne
+        joinColumn: task_id
+        inverseField: attachments
+        fetch: EAGER
+      - name: uploadedBy
+        type: TeamMember
+        relationType: ManyToOne
+        joinColumn: uploader_id
+        inverseField: uploadedAttachments
+        fetch: EAGER
+
+  - name: Team
+    fields:
+      - name: name
+        type: String
+        validation:
+          notNull: true
+          size:
+            min: 2
+            max: 100
+      - name: motto
+        type: String
+        validation:
+          size:
+            max: 255
+    relationships:
+      - name: members
+        type: TeamMember
+        relationType: OneToMany
+        mappedBy: team
+        inverseField: team
+        fetch: LAZY
+      - name: teamLead
+        type: TeamMember
+        relationType: OneToOne
+        joinColumn: lead_id
+        inverseField: managedTeam
+        fetch: EAGER
+        owner: true
+      - name: teamProjects
+        type: Project
+        relationType: OneToMany
+        mappedBy: team
+        inverseField: team
+        fetch: LAZY

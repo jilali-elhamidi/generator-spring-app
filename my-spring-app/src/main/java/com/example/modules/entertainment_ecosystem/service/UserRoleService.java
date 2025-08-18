@@ -81,9 +81,13 @@ UserRole entity = entityOpt.get();
 
     
         if (entity.getUsers() != null) {
-        entity.getUsers().clear();
+        for (UserProfile item : new ArrayList<>(entity.getUsers())) {
+        
+        }
+        entity.getUsers().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

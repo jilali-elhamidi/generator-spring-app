@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Movie;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "movieformat_tbl")
@@ -25,16 +24,15 @@ public class MovieFormat extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 50)
+        @NotNull@Size(min = 2, max = 50)
     private String name;
 
 
 // === Relations ===
 
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "formats", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<Movie> movies;
+            private List<Movie> movies = new ArrayList<>();
         
 
 }

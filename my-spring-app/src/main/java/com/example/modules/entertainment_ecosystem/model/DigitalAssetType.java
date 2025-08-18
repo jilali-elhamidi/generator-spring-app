@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.DigitalAsset;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "digitalassettype_tbl")
@@ -25,15 +24,14 @@ public class DigitalAssetType extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 50)
+        @NotNull@Size(min = 2, max = 50)
     private String name;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "assetType", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "assetType", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("assetType")
         private List<DigitalAsset> assets;
     
 

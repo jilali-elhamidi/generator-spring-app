@@ -141,27 +141,40 @@ ContentTag entity = entityOpt.get();
 
     
         if (entity.getMovies() != null) {
-        entity.getMovies().clear();
+        for (Movie item : new ArrayList<>(entity.getMovies())) {
+        
+        }
+        entity.getMovies().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getTvShows() != null) {
-        entity.getTvShows().clear();
+        for (TVShow item : new ArrayList<>(entity.getTvShows())) {
+        
+        }
+        entity.getTvShows().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getVideoGames() != null) {
-        entity.getVideoGames().clear();
+        for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
+        
+        }
+        entity.getVideoGames().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getLiveEvents() != null) {
-        entity.getLiveEvents().clear();
+        for (LiveEvent item : new ArrayList<>(entity.getLiveEvents())) {
+        
+        }
+        entity.getLiveEvents().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

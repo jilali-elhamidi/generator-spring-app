@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.LiveEvent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "contenttag_tbl")
@@ -25,31 +24,27 @@ public class ContentTag extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 50)
+        @NotNull@Size(min = 2, max = 50)
     private String name;
 
 
 // === Relations ===
 
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<Movie> movies;
+            private List<Movie> movies = new ArrayList<>();
         
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<TVShow> tvShows;
+            private List<TVShow> tvShows = new ArrayList<>();
         
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<VideoGame> videoGames;
+            private List<VideoGame> videoGames = new ArrayList<>();
         
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<LiveEvent> liveEvents;
+            private List<LiveEvent> liveEvents = new ArrayList<>();
         
 
 }

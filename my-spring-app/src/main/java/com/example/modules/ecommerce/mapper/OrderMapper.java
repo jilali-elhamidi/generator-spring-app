@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface OrderMapper {
     List<OrderDto> toDtoList(List<Order> orderList);
 
     List<Order> toEntityList(List<OrderDto> orderDtoList);
+
+    void updateEntityFromDto(OrderDto dto, @MappingTarget Order entity);
 
 }

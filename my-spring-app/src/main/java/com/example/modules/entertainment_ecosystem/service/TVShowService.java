@@ -433,13 +433,19 @@ TVShow entity = entityOpt.get();
 
     
         if (entity.getGenres() != null) {
-        entity.getGenres().clear();
+        for (Genre item : new ArrayList<>(entity.getGenres())) {
+        
+        }
+        entity.getGenres().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getRelatedMerchandise() != null) {
-        entity.getRelatedMerchandise().clear();
+        for (Merchandise item : new ArrayList<>(entity.getRelatedMerchandise())) {
+        
+        }
+        entity.getRelatedMerchandise().clear(); // puis vide côté courant
         }
     
 
@@ -447,7 +453,10 @@ TVShow entity = entityOpt.get();
 
     
         if (entity.getCast() != null) {
-        entity.getCast().clear();
+        for (Artist item : new ArrayList<>(entity.getCast())) {
+        
+        }
+        entity.getCast().clear(); // puis vide côté courant
         }
     
 
@@ -461,15 +470,22 @@ TVShow entity = entityOpt.get();
 
     
         if (entity.getTags() != null) {
-        entity.getTags().clear();
+        for (ContentTag item : new ArrayList<>(entity.getTags())) {
+        
+        }
+        entity.getTags().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getLanguages() != null) {
-        entity.getLanguages().clear();
+        for (ContentLanguage item : new ArrayList<>(entity.getLanguages())) {
+        
+        }
+        entity.getLanguages().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

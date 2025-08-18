@@ -23,21 +23,21 @@ public class Shipment extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Date shipmentDate;
 
-    @NotNull@Size(max = 100)
+        @NotNull@Size(max = 100)
     private String carrier;
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String trackingNumber;
 
 
 // === Relations ===
 
     @OneToOne(mappedBy = "shipment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("shipment")
-    private Order order;
+            @JsonIgnoreProperties("shipment")
+            private Order order;
         
 
 }

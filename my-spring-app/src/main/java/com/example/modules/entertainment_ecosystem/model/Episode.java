@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Season;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "episode_tbl")
@@ -25,42 +24,37 @@ public class Episode extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Min(1)
+        @NotNull@Min(1)
     private Integer episodeNumber;
 
-    @NotNull@Size(min = 2, max = 255)
+        @NotNull@Size(min = 2, max = 255)
     private String title;
 
-    @Size(max = 500)
+        @Size(max = 500)
     private String description;
 
-    @Min(1)
+        @Min(1)
     private Integer durationMinutes;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "season_id")
-        
+        @JsonIgnoreProperties("episodes")
         private Season season;
-    
-    
     
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<UserProfile> watchedByUsers;
+            private List<UserProfile> watchedByUsers = new ArrayList<>();
         
-    
     @OneToOne
-    @JoinColumn(name = "")
-    @JsonIgnoreProperties("relatedEpisode")
-    private PodcastEpisode relatedPodcastEpisode;
+            @JoinColumn(name = "")
+            @JsonIgnoreProperties("relatedEpisode")
+            private PodcastEpisode relatedPodcastEpisode;
             
-    
-    @OneToMany(mappedBy = "episode", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "episode", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("episode")
         private List<EpisodeCredit> credits;
     
 

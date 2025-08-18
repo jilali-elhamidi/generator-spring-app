@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.PodcastEpisode;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Publisher;import com.example.modules.entertainment_ecosystem.model.PodcastCategory;import com.example.modules.entertainment_ecosystem.model.PodcastGuest;import com.example.modules.entertainment_ecosystem.model.ContentProvider;import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "podcast_tbl")
@@ -25,47 +24,39 @@ public class Podcast extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 255)
+        @NotNull@Size(min = 2, max = 255)
     private String title;
 
-    @Size(max = 1000)
+        @Size(max = 1000)
     private String description;
 
-    @Min(1)
+        @Min(1)
     private Integer totalEpisodes;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "host_id")
-        
+        @JsonIgnoreProperties("hostedPodcasts")
         private Artist host;
     
-    
-    
-    @OneToMany(mappedBy = "podcast", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "podcast", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("podcast")
         private List<PodcastEpisode> episodes;
     
-    
+    @ManyToMany(mappedBy = "podcasts", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("")
+            private List<Genre> genres = new ArrayList<>();
+        
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<Genre> genres;
+            private List<UserProfile> listeners = new ArrayList<>();
         
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
-            private List<UserProfile> listeners;
-        
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "publisher_id")
-        
+        @JsonIgnoreProperties("podcasts")
         private Publisher publisher;
-    
-    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "podcast_categories",
@@ -74,18 +65,14 @@ public class Podcast extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<PodcastCategory> categories;
             
-    
-    @OneToMany(mappedBy = "podcast", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "podcast", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("podcast")
         private List<PodcastGuest> guests;
     
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "provider_id")
-        
+        @JsonIgnoreProperties("providedPodcasts")
         private ContentProvider provider;
-    
-    
     
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "podcast_languages",

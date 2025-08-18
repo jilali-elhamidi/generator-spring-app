@@ -23,25 +23,25 @@ public class User extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 3, max = 50)
+        @NotNull@Size(min = 3, max = 50)
     private String username;
 
-    @NotNull@Email
+        @NotNull@Email
     private String email;
 
-    @Size(max = 20)
+        @Size(max = 20)
     private String phone;
 
 
 // === Relations ===
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<Address> addresses;
+        @JsonIgnoreProperties("user")
+        private List<Address> addresses;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("user")
-    private List<Order> orders;
+        @JsonIgnoreProperties("user")
+        private List<Order> orders;
     
 
 }

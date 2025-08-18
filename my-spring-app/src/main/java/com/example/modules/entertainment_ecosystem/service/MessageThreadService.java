@@ -142,11 +142,15 @@ MessageThread entity = entityOpt.get();
 
     
         if (entity.getParticipants() != null) {
-        entity.getParticipants().clear();
+        for (UserProfile item : new ArrayList<>(entity.getParticipants())) {
+        
+        }
+        entity.getParticipants().clear(); // puis vide côté courant
         }
     
 
     
+
 
 
 // --- Dissocier OneToOne ---

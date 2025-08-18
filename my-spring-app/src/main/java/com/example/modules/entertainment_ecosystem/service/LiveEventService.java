@@ -350,7 +350,10 @@ LiveEvent entity = entityOpt.get();
 
     
         if (entity.getPerformers() != null) {
-        entity.getPerformers().clear();
+        for (Artist item : new ArrayList<>(entity.getPerformers())) {
+        
+        }
+        entity.getPerformers().clear(); // puis vide côté courant
         }
     
 
@@ -368,9 +371,13 @@ LiveEvent entity = entityOpt.get();
 
     
         if (entity.getTags() != null) {
-        entity.getTags().clear();
+        for (ContentTag item : new ArrayList<>(entity.getTags())) {
+        
+        }
+        entity.getTags().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

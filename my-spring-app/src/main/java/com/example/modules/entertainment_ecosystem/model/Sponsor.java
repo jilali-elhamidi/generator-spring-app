@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.EventSponsorship;import com.example.modules.entertainment_ecosystem.model.AdCampaign;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "sponsor_tbl")
@@ -25,31 +24,28 @@ public class Sponsor extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @NotNull@Email
+        @NotNull@Email
     private String contactEmail;
 
-    
+        
     private String companyType;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "sponsor", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "sponsor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("sponsor")
         private List<LiveEvent> sponsoredEvents;
     
-    
-    @OneToMany(mappedBy = "sponsor", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "sponsor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("sponsor")
         private List<EventSponsorship> sponsorships;
     
-    
-    @OneToMany(mappedBy = "advertiser", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "advertiser", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("advertiser")
         private List<AdCampaign> adCampaigns;
     
 

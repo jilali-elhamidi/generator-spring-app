@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.Album;import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.Manager;import com.example.modules.entertainment_ecosystem.model.ArtistAward;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.DigitalAsset;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.ArtistSocialMedia;import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "artist_tbl")
@@ -25,106 +24,88 @@ public class Artist extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @Size(max = 1000)
+        @Size(max = 1000)
     private String bio;
 
-    @NotNull
+        @NotNull
     private Date birthDate;
 
-    @Size(max = 50)
+        @Size(max = 50)
     private String nationality;
 
 
 // === Relations ===
 
-    
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<UserProfile> favoriteArtists;
+            private List<UserProfile> favoriteArtists = new ArrayList<>();
         
-    
-    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("artist")
         private List<MusicTrack> composedMusic;
     
-    
-    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("artist")
         private List<Album> albums;
     
-    
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "author", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("author")
         private List<Book> booksAuthored;
     
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "performers", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<LiveEvent> participatedInEvents;
+            private List<LiveEvent> participatedInEvents = new ArrayList<>();
         
-    
-    @OneToMany(mappedBy = "host", fetch = FetchType.EAGER)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "host", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.EAGER)
+        @JsonIgnoreProperties("host")
         private List<Podcast> hostedPodcasts;
     
-    
-    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("artist")
         private List<Merchandise> managedMerchandise;
     
-    
-    @OneToMany(mappedBy = "developer", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "developer", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("developer")
         private List<VideoGame> managedGames;
     
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "manager_id")
-        
+        @JsonIgnoreProperties("artists")
         private Manager manager;
     
-    
-    
-    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("artist")
         private List<ArtistAward> awards;
     
-    
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "cast", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<Movie> actedInMovies;
+            private List<Movie> actedInMovies = new ArrayList<>();
         
-    
-    @OneToMany(mappedBy = "director", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "director", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("director")
         private List<Movie> directedMovies;
     
-    
-    @OneToMany(mappedBy = "director", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "director", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("director")
         private List<TVShow> directedShows;
     
-    
-    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("artist")
         private List<DigitalAsset> managedAssets;
-    
     
     @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
-            private List<TVShow> actedInShows;
+            private List<TVShow> actedInShows = new ArrayList<>();
         
-    
-    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("artist")
         private List<ArtistSocialMedia> socialMediaLinks;
     
-    
-    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("artist")
         private List<EpisodeCredit> episodeCredits;
     
 

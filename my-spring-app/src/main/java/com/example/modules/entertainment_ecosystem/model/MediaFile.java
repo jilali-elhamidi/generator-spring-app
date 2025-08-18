@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Review;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "mediafile_tbl")
@@ -25,19 +24,18 @@ public class MediaFile extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(max = 255)
+        @NotNull@Size(max = 255)
     private String url;
 
-    @NotNull@Size(max = 50)
+        @NotNull@Size(max = 50)
     private String type;
 
 
 // === Relations ===
 
-    
-    @OneToOne(mappedBy = "mediaFile", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("mediaFile")
-    private Review review;
+    @OneToOne(mappedBy = "mediaFile", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+            @JsonIgnoreProperties("mediaFile")
+            private Review review;
         
 
 }

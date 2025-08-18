@@ -122,6 +122,7 @@ OnlineEventType entity = entityOpt.get();
     
 
 
+
 // --- Dissocier OneToOne ---
 
     

@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.MerchandiseOrder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "merchandiseorderitem_tbl")
@@ -25,28 +24,24 @@ public class MerchandiseOrderItem extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Min(1)
+        @NotNull@Min(1)
     private Integer quantity;
 
-    @NotNull
+        @NotNull
     private Double priceAtPurchase;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "merchandiseItem_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "merchandise_id")
+        @JsonIgnoreProperties("orderItems")
         private Merchandise merchandiseItem;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "order_id")
-        
+        @JsonIgnoreProperties("items")
         private MerchandiseOrder order;
-    
     
 
 }

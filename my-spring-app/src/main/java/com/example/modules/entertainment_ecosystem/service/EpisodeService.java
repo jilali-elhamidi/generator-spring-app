@@ -215,13 +215,17 @@ Episode entity = entityOpt.get();
 
     
         if (entity.getWatchedByUsers() != null) {
-        entity.getWatchedByUsers().clear();
+        for (UserProfile item : new ArrayList<>(entity.getWatchedByUsers())) {
+        
+        }
+        entity.getWatchedByUsers().clear(); // puis vide côté courant
         }
     
 
     
 
     
+
 
 
 // --- Dissocier OneToOne ---

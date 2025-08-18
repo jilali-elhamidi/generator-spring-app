@@ -122,21 +122,31 @@ ContentLanguage entity = entityOpt.get();
 
     
         if (entity.getMovies() != null) {
-        entity.getMovies().clear();
+        for (Movie item : new ArrayList<>(entity.getMovies())) {
+        
+        }
+        entity.getMovies().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getTvShows() != null) {
-        entity.getTvShows().clear();
+        for (TVShow item : new ArrayList<>(entity.getTvShows())) {
+        
+        }
+        entity.getTvShows().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getPodcasts() != null) {
-        entity.getPodcasts().clear();
+        for (Podcast item : new ArrayList<>(entity.getPodcasts())) {
+        
+        }
+        entity.getPodcasts().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

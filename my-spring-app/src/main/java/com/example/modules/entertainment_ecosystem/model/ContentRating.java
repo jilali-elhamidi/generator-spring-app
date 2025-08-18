@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.ContentRatingBoard;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "contentrating_tbl")
@@ -25,36 +24,31 @@ public class ContentRating extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 20)
+        @NotNull@Size(min = 2, max = 20)
     private String name;
 
-    @Size(max = 200)
+        @Size(max = 200)
     private String description;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "contentRating", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "contentRating", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("contentRating")
         private List<Movie> ratedMovies;
     
-    
-    @OneToMany(mappedBy = "contentRating", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "contentRating", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("contentRating")
         private List<TVShow> ratedTvShows;
     
-    
-    @OneToMany(mappedBy = "contentRating", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "contentRating", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("contentRating")
         private List<VideoGame> ratedVideoGames;
     
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "board_id")
-        
+        @JsonIgnoreProperties("ratings")
         private ContentRatingBoard board;
-    
     
 
 }

@@ -81,9 +81,13 @@ GamePlatform entity = entityOpt.get();
 
     
         if (entity.getVideoGames() != null) {
-        entity.getVideoGames().clear();
+        for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
+        
+        }
+        entity.getVideoGames().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

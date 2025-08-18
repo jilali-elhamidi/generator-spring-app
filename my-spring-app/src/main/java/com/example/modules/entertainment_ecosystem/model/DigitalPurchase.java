@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.Transaction;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "digitalpurchase_tbl")
@@ -25,48 +24,39 @@ public class DigitalPurchase extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Date purchaseDate;
 
-    @NotNull
+        @NotNull
     private Double price;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "user_id")
-        
+        @JsonIgnoreProperties("digitalPurchases")
         private UserProfile user;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "movie_id")
-        
+        @JsonIgnoreProperties("purchases")
         private Movie movie;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "musicTrack_id")
-        
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "track_id")
+        @JsonIgnoreProperties("purchases")
         private MusicTrack musicTrack;
     
-    
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "videoGame_id")
-        
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "game_id")
+        @JsonIgnoreProperties("purchases")
         private VideoGame videoGame;
     
-    
-    
     @OneToOne
-    @JoinColumn(name = "transaction_id")
-    @JsonIgnoreProperties("digitalPurchase")
-    private Transaction transaction;
+            @JoinColumn(name = "transaction_id")
+            @JsonIgnoreProperties("digitalPurchase")
+            private Transaction transaction;
             
 
 }

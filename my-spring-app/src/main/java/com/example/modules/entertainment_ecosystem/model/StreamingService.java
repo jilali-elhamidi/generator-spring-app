@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;import com.example.modules.entertainment_ecosystem.model.SubscriptionPlan;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "streamingservice_tbl")
@@ -25,23 +24,21 @@ public class StreamingService extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @Size(max = 255)
+        @Size(max = 255)
     private String logoUrl;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "streamingService", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "streamingService", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("streamingService")
         private List<StreamingPlatform> platforms;
     
-    
-    @OneToMany(mappedBy = "service", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "service", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("service")
         private List<SubscriptionPlan> plans;
     
 

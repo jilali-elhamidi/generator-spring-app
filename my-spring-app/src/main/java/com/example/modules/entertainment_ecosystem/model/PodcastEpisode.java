@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.Episode;import com.example.modules.entertainment_ecosystem.model.PodcastGuest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "podcastepisode_tbl")
@@ -25,32 +24,28 @@ public class PodcastEpisode extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 255)
+        @NotNull@Size(min = 2, max = 255)
     private String title;
 
-    @NotNull
+        @NotNull
     private Date releaseDate;
 
-    @Min(1)
+        @Min(1)
     private Integer durationMinutes;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "podcast_id")
-        
+        @JsonIgnoreProperties("episodes")
         private Podcast podcast;
     
-    
-    
     @OneToOne
-    @JoinColumn(name = "")
-    @JsonIgnoreProperties("relatedPodcastEpisode")
-    private Episode relatedEpisode;
+            @JoinColumn(name = "")
+            @JsonIgnoreProperties("relatedPodcastEpisode")
+            private Episode relatedEpisode;
             
-    
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "podcast_guest_appearances",
             joinColumns = @JoinColumn(name = "episode_id"),

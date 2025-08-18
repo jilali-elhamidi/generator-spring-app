@@ -23,25 +23,25 @@ public class Address extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 5, max = 100)
+        @NotNull@Size(min = 5, max = 100)
     private String street;
 
-    @NotNull@Size(min = 2, max = 50)
+        @NotNull@Size(min = 2, max = 50)
     private String city;
 
-    @NotNull@Size(min = 4, max = 10)
+        @NotNull@Size(min = 4, max = 10)
     private String postalCode;
 
-    @NotNull@Size(min = 2, max = 50)
+        @NotNull@Size(min = 2, max = 50)
     private String country;
 
 
 // === Relations ===
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("addresses")
-    private User user;
+        @JoinColumn(name = "user_id")
+        @JsonIgnoreProperties("addresses")
+        private User user;
     
 
 }

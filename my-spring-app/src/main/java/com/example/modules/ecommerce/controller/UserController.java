@@ -51,25 +51,32 @@ public class UserController {
         return ResponseEntity.created(location).body(userMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(
-            @PathVariable Long id,
-            @Valid @RequestBody UserDto userDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<UserDto> updateUser(
+                @PathVariable Long id,
+                @RequestBody UserDto userDto) {
 
-        try {
-            User updatedEntity = userService.update(
-                    id,
-                    userMapper.toEntity(userDto)
-            );
-            return ResponseEntity.ok(userMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                // Transformer le DTO en entity pour le service
+                User entityToUpdate = userMapper.toEntity(userDto);
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                // Appel du service update
+                User updatedEntity = userService.update(id, entityToUpdate);
+
+                // Transformer l’entity mise à jour en DTO pour le retour
+                UserDto updatedDto = userMapper.toDto(updatedEntity);
+
+                return ResponseEntity.ok(updatedDto);
+                }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+                    boolean deleted = userService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

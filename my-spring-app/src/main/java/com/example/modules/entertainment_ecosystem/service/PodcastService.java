@@ -354,13 +354,19 @@ Podcast entity = entityOpt.get();
 
     
         if (entity.getGenres() != null) {
-        entity.getGenres().clear();
+        for (Genre item : new ArrayList<>(entity.getGenres())) {
+        
+        }
+        entity.getGenres().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getListeners() != null) {
-        entity.getListeners().clear();
+        for (UserProfile item : new ArrayList<>(entity.getListeners())) {
+        
+        }
+        entity.getListeners().clear(); // puis vide côté courant
         }
     
 
@@ -368,7 +374,10 @@ Podcast entity = entityOpt.get();
 
     
         if (entity.getCategories() != null) {
-        entity.getCategories().clear();
+        for (PodcastCategory item : new ArrayList<>(entity.getCategories())) {
+        
+        }
+        entity.getCategories().clear(); // puis vide côté courant
         }
     
 
@@ -378,9 +387,13 @@ Podcast entity = entityOpt.get();
 
     
         if (entity.getLanguages() != null) {
-        entity.getLanguages().clear();
+        for (ContentLanguage item : new ArrayList<>(entity.getLanguages())) {
+        
+        }
+        entity.getLanguages().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

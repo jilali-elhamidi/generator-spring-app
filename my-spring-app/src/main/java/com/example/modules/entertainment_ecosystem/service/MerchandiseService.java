@@ -492,19 +492,28 @@ Merchandise entity = entityOpt.get();
 
     
         if (entity.getRelatedMovies() != null) {
-        entity.getRelatedMovies().clear();
+        for (Movie item : new ArrayList<>(entity.getRelatedMovies())) {
+        
+        }
+        entity.getRelatedMovies().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getRelatedShows() != null) {
-        entity.getRelatedShows().clear();
+        for (TVShow item : new ArrayList<>(entity.getRelatedShows())) {
+        
+        }
+        entity.getRelatedShows().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getOwnedByUsers() != null) {
-        entity.getOwnedByUsers().clear();
+        for (UserProfile item : new ArrayList<>(entity.getOwnedByUsers())) {
+        
+        }
+        entity.getOwnedByUsers().clear(); // puis vide côté courant
         }
     
 
@@ -521,6 +530,7 @@ Merchandise entity = entityOpt.get();
     
 
     
+
 
 
 // --- Dissocier OneToOne ---

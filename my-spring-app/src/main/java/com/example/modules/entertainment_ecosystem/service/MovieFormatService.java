@@ -81,9 +81,13 @@ MovieFormat entity = entityOpt.get();
 
     
         if (entity.getMovies() != null) {
-        entity.getMovies().clear();
+        for (Movie item : new ArrayList<>(entity.getMovies())) {
+        
+        }
+        entity.getMovies().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

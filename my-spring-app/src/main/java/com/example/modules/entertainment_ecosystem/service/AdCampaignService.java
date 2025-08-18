@@ -115,9 +115,13 @@ AdCampaign entity = entityOpt.get();
 
     
         if (entity.getDisplayedOnPlatforms() != null) {
-        entity.getDisplayedOnPlatforms().clear();
+        for (StreamingPlatform item : new ArrayList<>(entity.getDisplayedOnPlatforms())) {
+        
+        }
+        entity.getDisplayedOnPlatforms().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.EventSponsorship;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "contract_tbl")
@@ -25,19 +24,18 @@ public class Contract extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 5, max = 50)
+        @NotNull@Size(min = 5, max = 50)
     private String contractNumber;
 
-    @Size(max = 2000)
+        @Size(max = 2000)
     private String terms;
 
 
 // === Relations ===
 
-    
-    @OneToOne(mappedBy = "contract", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("contract")
-    private EventSponsorship sponsorship;
+    @OneToOne(mappedBy = "contract", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+            @JsonIgnoreProperties("contract")
+            private EventSponsorship sponsorship;
         
 
 }

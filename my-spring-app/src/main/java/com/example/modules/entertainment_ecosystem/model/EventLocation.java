@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.LiveEvent;import com.example.modules.entertainment_ecosystem.model.Employee;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "eventlocation_tbl")
@@ -25,26 +24,23 @@ public class EventLocation extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 255)
+        @NotNull@Size(min = 2, max = 255)
     private String name;
 
-    @NotNull@Size(min = 5, max = 255)
+        @NotNull@Size(min = 5, max = 255)
     private String address;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "location", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "location", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("location")
         private List<LiveEvent> liveEvents;
     
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "contactPerson_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "employee_id")
+        @JsonIgnoreProperties("managedLocations")
         private Employee contactPerson;
-    
     
 
 }

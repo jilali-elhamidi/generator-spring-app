@@ -51,25 +51,32 @@ public class OrderController {
         return ResponseEntity.created(location).body(orderMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OrderDto> updateOrder(
-            @PathVariable Long id,
-            @Valid @RequestBody OrderDto orderDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<OrderDto> updateOrder(
+                @PathVariable Long id,
+                @RequestBody OrderDto orderDto) {
 
-        try {
-            Order updatedEntity = orderService.update(
-                    id,
-                    orderMapper.toEntity(orderDto)
-            );
-            return ResponseEntity.ok(orderMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                // Transformer le DTO en entity pour le service
+                Order entityToUpdate = orderMapper.toEntity(orderDto);
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        orderService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                // Appel du service update
+                Order updatedEntity = orderService.update(id, entityToUpdate);
+
+                // Transformer l’entity mise à jour en DTO pour le retour
+                OrderDto updatedDto = orderMapper.toDto(updatedEntity);
+
+                return ResponseEntity.ok(updatedDto);
+                }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+                    boolean deleted = orderService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

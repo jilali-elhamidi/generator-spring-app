@@ -7,6 +7,7 @@ import com.example.modules.ecommerce.model.Product;
 import com.example.modules.ecommerce.repository.ProductRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -30,31 +31,28 @@ public class CategoryService extends BaseService<Category> {
 
 
     
-        if (category.getProducts() != null) {
-        List<Product> managedProducts = new ArrayList<>();
-        for (Product item : category.getProducts()) {
-        if (item.getId() != null) {
-        Product existingItem = productsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Product not found"));
-        // Set the parent reference on the existing item
-        existingItem.setCategory(category);
-        managedProducts.add(existingItem);
-        } else {
-        // Set the parent reference on the new item
-        item.setCategory(category);
-        managedProducts.add(item);
-        }
-        }
-        category.setProducts(managedProducts);
-        }
+        // Cherche la relation ManyToOne correspondante dans l'entité enfant
+        
+            if (category.getProducts() != null) {
+            List<Product> managedProducts = new ArrayList<>();
+            for (Product item : category.getProducts()) {
+            if (item.getId() != null) {
+            Product existingItem = productsRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("Product not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setCategory(category);
+            managedProducts.add(existingItem);
+            } else {
+            item.setCategory(category);
+            managedProducts.add(item);
+            }
+            }
+            category.setProducts(managedProducts);
+            }
+        
     
 
-
-        if (category.getProducts() != null) {
-            for (Product item : category.getProducts()) {
-            item.setCategory(category);
-            }
-        }
+    
 
         return categoryRepository.save(category);
     }
@@ -73,18 +71,69 @@ public class CategoryService extends BaseService<Category> {
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
-
+        // Vider la collection existante
         existing.getProducts().clear();
+
         if (categoryRequest.getProducts() != null) {
-            for (var item : categoryRequest.getProducts()) {
-            item.setCategory(existing);
-            existing.getProducts().add(item);
-            }
+        for (var item : categoryRequest.getProducts()) {
+        Product existingItem;
+        if (item.getId() != null) {
+        existingItem = productsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Product not found"));
+        } else {
+        existingItem = item; // ou mapper les champs si DTO
         }
+        // Maintenir la relation bidirectionnelle
+        existingItem.setCategory(existing);
+
+        // Ajouter directement dans la collection existante
+        existing.getProducts().add(existingItem);
+        }
+        }
+        // NE PLUS FAIRE setCollection()
 
     
 
 
         return categoryRepository.save(existing);
     }
+@Transactional
+public boolean deleteById(Long id) {
+Optional<Category> entityOpt = repository.findById(id);
+if (entityOpt.isEmpty()) return false;
+
+Category entity = entityOpt.get();
+
+// --- Dissocier OneToMany ---
+
+    
+        if (entity.getProducts() != null) {
+        for (var child : entity.getProducts()) {
+        
+            child.setCategory(null); // retirer la référence inverse
+        
+        }
+        entity.getProducts().clear();
+        }
+    
+
+
+// --- Dissocier ManyToMany ---
+
+    
+
+
+// --- Dissocier OneToOne ---
+
+    
+
+
+// --- Dissocier ManyToOne ---
+
+    
+
+
+repository.delete(entity);
+return true;
+}
 }

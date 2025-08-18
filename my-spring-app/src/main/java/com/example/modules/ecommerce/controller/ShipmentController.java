@@ -51,25 +51,32 @@ public class ShipmentController {
         return ResponseEntity.created(location).body(shipmentMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ShipmentDto> updateShipment(
-            @PathVariable Long id,
-            @Valid @RequestBody ShipmentDto shipmentDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<ShipmentDto> updateShipment(
+                @PathVariable Long id,
+                @RequestBody ShipmentDto shipmentDto) {
 
-        try {
-            Shipment updatedEntity = shipmentService.update(
-                    id,
-                    shipmentMapper.toEntity(shipmentDto)
-            );
-            return ResponseEntity.ok(shipmentMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                // Transformer le DTO en entity pour le service
+                Shipment entityToUpdate = shipmentMapper.toEntity(shipmentDto);
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteShipment(@PathVariable Long id) {
-        shipmentService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                // Appel du service update
+                Shipment updatedEntity = shipmentService.update(id, entityToUpdate);
+
+                // Transformer l’entity mise à jour en DTO pour le retour
+                ShipmentDto updatedDto = shipmentMapper.toDto(updatedEntity);
+
+                return ResponseEntity.ok(updatedDto);
+                }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteShipment(@PathVariable Long id) {
+                    boolean deleted = shipmentService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

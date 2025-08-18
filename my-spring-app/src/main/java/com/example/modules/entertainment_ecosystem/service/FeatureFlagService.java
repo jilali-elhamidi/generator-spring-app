@@ -83,9 +83,13 @@ FeatureFlag entity = entityOpt.get();
 
     
         if (entity.getEnabledForUsers() != null) {
-        entity.getEnabledForUsers().clear();
+        for (UserProfile item : new ArrayList<>(entity.getEnabledForUsers())) {
+        
+        }
+        entity.getEnabledForUsers().clear(); // puis vide côté courant
         }
     
+
 
 
 // --- Dissocier OneToOne ---

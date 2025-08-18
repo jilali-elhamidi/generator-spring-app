@@ -23,24 +23,24 @@ public class OrderItem extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Min(1)
+        @NotNull@Min(1)
     private Integer quantity;
 
-    @NotNull@Min(2)
+        @NotNull@Min(2)
     private Double price;
 
 
 // === Relations ===
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "product_id")
-    @JsonIgnoreProperties("orderItems")
-    private Product product;
+        @JoinColumn(name = "product_id")
+        @JsonIgnoreProperties("orderItems")
+        private Product product;
     
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "order_id")
-    @JsonIgnoreProperties("orderItems")
-    private Order order;
+        @JoinColumn(name = "order_id")
+        @JsonIgnoreProperties("orderItems")
+        private Order order;
     
 
 }

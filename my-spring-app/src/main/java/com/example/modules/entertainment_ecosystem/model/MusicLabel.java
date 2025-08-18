@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Album;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "musiclabel_tbl")
@@ -25,15 +24,14 @@ public class MusicLabel extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "musicLabel", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "musicLabel", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("musicLabel")
         private List<Album> albums;
     
 

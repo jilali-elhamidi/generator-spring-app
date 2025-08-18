@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Employee;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "productioncompany_tbl")
@@ -25,30 +24,27 @@ public class ProductionCompany extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
     private Date foundedDate;
 
-    @Size(max = 255)
+        @Size(max = 255)
     private String location;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "productionCompany", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "productionCompany", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("productionCompany")
         private List<Movie> movies;
     
-    
-    @OneToMany(mappedBy = "productionCompany", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "productionCompany", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("productionCompany")
         private List<TVShow> tvShows;
     
-    
-    @OneToMany(mappedBy = "productionCompany", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "productionCompany", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("productionCompany")
         private List<Employee> staff;
     
 

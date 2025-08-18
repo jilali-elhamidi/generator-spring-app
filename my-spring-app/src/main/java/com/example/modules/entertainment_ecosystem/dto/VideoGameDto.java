@@ -1,5 +1,7 @@
 package com.example.modules.entertainment_ecosystem.dto;
 
+import com.example.modules.entertainment_ecosystem.model.Artist;
+import com.example.modules.entertainment_ecosystem.model.Publisher;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -37,8 +39,7 @@ import com.example.modules.entertainment_ecosystem.dtosimple.GameReviewUpvoteSim
 import com.example.modules.entertainment_ecosystem.dtosimple.GameReviewDownvoteSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.ContentRatingBoardSimpleDto;
-import com.example.modules.entertainment_ecosystem.model.Artist;
-import com.example.modules.entertainment_ecosystem.model.Publisher;
+
 
 
 @Data

@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "publisher_tbl")
@@ -25,28 +24,25 @@ public class Publisher extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 2, max = 100)
+        @NotNull@Size(min = 2, max = 100)
     private String name;
 
-    @Size(max = 255)
+        @Size(max = 255)
     private String website;
 
 
 // === Relations ===
 
-    
-    @OneToMany(mappedBy = "publisher", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "publisher", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("publisher")
         private List<Book> books;
     
-    
-    @OneToMany(mappedBy = "publisher", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "publisher", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("publisher")
         private List<Podcast> podcasts;
     
-    
-    @OneToMany(mappedBy = "publisher", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "publisher", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("publisher")
         private List<VideoGame> videoGames;
     
 

@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.DigitalAsset;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "license_tbl")
@@ -25,23 +24,22 @@ public class License extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull@Size(min = 10, max = 100)
+        @NotNull@Size(min = 10, max = 100)
     private String licenseKey;
 
-    @NotNull
+        @NotNull
     private Date startDate;
 
-    @NotNull
+        @NotNull
     private Date endDate;
 
 
 // === Relations ===
 
-    
     @OneToOne
-    @JoinColumn(name = "asset_id")
-    @JsonIgnoreProperties("license")
-    private DigitalAsset asset;
+            @JoinColumn(name = "asset_id")
+            @JsonIgnoreProperties("license")
+            private DigitalAsset asset;
             
 
 }

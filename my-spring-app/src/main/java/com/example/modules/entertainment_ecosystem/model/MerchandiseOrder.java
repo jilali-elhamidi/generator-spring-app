@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.MerchandiseOrderItem;import com.example.modules.entertainment_ecosystem.model.MerchandiseShipping;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "merchandiseorder_tbl")
@@ -25,32 +24,28 @@ public class MerchandiseOrder extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Date orderDate;
 
-    @NotNull
+        @NotNull
     private String status;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "user_id")
-        
+        @JsonIgnoreProperties("merchandiseOrders")
         private UserProfile user;
     
-    
-    
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
-        @JsonManagedReference
+    @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+        @JsonIgnoreProperties("order")
         private List<MerchandiseOrderItem> items;
     
-    
     @OneToOne
-    @JoinColumn(name = "shipping_id")
-    @JsonIgnoreProperties("order")
-    private MerchandiseShipping shippingDetails;
+            @JoinColumn(name = "shipping_id")
+            @JsonIgnoreProperties("order")
+            private MerchandiseShipping shippingDetails;
             
 
 }

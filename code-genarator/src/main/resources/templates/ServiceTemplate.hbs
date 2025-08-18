@@ -242,10 +242,16 @@ if (entityOpt.isEmpty()) return false;
 {{#each relationships}}
     {{#if (eq relationType "ManyToMany")}}
         if (entity.get{{capitalize name}}() != null) {
-        entity.get{{capitalize name}}().clear();
+        for ({{type}} item : new ArrayList<>(entity.get{{capitalize name}}())) {
+        {{#if inverseField}}
+            item.get{{capitalize inverseField}}().remove(entity); // retire côté inverse
+        {{/if}}
+        }
+        entity.get{{capitalize name}}().clear(); // puis vide côté courant
         }
     {{/if}}
 {{/each}}
+
 
 // --- Dissocier OneToOne ---
 {{#each relationships}}

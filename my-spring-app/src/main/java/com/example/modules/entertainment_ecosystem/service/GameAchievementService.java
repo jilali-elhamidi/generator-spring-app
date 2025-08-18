@@ -174,11 +174,15 @@ GameAchievement entity = entityOpt.get();
 
     
         if (entity.getEarnedBy() != null) {
-        entity.getEarnedBy().clear();
+        for (UserProfile item : new ArrayList<>(entity.getEarnedBy())) {
+        
+        }
+        entity.getEarnedBy().clear(); // puis vide côté courant
         }
     
 
     
+
 
 
 // --- Dissocier OneToOne ---

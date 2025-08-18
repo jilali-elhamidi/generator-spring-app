@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.Warehouse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "merchandiseinventory_tbl")
@@ -25,28 +24,24 @@ public class MerchandiseInventory extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Integer stockQuantity;
 
-    @NotNull
+        @NotNull
     private Date lastUpdated;
 
 
 // === Relations ===
 
-
     @OneToOne
     @JoinColumn(name = "merchandise_id") // clé étrangère
     @JsonIgnoreProperties("inventory")
     private Merchandise merchandiseItem;
-
-
-
-    @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "warehouse_id")
         
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "warehouse_id")
+        @JsonIgnoreProperties("inventoryItems")
         private Warehouse warehouse;
-    
     
 
 }

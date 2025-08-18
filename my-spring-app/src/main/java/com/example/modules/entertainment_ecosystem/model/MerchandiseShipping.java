@@ -12,8 +12,7 @@ import java.util.Date;
 import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.MerchandiseOrder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "merchandiseshipping_tbl")
@@ -25,29 +24,26 @@ public class MerchandiseShipping extends BaseEntity {
 
 // === Attributs simples ===
 
-    @NotNull
+        @NotNull
     private Date shippingDate;
 
-    @NotNull@Size(min = 2, max = 50)
+        @NotNull@Size(min = 2, max = 50)
     private String carrier;
 
-    @NotNull@Size(min = 5, max = 50)
+        @NotNull@Size(min = 5, max = 50)
     private String trackingNumber;
 
 
 // === Relations ===
 
-    
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "merchandiseItem_id")
-        
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "merchandise_id")
+        @JsonIgnoreProperties("shipments")
         private Merchandise merchandiseItem;
     
-    
-    
-    @OneToOne(mappedBy = "shippingDetails", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("shippingDetails")
-    private MerchandiseOrder order;
+    @OneToOne(mappedBy = "shippingDetails", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+            @JsonIgnoreProperties("shippingDetails")
+            private MerchandiseOrder order;
         
 
 }

@@ -2011,31 +2011,46 @@ UserProfile entity = entityOpt.get();
 
     
         if (entity.getWatchlistMovies() != null) {
-        entity.getWatchlistMovies().clear();
+        for (Movie item : new ArrayList<>(entity.getWatchlistMovies())) {
+        
+        }
+        entity.getWatchlistMovies().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getFavoriteArtists() != null) {
-        entity.getFavoriteArtists().clear();
+        for (Artist item : new ArrayList<>(entity.getFavoriteArtists())) {
+        
+        }
+        entity.getFavoriteArtists().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getFollowedUsers() != null) {
-        entity.getFollowedUsers().clear();
+        for (UserProfile item : new ArrayList<>(entity.getFollowedUsers())) {
+        
+        }
+        entity.getFollowedUsers().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getFollowingUsers() != null) {
-        entity.getFollowingUsers().clear();
+        for (UserProfile item : new ArrayList<>(entity.getFollowingUsers())) {
+        
+        }
+        entity.getFollowingUsers().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getFavoriteGenres() != null) {
-        entity.getFavoriteGenres().clear();
+        for (Genre item : new ArrayList<>(entity.getFavoriteGenres())) {
+        
+        }
+        entity.getFavoriteGenres().clear(); // puis vide côté courant
         }
     
 
@@ -2043,13 +2058,19 @@ UserProfile entity = entityOpt.get();
 
     
         if (entity.getWatchedEpisodes() != null) {
-        entity.getWatchedEpisodes().clear();
+        for (Episode item : new ArrayList<>(entity.getWatchedEpisodes())) {
+        
+        }
+        entity.getWatchedEpisodes().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getPlayedGames() != null) {
-        entity.getPlayedGames().clear();
+        for (VideoGame item : new ArrayList<>(entity.getPlayedGames())) {
+        
+        }
+        entity.getPlayedGames().clear(); // puis vide côté courant
         }
     
 
@@ -2063,25 +2084,37 @@ UserProfile entity = entityOpt.get();
 
     
         if (entity.getAttendedOnlineEvents() != null) {
-        entity.getAttendedOnlineEvents().clear();
+        for (OnlineEvent item : new ArrayList<>(entity.getAttendedOnlineEvents())) {
+        
+        }
+        entity.getAttendedOnlineEvents().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getOwnedMerchandise() != null) {
-        entity.getOwnedMerchandise().clear();
+        for (Merchandise item : new ArrayList<>(entity.getOwnedMerchandise())) {
+        
+        }
+        entity.getOwnedMerchandise().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getLibraryPodcasts() != null) {
-        entity.getLibraryPodcasts().clear();
+        for (Podcast item : new ArrayList<>(entity.getLibraryPodcasts())) {
+        
+        }
+        entity.getLibraryPodcasts().clear(); // puis vide côté courant
         }
     
 
     
         if (entity.getListenedMusic() != null) {
-        entity.getListenedMusic().clear();
+        for (MusicTrack item : new ArrayList<>(entity.getListenedMusic())) {
+        
+        }
+        entity.getListenedMusic().clear(); // puis vide côté courant
         }
     
 
@@ -2130,6 +2163,7 @@ UserProfile entity = entityOpt.get();
     
 
     
+
 
 
 // --- Dissocier OneToOne ---

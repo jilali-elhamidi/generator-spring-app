@@ -51,25 +51,32 @@ public class PaymentController {
         return ResponseEntity.created(location).body(paymentMapper.toDto(saved));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PaymentDto> updatePayment(
-            @PathVariable Long id,
-            @Valid @RequestBody PaymentDto paymentDto) {
+            @PutMapping("/{id}")
+            public ResponseEntity<PaymentDto> updatePayment(
+                @PathVariable Long id,
+                @RequestBody PaymentDto paymentDto) {
 
-        try {
-            Payment updatedEntity = paymentService.update(
-                    id,
-                    paymentMapper.toEntity(paymentDto)
-            );
-            return ResponseEntity.ok(paymentMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+                // Transformer le DTO en entity pour le service
+                Payment entityToUpdate = paymentMapper.toEntity(paymentDto);
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
-        paymentService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+                // Appel du service update
+                Payment updatedEntity = paymentService.update(id, entityToUpdate);
+
+                // Transformer l’entity mise à jour en DTO pour le retour
+                PaymentDto updatedDto = paymentMapper.toDto(updatedEntity);
+
+                return ResponseEntity.ok(updatedDto);
+                }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
+                    boolean deleted = paymentService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
 }

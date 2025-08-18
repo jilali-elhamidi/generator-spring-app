@@ -12,8 +12,7 @@ import java.time.LocalDateTime;
 {{#each relationships}}import com.example.modules.{{../module}}.model.{{type}};{{/each}}
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "{{entityNameLowercase}}_tbl")
@@ -25,47 +24,47 @@ public class {{entityName}} extends BaseEntity {
 
 // === Attributs simples ===
 {{#each fields~}}
-{{#if validation}}
-    {{#if validation.notBlank}}@NotBlank{{/if~}}
-    {{#if validation.notNull}}@NotNull{{/if~}}
-    {{#if validation.size~}}
-        {{#if validation.size.min~}}
-            {{#if validation.size.max}}@Size(min = {{validation.size.min}}, max = {{validation.size.max}}){{else}}@Size(min = {{validation.size.min}}){{/if~}}
-            {{else~}}
-            {{#if validation.size.max}}@Size(max = {{validation.size.max}}){{/if~}}
+    {{#if validation}}
+        {{#if validation.notBlank}}@NotBlank{{/if~}}
+        {{#if validation.notNull}}@NotNull{{/if~}}
+        {{#if validation.size~}}
+            {{#if validation.size.min~}}
+                {{#if validation.size.max}}@Size(min = {{validation.size.min}}, max = {{validation.size.max}}){{else}}@Size(min = {{validation.size.min}}){{/if~}}
+                {{else~}}
+                {{#if validation.size.max}}@Size(max = {{validation.size.max}}){{/if~}}
+            {{/if~}}
         {{/if~}}
-    {{/if~}}
-    {{#if validation.min}}@Min({{validation.min}}){{/if~}}
-    {{#if validation.max}}@Max({{validation.max}}){{/if~}}
-    {{#if validation.positive}}@Positive{{/if~}}
-    {{#if validation.email}}@Email{{/if~}}
-{{/if}}
+        {{#if validation.min}}@Min({{validation.min}}){{/if~}}
+        {{#if validation.max}}@Max({{validation.max}}){{/if~}}
+        {{#if validation.positive}}@Positive{{/if~}}
+        {{#if validation.email}}@Email{{/if~}}
+    {{/if}}
     private {{type}} {{name}};
 {{/each}}
 
 // === Relations ===
 {{#each relationships}}
-    {{#if (eq relationType "ManyToOne")}}
-        @ManyToOne(fetch = FetchType.EAGER)
-        @JoinColumn(name = "{{name}}_id")
-        {{#if jsonIgnore}}@JsonBackReference{{/if}}
+    {{#if (eq relationType "ManyToOne")~}}
+        @ManyToOne(fetch = FetchType.{{fetch}}, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+        @JoinColumn(name = "{{joinColumn}}")
+        @JsonIgnoreProperties("{{inverseField}}")
         private {{type}} {{name}};
-    {{/if}}
+    {{/if~}}
     {{#if (eq relationType "OneToMany")~}}
-        @OneToMany(mappedBy = "{{mappedBy}}", fetch = FetchType.{{fetch}})
-        @JsonManagedReference
+        @OneToMany(mappedBy = "{{mappedBy}}", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.{{fetch}})
+        @JsonIgnoreProperties("{{mappedBy}}")
         private List<{{type}}> {{name}};
     {{/if~}}
     {{#if (eq relationType "OneToOne")~}}
         {{#if owner~}}
             @OneToOne
-    @JoinColumn(name = "{{joinColumn}}")
-    @JsonIgnoreProperties("{{inverseField}}")
-    private {{type}} {{name}};
+            @JoinColumn(name = "{{joinColumn}}")
+            @JsonIgnoreProperties("{{inverseField}}")
+            private {{type}} {{name}};
             {{else~}}
-            @OneToOne(mappedBy = "{{mappedBy}}", fetch = FetchType.{{fetch}})
-    @JsonIgnoreProperties("{{inverseField}}")
-    private {{type}} {{name}};
+            @OneToOne(mappedBy = "{{mappedBy}}", fetch = FetchType.{{fetch}}, cascade = CascadeType.ALL)
+            @JsonIgnoreProperties("{{inverseField}}")
+            private {{type}} {{name}};
         {{/if~}}
     {{/if~}}
     {{#if (eq relationType "ManyToMany")~}}
@@ -79,7 +78,7 @@ public class {{entityName}} extends BaseEntity {
             {{else~}}
             @ManyToMany(mappedBy = "{{mappedBy}}", fetch = FetchType.{{fetch}})
             @JsonIgnoreProperties("{{inverseField}}")
-            private List<{{type}}> {{name}};
+            private List<{{type}}> {{name}} = new ArrayList<>();
         {{/if~}}
     {{/if~}}
 {{/each}}
