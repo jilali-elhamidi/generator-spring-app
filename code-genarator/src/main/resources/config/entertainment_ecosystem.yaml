@@ -1396,6 +1396,7 @@ entities:
       - name: subscriptions
         type: Subscription
         relationType: OneToMany
+        mappedBy: platform
         inverseField: platform
         fetch: LAZY
       - name: streamingService

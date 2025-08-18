@@ -44,7 +44,6 @@ public class GameReviewDownvote extends BaseEntity {
     @JoinColumn(name = "game_id")
     @JsonIgnoreProperties("gameReviewDownvotes")
     private VideoGame game;
-
-
+    
 
 }

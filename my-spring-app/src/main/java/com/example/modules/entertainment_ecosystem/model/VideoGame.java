@@ -13,8 +13,7 @@ import com.example.modules.entertainment_ecosystem.model.Genre;import com.exampl
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
-import com.example.modules.entertainment_ecosystem.model.Artist;
-import com.example.modules.entertainment_ecosystem.model.Publisher;
+
 @Entity
 @Table(name = "videogame_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

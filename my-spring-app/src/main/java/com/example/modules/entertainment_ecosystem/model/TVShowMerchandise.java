@@ -34,9 +34,9 @@ public class TVShowMerchandise extends BaseEntity {
 // === Relations ===
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "tv_show_id")
-    @JsonIgnoreProperties("tvShowMerchandise")
-    private TVShow tvShow;
+        @JoinColumn(name = "tv_show_id")
+        @JsonIgnoreProperties("tvShowMerchandise")
+        private TVShow tvShow;
     
 
 }
