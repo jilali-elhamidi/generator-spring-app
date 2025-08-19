@@ -172,6 +172,71 @@ public class MerchandiseService extends BaseService<Merchandise> {
         
     
 
+
+    
+
+    
+        if (merchandise.getRelatedMovies() != null
+        && !merchandise.getRelatedMovies().isEmpty()) {
+
+        List<Movie> attachedRelatedMovies = merchandise.getRelatedMovies().stream()
+        .map(item -> relatedMoviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
+        .toList();
+
+        merchandise.setRelatedMovies(attachedRelatedMovies);
+
+        // côté propriétaire (Movie → Merchandise)
+        attachedRelatedMovies.forEach(it -> it.getRelatedMerchandise().add(merchandise));
+        }
+    
+
+    
+        if (merchandise.getRelatedShows() != null
+        && !merchandise.getRelatedShows().isEmpty()) {
+
+        List<TVShow> attachedRelatedShows = merchandise.getRelatedShows().stream()
+        .map(item -> relatedShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
+        .toList();
+
+        merchandise.setRelatedShows(attachedRelatedShows);
+
+        // côté propriétaire (TVShow → Merchandise)
+        attachedRelatedShows.forEach(it -> it.getRelatedMerchandise().add(merchandise));
+        }
+    
+
+    
+        if (merchandise.getOwnedByUsers() != null
+        && !merchandise.getOwnedByUsers().isEmpty()) {
+
+        List<UserProfile> attachedOwnedByUsers = merchandise.getOwnedByUsers().stream()
+        .map(item -> ownedByUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        merchandise.setOwnedByUsers(attachedOwnedByUsers);
+
+        // côté propriétaire (UserProfile → Merchandise)
+        attachedOwnedByUsers.forEach(it -> it.getOwnedMerchandise().add(merchandise));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
     if (merchandise.getArtist() != null
         && merchandise.getArtist().getId() != null) {
         Artist existingArtist = artistRepository.findById(
@@ -265,32 +330,56 @@ public class MerchandiseService extends BaseService<Merchandise> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (merchandiseRequest.getRelatedMovies() != null) {
-            existing.getRelatedMovies().clear();
-            List<Movie> relatedMoviesList = merchandiseRequest.getRelatedMovies().stream()
-                .map(item -> relatedMoviesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Movie not found")))
-                .collect(Collectors.toList());
+        existing.getRelatedMovies().clear();
+
+        List<Movie> relatedMoviesList = merchandiseRequest.getRelatedMovies().stream()
+        .map(item -> relatedMoviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found")))
+        .collect(Collectors.toList());
+
         existing.getRelatedMovies().addAll(relatedMoviesList);
-        }
 
+        // Mettre à jour le côté inverse
+        relatedMoviesList.forEach(it -> {
+        if (!it.getRelatedMerchandise().contains(existing)) {
+        it.getRelatedMerchandise().add(existing);
+        }
+        });
+        }
         if (merchandiseRequest.getRelatedShows() != null) {
-            existing.getRelatedShows().clear();
-            List<TVShow> relatedShowsList = merchandiseRequest.getRelatedShows().stream()
-                .map(item -> relatedShowsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("TVShow not found")))
-                .collect(Collectors.toList());
-        existing.getRelatedShows().addAll(relatedShowsList);
-        }
+        existing.getRelatedShows().clear();
 
+        List<TVShow> relatedShowsList = merchandiseRequest.getRelatedShows().stream()
+        .map(item -> relatedShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found")))
+        .collect(Collectors.toList());
+
+        existing.getRelatedShows().addAll(relatedShowsList);
+
+        // Mettre à jour le côté inverse
+        relatedShowsList.forEach(it -> {
+        if (!it.getRelatedMerchandise().contains(existing)) {
+        it.getRelatedMerchandise().add(existing);
+        }
+        });
+        }
         if (merchandiseRequest.getOwnedByUsers() != null) {
-            existing.getOwnedByUsers().clear();
-            List<UserProfile> ownedByUsersList = merchandiseRequest.getOwnedByUsers().stream()
-                .map(item -> ownedByUsersRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getOwnedByUsers().clear();
+
+        List<UserProfile> ownedByUsersList = merchandiseRequest.getOwnedByUsers().stream()
+        .map(item -> ownedByUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getOwnedByUsers().addAll(ownedByUsersList);
+
+        // Mettre à jour le côté inverse
+        ownedByUsersList.forEach(it -> {
+        if (!it.getOwnedMerchandise().contains(existing)) {
+        it.getOwnedMerchandise().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

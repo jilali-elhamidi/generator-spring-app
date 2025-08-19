@@ -32,6 +32,23 @@ public class GamePlatformService extends BaseService<GamePlatform> {
 
     
 
+
+    
+        if (gameplatform.getVideoGames() != null
+        && !gameplatform.getVideoGames().isEmpty()) {
+
+        List<VideoGame> attachedVideoGames = gameplatform.getVideoGames().stream()
+        .map(item -> videoGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId())))
+        .toList();
+
+        gameplatform.setVideoGames(attachedVideoGames);
+
+        // côté propriétaire (VideoGame → GamePlatform)
+        attachedVideoGames.forEach(it -> it.getPlatforms().add(gameplatform));
+        }
+    
+
     
 
         return gameplatformRepository.save(gameplatform);
@@ -48,14 +65,22 @@ public class GamePlatformService extends BaseService<GamePlatform> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (gameplatformRequest.getVideoGames() != null) {
-            existing.getVideoGames().clear();
-            List<VideoGame> videoGamesList = gameplatformRequest.getVideoGames().stream()
-                .map(item -> videoGamesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("VideoGame not found")))
-                .collect(Collectors.toList());
+        existing.getVideoGames().clear();
+
+        List<VideoGame> videoGamesList = gameplatformRequest.getVideoGames().stream()
+        .map(item -> videoGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found")))
+        .collect(Collectors.toList());
+
         existing.getVideoGames().addAll(videoGamesList);
+
+        // Mettre à jour le côté inverse
+        videoGamesList.forEach(it -> {
+        if (!it.getPlatforms().contains(existing)) {
+        it.getPlatforms().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

@@ -70,6 +70,15 @@ public class ForumPostService extends BaseService<ForumPost> {
 
     
 
+
+    
+
+    
+
+    
+
+    
+
     if (forumpost.getAuthor() != null
         && forumpost.getAuthor().getId() != null) {
         UserProfile existingAuthor = authorRepository.findById(

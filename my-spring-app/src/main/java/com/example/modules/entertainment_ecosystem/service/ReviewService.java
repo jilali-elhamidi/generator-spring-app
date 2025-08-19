@@ -134,6 +134,23 @@ public class ReviewService extends BaseService<Review> {
         
     
 
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
     if (review.getUser() != null
         && review.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

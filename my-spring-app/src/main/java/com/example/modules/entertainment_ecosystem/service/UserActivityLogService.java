@@ -32,6 +32,9 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
 
     
 
+
+    
+
     if (useractivitylog.getUser() != null
         && useractivitylog.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

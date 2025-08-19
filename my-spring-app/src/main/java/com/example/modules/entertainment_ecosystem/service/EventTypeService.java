@@ -52,6 +52,9 @@ public class EventTypeService extends BaseService<EventType> {
         
     
 
+
+    
+
     
 
         return eventtypeRepository.save(eventtype);

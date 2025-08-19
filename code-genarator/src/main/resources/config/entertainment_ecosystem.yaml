@@ -252,7 +252,7 @@ entities:
         mappedBy: user
         inverseField: user
         fetch: LAZY
-      - name: UserRole
+      - name: userRoles
         type: UserRole
         relationType: ManyToMany
         joinTable: user_roles
@@ -260,6 +260,7 @@ entities:
         inverseJoinColumns: role_id
         fetch: LAZY
         owner: true
+        inverseField: users
       - name: followers
         type: UserFollower
         relationType: OneToMany
@@ -341,6 +342,13 @@ entities:
         fetch: LAZY
         owner: true
         inverseField: enabledForUsers
+      - name: messageThreads
+        type: MessageThread
+        relationType: ManyToMany
+        mappedBy: participants
+        fetch: LAZY
+        owner: false
+        inverseField: participants
 
   - name: UserWallet
     fields:
@@ -1003,12 +1011,15 @@ entities:
         joinColumn: artist_id
         inverseField: composedMusic
         fetch: EAGER
-      - name: genre
+      - name: genres
         type: Genre
-        relationType: ManyToOne
-        joinColumn: genre_id
+        relationType: ManyToMany
+        joinTable: music_track_genres
+        joinColumns: track_id
+        inverseJoinColumns: genre_id
+        fetch: LAZY
+        owner: true
         inverseField: musicTracks
-        fetch: EAGER
       - name: listenedByUsers
         type: UserProfile
         relationType: ManyToMany
@@ -1085,6 +1096,7 @@ entities:
         joinTable: album_genres
         joinColumns: album_id
         inverseJoinColumns: genre_id
+        inverseField: Albums
         fetch: EAGER
         owner: true
       - name: musicLabel
@@ -1460,6 +1472,7 @@ entities:
         mappedBy: platforms
         fetch: LAZY
         owner: false
+        inverseField: platforms
       - name: tvShows
         type: TVShow
         relationType: ManyToMany
@@ -1469,6 +1482,7 @@ entities:
         mappedBy: platforms
         fetch: LAZY
         owner: false
+        inverseField: platforms
       - name: subscriptions
         type: Subscription
         relationType: OneToMany
@@ -1598,6 +1612,7 @@ entities:
         joinTable: tvshow_genres
         joinColumns: genre_id
         inverseJoinColumns: tvshow_id
+        inverseField: genres
         mappedBy: genres
         fetch: LAZY
         owner: false
@@ -1608,6 +1623,7 @@ entities:
         joinColumns: genre_id
         inverseJoinColumns: book_id
         mappedBy: genres
+        inverseField: genres
         fetch: LAZY
         owner: false
       - name: musicTracks
@@ -1616,9 +1632,10 @@ entities:
         joinTable: genre_music_tracks
         joinColumns: genre_id
         inverseJoinColumns: track_id
+        inverseField: genres
         mappedBy: genres
         fetch: LAZY
-        owner: true
+        owner: false
       - name: favoriteUsers
         type: UserProfile
         relationType: ManyToMany
@@ -1636,6 +1653,7 @@ entities:
         joinColumns: genre_id
         inverseJoinColumns: video_game_id
         mappedBy: genres
+        inverseField: genres
         fetch: LAZY
         owner: false
       - name: podcasts
@@ -1648,7 +1666,13 @@ entities:
         fetch: LAZY
         owner: true
         inverseField: genres
-
+      - name: albums
+        type: Album
+        relationType: ManyToMany
+        mappedBy: genres # This must match the field name in your Album entity
+        fetch: LAZY
+        owner: false
+        inverseField: genres
   - name: VideoGame
     fields:
       - name: title
@@ -3455,6 +3479,7 @@ entities:
         joinColumns: flag_id
         inverseJoinColumns: user_id
         mappedBy: enabledFeatureFlags
+        inverseField: enabledFeatureFlags
         fetch: LAZY
         owner: false
 
@@ -3587,12 +3612,10 @@ entities:
       - name: users
         type: UserProfile
         relationType: ManyToMany
-        joinTable: user_roles
-        joinColumns: role_id
-        inverseJoinColumns: user_id
-        mappedBy: UserRole
+        mappedBy: userRoles
         fetch: LAZY
         owner: false
+        inverseField: userRoles
 
   - name: ContentTag
     fields:
@@ -4214,6 +4237,7 @@ entities:
         joinTable: message_thread_participants
         joinColumns: thread_id
         inverseJoinColumns: user_id
+        inverseField: MessageThreads
         fetch: LAZY
         owner: true
       - name: messages

@@ -87,6 +87,8 @@ import com.example.modules.entertainment_ecosystem.model.UserMessage;
 import com.example.modules.entertainment_ecosystem.repository.UserMessageRepository;
 import com.example.modules.entertainment_ecosystem.model.FeatureFlag;
 import com.example.modules.entertainment_ecosystem.repository.FeatureFlagRepository;
+import com.example.modules.entertainment_ecosystem.model.MessageThread;
+import com.example.modules.entertainment_ecosystem.repository.MessageThreadRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,7 +129,7 @@ public class UserProfileService extends BaseService<UserProfile> {
     private final ReviewLikeRepository likedReviewsRepository;
     private final UserActivityLogRepository activityLogsRepository;
     private final UserSettingRepository settingsRepository;
-    private final UserRoleRepository UserRoleRepository;
+    private final UserRoleRepository userRolesRepository;
     private final UserFollowerRepository followersRepository;
     private final UserFollowerRepository followingRepository;
     private final UserAchievementRepository userAchievementsRepository;
@@ -141,8 +143,9 @@ public class UserProfileService extends BaseService<UserProfile> {
     private final UserMessageRepository sentMessagesRepository;
     private final UserMessageRepository receivedMessagesRepository;
     private final FeatureFlagRepository enabledFeatureFlagsRepository;
+    private final MessageThreadRepository messageThreadsRepository;
 
-    public UserProfileService(UserProfileRepository repository,ReviewRepository reviewsRepository,MovieRepository watchlistMoviesRepository,ArtistRepository favoriteArtistsRepository,UserProfileRepository followedUsersRepository,UserProfileRepository followingUsersRepository,GenreRepository favoriteGenresRepository,SubscriptionRepository subscriptionsRepository,EpisodeRepository watchedEpisodesRepository,VideoGameRepository playedGamesRepository,ForumThreadRepository forumThreadsRepository,ForumPostRepository forumPostsRepository,AchievementRepository achievementsRepository,OnlineEventRepository hostedOnlineEventsRepository,OnlineEventRepository attendedOnlineEventsRepository,MerchandiseRepository ownedMerchandiseRepository,PodcastRepository libraryPodcastsRepository,MusicTrackRepository listenedMusicRepository,PlaylistRepository playlistsRepository,UserWalletRepository walletRepository,DigitalPurchaseRepository digitalPurchasesRepository,GameSessionRepository gameSessionsRepository,GameReviewCommentRepository gameReviewCommentsRepository,UserPlaylistRepository userPlaylistsRepository,UserPlaylistItemRepository userPlaylistItemsRepository,ReviewRatingRepository givenRatingsRepository,ReviewLikeRepository likedReviewsRepository,UserActivityLogRepository activityLogsRepository,UserSettingRepository settingsRepository,UserRoleRepository UserRoleRepository,UserFollowerRepository followersRepository,UserFollowerRepository followingRepository,UserAchievementRepository userAchievementsRepository,NotificationRepository notificationsRepository,MerchandiseReviewRepository merchandiseReviewsRepository,UserPreferenceRepository preferencesRepository,MerchandiseSaleRepository merchandiseSalesRepository,GamePlaySessionRepository gamePlaySessionsRepository,GameReviewUpvoteRepository gameReviewUpvotesRepository,GameReviewDownvoteRepository gameReviewDownvotesRepository,UserMessageRepository sentMessagesRepository,UserMessageRepository receivedMessagesRepository,FeatureFlagRepository enabledFeatureFlagsRepository)
+    public UserProfileService(UserProfileRepository repository,ReviewRepository reviewsRepository,MovieRepository watchlistMoviesRepository,ArtistRepository favoriteArtistsRepository,UserProfileRepository followedUsersRepository,UserProfileRepository followingUsersRepository,GenreRepository favoriteGenresRepository,SubscriptionRepository subscriptionsRepository,EpisodeRepository watchedEpisodesRepository,VideoGameRepository playedGamesRepository,ForumThreadRepository forumThreadsRepository,ForumPostRepository forumPostsRepository,AchievementRepository achievementsRepository,OnlineEventRepository hostedOnlineEventsRepository,OnlineEventRepository attendedOnlineEventsRepository,MerchandiseRepository ownedMerchandiseRepository,PodcastRepository libraryPodcastsRepository,MusicTrackRepository listenedMusicRepository,PlaylistRepository playlistsRepository,UserWalletRepository walletRepository,DigitalPurchaseRepository digitalPurchasesRepository,GameSessionRepository gameSessionsRepository,GameReviewCommentRepository gameReviewCommentsRepository,UserPlaylistRepository userPlaylistsRepository,UserPlaylistItemRepository userPlaylistItemsRepository,ReviewRatingRepository givenRatingsRepository,ReviewLikeRepository likedReviewsRepository,UserActivityLogRepository activityLogsRepository,UserSettingRepository settingsRepository,UserRoleRepository userRolesRepository,UserFollowerRepository followersRepository,UserFollowerRepository followingRepository,UserAchievementRepository userAchievementsRepository,NotificationRepository notificationsRepository,MerchandiseReviewRepository merchandiseReviewsRepository,UserPreferenceRepository preferencesRepository,MerchandiseSaleRepository merchandiseSalesRepository,GamePlaySessionRepository gamePlaySessionsRepository,GameReviewUpvoteRepository gameReviewUpvotesRepository,GameReviewDownvoteRepository gameReviewDownvotesRepository,UserMessageRepository sentMessagesRepository,UserMessageRepository receivedMessagesRepository,FeatureFlagRepository enabledFeatureFlagsRepository,MessageThreadRepository messageThreadsRepository)
     {
         super(repository);
         this.userprofileRepository = repository;
@@ -174,7 +177,7 @@ public class UserProfileService extends BaseService<UserProfile> {
         this.likedReviewsRepository = likedReviewsRepository;
         this.activityLogsRepository = activityLogsRepository;
         this.settingsRepository = settingsRepository;
-        this.UserRoleRepository = UserRoleRepository;
+        this.userRolesRepository = userRolesRepository;
         this.followersRepository = followersRepository;
         this.followingRepository = followingRepository;
         this.userAchievementsRepository = userAchievementsRepository;
@@ -188,6 +191,7 @@ public class UserProfileService extends BaseService<UserProfile> {
         this.sentMessagesRepository = sentMessagesRepository;
         this.receivedMessagesRepository = receivedMessagesRepository;
         this.enabledFeatureFlagsRepository = enabledFeatureFlagsRepository;
+        this.messageThreadsRepository = messageThreadsRepository;
     }
 
     @Override
@@ -839,6 +843,292 @@ public class UserProfileService extends BaseService<UserProfile> {
     
 
     
+
+
+    
+
+    
+        if (userprofile.getWatchlistMovies() != null
+        && !userprofile.getWatchlistMovies().isEmpty()) {
+
+        List<Movie> attachedWatchlistMovies = userprofile.getWatchlistMovies().stream()
+        .map(item -> watchlistMoviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setWatchlistMovies(attachedWatchlistMovies);
+
+        // côté propriétaire (Movie → UserProfile)
+        attachedWatchlistMovies.forEach(it -> it.getWatchlistUsers().add(userprofile));
+        }
+    
+
+    
+        if (userprofile.getFavoriteArtists() != null
+        && !userprofile.getFavoriteArtists().isEmpty()) {
+
+        List<Artist> attachedFavoriteArtists = userprofile.getFavoriteArtists().stream()
+        .map(item -> favoriteArtistsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setFavoriteArtists(attachedFavoriteArtists);
+
+        // côté propriétaire (Artist → UserProfile)
+        attachedFavoriteArtists.forEach(it -> it.getFavoriteArtists().add(userprofile));
+        }
+    
+
+    
+        if (userprofile.getFollowedUsers() != null
+        && !userprofile.getFollowedUsers().isEmpty()) {
+
+        List<UserProfile> attachedFollowedUsers = userprofile.getFollowedUsers().stream()
+        .map(item -> followedUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setFollowedUsers(attachedFollowedUsers);
+
+        // côté propriétaire (UserProfile → UserProfile)
+        attachedFollowedUsers.forEach(it -> it.getFollowingUsers().add(userprofile));
+        }
+    
+
+    
+        if (userprofile.getFollowingUsers() != null
+        && !userprofile.getFollowingUsers().isEmpty()) {
+
+        List<UserProfile> attachedFollowingUsers = userprofile.getFollowingUsers().stream()
+        .map(item -> followingUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setFollowingUsers(attachedFollowingUsers);
+
+        // côté propriétaire (UserProfile → UserProfile)
+        attachedFollowingUsers.forEach(it -> it.getFollowedUsers().add(userprofile));
+        }
+    
+
+    
+        if (userprofile.getFavoriteGenres() != null
+        && !userprofile.getFavoriteGenres().isEmpty()) {
+
+        List<Genre> attachedFavoriteGenres = userprofile.getFavoriteGenres().stream()
+        .map(item -> favoriteGenresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setFavoriteGenres(attachedFavoriteGenres);
+
+        // côté propriétaire (Genre → UserProfile)
+        attachedFavoriteGenres.forEach(it -> it.getFavoriteUsers().add(userprofile));
+        }
+    
+
+    
+
+    
+        if (userprofile.getWatchedEpisodes() != null
+        && !userprofile.getWatchedEpisodes().isEmpty()) {
+
+        List<Episode> attachedWatchedEpisodes = userprofile.getWatchedEpisodes().stream()
+        .map(item -> watchedEpisodesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Episode not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setWatchedEpisodes(attachedWatchedEpisodes);
+
+        // côté propriétaire (Episode → UserProfile)
+        attachedWatchedEpisodes.forEach(it -> it.getWatchedByUsers().add(userprofile));
+        }
+    
+
+    
+        if (userprofile.getPlayedGames() != null
+        && !userprofile.getPlayedGames().isEmpty()) {
+
+        List<VideoGame> attachedPlayedGames = userprofile.getPlayedGames().stream()
+        .map(item -> playedGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setPlayedGames(attachedPlayedGames);
+
+        // côté propriétaire (VideoGame → UserProfile)
+        attachedPlayedGames.forEach(it -> it.getPlayedBy().add(userprofile));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (userprofile.getAttendedOnlineEvents() != null
+        && !userprofile.getAttendedOnlineEvents().isEmpty()) {
+
+        List<OnlineEvent> attachedAttendedOnlineEvents = userprofile.getAttendedOnlineEvents().stream()
+        .map(item -> attendedOnlineEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("OnlineEvent not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setAttendedOnlineEvents(attachedAttendedOnlineEvents);
+
+        // côté propriétaire (OnlineEvent → UserProfile)
+        attachedAttendedOnlineEvents.forEach(it -> it.getAttendees().add(userprofile));
+        }
+    
+
+    
+        if (userprofile.getOwnedMerchandise() != null
+        && !userprofile.getOwnedMerchandise().isEmpty()) {
+
+        List<Merchandise> attachedOwnedMerchandise = userprofile.getOwnedMerchandise().stream()
+        .map(item -> ownedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setOwnedMerchandise(attachedOwnedMerchandise);
+
+        // côté propriétaire (Merchandise → UserProfile)
+        attachedOwnedMerchandise.forEach(it -> it.getOwnedByUsers().add(userprofile));
+        }
+    
+
+    
+        if (userprofile.getLibraryPodcasts() != null
+        && !userprofile.getLibraryPodcasts().isEmpty()) {
+
+        List<Podcast> attachedLibraryPodcasts = userprofile.getLibraryPodcasts().stream()
+        .map(item -> libraryPodcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setLibraryPodcasts(attachedLibraryPodcasts);
+
+        // côté propriétaire (Podcast → UserProfile)
+        attachedLibraryPodcasts.forEach(it -> it.getListeners().add(userprofile));
+        }
+    
+
+    
+        if (userprofile.getListenedMusic() != null
+        && !userprofile.getListenedMusic().isEmpty()) {
+
+        List<MusicTrack> attachedListenedMusic = userprofile.getListenedMusic().stream()
+        .map(item -> listenedMusicRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicTrack not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setListenedMusic(attachedListenedMusic);
+
+        // côté propriétaire (MusicTrack → UserProfile)
+        attachedListenedMusic.forEach(it -> it.getListenedByUsers().add(userprofile));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (userprofile.getUserRoles() != null
+        && !userprofile.getUserRoles().isEmpty()) {
+
+        List<UserRole> attachedUserRoles = userprofile.getUserRoles().stream()
+        .map(item -> userRolesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserRole not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setUserRoles(attachedUserRoles);
+
+        // côté propriétaire (UserRole → UserProfile)
+        attachedUserRoles.forEach(it -> it.getUsers().add(userprofile));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (userprofile.getEnabledFeatureFlags() != null
+        && !userprofile.getEnabledFeatureFlags().isEmpty()) {
+
+        List<FeatureFlag> attachedEnabledFeatureFlags = userprofile.getEnabledFeatureFlags().stream()
+        .map(item -> enabledFeatureFlagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("FeatureFlag not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setEnabledFeatureFlags(attachedEnabledFeatureFlags);
+
+        // côté propriétaire (FeatureFlag → UserProfile)
+        attachedEnabledFeatureFlags.forEach(it -> it.getEnabledForUsers().add(userprofile));
+        }
+    
+
+    
+        if (userprofile.getMessageThreads() != null
+        && !userprofile.getMessageThreads().isEmpty()) {
+
+        List<MessageThread> attachedMessageThreads = userprofile.getMessageThreads().stream()
+        .map(item -> messageThreadsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MessageThread not found with id " + item.getId())))
+        .toList();
+
+        userprofile.setMessageThreads(attachedMessageThreads);
+
+        // côté propriétaire (MessageThread → UserProfile)
+        attachedMessageThreads.forEach(it -> it.getParticipants().add(userprofile));
+        }
+    
+
+    
+    
     
     
     
@@ -914,122 +1204,243 @@ public class UserProfileService extends BaseService<UserProfile> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (userprofileRequest.getWatchlistMovies() != null) {
-            existing.getWatchlistMovies().clear();
-            List<Movie> watchlistMoviesList = userprofileRequest.getWatchlistMovies().stream()
-                .map(item -> watchlistMoviesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Movie not found")))
-                .collect(Collectors.toList());
+        existing.getWatchlistMovies().clear();
+
+        List<Movie> watchlistMoviesList = userprofileRequest.getWatchlistMovies().stream()
+        .map(item -> watchlistMoviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found")))
+        .collect(Collectors.toList());
+
         existing.getWatchlistMovies().addAll(watchlistMoviesList);
-        }
 
+        // Mettre à jour le côté inverse
+        watchlistMoviesList.forEach(it -> {
+        if (!it.getWatchlistUsers().contains(existing)) {
+        it.getWatchlistUsers().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getFavoriteArtists() != null) {
-            existing.getFavoriteArtists().clear();
-            List<Artist> favoriteArtistsList = userprofileRequest.getFavoriteArtists().stream()
-                .map(item -> favoriteArtistsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Artist not found")))
-                .collect(Collectors.toList());
+        existing.getFavoriteArtists().clear();
+
+        List<Artist> favoriteArtistsList = userprofileRequest.getFavoriteArtists().stream()
+        .map(item -> favoriteArtistsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found")))
+        .collect(Collectors.toList());
+
         existing.getFavoriteArtists().addAll(favoriteArtistsList);
-        }
 
+        // Mettre à jour le côté inverse
+        favoriteArtistsList.forEach(it -> {
+        if (!it.getFavoriteArtists().contains(existing)) {
+        it.getFavoriteArtists().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getFollowedUsers() != null) {
-            existing.getFollowedUsers().clear();
-            List<UserProfile> followedUsersList = userprofileRequest.getFollowedUsers().stream()
-                .map(item -> followedUsersRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getFollowedUsers().clear();
+
+        List<UserProfile> followedUsersList = userprofileRequest.getFollowedUsers().stream()
+        .map(item -> followedUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getFollowedUsers().addAll(followedUsersList);
-        }
 
+        // Mettre à jour le côté inverse
+        followedUsersList.forEach(it -> {
+        if (!it.getFollowingUsers().contains(existing)) {
+        it.getFollowingUsers().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getFollowingUsers() != null) {
-            existing.getFollowingUsers().clear();
-            List<UserProfile> followingUsersList = userprofileRequest.getFollowingUsers().stream()
-                .map(item -> followingUsersRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getFollowingUsers().clear();
+
+        List<UserProfile> followingUsersList = userprofileRequest.getFollowingUsers().stream()
+        .map(item -> followingUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getFollowingUsers().addAll(followingUsersList);
-        }
 
+        // Mettre à jour le côté inverse
+        followingUsersList.forEach(it -> {
+        if (!it.getFollowedUsers().contains(existing)) {
+        it.getFollowedUsers().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getFavoriteGenres() != null) {
-            existing.getFavoriteGenres().clear();
-            List<Genre> favoriteGenresList = userprofileRequest.getFavoriteGenres().stream()
-                .map(item -> favoriteGenresRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Genre not found")))
-                .collect(Collectors.toList());
+        existing.getFavoriteGenres().clear();
+
+        List<Genre> favoriteGenresList = userprofileRequest.getFavoriteGenres().stream()
+        .map(item -> favoriteGenresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found")))
+        .collect(Collectors.toList());
+
         existing.getFavoriteGenres().addAll(favoriteGenresList);
-        }
 
+        // Mettre à jour le côté inverse
+        favoriteGenresList.forEach(it -> {
+        if (!it.getFavoriteUsers().contains(existing)) {
+        it.getFavoriteUsers().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getWatchedEpisodes() != null) {
-            existing.getWatchedEpisodes().clear();
-            List<Episode> watchedEpisodesList = userprofileRequest.getWatchedEpisodes().stream()
-                .map(item -> watchedEpisodesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Episode not found")))
-                .collect(Collectors.toList());
+        existing.getWatchedEpisodes().clear();
+
+        List<Episode> watchedEpisodesList = userprofileRequest.getWatchedEpisodes().stream()
+        .map(item -> watchedEpisodesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Episode not found")))
+        .collect(Collectors.toList());
+
         existing.getWatchedEpisodes().addAll(watchedEpisodesList);
-        }
 
+        // Mettre à jour le côté inverse
+        watchedEpisodesList.forEach(it -> {
+        if (!it.getWatchedByUsers().contains(existing)) {
+        it.getWatchedByUsers().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getPlayedGames() != null) {
-            existing.getPlayedGames().clear();
-            List<VideoGame> playedGamesList = userprofileRequest.getPlayedGames().stream()
-                .map(item -> playedGamesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("VideoGame not found")))
-                .collect(Collectors.toList());
+        existing.getPlayedGames().clear();
+
+        List<VideoGame> playedGamesList = userprofileRequest.getPlayedGames().stream()
+        .map(item -> playedGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found")))
+        .collect(Collectors.toList());
+
         existing.getPlayedGames().addAll(playedGamesList);
-        }
 
+        // Mettre à jour le côté inverse
+        playedGamesList.forEach(it -> {
+        if (!it.getPlayedBy().contains(existing)) {
+        it.getPlayedBy().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getAttendedOnlineEvents() != null) {
-            existing.getAttendedOnlineEvents().clear();
-            List<OnlineEvent> attendedOnlineEventsList = userprofileRequest.getAttendedOnlineEvents().stream()
-                .map(item -> attendedOnlineEventsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("OnlineEvent not found")))
-                .collect(Collectors.toList());
+        existing.getAttendedOnlineEvents().clear();
+
+        List<OnlineEvent> attendedOnlineEventsList = userprofileRequest.getAttendedOnlineEvents().stream()
+        .map(item -> attendedOnlineEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("OnlineEvent not found")))
+        .collect(Collectors.toList());
+
         existing.getAttendedOnlineEvents().addAll(attendedOnlineEventsList);
-        }
 
+        // Mettre à jour le côté inverse
+        attendedOnlineEventsList.forEach(it -> {
+        if (!it.getAttendees().contains(existing)) {
+        it.getAttendees().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getOwnedMerchandise() != null) {
-            existing.getOwnedMerchandise().clear();
-            List<Merchandise> ownedMerchandiseList = userprofileRequest.getOwnedMerchandise().stream()
-                .map(item -> ownedMerchandiseRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Merchandise not found")))
-                .collect(Collectors.toList());
+        existing.getOwnedMerchandise().clear();
+
+        List<Merchandise> ownedMerchandiseList = userprofileRequest.getOwnedMerchandise().stream()
+        .map(item -> ownedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found")))
+        .collect(Collectors.toList());
+
         existing.getOwnedMerchandise().addAll(ownedMerchandiseList);
-        }
 
+        // Mettre à jour le côté inverse
+        ownedMerchandiseList.forEach(it -> {
+        if (!it.getOwnedByUsers().contains(existing)) {
+        it.getOwnedByUsers().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getLibraryPodcasts() != null) {
-            existing.getLibraryPodcasts().clear();
-            List<Podcast> libraryPodcastsList = userprofileRequest.getLibraryPodcasts().stream()
-                .map(item -> libraryPodcastsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Podcast not found")))
-                .collect(Collectors.toList());
+        existing.getLibraryPodcasts().clear();
+
+        List<Podcast> libraryPodcastsList = userprofileRequest.getLibraryPodcasts().stream()
+        .map(item -> libraryPodcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found")))
+        .collect(Collectors.toList());
+
         existing.getLibraryPodcasts().addAll(libraryPodcastsList);
-        }
 
+        // Mettre à jour le côté inverse
+        libraryPodcastsList.forEach(it -> {
+        if (!it.getListeners().contains(existing)) {
+        it.getListeners().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getListenedMusic() != null) {
-            existing.getListenedMusic().clear();
-            List<MusicTrack> listenedMusicList = userprofileRequest.getListenedMusic().stream()
-                .map(item -> listenedMusicRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("MusicTrack not found")))
-                .collect(Collectors.toList());
+        existing.getListenedMusic().clear();
+
+        List<MusicTrack> listenedMusicList = userprofileRequest.getListenedMusic().stream()
+        .map(item -> listenedMusicRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicTrack not found")))
+        .collect(Collectors.toList());
+
         existing.getListenedMusic().addAll(listenedMusicList);
-        }
 
-        if (userprofileRequest.getUserRole() != null) {
-            existing.getUserRole().clear();
-            List<UserRole> UserRoleList = userprofileRequest.getUserRole().stream()
-                .map(item -> UserRoleRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserRole not found")))
-                .collect(Collectors.toList());
-        existing.getUserRole().addAll(UserRoleList);
+        // Mettre à jour le côté inverse
+        listenedMusicList.forEach(it -> {
+        if (!it.getListenedByUsers().contains(existing)) {
+        it.getListenedByUsers().add(existing);
         }
+        });
+        }
+        if (userprofileRequest.getUserRoles() != null) {
+        existing.getUserRoles().clear();
 
+        List<UserRole> userRolesList = userprofileRequest.getUserRoles().stream()
+        .map(item -> userRolesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserRole not found")))
+        .collect(Collectors.toList());
+
+        existing.getUserRoles().addAll(userRolesList);
+
+        // Mettre à jour le côté inverse
+        userRolesList.forEach(it -> {
+        if (!it.getUsers().contains(existing)) {
+        it.getUsers().add(existing);
+        }
+        });
+        }
         if (userprofileRequest.getEnabledFeatureFlags() != null) {
-            existing.getEnabledFeatureFlags().clear();
-            List<FeatureFlag> enabledFeatureFlagsList = userprofileRequest.getEnabledFeatureFlags().stream()
-                .map(item -> enabledFeatureFlagsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("FeatureFlag not found")))
-                .collect(Collectors.toList());
+        existing.getEnabledFeatureFlags().clear();
+
+        List<FeatureFlag> enabledFeatureFlagsList = userprofileRequest.getEnabledFeatureFlags().stream()
+        .map(item -> enabledFeatureFlagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("FeatureFlag not found")))
+        .collect(Collectors.toList());
+
         existing.getEnabledFeatureFlags().addAll(enabledFeatureFlagsList);
+
+        // Mettre à jour le côté inverse
+        enabledFeatureFlagsList.forEach(it -> {
+        if (!it.getEnabledForUsers().contains(existing)) {
+        it.getEnabledForUsers().add(existing);
+        }
+        });
+        }
+        if (userprofileRequest.getMessageThreads() != null) {
+        existing.getMessageThreads().clear();
+
+        List<MessageThread> messageThreadsList = userprofileRequest.getMessageThreads().stream()
+        .map(item -> messageThreadsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MessageThread not found")))
+        .collect(Collectors.toList());
+
+        existing.getMessageThreads().addAll(messageThreadsList);
+
+        // Mettre à jour le côté inverse
+        messageThreadsList.forEach(it -> {
+        if (!it.getParticipants().contains(existing)) {
+        it.getParticipants().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée
@@ -1696,6 +2107,8 @@ public class UserProfileService extends BaseService<UserProfile> {
 
     
 
+    
+
 
         return userprofileRepository.save(existing);
     }
@@ -2044,6 +2457,8 @@ UserProfile entity = entityOpt.get();
 
     
 
+    
+
 
 // --- Dissocier ManyToMany ---
 
@@ -2203,11 +2618,13 @@ UserProfile entity = entityOpt.get();
     
 
     
-        if (entity.getUserRole() != null) {
-        for (UserRole item : new ArrayList<>(entity.getUserRole())) {
+        if (entity.getUserRoles() != null) {
+        for (UserRole item : new ArrayList<>(entity.getUserRoles())) {
+        
+            item.getUsers().remove(entity); // retire côté inverse
         
         }
-        entity.getUserRole().clear(); // puis vide côté courant
+        entity.getUserRoles().clear(); // puis vide côté courant
         }
     
 
@@ -2243,6 +2660,17 @@ UserProfile entity = entityOpt.get();
         
         }
         entity.getEnabledFeatureFlags().clear(); // puis vide côté courant
+        }
+    
+
+    
+        if (entity.getMessageThreads() != null) {
+        for (MessageThread item : new ArrayList<>(entity.getMessageThreads())) {
+        
+            item.getParticipants().remove(entity); // retire côté inverse
+        
+        }
+        entity.getMessageThreads().clear(); // puis vide côté courant
         }
     
 
@@ -2341,8 +2769,12 @@ UserProfile entity = entityOpt.get();
 
     
 
+    
+
 
 // --- Dissocier ManyToOne ---
+
+    
 
     
 

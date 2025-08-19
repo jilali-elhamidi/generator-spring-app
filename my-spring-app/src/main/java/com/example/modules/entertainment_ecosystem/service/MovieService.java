@@ -182,6 +182,151 @@ public class MovieService extends BaseService<Movie> {
 
     
 
+
+    
+        if (movie.getCast() != null
+        && !movie.getCast().isEmpty()) {
+
+        List<Artist> attachedCast = movie.getCast().stream()
+        .map(item -> castRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
+        .toList();
+
+        movie.setCast(attachedCast);
+
+        // côté propriétaire (Artist → Movie)
+        attachedCast.forEach(it -> it.getActedInMovies().add(movie));
+        }
+    
+
+    
+
+    
+
+    
+        if (movie.getGenres() != null
+        && !movie.getGenres().isEmpty()) {
+
+        List<Genre> attachedGenres = movie.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
+        .toList();
+
+        movie.setGenres(attachedGenres);
+
+        // côté propriétaire (Genre → Movie)
+        attachedGenres.forEach(it -> it.getMovies().add(movie));
+        }
+    
+
+    
+        if (movie.getWatchlistUsers() != null
+        && !movie.getWatchlistUsers().isEmpty()) {
+
+        List<UserProfile> attachedWatchlistUsers = movie.getWatchlistUsers().stream()
+        .map(item -> watchlistUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        movie.setWatchlistUsers(attachedWatchlistUsers);
+
+        // côté propriétaire (UserProfile → Movie)
+        attachedWatchlistUsers.forEach(it -> it.getWatchlistMovies().add(movie));
+        }
+    
+
+    
+        if (movie.getRelatedMerchandise() != null
+        && !movie.getRelatedMerchandise().isEmpty()) {
+
+        List<Merchandise> attachedRelatedMerchandise = movie.getRelatedMerchandise().stream()
+        .map(item -> relatedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found with id " + item.getId())))
+        .toList();
+
+        movie.setRelatedMerchandise(attachedRelatedMerchandise);
+
+        // côté propriétaire (Merchandise → Movie)
+        attachedRelatedMerchandise.forEach(it -> it.getRelatedMovies().add(movie));
+        }
+    
+
+    
+
+    
+
+    
+        if (movie.getFormats() != null
+        && !movie.getFormats().isEmpty()) {
+
+        List<MovieFormat> attachedFormats = movie.getFormats().stream()
+        .map(item -> formatsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MovieFormat not found with id " + item.getId())))
+        .toList();
+
+        movie.setFormats(attachedFormats);
+
+        // côté propriétaire (MovieFormat → Movie)
+        attachedFormats.forEach(it -> it.getMovies().add(movie));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (movie.getTags() != null
+        && !movie.getTags().isEmpty()) {
+
+        List<ContentTag> attachedTags = movie.getTags().stream()
+        .map(item -> tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
+        .toList();
+
+        movie.setTags(attachedTags);
+
+        // côté propriétaire (ContentTag → Movie)
+        attachedTags.forEach(it -> it.getMovies().add(movie));
+        }
+    
+
+    
+        if (movie.getLanguages() != null
+        && !movie.getLanguages().isEmpty()) {
+
+        List<ContentLanguage> attachedLanguages = movie.getLanguages().stream()
+        .map(item -> languagesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentLanguage not found with id " + item.getId())))
+        .toList();
+
+        movie.setLanguages(attachedLanguages);
+
+        // côté propriétaire (ContentLanguage → Movie)
+        attachedLanguages.forEach(it -> it.getMovies().add(movie));
+        }
+    
+
+    
+        if (movie.getPlatforms() != null
+        && !movie.getPlatforms().isEmpty()) {
+
+        List<StreamingPlatform> attachedPlatforms = movie.getPlatforms().stream()
+        .map(item -> platformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found with id " + item.getId())))
+        .toList();
+
+        movie.setPlatforms(attachedPlatforms);
+
+        // côté propriétaire (StreamingPlatform → Movie)
+        attachedPlatforms.forEach(it -> it.getMovies().add(movie));
+        }
+    
+
     
     if (movie.getDirector() != null
         && movie.getDirector().getId() != null) {
@@ -307,77 +452,141 @@ public class MovieService extends BaseService<Movie> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (movieRequest.getCast() != null) {
-            existing.getCast().clear();
-            List<Artist> castList = movieRequest.getCast().stream()
-                .map(item -> castRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Artist not found")))
-                .collect(Collectors.toList());
+        existing.getCast().clear();
+
+        List<Artist> castList = movieRequest.getCast().stream()
+        .map(item -> castRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found")))
+        .collect(Collectors.toList());
+
         existing.getCast().addAll(castList);
-        }
 
+        // Mettre à jour le côté inverse
+        castList.forEach(it -> {
+        if (!it.getActedInMovies().contains(existing)) {
+        it.getActedInMovies().add(existing);
+        }
+        });
+        }
         if (movieRequest.getGenres() != null) {
-            existing.getGenres().clear();
-            List<Genre> genresList = movieRequest.getGenres().stream()
-                .map(item -> genresRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Genre not found")))
-                .collect(Collectors.toList());
+        existing.getGenres().clear();
+
+        List<Genre> genresList = movieRequest.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found")))
+        .collect(Collectors.toList());
+
         existing.getGenres().addAll(genresList);
-        }
 
+        // Mettre à jour le côté inverse
+        genresList.forEach(it -> {
+        if (!it.getMovies().contains(existing)) {
+        it.getMovies().add(existing);
+        }
+        });
+        }
         if (movieRequest.getWatchlistUsers() != null) {
-            existing.getWatchlistUsers().clear();
-            List<UserProfile> watchlistUsersList = movieRequest.getWatchlistUsers().stream()
-                .map(item -> watchlistUsersRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getWatchlistUsers().clear();
+
+        List<UserProfile> watchlistUsersList = movieRequest.getWatchlistUsers().stream()
+        .map(item -> watchlistUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getWatchlistUsers().addAll(watchlistUsersList);
-        }
 
+        // Mettre à jour le côté inverse
+        watchlistUsersList.forEach(it -> {
+        if (!it.getWatchlistMovies().contains(existing)) {
+        it.getWatchlistMovies().add(existing);
+        }
+        });
+        }
         if (movieRequest.getRelatedMerchandise() != null) {
-            existing.getRelatedMerchandise().clear();
-            List<Merchandise> relatedMerchandiseList = movieRequest.getRelatedMerchandise().stream()
-                .map(item -> relatedMerchandiseRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Merchandise not found")))
-                .collect(Collectors.toList());
+        existing.getRelatedMerchandise().clear();
+
+        List<Merchandise> relatedMerchandiseList = movieRequest.getRelatedMerchandise().stream()
+        .map(item -> relatedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found")))
+        .collect(Collectors.toList());
+
         existing.getRelatedMerchandise().addAll(relatedMerchandiseList);
-        }
 
+        // Mettre à jour le côté inverse
+        relatedMerchandiseList.forEach(it -> {
+        if (!it.getRelatedMovies().contains(existing)) {
+        it.getRelatedMovies().add(existing);
+        }
+        });
+        }
         if (movieRequest.getFormats() != null) {
-            existing.getFormats().clear();
-            List<MovieFormat> formatsList = movieRequest.getFormats().stream()
-                .map(item -> formatsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("MovieFormat not found")))
-                .collect(Collectors.toList());
+        existing.getFormats().clear();
+
+        List<MovieFormat> formatsList = movieRequest.getFormats().stream()
+        .map(item -> formatsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MovieFormat not found")))
+        .collect(Collectors.toList());
+
         existing.getFormats().addAll(formatsList);
-        }
 
+        // Mettre à jour le côté inverse
+        formatsList.forEach(it -> {
+        if (!it.getMovies().contains(existing)) {
+        it.getMovies().add(existing);
+        }
+        });
+        }
         if (movieRequest.getTags() != null) {
-            existing.getTags().clear();
-            List<ContentTag> tagsList = movieRequest.getTags().stream()
-                .map(item -> tagsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("ContentTag not found")))
-                .collect(Collectors.toList());
+        existing.getTags().clear();
+
+        List<ContentTag> tagsList = movieRequest.getTags().stream()
+        .map(item -> tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found")))
+        .collect(Collectors.toList());
+
         existing.getTags().addAll(tagsList);
-        }
 
+        // Mettre à jour le côté inverse
+        tagsList.forEach(it -> {
+        if (!it.getMovies().contains(existing)) {
+        it.getMovies().add(existing);
+        }
+        });
+        }
         if (movieRequest.getLanguages() != null) {
-            existing.getLanguages().clear();
-            List<ContentLanguage> languagesList = movieRequest.getLanguages().stream()
-                .map(item -> languagesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("ContentLanguage not found")))
-                .collect(Collectors.toList());
-        existing.getLanguages().addAll(languagesList);
-        }
+        existing.getLanguages().clear();
 
+        List<ContentLanguage> languagesList = movieRequest.getLanguages().stream()
+        .map(item -> languagesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentLanguage not found")))
+        .collect(Collectors.toList());
+
+        existing.getLanguages().addAll(languagesList);
+
+        // Mettre à jour le côté inverse
+        languagesList.forEach(it -> {
+        if (!it.getMovies().contains(existing)) {
+        it.getMovies().add(existing);
+        }
+        });
+        }
         if (movieRequest.getPlatforms() != null) {
-            existing.getPlatforms().clear();
-            List<StreamingPlatform> platformsList = movieRequest.getPlatforms().stream()
-                .map(item -> platformsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("StreamingPlatform not found")))
-                .collect(Collectors.toList());
+        existing.getPlatforms().clear();
+
+        List<StreamingPlatform> platformsList = movieRequest.getPlatforms().stream()
+        .map(item -> platformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found")))
+        .collect(Collectors.toList());
+
         existing.getPlatforms().addAll(platformsList);
+
+        // Mettre à jour le côté inverse
+        platformsList.forEach(it -> {
+        if (!it.getMovies().contains(existing)) {
+        it.getMovies().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

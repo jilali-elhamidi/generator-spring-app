@@ -44,6 +44,55 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
 
     
 
+
+    
+        if (contentlanguage.getMovies() != null
+        && !contentlanguage.getMovies().isEmpty()) {
+
+        List<Movie> attachedMovies = contentlanguage.getMovies().stream()
+        .map(item -> moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
+        .toList();
+
+        contentlanguage.setMovies(attachedMovies);
+
+        // côté propriétaire (Movie → ContentLanguage)
+        attachedMovies.forEach(it -> it.getLanguages().add(contentlanguage));
+        }
+    
+
+    
+        if (contentlanguage.getTvShows() != null
+        && !contentlanguage.getTvShows().isEmpty()) {
+
+        List<TVShow> attachedTvShows = contentlanguage.getTvShows().stream()
+        .map(item -> tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
+        .toList();
+
+        contentlanguage.setTvShows(attachedTvShows);
+
+        // côté propriétaire (TVShow → ContentLanguage)
+        attachedTvShows.forEach(it -> it.getLanguages().add(contentlanguage));
+        }
+    
+
+    
+        if (contentlanguage.getPodcasts() != null
+        && !contentlanguage.getPodcasts().isEmpty()) {
+
+        List<Podcast> attachedPodcasts = contentlanguage.getPodcasts().stream()
+        .map(item -> podcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId())))
+        .toList();
+
+        contentlanguage.setPodcasts(attachedPodcasts);
+
+        // côté propriétaire (Podcast → ContentLanguage)
+        attachedPodcasts.forEach(it -> it.getLanguages().add(contentlanguage));
+        }
+    
+
     
     
     
@@ -63,32 +112,56 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (contentlanguageRequest.getMovies() != null) {
-            existing.getMovies().clear();
-            List<Movie> moviesList = contentlanguageRequest.getMovies().stream()
-                .map(item -> moviesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Movie not found")))
-                .collect(Collectors.toList());
+        existing.getMovies().clear();
+
+        List<Movie> moviesList = contentlanguageRequest.getMovies().stream()
+        .map(item -> moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found")))
+        .collect(Collectors.toList());
+
         existing.getMovies().addAll(moviesList);
-        }
 
+        // Mettre à jour le côté inverse
+        moviesList.forEach(it -> {
+        if (!it.getLanguages().contains(existing)) {
+        it.getLanguages().add(existing);
+        }
+        });
+        }
         if (contentlanguageRequest.getTvShows() != null) {
-            existing.getTvShows().clear();
-            List<TVShow> tvShowsList = contentlanguageRequest.getTvShows().stream()
-                .map(item -> tvShowsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("TVShow not found")))
-                .collect(Collectors.toList());
-        existing.getTvShows().addAll(tvShowsList);
-        }
+        existing.getTvShows().clear();
 
+        List<TVShow> tvShowsList = contentlanguageRequest.getTvShows().stream()
+        .map(item -> tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found")))
+        .collect(Collectors.toList());
+
+        existing.getTvShows().addAll(tvShowsList);
+
+        // Mettre à jour le côté inverse
+        tvShowsList.forEach(it -> {
+        if (!it.getLanguages().contains(existing)) {
+        it.getLanguages().add(existing);
+        }
+        });
+        }
         if (contentlanguageRequest.getPodcasts() != null) {
-            existing.getPodcasts().clear();
-            List<Podcast> podcastsList = contentlanguageRequest.getPodcasts().stream()
-                .map(item -> podcastsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Podcast not found")))
-                .collect(Collectors.toList());
+        existing.getPodcasts().clear();
+
+        List<Podcast> podcastsList = contentlanguageRequest.getPodcasts().stream()
+        .map(item -> podcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found")))
+        .collect(Collectors.toList());
+
         existing.getPodcasts().addAll(podcastsList);
+
+        // Mettre à jour le côté inverse
+        podcastsList.forEach(it -> {
+        if (!it.getLanguages().contains(existing)) {
+        it.getLanguages().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

@@ -38,6 +38,11 @@ public class MerchandiseShippingService extends BaseService<MerchandiseShipping>
 
     
 
+
+    
+
+    
+
     if (merchandiseshipping.getMerchandiseItem() != null
         && merchandiseshipping.getMerchandiseItem().getId() != null) {
         Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(

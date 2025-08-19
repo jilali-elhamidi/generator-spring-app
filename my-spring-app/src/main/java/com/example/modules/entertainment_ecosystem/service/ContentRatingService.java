@@ -110,6 +110,15 @@ public class ContentRatingService extends BaseService<ContentRating> {
 
     
 
+
+    
+
+    
+
+    
+
+    
+
     
     
     

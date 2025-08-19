@@ -52,6 +52,9 @@ public class MerchandiseSupplierService extends BaseService<MerchandiseSupplier>
         
     
 
+
+    
+
     
 
         return merchandisesupplierRepository.save(merchandisesupplier);

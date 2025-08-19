@@ -64,6 +64,13 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
 
     
 
+
+    
+
+    
+
+    
+
     if (merchandiseorder.getUser() != null
         && merchandiseorder.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

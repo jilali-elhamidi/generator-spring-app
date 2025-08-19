@@ -82,6 +82,61 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
 
     
 
+
+    
+        if (streamingplatform.getMovies() != null
+        && !streamingplatform.getMovies().isEmpty()) {
+
+        List<Movie> attachedMovies = streamingplatform.getMovies().stream()
+        .map(item -> moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
+        .toList();
+
+        streamingplatform.setMovies(attachedMovies);
+
+        // côté propriétaire (Movie → StreamingPlatform)
+        attachedMovies.forEach(it -> it.getPlatforms().add(streamingplatform));
+        }
+    
+
+    
+        if (streamingplatform.getTvShows() != null
+        && !streamingplatform.getTvShows().isEmpty()) {
+
+        List<TVShow> attachedTvShows = streamingplatform.getTvShows().stream()
+        .map(item -> tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
+        .toList();
+
+        streamingplatform.setTvShows(attachedTvShows);
+
+        // côté propriétaire (TVShow → StreamingPlatform)
+        attachedTvShows.forEach(it -> it.getPlatforms().add(streamingplatform));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (streamingplatform.getAdCampaigns() != null
+        && !streamingplatform.getAdCampaigns().isEmpty()) {
+
+        List<AdCampaign> attachedAdCampaigns = streamingplatform.getAdCampaigns().stream()
+        .map(item -> adCampaignsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("AdCampaign not found with id " + item.getId())))
+        .toList();
+
+        streamingplatform.setAdCampaigns(attachedAdCampaigns);
+
+        // côté propriétaire (AdCampaign → StreamingPlatform)
+        attachedAdCampaigns.forEach(it -> it.getDisplayedOnPlatforms().add(streamingplatform));
+        }
+    
+
     
     
     
@@ -140,32 +195,56 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (streamingplatformRequest.getMovies() != null) {
-            existing.getMovies().clear();
-            List<Movie> moviesList = streamingplatformRequest.getMovies().stream()
-                .map(item -> moviesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Movie not found")))
-                .collect(Collectors.toList());
+        existing.getMovies().clear();
+
+        List<Movie> moviesList = streamingplatformRequest.getMovies().stream()
+        .map(item -> moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found")))
+        .collect(Collectors.toList());
+
         existing.getMovies().addAll(moviesList);
-        }
 
+        // Mettre à jour le côté inverse
+        moviesList.forEach(it -> {
+        if (!it.getPlatforms().contains(existing)) {
+        it.getPlatforms().add(existing);
+        }
+        });
+        }
         if (streamingplatformRequest.getTvShows() != null) {
-            existing.getTvShows().clear();
-            List<TVShow> tvShowsList = streamingplatformRequest.getTvShows().stream()
-                .map(item -> tvShowsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("TVShow not found")))
-                .collect(Collectors.toList());
-        existing.getTvShows().addAll(tvShowsList);
-        }
+        existing.getTvShows().clear();
 
+        List<TVShow> tvShowsList = streamingplatformRequest.getTvShows().stream()
+        .map(item -> tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found")))
+        .collect(Collectors.toList());
+
+        existing.getTvShows().addAll(tvShowsList);
+
+        // Mettre à jour le côté inverse
+        tvShowsList.forEach(it -> {
+        if (!it.getPlatforms().contains(existing)) {
+        it.getPlatforms().add(existing);
+        }
+        });
+        }
         if (streamingplatformRequest.getAdCampaigns() != null) {
-            existing.getAdCampaigns().clear();
-            List<AdCampaign> adCampaignsList = streamingplatformRequest.getAdCampaigns().stream()
-                .map(item -> adCampaignsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("AdCampaign not found")))
-                .collect(Collectors.toList());
+        existing.getAdCampaigns().clear();
+
+        List<AdCampaign> adCampaignsList = streamingplatformRequest.getAdCampaigns().stream()
+        .map(item -> adCampaignsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("AdCampaign not found")))
+        .collect(Collectors.toList());
+
         existing.getAdCampaigns().addAll(adCampaignsList);
+
+        // Mettre à jour le côté inverse
+        adCampaignsList.forEach(it -> {
+        if (!it.getDisplayedOnPlatforms().contains(existing)) {
+        it.getDisplayedOnPlatforms().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée
@@ -242,6 +321,8 @@ StreamingPlatform entity = entityOpt.get();
         if (entity.getMovies() != null) {
         for (Movie item : new ArrayList<>(entity.getMovies())) {
         
+            item.getPlatforms().remove(entity); // retire côté inverse
+        
         }
         entity.getMovies().clear(); // puis vide côté courant
         }
@@ -250,6 +331,8 @@ StreamingPlatform entity = entityOpt.get();
     
         if (entity.getTvShows() != null) {
         for (TVShow item : new ArrayList<>(entity.getTvShows())) {
+        
+            item.getPlatforms().remove(entity); // retire côté inverse
         
         }
         entity.getTvShows().clear(); // puis vide côté courant

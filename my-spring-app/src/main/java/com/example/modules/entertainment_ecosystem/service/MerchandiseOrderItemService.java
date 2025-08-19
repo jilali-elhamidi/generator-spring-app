@@ -38,6 +38,11 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
 
     
 
+
+    
+
+    
+
     if (merchandiseorderitem.getMerchandiseItem() != null
         && merchandiseorderitem.getMerchandiseItem().getId() != null) {
         Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(

@@ -43,7 +43,7 @@ public class MusicTrackDto {
 
     private ArtistSimpleDto artist;
 
-    private GenreSimpleDto genre;
+    private List<GenreSimpleDto> genres;
 
     private List<UserProfileSimpleDto> listenedByUsers;
 

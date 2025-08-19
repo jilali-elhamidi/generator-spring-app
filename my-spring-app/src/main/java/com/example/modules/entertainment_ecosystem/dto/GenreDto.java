@@ -20,6 +20,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.VideoGameSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.PodcastSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.AlbumSimpleDto;
+
 
 
 @Data
@@ -44,5 +46,7 @@ public class GenreDto {
     private List<VideoGameSimpleDto> videoGames;
 
     private List<PodcastSimpleDto> podcasts;
+
+    private List<AlbumSimpleDto> albums;
 
 }

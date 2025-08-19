@@ -32,6 +32,9 @@ public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
 
     
 
+
+    
+
     if (tvshowmerchandise.getTvShow() != null
         && tvshowmerchandise.getTvShow().getId() != null) {
         TVShow existingTvShow = tvShowRepository.findById(

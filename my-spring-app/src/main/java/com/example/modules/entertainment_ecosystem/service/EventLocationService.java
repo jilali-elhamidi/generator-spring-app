@@ -58,6 +58,11 @@ public class EventLocationService extends BaseService<EventLocation> {
 
     
 
+
+    
+
+    
+
     
     if (eventlocation.getContactPerson() != null
         && eventlocation.getContactPerson().getId() != null) {

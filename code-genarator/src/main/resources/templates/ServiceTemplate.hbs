@@ -91,6 +91,23 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         {{/with}}
     {{/if}}
 {{/each}}
+{{#each relationships}}
+    {{#if (eq relationType "ManyToMany")}}
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null
+        && !{{../entityNameLowercase}}.get{{capitalize name}}().isEmpty()) {
+
+        List<{{type}}> attached{{capitalize name}} = {{../entityNameLowercase}}.get{{capitalize name}}().stream()
+        .map(item -> {{name}}Repository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("{{type}} not found with id " + item.getId())))
+        .toList();
+
+        {{../entityNameLowercase}}.set{{capitalize name}}(attached{{capitalize name}});
+
+        // côté propriétaire ({{type}} → {{../entityName}})
+        attached{{capitalize name}}.forEach(it -> it.get{{capitalize inverseField}}().add({{../entityNameLowercase}}));
+        }
+    {{/if}}
+{{/each}}
 
 {{~#each relationships}}
     {{#if (eq relationType "ManyToOne")~}}
@@ -153,17 +170,25 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 // Relations ManyToMany : synchronisation sécurisée
 {{~#each relationships}}
 
-{{~#if (eq relationType "ManyToMany")}}
-
+    {{~#if (eq relationType "ManyToMany")}}
         if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
-            existing.get{{capitalize name}}().clear();
-            List<{{type}}> {{name}}List = {{entityNameLowercase}}Request.get{{capitalize name}}().stream()
-                .map(item -> {{name}}Repository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("{{type}} not found")))
-                .collect(Collectors.toList());
+        existing.get{{capitalize name}}().clear();
+
+        List<{{type}}> {{name}}List = {{entityNameLowercase}}Request.get{{capitalize name}}().stream()
+        .map(item -> {{name}}Repository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("{{type}} not found")))
+        .collect(Collectors.toList());
+
         existing.get{{capitalize name}}().addAll({{name}}List);
+
+        // Mettre à jour le côté inverse
+        {{name}}List.forEach(it -> {
+        if (!it.get{{capitalize inverseField}}().contains(existing)) {
+        it.get{{capitalize inverseField}}().add(existing);
         }
-{{~/if}}
+        });
+        }
+    {{~/if}}
 {{~/each}}
 
 // Relations OneToMany : synchronisation sécurisée

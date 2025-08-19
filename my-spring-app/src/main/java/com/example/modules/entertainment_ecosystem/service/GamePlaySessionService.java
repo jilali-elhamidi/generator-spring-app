@@ -38,6 +38,11 @@ public class GamePlaySessionService extends BaseService<GamePlaySession> {
 
     
 
+
+    
+
+    
+
     if (gameplaysession.getUser() != null
         && gameplaysession.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

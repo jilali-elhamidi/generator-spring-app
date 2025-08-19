@@ -84,6 +84,13 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
         
     
 
+
+    
+
+    
+
+    
+
     
     if (forumcategory.getParentCategory() != null
         && forumcategory.getParentCategory().getId() != null) {

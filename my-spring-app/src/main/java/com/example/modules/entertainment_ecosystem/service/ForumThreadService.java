@@ -64,6 +64,13 @@ public class ForumThreadService extends BaseService<ForumThread> {
 
     
 
+
+    
+
+    
+
+    
+
     if (forumthread.getAuthor() != null
         && forumthread.getAuthor().getId() != null) {
         UserProfile existingAuthor = authorRepository.findById(

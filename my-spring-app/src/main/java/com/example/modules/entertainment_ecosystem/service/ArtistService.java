@@ -351,6 +351,97 @@ public class ArtistService extends BaseService<Artist> {
         
     
 
+
+    
+        if (artist.getFavoriteArtists() != null
+        && !artist.getFavoriteArtists().isEmpty()) {
+
+        List<UserProfile> attachedFavoriteArtists = artist.getFavoriteArtists().stream()
+        .map(item -> favoriteArtistsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        artist.setFavoriteArtists(attachedFavoriteArtists);
+
+        // côté propriétaire (UserProfile → Artist)
+        attachedFavoriteArtists.forEach(it -> it.getFavoriteArtists().add(artist));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (artist.getParticipatedInEvents() != null
+        && !artist.getParticipatedInEvents().isEmpty()) {
+
+        List<LiveEvent> attachedParticipatedInEvents = artist.getParticipatedInEvents().stream()
+        .map(item -> participatedInEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("LiveEvent not found with id " + item.getId())))
+        .toList();
+
+        artist.setParticipatedInEvents(attachedParticipatedInEvents);
+
+        // côté propriétaire (LiveEvent → Artist)
+        attachedParticipatedInEvents.forEach(it -> it.getPerformers().add(artist));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (artist.getActedInMovies() != null
+        && !artist.getActedInMovies().isEmpty()) {
+
+        List<Movie> attachedActedInMovies = artist.getActedInMovies().stream()
+        .map(item -> actedInMoviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
+        .toList();
+
+        artist.setActedInMovies(attachedActedInMovies);
+
+        // côté propriétaire (Movie → Artist)
+        attachedActedInMovies.forEach(it -> it.getCast().add(artist));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+        if (artist.getActedInShows() != null
+        && !artist.getActedInShows().isEmpty()) {
+
+        List<TVShow> attachedActedInShows = artist.getActedInShows().stream()
+        .map(item -> actedInShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
+        .toList();
+
+        artist.setActedInShows(attachedActedInShows);
+
+        // côté propriétaire (TVShow → Artist)
+        attachedActedInShows.forEach(it -> it.getCast().add(artist));
+        }
+    
+
+    
+
+    
+
     
     
     
@@ -404,41 +495,73 @@ public class ArtistService extends BaseService<Artist> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (artistRequest.getFavoriteArtists() != null) {
-            existing.getFavoriteArtists().clear();
-            List<UserProfile> favoriteArtistsList = artistRequest.getFavoriteArtists().stream()
-                .map(item -> favoriteArtistsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getFavoriteArtists().clear();
+
+        List<UserProfile> favoriteArtistsList = artistRequest.getFavoriteArtists().stream()
+        .map(item -> favoriteArtistsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getFavoriteArtists().addAll(favoriteArtistsList);
-        }
 
+        // Mettre à jour le côté inverse
+        favoriteArtistsList.forEach(it -> {
+        if (!it.getFavoriteArtists().contains(existing)) {
+        it.getFavoriteArtists().add(existing);
+        }
+        });
+        }
         if (artistRequest.getParticipatedInEvents() != null) {
-            existing.getParticipatedInEvents().clear();
-            List<LiveEvent> participatedInEventsList = artistRequest.getParticipatedInEvents().stream()
-                .map(item -> participatedInEventsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("LiveEvent not found")))
-                .collect(Collectors.toList());
+        existing.getParticipatedInEvents().clear();
+
+        List<LiveEvent> participatedInEventsList = artistRequest.getParticipatedInEvents().stream()
+        .map(item -> participatedInEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("LiveEvent not found")))
+        .collect(Collectors.toList());
+
         existing.getParticipatedInEvents().addAll(participatedInEventsList);
-        }
 
+        // Mettre à jour le côté inverse
+        participatedInEventsList.forEach(it -> {
+        if (!it.getPerformers().contains(existing)) {
+        it.getPerformers().add(existing);
+        }
+        });
+        }
         if (artistRequest.getActedInMovies() != null) {
-            existing.getActedInMovies().clear();
-            List<Movie> actedInMoviesList = artistRequest.getActedInMovies().stream()
-                .map(item -> actedInMoviesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Movie not found")))
-                .collect(Collectors.toList());
-        existing.getActedInMovies().addAll(actedInMoviesList);
-        }
+        existing.getActedInMovies().clear();
 
+        List<Movie> actedInMoviesList = artistRequest.getActedInMovies().stream()
+        .map(item -> actedInMoviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found")))
+        .collect(Collectors.toList());
+
+        existing.getActedInMovies().addAll(actedInMoviesList);
+
+        // Mettre à jour le côté inverse
+        actedInMoviesList.forEach(it -> {
+        if (!it.getCast().contains(existing)) {
+        it.getCast().add(existing);
+        }
+        });
+        }
         if (artistRequest.getActedInShows() != null) {
-            existing.getActedInShows().clear();
-            List<TVShow> actedInShowsList = artistRequest.getActedInShows().stream()
-                .map(item -> actedInShowsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("TVShow not found")))
-                .collect(Collectors.toList());
+        existing.getActedInShows().clear();
+
+        List<TVShow> actedInShowsList = artistRequest.getActedInShows().stream()
+        .map(item -> actedInShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found")))
+        .collect(Collectors.toList());
+
         existing.getActedInShows().addAll(actedInShowsList);
+
+        // Mettre à jour le côté inverse
+        actedInShowsList.forEach(it -> {
+        if (!it.getCast().contains(existing)) {
+        it.getCast().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

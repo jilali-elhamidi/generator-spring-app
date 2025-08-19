@@ -144,6 +144,117 @@ public class TVShowService extends BaseService<TVShow> {
 
     
 
+
+    
+
+    
+
+    
+        if (tvshow.getGenres() != null
+        && !tvshow.getGenres().isEmpty()) {
+
+        List<Genre> attachedGenres = tvshow.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
+        .toList();
+
+        tvshow.setGenres(attachedGenres);
+
+        // côté propriétaire (Genre → TVShow)
+        attachedGenres.forEach(it -> it.getTvShows().add(tvshow));
+        }
+    
+
+    
+        if (tvshow.getRelatedMerchandise() != null
+        && !tvshow.getRelatedMerchandise().isEmpty()) {
+
+        List<Merchandise> attachedRelatedMerchandise = tvshow.getRelatedMerchandise().stream()
+        .map(item -> relatedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found with id " + item.getId())))
+        .toList();
+
+        tvshow.setRelatedMerchandise(attachedRelatedMerchandise);
+
+        // côté propriétaire (Merchandise → TVShow)
+        attachedRelatedMerchandise.forEach(it -> it.getRelatedShows().add(tvshow));
+        }
+    
+
+    
+
+    
+        if (tvshow.getCast() != null
+        && !tvshow.getCast().isEmpty()) {
+
+        List<Artist> attachedCast = tvshow.getCast().stream()
+        .map(item -> castRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
+        .toList();
+
+        tvshow.setCast(attachedCast);
+
+        // côté propriétaire (Artist → TVShow)
+        attachedCast.forEach(it -> it.getActedInShows().add(tvshow));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (tvshow.getTags() != null
+        && !tvshow.getTags().isEmpty()) {
+
+        List<ContentTag> attachedTags = tvshow.getTags().stream()
+        .map(item -> tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
+        .toList();
+
+        tvshow.setTags(attachedTags);
+
+        // côté propriétaire (ContentTag → TVShow)
+        attachedTags.forEach(it -> it.getTvShows().add(tvshow));
+        }
+    
+
+    
+        if (tvshow.getLanguages() != null
+        && !tvshow.getLanguages().isEmpty()) {
+
+        List<ContentLanguage> attachedLanguages = tvshow.getLanguages().stream()
+        .map(item -> languagesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentLanguage not found with id " + item.getId())))
+        .toList();
+
+        tvshow.setLanguages(attachedLanguages);
+
+        // côté propriétaire (ContentLanguage → TVShow)
+        attachedLanguages.forEach(it -> it.getTvShows().add(tvshow));
+        }
+    
+
+    
+        if (tvshow.getPlatforms() != null
+        && !tvshow.getPlatforms().isEmpty()) {
+
+        List<StreamingPlatform> attachedPlatforms = tvshow.getPlatforms().stream()
+        .map(item -> platformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found with id " + item.getId())))
+        .toList();
+
+        tvshow.setPlatforms(attachedPlatforms);
+
+        // côté propriétaire (StreamingPlatform → TVShow)
+        attachedPlatforms.forEach(it -> it.getTvShows().add(tvshow));
+        }
+    
+
     
     if (tvshow.getDirector() != null
         && tvshow.getDirector().getId() != null) {
@@ -265,59 +376,107 @@ public class TVShowService extends BaseService<TVShow> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (tvshowRequest.getGenres() != null) {
-            existing.getGenres().clear();
-            List<Genre> genresList = tvshowRequest.getGenres().stream()
-                .map(item -> genresRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Genre not found")))
-                .collect(Collectors.toList());
+        existing.getGenres().clear();
+
+        List<Genre> genresList = tvshowRequest.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found")))
+        .collect(Collectors.toList());
+
         existing.getGenres().addAll(genresList);
-        }
 
+        // Mettre à jour le côté inverse
+        genresList.forEach(it -> {
+        if (!it.getTvShows().contains(existing)) {
+        it.getTvShows().add(existing);
+        }
+        });
+        }
         if (tvshowRequest.getRelatedMerchandise() != null) {
-            existing.getRelatedMerchandise().clear();
-            List<Merchandise> relatedMerchandiseList = tvshowRequest.getRelatedMerchandise().stream()
-                .map(item -> relatedMerchandiseRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Merchandise not found")))
-                .collect(Collectors.toList());
+        existing.getRelatedMerchandise().clear();
+
+        List<Merchandise> relatedMerchandiseList = tvshowRequest.getRelatedMerchandise().stream()
+        .map(item -> relatedMerchandiseRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Merchandise not found")))
+        .collect(Collectors.toList());
+
         existing.getRelatedMerchandise().addAll(relatedMerchandiseList);
-        }
 
+        // Mettre à jour le côté inverse
+        relatedMerchandiseList.forEach(it -> {
+        if (!it.getRelatedShows().contains(existing)) {
+        it.getRelatedShows().add(existing);
+        }
+        });
+        }
         if (tvshowRequest.getCast() != null) {
-            existing.getCast().clear();
-            List<Artist> castList = tvshowRequest.getCast().stream()
-                .map(item -> castRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Artist not found")))
-                .collect(Collectors.toList());
+        existing.getCast().clear();
+
+        List<Artist> castList = tvshowRequest.getCast().stream()
+        .map(item -> castRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found")))
+        .collect(Collectors.toList());
+
         existing.getCast().addAll(castList);
-        }
 
+        // Mettre à jour le côté inverse
+        castList.forEach(it -> {
+        if (!it.getActedInShows().contains(existing)) {
+        it.getActedInShows().add(existing);
+        }
+        });
+        }
         if (tvshowRequest.getTags() != null) {
-            existing.getTags().clear();
-            List<ContentTag> tagsList = tvshowRequest.getTags().stream()
-                .map(item -> tagsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("ContentTag not found")))
-                .collect(Collectors.toList());
+        existing.getTags().clear();
+
+        List<ContentTag> tagsList = tvshowRequest.getTags().stream()
+        .map(item -> tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found")))
+        .collect(Collectors.toList());
+
         existing.getTags().addAll(tagsList);
-        }
 
+        // Mettre à jour le côté inverse
+        tagsList.forEach(it -> {
+        if (!it.getTvShows().contains(existing)) {
+        it.getTvShows().add(existing);
+        }
+        });
+        }
         if (tvshowRequest.getLanguages() != null) {
-            existing.getLanguages().clear();
-            List<ContentLanguage> languagesList = tvshowRequest.getLanguages().stream()
-                .map(item -> languagesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("ContentLanguage not found")))
-                .collect(Collectors.toList());
-        existing.getLanguages().addAll(languagesList);
-        }
+        existing.getLanguages().clear();
 
+        List<ContentLanguage> languagesList = tvshowRequest.getLanguages().stream()
+        .map(item -> languagesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentLanguage not found")))
+        .collect(Collectors.toList());
+
+        existing.getLanguages().addAll(languagesList);
+
+        // Mettre à jour le côté inverse
+        languagesList.forEach(it -> {
+        if (!it.getTvShows().contains(existing)) {
+        it.getTvShows().add(existing);
+        }
+        });
+        }
         if (tvshowRequest.getPlatforms() != null) {
-            existing.getPlatforms().clear();
-            List<StreamingPlatform> platformsList = tvshowRequest.getPlatforms().stream()
-                .map(item -> platformsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("StreamingPlatform not found")))
-                .collect(Collectors.toList());
+        existing.getPlatforms().clear();
+
+        List<StreamingPlatform> platformsList = tvshowRequest.getPlatforms().stream()
+        .map(item -> platformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found")))
+        .collect(Collectors.toList());
+
         existing.getPlatforms().addAll(platformsList);
+
+        // Mettre à jour le côté inverse
+        platformsList.forEach(it -> {
+        if (!it.getTvShows().contains(existing)) {
+        it.getTvShows().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

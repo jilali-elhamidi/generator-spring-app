@@ -32,6 +32,23 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
 
     
 
+
+    
+        if (featureflag.getEnabledForUsers() != null
+        && !featureflag.getEnabledForUsers().isEmpty()) {
+
+        List<UserProfile> attachedEnabledForUsers = featureflag.getEnabledForUsers().stream()
+        .map(item -> enabledForUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        featureflag.setEnabledForUsers(attachedEnabledForUsers);
+
+        // côté propriétaire (UserProfile → FeatureFlag)
+        attachedEnabledForUsers.forEach(it -> it.getEnabledFeatureFlags().add(featureflag));
+        }
+    
+
     
 
         return featureflagRepository.save(featureflag);
@@ -50,14 +67,22 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (featureflagRequest.getEnabledForUsers() != null) {
-            existing.getEnabledForUsers().clear();
-            List<UserProfile> enabledForUsersList = featureflagRequest.getEnabledForUsers().stream()
-                .map(item -> enabledForUsersRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getEnabledForUsers().clear();
+
+        List<UserProfile> enabledForUsersList = featureflagRequest.getEnabledForUsers().stream()
+        .map(item -> enabledForUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getEnabledForUsers().addAll(enabledForUsersList);
+
+        // Mettre à jour le côté inverse
+        enabledForUsersList.forEach(it -> {
+        if (!it.getEnabledFeatureFlags().contains(existing)) {
+        it.getEnabledFeatureFlags().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée
@@ -84,6 +109,8 @@ FeatureFlag entity = entityOpt.get();
     
         if (entity.getEnabledForUsers() != null) {
         for (UserProfile item : new ArrayList<>(entity.getEnabledForUsers())) {
+        
+            item.getEnabledFeatureFlags().remove(entity); // retire côté inverse
         
         }
         entity.getEnabledForUsers().clear(); // puis vide côté courant

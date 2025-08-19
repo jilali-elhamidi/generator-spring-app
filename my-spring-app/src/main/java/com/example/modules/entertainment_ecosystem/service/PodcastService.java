@@ -120,6 +120,81 @@ public class PodcastService extends BaseService<Podcast> {
 
     
 
+
+    
+
+    
+
+    
+        if (podcast.getGenres() != null
+        && !podcast.getGenres().isEmpty()) {
+
+        List<Genre> attachedGenres = podcast.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
+        .toList();
+
+        podcast.setGenres(attachedGenres);
+
+        // côté propriétaire (Genre → Podcast)
+        attachedGenres.forEach(it -> it.getPodcasts().add(podcast));
+        }
+    
+
+    
+        if (podcast.getListeners() != null
+        && !podcast.getListeners().isEmpty()) {
+
+        List<UserProfile> attachedListeners = podcast.getListeners().stream()
+        .map(item -> listenersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        podcast.setListeners(attachedListeners);
+
+        // côté propriétaire (UserProfile → Podcast)
+        attachedListeners.forEach(it -> it.getLibraryPodcasts().add(podcast));
+        }
+    
+
+    
+
+    
+        if (podcast.getCategories() != null
+        && !podcast.getCategories().isEmpty()) {
+
+        List<PodcastCategory> attachedCategories = podcast.getCategories().stream()
+        .map(item -> categoriesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastCategory not found with id " + item.getId())))
+        .toList();
+
+        podcast.setCategories(attachedCategories);
+
+        // côté propriétaire (PodcastCategory → Podcast)
+        attachedCategories.forEach(it -> it.getPodcasts().add(podcast));
+        }
+    
+
+    
+
+    
+
+    
+        if (podcast.getLanguages() != null
+        && !podcast.getLanguages().isEmpty()) {
+
+        List<ContentLanguage> attachedLanguages = podcast.getLanguages().stream()
+        .map(item -> languagesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentLanguage not found with id " + item.getId())))
+        .toList();
+
+        podcast.setLanguages(attachedLanguages);
+
+        // côté propriétaire (ContentLanguage → Podcast)
+        attachedLanguages.forEach(it -> it.getPodcasts().add(podcast));
+        }
+    
+
     if (podcast.getHost() != null
         && podcast.getHost().getId() != null) {
         Artist existingHost = hostRepository.findById(
@@ -200,41 +275,73 @@ public class PodcastService extends BaseService<Podcast> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (podcastRequest.getGenres() != null) {
-            existing.getGenres().clear();
-            List<Genre> genresList = podcastRequest.getGenres().stream()
-                .map(item -> genresRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Genre not found")))
-                .collect(Collectors.toList());
+        existing.getGenres().clear();
+
+        List<Genre> genresList = podcastRequest.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found")))
+        .collect(Collectors.toList());
+
         existing.getGenres().addAll(genresList);
-        }
 
+        // Mettre à jour le côté inverse
+        genresList.forEach(it -> {
+        if (!it.getPodcasts().contains(existing)) {
+        it.getPodcasts().add(existing);
+        }
+        });
+        }
         if (podcastRequest.getListeners() != null) {
-            existing.getListeners().clear();
-            List<UserProfile> listenersList = podcastRequest.getListeners().stream()
-                .map(item -> listenersRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getListeners().clear();
+
+        List<UserProfile> listenersList = podcastRequest.getListeners().stream()
+        .map(item -> listenersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getListeners().addAll(listenersList);
-        }
 
+        // Mettre à jour le côté inverse
+        listenersList.forEach(it -> {
+        if (!it.getLibraryPodcasts().contains(existing)) {
+        it.getLibraryPodcasts().add(existing);
+        }
+        });
+        }
         if (podcastRequest.getCategories() != null) {
-            existing.getCategories().clear();
-            List<PodcastCategory> categoriesList = podcastRequest.getCategories().stream()
-                .map(item -> categoriesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("PodcastCategory not found")))
-                .collect(Collectors.toList());
-        existing.getCategories().addAll(categoriesList);
-        }
+        existing.getCategories().clear();
 
+        List<PodcastCategory> categoriesList = podcastRequest.getCategories().stream()
+        .map(item -> categoriesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastCategory not found")))
+        .collect(Collectors.toList());
+
+        existing.getCategories().addAll(categoriesList);
+
+        // Mettre à jour le côté inverse
+        categoriesList.forEach(it -> {
+        if (!it.getPodcasts().contains(existing)) {
+        it.getPodcasts().add(existing);
+        }
+        });
+        }
         if (podcastRequest.getLanguages() != null) {
-            existing.getLanguages().clear();
-            List<ContentLanguage> languagesList = podcastRequest.getLanguages().stream()
-                .map(item -> languagesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("ContentLanguage not found")))
-                .collect(Collectors.toList());
+        existing.getLanguages().clear();
+
+        List<ContentLanguage> languagesList = podcastRequest.getLanguages().stream()
+        .map(item -> languagesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentLanguage not found")))
+        .collect(Collectors.toList());
+
         existing.getLanguages().addAll(languagesList);
+
+        // Mettre à jour le côté inverse
+        languagesList.forEach(it -> {
+        if (!it.getPodcasts().contains(existing)) {
+        it.getPodcasts().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

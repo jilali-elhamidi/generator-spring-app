@@ -32,6 +32,23 @@ public class MovieFormatService extends BaseService<MovieFormat> {
 
     
 
+
+    
+        if (movieformat.getMovies() != null
+        && !movieformat.getMovies().isEmpty()) {
+
+        List<Movie> attachedMovies = movieformat.getMovies().stream()
+        .map(item -> moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
+        .toList();
+
+        movieformat.setMovies(attachedMovies);
+
+        // côté propriétaire (Movie → MovieFormat)
+        attachedMovies.forEach(it -> it.getFormats().add(movieformat));
+        }
+    
+
     
 
         return movieformatRepository.save(movieformat);
@@ -48,14 +65,22 @@ public class MovieFormatService extends BaseService<MovieFormat> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (movieformatRequest.getMovies() != null) {
-            existing.getMovies().clear();
-            List<Movie> moviesList = movieformatRequest.getMovies().stream()
-                .map(item -> moviesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Movie not found")))
-                .collect(Collectors.toList());
+        existing.getMovies().clear();
+
+        List<Movie> moviesList = movieformatRequest.getMovies().stream()
+        .map(item -> moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found")))
+        .collect(Collectors.toList());
+
         existing.getMovies().addAll(moviesList);
+
+        // Mettre à jour le côté inverse
+        moviesList.forEach(it -> {
+        if (!it.getFormats().contains(existing)) {
+        it.getFormats().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

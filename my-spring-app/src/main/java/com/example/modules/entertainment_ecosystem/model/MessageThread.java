@@ -37,7 +37,7 @@ public class MessageThread extends BaseEntity {
             @JoinTable(name = "message_thread_participants",
             joinColumns = @JoinColumn(name = "thread_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("MessageThreads")
             private List<UserProfile> participants;
             
     @OneToMany(mappedBy = "thread", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)

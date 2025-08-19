@@ -302,6 +302,95 @@ public class VideoGameService extends BaseService<VideoGame> {
 
     
 
+
+    
+        if (videogame.getGenres() != null
+        && !videogame.getGenres().isEmpty()) {
+
+        List<Genre> attachedGenres = videogame.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
+        .toList();
+
+        videogame.setGenres(attachedGenres);
+
+        // côté propriétaire (Genre → VideoGame)
+        attachedGenres.forEach(it -> it.getVideoGames().add(videogame));
+        }
+    
+
+    
+
+    
+
+    
+        if (videogame.getPlayedBy() != null
+        && !videogame.getPlayedBy().isEmpty()) {
+
+        List<UserProfile> attachedPlayedBy = videogame.getPlayedBy().stream()
+        .map(item -> playedByRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        videogame.setPlayedBy(attachedPlayedBy);
+
+        // côté propriétaire (UserProfile → VideoGame)
+        attachedPlayedBy.forEach(it -> it.getPlayedGames().add(videogame));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (videogame.getPlatforms() != null
+        && !videogame.getPlatforms().isEmpty()) {
+
+        List<GamePlatform> attachedPlatforms = videogame.getPlatforms().stream()
+        .map(item -> platformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("GamePlatform not found with id " + item.getId())))
+        .toList();
+
+        videogame.setPlatforms(attachedPlatforms);
+
+        // côté propriétaire (GamePlatform → VideoGame)
+        attachedPlatforms.forEach(it -> it.getVideoGames().add(videogame));
+        }
+    
+
+    
+
+    
+        if (videogame.getTags() != null
+        && !videogame.getTags().isEmpty()) {
+
+        List<ContentTag> attachedTags = videogame.getTags().stream()
+        .map(item -> tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
+        .toList();
+
+        videogame.setTags(attachedTags);
+
+        // côté propriétaire (ContentTag → VideoGame)
+        attachedTags.forEach(it -> it.getVideoGames().add(videogame));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
     
     
     
@@ -391,41 +480,73 @@ public class VideoGameService extends BaseService<VideoGame> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (videogameRequest.getGenres() != null) {
-            existing.getGenres().clear();
-            List<Genre> genresList = videogameRequest.getGenres().stream()
-                .map(item -> genresRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Genre not found")))
-                .collect(Collectors.toList());
+        existing.getGenres().clear();
+
+        List<Genre> genresList = videogameRequest.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found")))
+        .collect(Collectors.toList());
+
         existing.getGenres().addAll(genresList);
-        }
 
+        // Mettre à jour le côté inverse
+        genresList.forEach(it -> {
+        if (!it.getVideoGames().contains(existing)) {
+        it.getVideoGames().add(existing);
+        }
+        });
+        }
         if (videogameRequest.getPlayedBy() != null) {
-            existing.getPlayedBy().clear();
-            List<UserProfile> playedByList = videogameRequest.getPlayedBy().stream()
-                .map(item -> playedByRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getPlayedBy().clear();
+
+        List<UserProfile> playedByList = videogameRequest.getPlayedBy().stream()
+        .map(item -> playedByRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getPlayedBy().addAll(playedByList);
-        }
 
+        // Mettre à jour le côté inverse
+        playedByList.forEach(it -> {
+        if (!it.getPlayedGames().contains(existing)) {
+        it.getPlayedGames().add(existing);
+        }
+        });
+        }
         if (videogameRequest.getPlatforms() != null) {
-            existing.getPlatforms().clear();
-            List<GamePlatform> platformsList = videogameRequest.getPlatforms().stream()
-                .map(item -> platformsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("GamePlatform not found")))
-                .collect(Collectors.toList());
-        existing.getPlatforms().addAll(platformsList);
-        }
+        existing.getPlatforms().clear();
 
+        List<GamePlatform> platformsList = videogameRequest.getPlatforms().stream()
+        .map(item -> platformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("GamePlatform not found")))
+        .collect(Collectors.toList());
+
+        existing.getPlatforms().addAll(platformsList);
+
+        // Mettre à jour le côté inverse
+        platformsList.forEach(it -> {
+        if (!it.getVideoGames().contains(existing)) {
+        it.getVideoGames().add(existing);
+        }
+        });
+        }
         if (videogameRequest.getTags() != null) {
-            existing.getTags().clear();
-            List<ContentTag> tagsList = videogameRequest.getTags().stream()
-                .map(item -> tagsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("ContentTag not found")))
-                .collect(Collectors.toList());
+        existing.getTags().clear();
+
+        List<ContentTag> tagsList = videogameRequest.getTags().stream()
+        .map(item -> tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found")))
+        .collect(Collectors.toList());
+
         existing.getTags().addAll(tagsList);
+
+        // Mettre à jour le côté inverse
+        tagsList.forEach(it -> {
+        if (!it.getVideoGames().contains(existing)) {
+        it.getVideoGames().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

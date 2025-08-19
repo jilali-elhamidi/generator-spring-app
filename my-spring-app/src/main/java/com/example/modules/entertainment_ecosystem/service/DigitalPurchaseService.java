@@ -56,6 +56,17 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
 
     
 
+
+    
+
+    
+
+    
+
+    
+
+    
+
     if (digitalpurchase.getUser() != null
         && digitalpurchase.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

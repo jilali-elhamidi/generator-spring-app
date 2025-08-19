@@ -38,6 +38,25 @@ public class AdCampaignService extends BaseService<AdCampaign> {
 
     
 
+
+    
+
+    
+        if (adcampaign.getDisplayedOnPlatforms() != null
+        && !adcampaign.getDisplayedOnPlatforms().isEmpty()) {
+
+        List<StreamingPlatform> attachedDisplayedOnPlatforms = adcampaign.getDisplayedOnPlatforms().stream()
+        .map(item -> displayedOnPlatformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found with id " + item.getId())))
+        .toList();
+
+        adcampaign.setDisplayedOnPlatforms(attachedDisplayedOnPlatforms);
+
+        // côté propriétaire (StreamingPlatform → AdCampaign)
+        attachedDisplayedOnPlatforms.forEach(it -> it.getAdCampaigns().add(adcampaign));
+        }
+    
+
     if (adcampaign.getAdvertiser() != null
         && adcampaign.getAdvertiser().getId() != null) {
         Sponsor existingAdvertiser = advertiserRepository.findById(
@@ -76,14 +95,22 @@ public class AdCampaignService extends BaseService<AdCampaign> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (adcampaignRequest.getDisplayedOnPlatforms() != null) {
-            existing.getDisplayedOnPlatforms().clear();
-            List<StreamingPlatform> displayedOnPlatformsList = adcampaignRequest.getDisplayedOnPlatforms().stream()
-                .map(item -> displayedOnPlatformsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("StreamingPlatform not found")))
-                .collect(Collectors.toList());
+        existing.getDisplayedOnPlatforms().clear();
+
+        List<StreamingPlatform> displayedOnPlatformsList = adcampaignRequest.getDisplayedOnPlatforms().stream()
+        .map(item -> displayedOnPlatformsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found")))
+        .collect(Collectors.toList());
+
         existing.getDisplayedOnPlatforms().addAll(displayedOnPlatformsList);
+
+        // Mettre à jour le côté inverse
+        displayedOnPlatformsList.forEach(it -> {
+        if (!it.getAdCampaigns().contains(existing)) {
+        it.getAdCampaigns().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

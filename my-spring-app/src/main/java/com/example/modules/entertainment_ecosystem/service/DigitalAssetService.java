@@ -44,6 +44,13 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
 
     
 
+
+    
+
+    
+
+    
+
     if (digitalasset.getAssetType() != null
         && digitalasset.getAssetType().getId() != null) {
         DigitalAssetType existingAssetType = assetTypeRepository.findById(

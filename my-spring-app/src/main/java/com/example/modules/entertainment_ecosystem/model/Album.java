@@ -46,7 +46,7 @@ public class Album extends BaseEntity {
             @JoinTable(name = "album_genres",
             joinColumns = @JoinColumn(name = "album_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("Albums")
             private List<Genre> genres;
             
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})

@@ -44,6 +44,13 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
 
     
 
+
+    
+
+    
+
+    
+
     if (eventsponsorship.getEvent() != null
         && eventsponsorship.getEvent().getId() != null) {
         LiveEvent existingEvent = eventRepository.findById(

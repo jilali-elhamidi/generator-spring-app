@@ -30,8 +30,8 @@ public class UserRole extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToMany(mappedBy = "UserRole", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "userRoles", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("userRoles")
             private List<UserProfile> users = new ArrayList<>();
         
 

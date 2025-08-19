@@ -46,11 +46,13 @@ public class MusicTrack extends BaseEntity {
         @JsonIgnoreProperties("composedMusic")
         private Artist artist;
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "genre_id")
-        @JsonIgnoreProperties("musicTracks")
-        private Genre genre;
-    
+    @ManyToMany(fetch = FetchType.LAZY)
+            @JoinTable(name = "music_track_genres",
+            joinColumns = @JoinColumn(name = "track_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id"))
+            @JsonIgnoreProperties("musicTracks")
+            private List<Genre> genres;
+            
     @ManyToMany(mappedBy = "listenedMusic", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("listenedMusic")
             private List<UserProfile> listenedByUsers = new ArrayList<>();

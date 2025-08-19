@@ -44,6 +44,27 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
 
     
 
+
+    
+
+    
+
+    
+        if (podcastepisode.getGuestAppearances() != null
+        && !podcastepisode.getGuestAppearances().isEmpty()) {
+
+        List<PodcastGuest> attachedGuestAppearances = podcastepisode.getGuestAppearances().stream()
+        .map(item -> guestAppearancesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastGuest not found with id " + item.getId())))
+        .toList();
+
+        podcastepisode.setGuestAppearances(attachedGuestAppearances);
+
+        // côté propriétaire (PodcastGuest → PodcastEpisode)
+        attachedGuestAppearances.forEach(it -> it.getAppearances().add(podcastepisode));
+        }
+    
+
     if (podcastepisode.getPodcast() != null
         && podcastepisode.getPodcast().getId() != null) {
         Podcast existingPodcast = podcastRepository.findById(
@@ -93,14 +114,22 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (podcastepisodeRequest.getGuestAppearances() != null) {
-            existing.getGuestAppearances().clear();
-            List<PodcastGuest> guestAppearancesList = podcastepisodeRequest.getGuestAppearances().stream()
-                .map(item -> guestAppearancesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("PodcastGuest not found")))
-                .collect(Collectors.toList());
+        existing.getGuestAppearances().clear();
+
+        List<PodcastGuest> guestAppearancesList = podcastepisodeRequest.getGuestAppearances().stream()
+        .map(item -> guestAppearancesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastGuest not found")))
+        .collect(Collectors.toList());
+
         existing.getGuestAppearances().addAll(guestAppearancesList);
+
+        // Mettre à jour le côté inverse
+        guestAppearancesList.forEach(it -> {
+        if (!it.getAppearances().contains(existing)) {
+        it.getAppearances().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

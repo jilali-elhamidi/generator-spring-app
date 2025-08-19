@@ -52,6 +52,9 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
         
     
 
+
+    
+
     
 
         return digitalassettypeRepository.save(digitalassettype);

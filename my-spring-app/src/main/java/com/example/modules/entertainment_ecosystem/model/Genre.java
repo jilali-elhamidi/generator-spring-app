@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.Podcast;
+import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Book;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.Album;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
@@ -35,26 +35,23 @@ public class Genre extends BaseEntity {
             private List<Movie> movies = new ArrayList<>();
         
     @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("genres")
             private List<TVShow> tvShows = new ArrayList<>();
         
     @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("genres")
             private List<Book> bookGenres = new ArrayList<>();
         
-    @ManyToMany(fetch = FetchType.LAZY)
-            @JoinTable(name = "genre_music_tracks",
-            joinColumns = @JoinColumn(name = "genre_id"),
-            inverseJoinColumns = @JoinColumn(name = "track_id"))
-            @JsonIgnoreProperties("")
-            private List<MusicTrack> musicTracks;
-            
+    @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("genres")
+            private List<MusicTrack> musicTracks = new ArrayList<>();
+        
     @ManyToMany(mappedBy = "favoriteGenres", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("favoriteGenres")
             private List<UserProfile> favoriteUsers = new ArrayList<>();
         
     @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("genres")
             private List<VideoGame> videoGames = new ArrayList<>();
         
     @ManyToMany(fetch = FetchType.LAZY)
@@ -64,5 +61,9 @@ public class Genre extends BaseEntity {
             @JsonIgnoreProperties("genres")
             private List<Podcast> podcasts;
             
+    @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("genres")
+            private List<Album> albums = new ArrayList<>();
+        
 
 }

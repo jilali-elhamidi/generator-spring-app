@@ -56,6 +56,17 @@ public class TicketService extends BaseService<Ticket> {
 
     
 
+
+    
+
+    
+
+    
+
+    
+
+    
+
     if (ticket.getUser() != null
         && ticket.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

@@ -58,6 +58,11 @@ public class UserPlaylistService extends BaseService<UserPlaylist> {
         
     
 
+
+    
+
+    
+
     if (userplaylist.getUser() != null
         && userplaylist.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

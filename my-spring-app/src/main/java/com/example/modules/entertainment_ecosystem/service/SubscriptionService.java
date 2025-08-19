@@ -44,6 +44,13 @@ public class SubscriptionService extends BaseService<Subscription> {
 
     
 
+
+    
+
+    
+
+    
+
     if (subscription.getUser() != null
         && subscription.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

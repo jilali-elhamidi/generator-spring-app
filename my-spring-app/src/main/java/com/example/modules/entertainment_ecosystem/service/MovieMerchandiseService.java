@@ -32,6 +32,9 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
 
     
 
+
+    
+
     if (moviemerchandise.getMovie() != null
         && moviemerchandise.getMovie().getId() != null) {
         Movie existingMovie = movieRepository.findById(

@@ -32,6 +32,23 @@ public class MusicFormatService extends BaseService<MusicFormat> {
 
     
 
+
+    
+        if (musicformat.getMusicTracks() != null
+        && !musicformat.getMusicTracks().isEmpty()) {
+
+        List<MusicTrack> attachedMusicTracks = musicformat.getMusicTracks().stream()
+        .map(item -> musicTracksRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicTrack not found with id " + item.getId())))
+        .toList();
+
+        musicformat.setMusicTracks(attachedMusicTracks);
+
+        // côté propriétaire (MusicTrack → MusicFormat)
+        attachedMusicTracks.forEach(it -> it.getFormats().add(musicformat));
+        }
+    
+
     
 
         return musicformatRepository.save(musicformat);
@@ -48,14 +65,22 @@ public class MusicFormatService extends BaseService<MusicFormat> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (musicformatRequest.getMusicTracks() != null) {
-            existing.getMusicTracks().clear();
-            List<MusicTrack> musicTracksList = musicformatRequest.getMusicTracks().stream()
-                .map(item -> musicTracksRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("MusicTrack not found")))
-                .collect(Collectors.toList());
+        existing.getMusicTracks().clear();
+
+        List<MusicTrack> musicTracksList = musicformatRequest.getMusicTracks().stream()
+        .map(item -> musicTracksRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicTrack not found")))
+        .collect(Collectors.toList());
+
         existing.getMusicTracks().addAll(musicTracksList);
+
+        // Mettre à jour le côté inverse
+        musicTracksList.forEach(it -> {
+        if (!it.getFormats().contains(existing)) {
+        it.getFormats().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

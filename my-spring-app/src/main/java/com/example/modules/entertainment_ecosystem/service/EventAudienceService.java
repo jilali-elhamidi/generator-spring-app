@@ -32,6 +32,9 @@ public class EventAudienceService extends BaseService<EventAudience> {
 
     
 
+
+    
+
     
         if (eventaudience.getEvent() != null) {
         

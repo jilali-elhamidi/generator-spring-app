@@ -50,6 +50,71 @@ public class ContentTagService extends BaseService<ContentTag> {
 
     
 
+
+    
+        if (contenttag.getMovies() != null
+        && !contenttag.getMovies().isEmpty()) {
+
+        List<Movie> attachedMovies = contenttag.getMovies().stream()
+        .map(item -> moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
+        .toList();
+
+        contenttag.setMovies(attachedMovies);
+
+        // côté propriétaire (Movie → ContentTag)
+        attachedMovies.forEach(it -> it.getTags().add(contenttag));
+        }
+    
+
+    
+        if (contenttag.getTvShows() != null
+        && !contenttag.getTvShows().isEmpty()) {
+
+        List<TVShow> attachedTvShows = contenttag.getTvShows().stream()
+        .map(item -> tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
+        .toList();
+
+        contenttag.setTvShows(attachedTvShows);
+
+        // côté propriétaire (TVShow → ContentTag)
+        attachedTvShows.forEach(it -> it.getTags().add(contenttag));
+        }
+    
+
+    
+        if (contenttag.getVideoGames() != null
+        && !contenttag.getVideoGames().isEmpty()) {
+
+        List<VideoGame> attachedVideoGames = contenttag.getVideoGames().stream()
+        .map(item -> videoGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId())))
+        .toList();
+
+        contenttag.setVideoGames(attachedVideoGames);
+
+        // côté propriétaire (VideoGame → ContentTag)
+        attachedVideoGames.forEach(it -> it.getTags().add(contenttag));
+        }
+    
+
+    
+        if (contenttag.getLiveEvents() != null
+        && !contenttag.getLiveEvents().isEmpty()) {
+
+        List<LiveEvent> attachedLiveEvents = contenttag.getLiveEvents().stream()
+        .map(item -> liveEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("LiveEvent not found with id " + item.getId())))
+        .toList();
+
+        contenttag.setLiveEvents(attachedLiveEvents);
+
+        // côté propriétaire (LiveEvent → ContentTag)
+        attachedLiveEvents.forEach(it -> it.getTags().add(contenttag));
+        }
+    
+
     
     
     
@@ -69,41 +134,73 @@ public class ContentTagService extends BaseService<ContentTag> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (contenttagRequest.getMovies() != null) {
-            existing.getMovies().clear();
-            List<Movie> moviesList = contenttagRequest.getMovies().stream()
-                .map(item -> moviesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Movie not found")))
-                .collect(Collectors.toList());
+        existing.getMovies().clear();
+
+        List<Movie> moviesList = contenttagRequest.getMovies().stream()
+        .map(item -> moviesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Movie not found")))
+        .collect(Collectors.toList());
+
         existing.getMovies().addAll(moviesList);
-        }
 
+        // Mettre à jour le côté inverse
+        moviesList.forEach(it -> {
+        if (!it.getTags().contains(existing)) {
+        it.getTags().add(existing);
+        }
+        });
+        }
         if (contenttagRequest.getTvShows() != null) {
-            existing.getTvShows().clear();
-            List<TVShow> tvShowsList = contenttagRequest.getTvShows().stream()
-                .map(item -> tvShowsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("TVShow not found")))
-                .collect(Collectors.toList());
+        existing.getTvShows().clear();
+
+        List<TVShow> tvShowsList = contenttagRequest.getTvShows().stream()
+        .map(item -> tvShowsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("TVShow not found")))
+        .collect(Collectors.toList());
+
         existing.getTvShows().addAll(tvShowsList);
-        }
 
+        // Mettre à jour le côté inverse
+        tvShowsList.forEach(it -> {
+        if (!it.getTags().contains(existing)) {
+        it.getTags().add(existing);
+        }
+        });
+        }
         if (contenttagRequest.getVideoGames() != null) {
-            existing.getVideoGames().clear();
-            List<VideoGame> videoGamesList = contenttagRequest.getVideoGames().stream()
-                .map(item -> videoGamesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("VideoGame not found")))
-                .collect(Collectors.toList());
-        existing.getVideoGames().addAll(videoGamesList);
-        }
+        existing.getVideoGames().clear();
 
+        List<VideoGame> videoGamesList = contenttagRequest.getVideoGames().stream()
+        .map(item -> videoGamesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("VideoGame not found")))
+        .collect(Collectors.toList());
+
+        existing.getVideoGames().addAll(videoGamesList);
+
+        // Mettre à jour le côté inverse
+        videoGamesList.forEach(it -> {
+        if (!it.getTags().contains(existing)) {
+        it.getTags().add(existing);
+        }
+        });
+        }
         if (contenttagRequest.getLiveEvents() != null) {
-            existing.getLiveEvents().clear();
-            List<LiveEvent> liveEventsList = contenttagRequest.getLiveEvents().stream()
-                .map(item -> liveEventsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("LiveEvent not found")))
-                .collect(Collectors.toList());
+        existing.getLiveEvents().clear();
+
+        List<LiveEvent> liveEventsList = contenttagRequest.getLiveEvents().stream()
+        .map(item -> liveEventsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("LiveEvent not found")))
+        .collect(Collectors.toList());
+
         existing.getLiveEvents().addAll(liveEventsList);
+
+        // Mettre à jour le côté inverse
+        liveEventsList.forEach(it -> {
+        if (!it.getTags().contains(existing)) {
+        it.getTags().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

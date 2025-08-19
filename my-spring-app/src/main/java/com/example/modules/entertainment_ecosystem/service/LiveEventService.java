@@ -114,6 +114,51 @@ public class LiveEventService extends BaseService<LiveEvent> {
 
     
 
+
+    
+        if (liveevent.getPerformers() != null
+        && !liveevent.getPerformers().isEmpty()) {
+
+        List<Artist> attachedPerformers = liveevent.getPerformers().stream()
+        .map(item -> performersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
+        .toList();
+
+        liveevent.setPerformers(attachedPerformers);
+
+        // côté propriétaire (Artist → LiveEvent)
+        attachedPerformers.forEach(it -> it.getParticipatedInEvents().add(liveevent));
+        }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        if (liveevent.getTags() != null
+        && !liveevent.getTags().isEmpty()) {
+
+        List<ContentTag> attachedTags = liveevent.getTags().stream()
+        .map(item -> tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
+        .toList();
+
+        liveevent.setTags(attachedTags);
+
+        // côté propriétaire (ContentTag → LiveEvent)
+        attachedTags.forEach(it -> it.getLiveEvents().add(liveevent));
+        }
+    
+
     
     
     if (liveevent.getEventType() != null
@@ -204,23 +249,39 @@ public class LiveEventService extends BaseService<LiveEvent> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (liveeventRequest.getPerformers() != null) {
-            existing.getPerformers().clear();
-            List<Artist> performersList = liveeventRequest.getPerformers().stream()
-                .map(item -> performersRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Artist not found")))
-                .collect(Collectors.toList());
-        existing.getPerformers().addAll(performersList);
-        }
+        existing.getPerformers().clear();
 
+        List<Artist> performersList = liveeventRequest.getPerformers().stream()
+        .map(item -> performersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Artist not found")))
+        .collect(Collectors.toList());
+
+        existing.getPerformers().addAll(performersList);
+
+        // Mettre à jour le côté inverse
+        performersList.forEach(it -> {
+        if (!it.getParticipatedInEvents().contains(existing)) {
+        it.getParticipatedInEvents().add(existing);
+        }
+        });
+        }
         if (liveeventRequest.getTags() != null) {
-            existing.getTags().clear();
-            List<ContentTag> tagsList = liveeventRequest.getTags().stream()
-                .map(item -> tagsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("ContentTag not found")))
-                .collect(Collectors.toList());
+        existing.getTags().clear();
+
+        List<ContentTag> tagsList = liveeventRequest.getTags().stream()
+        .map(item -> tagsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("ContentTag not found")))
+        .collect(Collectors.toList());
+
         existing.getTags().addAll(tagsList);
+
+        // Mettre à jour le côté inverse
+        tagsList.forEach(it -> {
+        if (!it.getLiveEvents().contains(existing)) {
+        it.getLiveEvents().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

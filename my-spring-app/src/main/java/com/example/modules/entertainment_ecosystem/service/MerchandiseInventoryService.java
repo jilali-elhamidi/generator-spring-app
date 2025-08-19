@@ -38,6 +38,11 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
 
     
 
+
+    
+
+    
+
     
     if (merchandiseinventory.getWarehouse() != null
         && merchandiseinventory.getWarehouse().getId() != null) {

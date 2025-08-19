@@ -32,6 +32,23 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
 
     
 
+
+    
+        if (podcastcategory.getPodcasts() != null
+        && !podcastcategory.getPodcasts().isEmpty()) {
+
+        List<Podcast> attachedPodcasts = podcastcategory.getPodcasts().stream()
+        .map(item -> podcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId())))
+        .toList();
+
+        podcastcategory.setPodcasts(attachedPodcasts);
+
+        // côté propriétaire (Podcast → PodcastCategory)
+        attachedPodcasts.forEach(it -> it.getCategories().add(podcastcategory));
+        }
+    
+
     
 
         return podcastcategoryRepository.save(podcastcategory);
@@ -48,14 +65,22 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (podcastcategoryRequest.getPodcasts() != null) {
-            existing.getPodcasts().clear();
-            List<Podcast> podcastsList = podcastcategoryRequest.getPodcasts().stream()
-                .map(item -> podcastsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Podcast not found")))
-                .collect(Collectors.toList());
+        existing.getPodcasts().clear();
+
+        List<Podcast> podcastsList = podcastcategoryRequest.getPodcasts().stream()
+        .map(item -> podcastsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Podcast not found")))
+        .collect(Collectors.toList());
+
         existing.getPodcasts().addAll(podcastsList);
+
+        // Mettre à jour le côté inverse
+        podcastsList.forEach(it -> {
+        if (!it.getCategories().contains(existing)) {
+        it.getCategories().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

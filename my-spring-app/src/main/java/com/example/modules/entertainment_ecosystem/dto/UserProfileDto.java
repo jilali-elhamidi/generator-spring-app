@@ -90,6 +90,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserMessageSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.FeatureFlagSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.MessageThreadSimpleDto;
+
 
 
 @Data
@@ -173,7 +175,7 @@ public class UserProfileDto {
 
     private List<UserSettingSimpleDto> settings;
 
-    private List<UserRoleSimpleDto> UserRole;
+    private List<UserRoleSimpleDto> userRoles;
 
     private List<UserFollowerSimpleDto> followers;
 
@@ -200,5 +202,7 @@ public class UserProfileDto {
     private List<UserMessageSimpleDto> receivedMessages;
 
     private List<FeatureFlagSimpleDto> enabledFeatureFlags;
+
+    private List<MessageThreadSimpleDto> messageThreads;
 
 }

@@ -70,6 +70,29 @@ public class AlbumService extends BaseService<Album> {
 
     
 
+
+    
+
+    
+
+    
+        if (album.getGenres() != null
+        && !album.getGenres().isEmpty()) {
+
+        List<Genre> attachedGenres = album.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
+        .toList();
+
+        album.setGenres(attachedGenres);
+
+        // côté propriétaire (Genre → Album)
+        attachedGenres.forEach(it -> it.getAlbums().add(album));
+        }
+    
+
+    
+
     if (album.getArtist() != null
         && album.getArtist().getId() != null) {
         Artist existingArtist = artistRepository.findById(
@@ -126,14 +149,22 @@ public class AlbumService extends BaseService<Album> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (albumRequest.getGenres() != null) {
-            existing.getGenres().clear();
-            List<Genre> genresList = albumRequest.getGenres().stream()
-                .map(item -> genresRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Genre not found")))
-                .collect(Collectors.toList());
+        existing.getGenres().clear();
+
+        List<Genre> genresList = albumRequest.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found")))
+        .collect(Collectors.toList());
+
         existing.getGenres().addAll(genresList);
+
+        // Mettre à jour le côté inverse
+        genresList.forEach(it -> {
+        if (!it.getAlbums().contains(existing)) {
+        it.getAlbums().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée
@@ -205,6 +236,8 @@ Album entity = entityOpt.get();
     
         if (entity.getGenres() != null) {
         for (Genre item : new ArrayList<>(entity.getGenres())) {
+        
+            item.getAlbums().remove(entity); // retire côté inverse
         
         }
         entity.getGenres().clear(); // puis vide côté courant

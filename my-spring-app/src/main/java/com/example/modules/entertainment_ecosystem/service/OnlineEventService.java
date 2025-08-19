@@ -44,6 +44,27 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
 
     
 
+
+    
+
+    
+        if (onlineevent.getAttendees() != null
+        && !onlineevent.getAttendees().isEmpty()) {
+
+        List<UserProfile> attachedAttendees = onlineevent.getAttendees().stream()
+        .map(item -> attendeesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        onlineevent.setAttendees(attachedAttendees);
+
+        // côté propriétaire (UserProfile → OnlineEvent)
+        attachedAttendees.forEach(it -> it.getAttendedOnlineEvents().add(onlineevent));
+        }
+    
+
+    
+
     if (onlineevent.getHost() != null
         && onlineevent.getHost().getId() != null) {
         UserProfile existingHost = hostRepository.findById(
@@ -101,14 +122,22 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (onlineeventRequest.getAttendees() != null) {
-            existing.getAttendees().clear();
-            List<UserProfile> attendeesList = onlineeventRequest.getAttendees().stream()
-                .map(item -> attendeesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getAttendees().clear();
+
+        List<UserProfile> attendeesList = onlineeventRequest.getAttendees().stream()
+        .map(item -> attendeesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getAttendees().addAll(attendeesList);
+
+        // Mettre à jour le côté inverse
+        attendeesList.forEach(it -> {
+        if (!it.getAttendedOnlineEvents().contains(existing)) {
+        it.getAttendedOnlineEvents().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

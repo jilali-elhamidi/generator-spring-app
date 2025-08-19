@@ -38,6 +38,25 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
 
     
 
+
+    
+
+    
+        if (podcastguest.getAppearances() != null
+        && !podcastguest.getAppearances().isEmpty()) {
+
+        List<PodcastEpisode> attachedAppearances = podcastguest.getAppearances().stream()
+        .map(item -> appearancesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastEpisode not found with id " + item.getId())))
+        .toList();
+
+        podcastguest.setAppearances(attachedAppearances);
+
+        // côté propriétaire (PodcastEpisode → PodcastGuest)
+        attachedAppearances.forEach(it -> it.getGuestAppearances().add(podcastguest));
+        }
+    
+
     if (podcastguest.getPodcast() != null
         && podcastguest.getPodcast().getId() != null) {
         Podcast existingPodcast = podcastRepository.findById(
@@ -74,14 +93,22 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (podcastguestRequest.getAppearances() != null) {
-            existing.getAppearances().clear();
-            List<PodcastEpisode> appearancesList = podcastguestRequest.getAppearances().stream()
-                .map(item -> appearancesRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("PodcastEpisode not found")))
-                .collect(Collectors.toList());
+        existing.getAppearances().clear();
+
+        List<PodcastEpisode> appearancesList = podcastguestRequest.getAppearances().stream()
+        .map(item -> appearancesRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("PodcastEpisode not found")))
+        .collect(Collectors.toList());
+
         existing.getAppearances().addAll(appearancesList);
+
+        // Mettre à jour le côté inverse
+        appearancesList.forEach(it -> {
+        if (!it.getGuestAppearances().contains(existing)) {
+        it.getGuestAppearances().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

@@ -52,6 +52,9 @@ public class WarehouseService extends BaseService<Warehouse> {
         
     
 
+
+    
+
     
 
         return warehouseRepository.save(warehouse);

@@ -32,6 +32,9 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
 
     
 
+
+    
+
     if (videogamerating.getGame() != null
         && videogamerating.getGame().getId() != null) {
         VideoGame existingGame = gameRepository.findById(

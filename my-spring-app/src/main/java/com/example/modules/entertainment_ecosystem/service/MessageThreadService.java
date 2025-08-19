@@ -58,6 +58,25 @@ public class MessageThreadService extends BaseService<MessageThread> {
         
     
 
+
+    
+        if (messagethread.getParticipants() != null
+        && !messagethread.getParticipants().isEmpty()) {
+
+        List<UserProfile> attachedParticipants = messagethread.getParticipants().stream()
+        .map(item -> participantsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        messagethread.setParticipants(attachedParticipants);
+
+        // côté propriétaire (UserProfile → MessageThread)
+        attachedParticipants.forEach(it -> it.getMessageThreads().add(messagethread));
+        }
+    
+
+    
+
     
     
 
@@ -76,14 +95,22 @@ public class MessageThreadService extends BaseService<MessageThread> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (messagethreadRequest.getParticipants() != null) {
-            existing.getParticipants().clear();
-            List<UserProfile> participantsList = messagethreadRequest.getParticipants().stream()
-                .map(item -> participantsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getParticipants().clear();
+
+        List<UserProfile> participantsList = messagethreadRequest.getParticipants().stream()
+        .map(item -> participantsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getParticipants().addAll(participantsList);
+
+        // Mettre à jour le côté inverse
+        participantsList.forEach(it -> {
+        if (!it.getMessageThreads().contains(existing)) {
+        it.getMessageThreads().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée
@@ -143,6 +170,8 @@ MessageThread entity = entityOpt.get();
     
         if (entity.getParticipants() != null) {
         for (UserProfile item : new ArrayList<>(entity.getParticipants())) {
+        
+            item.getMessageThreads().remove(entity); // retire côté inverse
         
         }
         entity.getParticipants().clear(); // puis vide côté courant

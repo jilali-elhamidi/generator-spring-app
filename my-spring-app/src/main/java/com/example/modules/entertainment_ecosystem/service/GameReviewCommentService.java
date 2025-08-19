@@ -70,6 +70,15 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
 
     
 
+
+    
+
+    
+
+    
+
+    
+
     if (gamereviewcomment.getUser() != null
         && gamereviewcomment.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

@@ -50,6 +50,15 @@ public class StreamingContentLicenseService extends BaseService<StreamingContent
 
     
 
+
+    
+
+    
+
+    
+
+    
+
     if (streamingcontentlicense.getSubscriptionPlan() != null
         && streamingcontentlicense.getSubscriptionPlan().getId() != null) {
         SubscriptionPlan existingSubscriptionPlan = subscriptionPlanRepository.findById(

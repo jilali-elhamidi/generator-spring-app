@@ -38,6 +38,11 @@ public class UserAchievementService extends BaseService<UserAchievement> {
 
     
 
+
+    
+
+    
+
     if (userachievement.getUser() != null
         && userachievement.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

@@ -44,6 +44,13 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
 
     
 
+
+    
+
+    
+
+    
+
     if (playlistitem.getPlaylist() != null
         && playlistitem.getPlaylist().getId() != null) {
         Playlist existingPlaylist = playlistRepository.findById(

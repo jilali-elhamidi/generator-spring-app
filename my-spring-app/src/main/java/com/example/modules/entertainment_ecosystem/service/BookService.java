@@ -70,6 +70,29 @@ public class BookService extends BaseService<Book> {
 
     
 
+
+    
+
+    
+
+    
+
+    
+        if (book.getGenres() != null
+        && !book.getGenres().isEmpty()) {
+
+        List<Genre> attachedGenres = book.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
+        .toList();
+
+        book.setGenres(attachedGenres);
+
+        // côté propriétaire (Genre → Book)
+        attachedGenres.forEach(it -> it.getBookGenres().add(book));
+        }
+    
+
     if (book.getAuthor() != null
         && book.getAuthor().getId() != null) {
         Artist existingAuthor = authorRepository.findById(
@@ -128,14 +151,22 @@ public class BookService extends BaseService<Book> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (bookRequest.getGenres() != null) {
-            existing.getGenres().clear();
-            List<Genre> genresList = bookRequest.getGenres().stream()
-                .map(item -> genresRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("Genre not found")))
-                .collect(Collectors.toList());
+        existing.getGenres().clear();
+
+        List<Genre> genresList = bookRequest.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found")))
+        .collect(Collectors.toList());
+
         existing.getGenres().addAll(genresList);
+
+        // Mettre à jour le côté inverse
+        genresList.forEach(it -> {
+        if (!it.getBookGenres().contains(existing)) {
+        it.getBookGenres().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée

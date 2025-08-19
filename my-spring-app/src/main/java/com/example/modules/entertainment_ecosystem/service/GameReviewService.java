@@ -116,6 +116,17 @@ public class GameReviewService extends BaseService<GameReview> {
         
     
 
+
+    
+
+    
+
+    
+
+    
+
+    
+
     if (gamereview.getUser() != null
         && gamereview.getUser().getId() != null) {
         UserProfile existingUser = userRepository.findById(

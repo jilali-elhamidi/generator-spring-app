@@ -35,7 +35,7 @@ public class MusicTrackService extends BaseService<MusicTrack> {
     protected final MusicTrackRepository musictrackRepository;
     private final AlbumRepository albumRepository;
     private final ArtistRepository artistRepository;
-    private final GenreRepository genreRepository;
+    private final GenreRepository genresRepository;
     private final UserProfileRepository listenedByUsersRepository;
     private final PlaylistItemRepository playlistItemsRepository;
     private final DigitalPurchaseRepository purchasesRepository;
@@ -43,13 +43,13 @@ public class MusicTrackService extends BaseService<MusicTrack> {
     private final StreamingContentLicenseRepository streamingLicensesRepository;
     private final ContentProviderRepository providerRepository;
 
-    public MusicTrackService(MusicTrackRepository repository,AlbumRepository albumRepository,ArtistRepository artistRepository,GenreRepository genreRepository,UserProfileRepository listenedByUsersRepository,PlaylistItemRepository playlistItemsRepository,DigitalPurchaseRepository purchasesRepository,MusicFormatRepository formatsRepository,StreamingContentLicenseRepository streamingLicensesRepository,ContentProviderRepository providerRepository)
+    public MusicTrackService(MusicTrackRepository repository,AlbumRepository albumRepository,ArtistRepository artistRepository,GenreRepository genresRepository,UserProfileRepository listenedByUsersRepository,PlaylistItemRepository playlistItemsRepository,DigitalPurchaseRepository purchasesRepository,MusicFormatRepository formatsRepository,StreamingContentLicenseRepository streamingLicensesRepository,ContentProviderRepository providerRepository)
     {
         super(repository);
         this.musictrackRepository = repository;
         this.albumRepository = albumRepository;
         this.artistRepository = artistRepository;
-        this.genreRepository = genreRepository;
+        this.genresRepository = genresRepository;
         this.listenedByUsersRepository = listenedByUsersRepository;
         this.playlistItemsRepository = playlistItemsRepository;
         this.purchasesRepository = purchasesRepository;
@@ -140,6 +140,67 @@ public class MusicTrackService extends BaseService<MusicTrack> {
 
     
 
+
+    
+
+    
+
+    
+        if (musictrack.getGenres() != null
+        && !musictrack.getGenres().isEmpty()) {
+
+        List<Genre> attachedGenres = musictrack.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
+        .toList();
+
+        musictrack.setGenres(attachedGenres);
+
+        // côté propriétaire (Genre → MusicTrack)
+        attachedGenres.forEach(it -> it.getMusicTracks().add(musictrack));
+        }
+    
+
+    
+        if (musictrack.getListenedByUsers() != null
+        && !musictrack.getListenedByUsers().isEmpty()) {
+
+        List<UserProfile> attachedListenedByUsers = musictrack.getListenedByUsers().stream()
+        .map(item -> listenedByUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        musictrack.setListenedByUsers(attachedListenedByUsers);
+
+        // côté propriétaire (UserProfile → MusicTrack)
+        attachedListenedByUsers.forEach(it -> it.getListenedMusic().add(musictrack));
+        }
+    
+
+    
+
+    
+
+    
+        if (musictrack.getFormats() != null
+        && !musictrack.getFormats().isEmpty()) {
+
+        List<MusicFormat> attachedFormats = musictrack.getFormats().stream()
+        .map(item -> formatsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicFormat not found with id " + item.getId())))
+        .toList();
+
+        musictrack.setFormats(attachedFormats);
+
+        // côté propriétaire (MusicFormat → MusicTrack)
+        attachedFormats.forEach(it -> it.getMusicTracks().add(musictrack));
+        }
+    
+
+    
+
+    
+
     if (musictrack.getAlbum() != null
         && musictrack.getAlbum().getId() != null) {
         Album existingAlbum = albumRepository.findById(
@@ -156,13 +217,6 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         musictrack.setArtist(existingArtist);
         }
     
-    if (musictrack.getGenre() != null
-        && musictrack.getGenre().getId() != null) {
-        Genre existingGenre = genreRepository.findById(
-        musictrack.getGenre().getId()
-        ).orElseThrow(() -> new RuntimeException("Genre not found"));
-        musictrack.setGenre(existingGenre);
-        }
     
     
     
@@ -214,17 +268,6 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         } else {
         existing.setArtist(null);
         }
-        if (musictrackRequest.getGenre() != null &&
-        musictrackRequest.getGenre().getId() != null) {
-
-        Genre existingGenre = genreRepository.findById(
-        musictrackRequest.getGenre().getId()
-        ).orElseThrow(() -> new RuntimeException("Genre not found"));
-
-        existing.setGenre(existingGenre);
-        } else {
-        existing.setGenre(null);
-        }
         if (musictrackRequest.getProvider() != null &&
         musictrackRequest.getProvider().getId() != null) {
 
@@ -238,23 +281,56 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         }
 
 // Relations ManyToMany : synchronisation sécurisée
+        if (musictrackRequest.getGenres() != null) {
+        existing.getGenres().clear();
 
-        if (musictrackRequest.getListenedByUsers() != null) {
-            existing.getListenedByUsers().clear();
-            List<UserProfile> listenedByUsersList = musictrackRequest.getListenedByUsers().stream()
-                .map(item -> listenedByUsersRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
-        existing.getListenedByUsers().addAll(listenedByUsersList);
+        List<Genre> genresList = musictrackRequest.getGenres().stream()
+        .map(item -> genresRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("Genre not found")))
+        .collect(Collectors.toList());
+
+        existing.getGenres().addAll(genresList);
+
+        // Mettre à jour le côté inverse
+        genresList.forEach(it -> {
+        if (!it.getMusicTracks().contains(existing)) {
+        it.getMusicTracks().add(existing);
         }
+        });
+        }
+        if (musictrackRequest.getListenedByUsers() != null) {
+        existing.getListenedByUsers().clear();
 
+        List<UserProfile> listenedByUsersList = musictrackRequest.getListenedByUsers().stream()
+        .map(item -> listenedByUsersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
+        existing.getListenedByUsers().addAll(listenedByUsersList);
+
+        // Mettre à jour le côté inverse
+        listenedByUsersList.forEach(it -> {
+        if (!it.getListenedMusic().contains(existing)) {
+        it.getListenedMusic().add(existing);
+        }
+        });
+        }
         if (musictrackRequest.getFormats() != null) {
-            existing.getFormats().clear();
-            List<MusicFormat> formatsList = musictrackRequest.getFormats().stream()
-                .map(item -> formatsRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("MusicFormat not found")))
-                .collect(Collectors.toList());
+        existing.getFormats().clear();
+
+        List<MusicFormat> formatsList = musictrackRequest.getFormats().stream()
+        .map(item -> formatsRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("MusicFormat not found")))
+        .collect(Collectors.toList());
+
         existing.getFormats().addAll(formatsList);
+
+        // Mettre à jour le côté inverse
+        formatsList.forEach(it -> {
+        if (!it.getMusicTracks().contains(existing)) {
+        it.getMusicTracks().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée
@@ -402,6 +478,15 @@ MusicTrack entity = entityOpt.get();
     
 
     
+        if (entity.getGenres() != null) {
+        for (Genre item : new ArrayList<>(entity.getGenres())) {
+        
+            item.getMusicTracks().remove(entity); // retire côté inverse
+        
+        }
+        entity.getGenres().clear(); // puis vide côté courant
+        }
+    
 
     
         if (entity.getListenedByUsers() != null) {
@@ -470,10 +555,6 @@ MusicTrack entity = entityOpt.get();
         }
     
 
-    
-        if (entity.getGenre() != null) {
-        entity.setGenre(null);
-        }
     
 
     

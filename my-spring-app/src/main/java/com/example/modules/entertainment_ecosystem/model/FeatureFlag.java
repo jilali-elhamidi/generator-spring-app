@@ -37,7 +37,7 @@ public class FeatureFlag extends BaseEntity {
 // === Relations ===
 
     @ManyToMany(mappedBy = "enabledFeatureFlags", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("enabledFeatureFlags")
             private List<UserProfile> enabledForUsers = new ArrayList<>();
         
 

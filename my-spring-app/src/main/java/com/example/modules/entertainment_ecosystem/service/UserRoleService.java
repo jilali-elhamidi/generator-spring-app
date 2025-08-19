@@ -32,6 +32,23 @@ public class UserRoleService extends BaseService<UserRole> {
 
     
 
+
+    
+        if (userrole.getUsers() != null
+        && !userrole.getUsers().isEmpty()) {
+
+        List<UserProfile> attachedUsers = userrole.getUsers().stream()
+        .map(item -> usersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+        .toList();
+
+        userrole.setUsers(attachedUsers);
+
+        // côté propriétaire (UserProfile → UserRole)
+        attachedUsers.forEach(it -> it.getUserRoles().add(userrole));
+        }
+    
+
     
 
         return userroleRepository.save(userrole);
@@ -48,14 +65,22 @@ public class UserRoleService extends BaseService<UserRole> {
 // Relations ManyToOne : mise à jour conditionnelle
 
 // Relations ManyToMany : synchronisation sécurisée
-
         if (userroleRequest.getUsers() != null) {
-            existing.getUsers().clear();
-            List<UserProfile> usersList = userroleRequest.getUsers().stream()
-                .map(item -> usersRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
+        existing.getUsers().clear();
+
+        List<UserProfile> usersList = userroleRequest.getUsers().stream()
+        .map(item -> usersRepository.findById(item.getId())
+        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+        .collect(Collectors.toList());
+
         existing.getUsers().addAll(usersList);
+
+        // Mettre à jour le côté inverse
+        usersList.forEach(it -> {
+        if (!it.getUserRoles().contains(existing)) {
+        it.getUserRoles().add(existing);
+        }
+        });
         }
 
 // Relations OneToMany : synchronisation sécurisée
@@ -82,6 +107,8 @@ UserRole entity = entityOpt.get();
     
         if (entity.getUsers() != null) {
         for (UserProfile item : new ArrayList<>(entity.getUsers())) {
+        
+            item.getUserRoles().remove(entity); // retire côté inverse
         
         }
         entity.getUsers().clear(); // puis vide côté courant
