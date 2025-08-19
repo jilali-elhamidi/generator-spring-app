@@ -44,7 +44,7 @@ public class VideoGame extends BaseEntity {
             @JoinTable(name = "video_game_genres",
             joinColumns = @JoinColumn(name = "video_game_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("videoGames")
             private List<Genre> genres;
             
     @OneToMany(mappedBy = "videoGame", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -55,8 +55,8 @@ public class VideoGame extends BaseEntity {
         @JsonIgnoreProperties("game")
         private List<GameReview> gameReviews;
     
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "playedGames", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("playedGames")
             private List<UserProfile> playedBy = new ArrayList<>();
         
     @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -80,7 +80,7 @@ public class VideoGame extends BaseEntity {
             @JoinTable(name = "video_game_platforms",
             joinColumns = @JoinColumn(name = "game_id"),
             inverseJoinColumns = @JoinColumn(name = "platform_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("videoGames")
             private List<GamePlatform> platforms;
             
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -92,7 +92,7 @@ public class VideoGame extends BaseEntity {
             @JoinTable(name = "videogame_tags",
             joinColumns = @JoinColumn(name = "tag_id"),
             inverseJoinColumns = @JoinColumn(name = "game_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("videoGames")
             private List<ContentTag> tags;
             
     @OneToMany(mappedBy = "game", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)

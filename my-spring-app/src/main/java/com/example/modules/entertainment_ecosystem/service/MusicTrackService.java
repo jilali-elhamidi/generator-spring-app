@@ -407,6 +407,8 @@ MusicTrack entity = entityOpt.get();
         if (entity.getListenedByUsers() != null) {
         for (UserProfile item : new ArrayList<>(entity.getListenedByUsers())) {
         
+            item.getListenedMusic().remove(entity); // retire côté inverse
+        
         }
         entity.getListenedByUsers().clear(); // puis vide côté courant
         }
@@ -419,6 +421,8 @@ MusicTrack entity = entityOpt.get();
     
         if (entity.getFormats() != null) {
         for (MusicFormat item : new ArrayList<>(entity.getFormats())) {
+        
+            item.getMusicTracks().remove(entity); // retire côté inverse
         
         }
         entity.getFormats().clear(); // puis vide côté courant

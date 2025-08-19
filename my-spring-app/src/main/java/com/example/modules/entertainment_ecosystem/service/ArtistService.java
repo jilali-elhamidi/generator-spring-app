@@ -878,6 +878,8 @@ Artist entity = entityOpt.get();
         if (entity.getFavoriteArtists() != null) {
         for (UserProfile item : new ArrayList<>(entity.getFavoriteArtists())) {
         
+            item.getFavoriteArtists().remove(entity); // retire côté inverse
+        
         }
         entity.getFavoriteArtists().clear(); // puis vide côté courant
         }
@@ -892,6 +894,8 @@ Artist entity = entityOpt.get();
     
         if (entity.getParticipatedInEvents() != null) {
         for (LiveEvent item : new ArrayList<>(entity.getParticipatedInEvents())) {
+        
+            item.getPerformers().remove(entity); // retire côté inverse
         
         }
         entity.getParticipatedInEvents().clear(); // puis vide côté courant
@@ -912,6 +916,8 @@ Artist entity = entityOpt.get();
         if (entity.getActedInMovies() != null) {
         for (Movie item : new ArrayList<>(entity.getActedInMovies())) {
         
+            item.getCast().remove(entity); // retire côté inverse
+        
         }
         entity.getActedInMovies().clear(); // puis vide côté courant
         }
@@ -926,6 +932,8 @@ Artist entity = entityOpt.get();
     
         if (entity.getActedInShows() != null) {
         for (TVShow item : new ArrayList<>(entity.getActedInShows())) {
+        
+            item.getCast().remove(entity); // retire côté inverse
         
         }
         entity.getActedInShows().clear(); // puis vide côté courant

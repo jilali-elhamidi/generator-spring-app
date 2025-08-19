@@ -266,6 +266,8 @@ StreamingPlatform entity = entityOpt.get();
         if (entity.getAdCampaigns() != null) {
         for (AdCampaign item : new ArrayList<>(entity.getAdCampaigns())) {
         
+            item.getDisplayedOnPlatforms().remove(entity); // retire côté inverse
+        
         }
         entity.getAdCampaigns().clear(); // puis vide côté courant
         }

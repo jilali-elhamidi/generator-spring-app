@@ -51,8 +51,8 @@ public class MusicTrack extends BaseEntity {
         @JsonIgnoreProperties("musicTracks")
         private Genre genre;
     
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "listenedMusic", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("listenedMusic")
             private List<UserProfile> listenedByUsers = new ArrayList<>();
         
     @OneToMany(mappedBy = "track", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -67,7 +67,7 @@ public class MusicTrack extends BaseEntity {
             @JoinTable(name = "music_formats",
             joinColumns = @JoinColumn(name = "track_id"),
             inverseJoinColumns = @JoinColumn(name = "format_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("musicTracks")
             private List<MusicFormat> formats;
             
     @OneToMany(mappedBy = "musicTrack", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)

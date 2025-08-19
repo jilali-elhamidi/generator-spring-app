@@ -31,7 +31,7 @@ public class GamePlatform extends BaseEntity {
 // === Relations ===
 
     @ManyToMany(mappedBy = "platforms", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("platforms")
             private List<VideoGame> videoGames = new ArrayList<>();
         
 

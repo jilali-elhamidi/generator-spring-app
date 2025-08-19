@@ -59,6 +59,8 @@ import com.example.modules.entertainment_ecosystem.model.UserActivityLog;
 import com.example.modules.entertainment_ecosystem.repository.UserActivityLogRepository;
 import com.example.modules.entertainment_ecosystem.model.UserSetting;
 import com.example.modules.entertainment_ecosystem.repository.UserSettingRepository;
+import com.example.modules.entertainment_ecosystem.model.UserRole;
+import com.example.modules.entertainment_ecosystem.repository.UserRoleRepository;
 import com.example.modules.entertainment_ecosystem.model.UserFollower;
 import com.example.modules.entertainment_ecosystem.repository.UserFollowerRepository;
 import com.example.modules.entertainment_ecosystem.model.UserFollower;
@@ -83,6 +85,8 @@ import com.example.modules.entertainment_ecosystem.model.UserMessage;
 import com.example.modules.entertainment_ecosystem.repository.UserMessageRepository;
 import com.example.modules.entertainment_ecosystem.model.UserMessage;
 import com.example.modules.entertainment_ecosystem.repository.UserMessageRepository;
+import com.example.modules.entertainment_ecosystem.model.FeatureFlag;
+import com.example.modules.entertainment_ecosystem.repository.FeatureFlagRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,6 +127,7 @@ public class UserProfileService extends BaseService<UserProfile> {
     private final ReviewLikeRepository likedReviewsRepository;
     private final UserActivityLogRepository activityLogsRepository;
     private final UserSettingRepository settingsRepository;
+    private final UserRoleRepository UserRoleRepository;
     private final UserFollowerRepository followersRepository;
     private final UserFollowerRepository followingRepository;
     private final UserAchievementRepository userAchievementsRepository;
@@ -135,8 +140,9 @@ public class UserProfileService extends BaseService<UserProfile> {
     private final GameReviewDownvoteRepository gameReviewDownvotesRepository;
     private final UserMessageRepository sentMessagesRepository;
     private final UserMessageRepository receivedMessagesRepository;
+    private final FeatureFlagRepository enabledFeatureFlagsRepository;
 
-    public UserProfileService(UserProfileRepository repository,ReviewRepository reviewsRepository,MovieRepository watchlistMoviesRepository,ArtistRepository favoriteArtistsRepository,UserProfileRepository followedUsersRepository,UserProfileRepository followingUsersRepository,GenreRepository favoriteGenresRepository,SubscriptionRepository subscriptionsRepository,EpisodeRepository watchedEpisodesRepository,VideoGameRepository playedGamesRepository,ForumThreadRepository forumThreadsRepository,ForumPostRepository forumPostsRepository,AchievementRepository achievementsRepository,OnlineEventRepository hostedOnlineEventsRepository,OnlineEventRepository attendedOnlineEventsRepository,MerchandiseRepository ownedMerchandiseRepository,PodcastRepository libraryPodcastsRepository,MusicTrackRepository listenedMusicRepository,PlaylistRepository playlistsRepository,UserWalletRepository walletRepository,DigitalPurchaseRepository digitalPurchasesRepository,GameSessionRepository gameSessionsRepository,GameReviewCommentRepository gameReviewCommentsRepository,UserPlaylistRepository userPlaylistsRepository,UserPlaylistItemRepository userPlaylistItemsRepository,ReviewRatingRepository givenRatingsRepository,ReviewLikeRepository likedReviewsRepository,UserActivityLogRepository activityLogsRepository,UserSettingRepository settingsRepository,UserFollowerRepository followersRepository,UserFollowerRepository followingRepository,UserAchievementRepository userAchievementsRepository,NotificationRepository notificationsRepository,MerchandiseReviewRepository merchandiseReviewsRepository,UserPreferenceRepository preferencesRepository,MerchandiseSaleRepository merchandiseSalesRepository,GamePlaySessionRepository gamePlaySessionsRepository,GameReviewUpvoteRepository gameReviewUpvotesRepository,GameReviewDownvoteRepository gameReviewDownvotesRepository,UserMessageRepository sentMessagesRepository,UserMessageRepository receivedMessagesRepository)
+    public UserProfileService(UserProfileRepository repository,ReviewRepository reviewsRepository,MovieRepository watchlistMoviesRepository,ArtistRepository favoriteArtistsRepository,UserProfileRepository followedUsersRepository,UserProfileRepository followingUsersRepository,GenreRepository favoriteGenresRepository,SubscriptionRepository subscriptionsRepository,EpisodeRepository watchedEpisodesRepository,VideoGameRepository playedGamesRepository,ForumThreadRepository forumThreadsRepository,ForumPostRepository forumPostsRepository,AchievementRepository achievementsRepository,OnlineEventRepository hostedOnlineEventsRepository,OnlineEventRepository attendedOnlineEventsRepository,MerchandiseRepository ownedMerchandiseRepository,PodcastRepository libraryPodcastsRepository,MusicTrackRepository listenedMusicRepository,PlaylistRepository playlistsRepository,UserWalletRepository walletRepository,DigitalPurchaseRepository digitalPurchasesRepository,GameSessionRepository gameSessionsRepository,GameReviewCommentRepository gameReviewCommentsRepository,UserPlaylistRepository userPlaylistsRepository,UserPlaylistItemRepository userPlaylistItemsRepository,ReviewRatingRepository givenRatingsRepository,ReviewLikeRepository likedReviewsRepository,UserActivityLogRepository activityLogsRepository,UserSettingRepository settingsRepository,UserRoleRepository UserRoleRepository,UserFollowerRepository followersRepository,UserFollowerRepository followingRepository,UserAchievementRepository userAchievementsRepository,NotificationRepository notificationsRepository,MerchandiseReviewRepository merchandiseReviewsRepository,UserPreferenceRepository preferencesRepository,MerchandiseSaleRepository merchandiseSalesRepository,GamePlaySessionRepository gamePlaySessionsRepository,GameReviewUpvoteRepository gameReviewUpvotesRepository,GameReviewDownvoteRepository gameReviewDownvotesRepository,UserMessageRepository sentMessagesRepository,UserMessageRepository receivedMessagesRepository,FeatureFlagRepository enabledFeatureFlagsRepository)
     {
         super(repository);
         this.userprofileRepository = repository;
@@ -168,6 +174,7 @@ public class UserProfileService extends BaseService<UserProfile> {
         this.likedReviewsRepository = likedReviewsRepository;
         this.activityLogsRepository = activityLogsRepository;
         this.settingsRepository = settingsRepository;
+        this.UserRoleRepository = UserRoleRepository;
         this.followersRepository = followersRepository;
         this.followingRepository = followingRepository;
         this.userAchievementsRepository = userAchievementsRepository;
@@ -180,6 +187,7 @@ public class UserProfileService extends BaseService<UserProfile> {
         this.gameReviewDownvotesRepository = gameReviewDownvotesRepository;
         this.sentMessagesRepository = sentMessagesRepository;
         this.receivedMessagesRepository = receivedMessagesRepository;
+        this.enabledFeatureFlagsRepository = enabledFeatureFlagsRepository;
     }
 
     @Override
@@ -563,6 +571,8 @@ public class UserProfileService extends BaseService<UserProfile> {
     
 
     
+
+    
         // Cherche la relation ManyToOne correspondante dans l'entité enfant
         
             if (userprofile.getFollowers() != null) {
@@ -827,6 +837,10 @@ public class UserProfileService extends BaseService<UserProfile> {
     
 
     
+
+    
+    
+    
     
     
     
@@ -998,6 +1012,24 @@ public class UserProfileService extends BaseService<UserProfile> {
                     .orElseThrow(() -> new RuntimeException("MusicTrack not found")))
                 .collect(Collectors.toList());
         existing.getListenedMusic().addAll(listenedMusicList);
+        }
+
+        if (userprofileRequest.getUserRole() != null) {
+            existing.getUserRole().clear();
+            List<UserRole> UserRoleList = userprofileRequest.getUserRole().stream()
+                .map(item -> UserRoleRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("UserRole not found")))
+                .collect(Collectors.toList());
+        existing.getUserRole().addAll(UserRoleList);
+        }
+
+        if (userprofileRequest.getEnabledFeatureFlags() != null) {
+            existing.getEnabledFeatureFlags().clear();
+            List<FeatureFlag> enabledFeatureFlagsList = userprofileRequest.getEnabledFeatureFlags().stream()
+                .map(item -> enabledFeatureFlagsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("FeatureFlag not found")))
+                .collect(Collectors.toList());
+        existing.getEnabledFeatureFlags().addAll(enabledFeatureFlagsList);
         }
 
 // Relations OneToMany : synchronisation sécurisée
@@ -1660,6 +1692,10 @@ public class UserProfileService extends BaseService<UserProfile> {
 
     
 
+    
+
+    
+
 
         return userprofileRepository.save(existing);
     }
@@ -1873,6 +1909,8 @@ UserProfile entity = entityOpt.get();
     
 
     
+
+    
         if (entity.getFollowers() != null) {
         for (var child : entity.getFollowers()) {
         
@@ -2004,6 +2042,8 @@ UserProfile entity = entityOpt.get();
         }
     
 
+    
+
 
 // --- Dissocier ManyToMany ---
 
@@ -2012,6 +2052,8 @@ UserProfile entity = entityOpt.get();
     
         if (entity.getWatchlistMovies() != null) {
         for (Movie item : new ArrayList<>(entity.getWatchlistMovies())) {
+        
+            item.getWatchlistUsers().remove(entity); // retire côté inverse
         
         }
         entity.getWatchlistMovies().clear(); // puis vide côté courant
@@ -2022,6 +2064,8 @@ UserProfile entity = entityOpt.get();
         if (entity.getFavoriteArtists() != null) {
         for (Artist item : new ArrayList<>(entity.getFavoriteArtists())) {
         
+            item.getFavoriteArtists().remove(entity); // retire côté inverse
+        
         }
         entity.getFavoriteArtists().clear(); // puis vide côté courant
         }
@@ -2030,6 +2074,8 @@ UserProfile entity = entityOpt.get();
     
         if (entity.getFollowedUsers() != null) {
         for (UserProfile item : new ArrayList<>(entity.getFollowedUsers())) {
+        
+            item.getFollowingUsers().remove(entity); // retire côté inverse
         
         }
         entity.getFollowedUsers().clear(); // puis vide côté courant
@@ -2040,6 +2086,8 @@ UserProfile entity = entityOpt.get();
         if (entity.getFollowingUsers() != null) {
         for (UserProfile item : new ArrayList<>(entity.getFollowingUsers())) {
         
+            item.getFollowedUsers().remove(entity); // retire côté inverse
+        
         }
         entity.getFollowingUsers().clear(); // puis vide côté courant
         }
@@ -2048,6 +2096,8 @@ UserProfile entity = entityOpt.get();
     
         if (entity.getFavoriteGenres() != null) {
         for (Genre item : new ArrayList<>(entity.getFavoriteGenres())) {
+        
+            item.getFavoriteUsers().remove(entity); // retire côté inverse
         
         }
         entity.getFavoriteGenres().clear(); // puis vide côté courant
@@ -2060,6 +2110,8 @@ UserProfile entity = entityOpt.get();
         if (entity.getWatchedEpisodes() != null) {
         for (Episode item : new ArrayList<>(entity.getWatchedEpisodes())) {
         
+            item.getWatchedByUsers().remove(entity); // retire côté inverse
+        
         }
         entity.getWatchedEpisodes().clear(); // puis vide côté courant
         }
@@ -2068,6 +2120,8 @@ UserProfile entity = entityOpt.get();
     
         if (entity.getPlayedGames() != null) {
         for (VideoGame item : new ArrayList<>(entity.getPlayedGames())) {
+        
+            item.getPlayedBy().remove(entity); // retire côté inverse
         
         }
         entity.getPlayedGames().clear(); // puis vide côté courant
@@ -2086,6 +2140,8 @@ UserProfile entity = entityOpt.get();
         if (entity.getAttendedOnlineEvents() != null) {
         for (OnlineEvent item : new ArrayList<>(entity.getAttendedOnlineEvents())) {
         
+            item.getAttendees().remove(entity); // retire côté inverse
+        
         }
         entity.getAttendedOnlineEvents().clear(); // puis vide côté courant
         }
@@ -2094,6 +2150,8 @@ UserProfile entity = entityOpt.get();
     
         if (entity.getOwnedMerchandise() != null) {
         for (Merchandise item : new ArrayList<>(entity.getOwnedMerchandise())) {
+        
+            item.getOwnedByUsers().remove(entity); // retire côté inverse
         
         }
         entity.getOwnedMerchandise().clear(); // puis vide côté courant
@@ -2104,6 +2162,8 @@ UserProfile entity = entityOpt.get();
         if (entity.getLibraryPodcasts() != null) {
         for (Podcast item : new ArrayList<>(entity.getLibraryPodcasts())) {
         
+            item.getListeners().remove(entity); // retire côté inverse
+        
         }
         entity.getLibraryPodcasts().clear(); // puis vide côté courant
         }
@@ -2112,6 +2172,8 @@ UserProfile entity = entityOpt.get();
     
         if (entity.getListenedMusic() != null) {
         for (MusicTrack item : new ArrayList<>(entity.getListenedMusic())) {
+        
+            item.getListenedByUsers().remove(entity); // retire côté inverse
         
         }
         entity.getListenedMusic().clear(); // puis vide côté courant
@@ -2141,7 +2203,12 @@ UserProfile entity = entityOpt.get();
     
 
     
-
+        if (entity.getUserRole() != null) {
+        for (UserRole item : new ArrayList<>(entity.getUserRole())) {
+        
+        }
+        entity.getUserRole().clear(); // puis vide côté courant
+        }
     
 
     
@@ -2162,6 +2229,21 @@ UserProfile entity = entityOpt.get();
 
     
 
+    
+
+    
+
+    
+
+    
+        if (entity.getEnabledFeatureFlags() != null) {
+        for (FeatureFlag item : new ArrayList<>(entity.getEnabledFeatureFlags())) {
+        
+            item.getEnabledForUsers().remove(entity); // retire côté inverse
+        
+        }
+        entity.getEnabledFeatureFlags().clear(); // puis vide côté courant
+        }
     
 
 
@@ -2255,8 +2337,16 @@ UserProfile entity = entityOpt.get();
 
     
 
+    
+
+    
+
 
 // --- Dissocier ManyToOne ---
+
+    
+
+    
 
     
 

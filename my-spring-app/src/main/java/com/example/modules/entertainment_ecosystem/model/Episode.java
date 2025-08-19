@@ -44,8 +44,8 @@ public class Episode extends BaseEntity {
         @JsonIgnoreProperties("episodes")
         private Season season;
     
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "watchedEpisodes", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("watchedEpisodes")
             private List<UserProfile> watchedByUsers = new ArrayList<>();
         
     @OneToOne

@@ -83,6 +83,8 @@ GamePlatform entity = entityOpt.get();
         if (entity.getVideoGames() != null) {
         for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
         
+            item.getPlatforms().remove(entity); // retire côté inverse
+        
         }
         entity.getVideoGames().clear(); // puis vide côté courant
         }

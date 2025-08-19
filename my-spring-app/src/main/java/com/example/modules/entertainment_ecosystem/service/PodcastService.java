@@ -356,6 +356,8 @@ Podcast entity = entityOpt.get();
         if (entity.getGenres() != null) {
         for (Genre item : new ArrayList<>(entity.getGenres())) {
         
+            item.getPodcasts().remove(entity); // retire côté inverse
+        
         }
         entity.getGenres().clear(); // puis vide côté courant
         }
@@ -364,6 +366,8 @@ Podcast entity = entityOpt.get();
     
         if (entity.getListeners() != null) {
         for (UserProfile item : new ArrayList<>(entity.getListeners())) {
+        
+            item.getLibraryPodcasts().remove(entity); // retire côté inverse
         
         }
         entity.getListeners().clear(); // puis vide côté courant
@@ -375,6 +379,8 @@ Podcast entity = entityOpt.get();
     
         if (entity.getCategories() != null) {
         for (PodcastCategory item : new ArrayList<>(entity.getCategories())) {
+        
+            item.getPodcasts().remove(entity); // retire côté inverse
         
         }
         entity.getCategories().clear(); // puis vide côté courant
@@ -388,6 +394,8 @@ Podcast entity = entityOpt.get();
     
         if (entity.getLanguages() != null) {
         for (ContentLanguage item : new ArrayList<>(entity.getLanguages())) {
+        
+            item.getPodcasts().remove(entity); // retire côté inverse
         
         }
         entity.getLanguages().clear(); // puis vide côté courant

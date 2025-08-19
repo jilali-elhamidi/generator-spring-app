@@ -217,6 +217,8 @@ Episode entity = entityOpt.get();
         if (entity.getWatchedByUsers() != null) {
         for (UserProfile item : new ArrayList<>(entity.getWatchedByUsers())) {
         
+            item.getWatchedEpisodes().remove(entity); // retire côté inverse
+        
         }
         entity.getWatchedByUsers().clear(); // puis vide côté courant
         }

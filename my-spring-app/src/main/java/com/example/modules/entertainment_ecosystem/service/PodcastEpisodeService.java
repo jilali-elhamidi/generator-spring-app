@@ -158,6 +158,8 @@ PodcastEpisode entity = entityOpt.get();
         if (entity.getGuestAppearances() != null) {
         for (PodcastGuest item : new ArrayList<>(entity.getGuestAppearances())) {
         
+            item.getAppearances().remove(entity); // retire côté inverse
+        
         }
         entity.getGuestAppearances().clear(); // puis vide côté courant
         }

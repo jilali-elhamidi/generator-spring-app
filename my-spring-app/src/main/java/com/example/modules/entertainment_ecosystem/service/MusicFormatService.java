@@ -83,6 +83,8 @@ MusicFormat entity = entityOpt.get();
         if (entity.getMusicTracks() != null) {
         for (MusicTrack item : new ArrayList<>(entity.getMusicTracks())) {
         
+            item.getFormats().remove(entity); // retire côté inverse
+        
         }
         entity.getMusicTracks().clear(); // puis vide côté courant
         }

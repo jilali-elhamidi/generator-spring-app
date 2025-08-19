@@ -83,6 +83,8 @@ MovieFormat entity = entityOpt.get();
         if (entity.getMovies() != null) {
         for (Movie item : new ArrayList<>(entity.getMovies())) {
         
+            item.getFormats().remove(entity); // retire côté inverse
+        
         }
         entity.getMovies().clear(); // puis vide côté courant
         }

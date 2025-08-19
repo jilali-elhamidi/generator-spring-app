@@ -31,19 +31,19 @@ public class ContentTag extends BaseEntity {
 // === Relations ===
 
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("tags")
             private List<Movie> movies = new ArrayList<>();
         
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("tags")
             private List<TVShow> tvShows = new ArrayList<>();
         
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("tags")
             private List<VideoGame> videoGames = new ArrayList<>();
         
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("tags")
             private List<LiveEvent> liveEvents = new ArrayList<>();
         
 

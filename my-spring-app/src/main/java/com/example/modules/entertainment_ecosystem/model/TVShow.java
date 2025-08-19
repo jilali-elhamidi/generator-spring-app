@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.Season;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.ProductionCompany;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;import com.example.modules.entertainment_ecosystem.model.ContentProvider;import com.example.modules.entertainment_ecosystem.model.TVShowStudio;import com.example.modules.entertainment_ecosystem.model.ContentRating;import com.example.modules.entertainment_ecosystem.model.ContentTag;import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
+import com.example.modules.entertainment_ecosystem.model.Season;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.ProductionCompany;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;import com.example.modules.entertainment_ecosystem.model.ContentProvider;import com.example.modules.entertainment_ecosystem.model.TVShowStudio;import com.example.modules.entertainment_ecosystem.model.ContentRating;import com.example.modules.entertainment_ecosystem.model.ContentTag;import com.example.modules.entertainment_ecosystem.model.ContentLanguage;import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
@@ -52,11 +52,11 @@ public class TVShow extends BaseEntity {
             @JoinTable(name = "tvshow_genres",
             joinColumns = @JoinColumn(name = "tvshow_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("tvShows")
             private List<Genre> genres;
             
     @ManyToMany(mappedBy = "relatedShows", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("relatedShows")
             private List<Merchandise> relatedMerchandise = new ArrayList<>();
         
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -68,7 +68,7 @@ public class TVShow extends BaseEntity {
             @JoinTable(name = "tvshow_cast",
             joinColumns = @JoinColumn(name = "tvshow_id"),
             inverseJoinColumns = @JoinColumn(name = "artist_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("actedInShows")
             private List<Artist> cast;
             
     @OneToMany(mappedBy = "tvShow", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -94,15 +94,22 @@ public class TVShow extends BaseEntity {
             @JoinTable(name = "tvshow_tags",
             joinColumns = @JoinColumn(name = "tag_id"),
             inverseJoinColumns = @JoinColumn(name = "tvshow_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("tvShows")
             private List<ContentTag> tags;
             
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "tvshow_languages",
             joinColumns = @JoinColumn(name = "tvshow_id"),
             inverseJoinColumns = @JoinColumn(name = "language_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("tvShows")
             private List<ContentLanguage> languages;
+            
+    @ManyToMany(fetch = FetchType.LAZY)
+            @JoinTable(name = "tvshow_platforms",
+            joinColumns = @JoinColumn(name = "tvshow_id"),
+            inverseJoinColumns = @JoinColumn(name = "platform_id"))
+            @JsonIgnoreProperties("tvShows")
+            private List<StreamingPlatform> platforms;
             
 
 }

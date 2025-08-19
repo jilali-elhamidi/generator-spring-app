@@ -31,7 +31,7 @@ public class MovieFormat extends BaseEntity {
 // === Relations ===
 
     @ManyToMany(mappedBy = "formats", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("formats")
             private List<Movie> movies = new ArrayList<>();
         
 

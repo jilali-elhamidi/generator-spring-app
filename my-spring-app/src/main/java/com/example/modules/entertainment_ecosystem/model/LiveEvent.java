@@ -40,7 +40,7 @@ public class LiveEvent extends BaseEntity {
             @JoinTable(name = "event_performers",
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "artist_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("participatedInEvents")
             private List<Artist> performers;
             
     @OneToMany(mappedBy = "event", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -75,7 +75,7 @@ public class LiveEvent extends BaseEntity {
             @JoinTable(name = "event_tags",
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("liveEvents")
             private List<ContentTag> tags;
             
 

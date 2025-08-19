@@ -34,10 +34,10 @@ public class MerchandiseInventory extends BaseEntity {
 // === Relations ===
 
     @OneToOne
-    @JoinColumn(name = "merchandise_id") // clé étrangère
-    @JsonIgnoreProperties("inventory")
-    private Merchandise merchandiseItem;
-        
+            @JoinColumn(name = "merchandise_id")
+            @JsonIgnoreProperties("inventory")
+            private Merchandise merchandiseItem;
+            
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
         @JoinColumn(name = "warehouse_id")
         @JsonIgnoreProperties("inventoryItems")

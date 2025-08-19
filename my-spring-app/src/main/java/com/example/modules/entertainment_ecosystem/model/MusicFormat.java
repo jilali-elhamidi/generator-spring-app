@@ -31,7 +31,7 @@ public class MusicFormat extends BaseEntity {
 // === Relations ===
 
     @ManyToMany(mappedBy = "formats", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("formats")
             private List<MusicTrack> musicTracks = new ArrayList<>();
         
 

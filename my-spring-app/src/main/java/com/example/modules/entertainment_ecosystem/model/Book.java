@@ -57,7 +57,7 @@ public class Book extends BaseEntity {
             @JoinTable(name = "book_genres",
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("bookGenres")
             private List<Genre> genres;
             
 

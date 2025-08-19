@@ -34,15 +34,15 @@ public class ContentLanguage extends BaseEntity {
 // === Relations ===
 
     @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("languages")
             private List<Movie> movies = new ArrayList<>();
         
     @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("languages")
             private List<TVShow> tvShows = new ArrayList<>();
         
     @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("languages")
             private List<Podcast> podcasts = new ArrayList<>();
         
 

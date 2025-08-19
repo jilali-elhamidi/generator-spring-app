@@ -124,6 +124,8 @@ ContentLanguage entity = entityOpt.get();
         if (entity.getMovies() != null) {
         for (Movie item : new ArrayList<>(entity.getMovies())) {
         
+            item.getLanguages().remove(entity); // retire côté inverse
+        
         }
         entity.getMovies().clear(); // puis vide côté courant
         }
@@ -133,6 +135,8 @@ ContentLanguage entity = entityOpt.get();
         if (entity.getTvShows() != null) {
         for (TVShow item : new ArrayList<>(entity.getTvShows())) {
         
+            item.getLanguages().remove(entity); // retire côté inverse
+        
         }
         entity.getTvShows().clear(); // puis vide côté courant
         }
@@ -141,6 +145,8 @@ ContentLanguage entity = entityOpt.get();
     
         if (entity.getPodcasts() != null) {
         for (Podcast item : new ArrayList<>(entity.getPodcasts())) {
+        
+            item.getLanguages().remove(entity); // retire côté inverse
         
         }
         entity.getPodcasts().clear(); // puis vide côté courant

@@ -48,7 +48,7 @@ public class OnlineEvent extends BaseEntity {
             @JoinTable(name = "online_event_attendees",
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("attendedOnlineEvents")
             private List<UserProfile> attendees;
             
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})

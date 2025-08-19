@@ -143,6 +143,8 @@ ContentTag entity = entityOpt.get();
         if (entity.getMovies() != null) {
         for (Movie item : new ArrayList<>(entity.getMovies())) {
         
+            item.getTags().remove(entity); // retire côté inverse
+        
         }
         entity.getMovies().clear(); // puis vide côté courant
         }
@@ -151,6 +153,8 @@ ContentTag entity = entityOpt.get();
     
         if (entity.getTvShows() != null) {
         for (TVShow item : new ArrayList<>(entity.getTvShows())) {
+        
+            item.getTags().remove(entity); // retire côté inverse
         
         }
         entity.getTvShows().clear(); // puis vide côté courant
@@ -161,6 +165,8 @@ ContentTag entity = entityOpt.get();
         if (entity.getVideoGames() != null) {
         for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
         
+            item.getTags().remove(entity); // retire côté inverse
+        
         }
         entity.getVideoGames().clear(); // puis vide côté courant
         }
@@ -169,6 +175,8 @@ ContentTag entity = entityOpt.get();
     
         if (entity.getLiveEvents() != null) {
         for (LiveEvent item : new ArrayList<>(entity.getLiveEvents())) {
+        
+            item.getTags().remove(entity); // retire côté inverse
         
         }
         entity.getLiveEvents().clear(); // puis vide côté courant

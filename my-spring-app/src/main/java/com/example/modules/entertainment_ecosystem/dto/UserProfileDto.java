@@ -62,6 +62,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserActivityLogSimp
 
 import com.example.modules.entertainment_ecosystem.dtosimple.UserSettingSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.UserRoleSimpleDto;
+
 import com.example.modules.entertainment_ecosystem.dtosimple.UserFollowerSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.UserFollowerSimpleDto;
@@ -85,6 +87,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.GameReviewDownvoteS
 import com.example.modules.entertainment_ecosystem.dtosimple.UserMessageSimpleDto;
 
 import com.example.modules.entertainment_ecosystem.dtosimple.UserMessageSimpleDto;
+
+import com.example.modules.entertainment_ecosystem.dtosimple.FeatureFlagSimpleDto;
 
 
 
@@ -169,6 +173,8 @@ public class UserProfileDto {
 
     private List<UserSettingSimpleDto> settings;
 
+    private List<UserRoleSimpleDto> UserRole;
+
     private List<UserFollowerSimpleDto> followers;
 
     private List<UserFollowerSimpleDto> following;
@@ -192,5 +198,7 @@ public class UserProfileDto {
     private List<UserMessageSimpleDto> sentMessages;
 
     private List<UserMessageSimpleDto> receivedMessages;
+
+    private List<FeatureFlagSimpleDto> enabledFeatureFlags;
 
 }

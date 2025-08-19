@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Date;
 import com.example.modules.entertainment_ecosystem.dtosimple.VideoGameSimpleDto;
 
-import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDto;
-
 import com.example.modules.entertainment_ecosystem.dtosimple.UserAchievementSimpleDto;
 
 
@@ -28,8 +26,6 @@ public class GameAchievementDto {
     private Date achievementDate;
 
     private VideoGameSimpleDto game;
-
-    private List<UserProfileSimpleDto> earnedBy;
 
     private List<UserAchievementSimpleDto> userAchievements;
 

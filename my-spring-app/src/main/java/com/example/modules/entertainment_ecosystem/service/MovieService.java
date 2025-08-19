@@ -33,6 +33,8 @@ import com.example.modules.entertainment_ecosystem.model.ContentTag;
 import com.example.modules.entertainment_ecosystem.repository.ContentTagRepository;
 import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import com.example.modules.entertainment_ecosystem.repository.ContentLanguageRepository;
+import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
+import com.example.modules.entertainment_ecosystem.repository.StreamingPlatformRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,8 +62,9 @@ public class MovieService extends BaseService<Movie> {
     private final ContentRatingRepository contentRatingRepository;
     private final ContentTagRepository tagsRepository;
     private final ContentLanguageRepository languagesRepository;
+    private final StreamingPlatformRepository platformsRepository;
 
-    public MovieService(MovieRepository repository,ArtistRepository castRepository,ArtistRepository directorRepository,ReviewRepository reviewsRepository,GenreRepository genresRepository,UserProfileRepository watchlistUsersRepository,MerchandiseRepository relatedMerchandiseRepository,ProductionCompanyRepository productionCompanyRepository,DigitalPurchaseRepository purchasesRepository,MovieFormatRepository formatsRepository,StreamingContentLicenseRepository streamingLicensesRepository,ContentProviderRepository providerRepository,MovieStudioRepository movieStudioRepository,ContentRatingRepository contentRatingRepository,ContentTagRepository tagsRepository,ContentLanguageRepository languagesRepository)
+    public MovieService(MovieRepository repository,ArtistRepository castRepository,ArtistRepository directorRepository,ReviewRepository reviewsRepository,GenreRepository genresRepository,UserProfileRepository watchlistUsersRepository,MerchandiseRepository relatedMerchandiseRepository,ProductionCompanyRepository productionCompanyRepository,DigitalPurchaseRepository purchasesRepository,MovieFormatRepository formatsRepository,StreamingContentLicenseRepository streamingLicensesRepository,ContentProviderRepository providerRepository,MovieStudioRepository movieStudioRepository,ContentRatingRepository contentRatingRepository,ContentTagRepository tagsRepository,ContentLanguageRepository languagesRepository,StreamingPlatformRepository platformsRepository)
     {
         super(repository);
         this.movieRepository = repository;
@@ -80,6 +83,7 @@ public class MovieService extends BaseService<Movie> {
         this.contentRatingRepository = contentRatingRepository;
         this.tagsRepository = tagsRepository;
         this.languagesRepository = languagesRepository;
+        this.platformsRepository = platformsRepository;
     }
 
     @Override
@@ -177,6 +181,8 @@ public class MovieService extends BaseService<Movie> {
     
 
     
+
+    
     if (movie.getDirector() != null
         && movie.getDirector().getId() != null) {
         Artist existingDirector = directorRepository.findById(
@@ -223,6 +229,7 @@ public class MovieService extends BaseService<Movie> {
         ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
         movie.setContentRating(existingContentRating);
         }
+    
     
     
     
@@ -364,6 +371,15 @@ public class MovieService extends BaseService<Movie> {
         existing.getLanguages().addAll(languagesList);
         }
 
+        if (movieRequest.getPlatforms() != null) {
+            existing.getPlatforms().clear();
+            List<StreamingPlatform> platformsList = movieRequest.getPlatforms().stream()
+                .map(item -> platformsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("StreamingPlatform not found")))
+                .collect(Collectors.toList());
+        existing.getPlatforms().addAll(platformsList);
+        }
+
 // Relations OneToMany : synchronisation sécurisée
         // Vider la collection existante
         existing.getReviews().clear();
@@ -425,6 +441,8 @@ public class MovieService extends BaseService<Movie> {
         }
         }
         // NE PLUS FAIRE setCollection()
+
+    
 
     
 
@@ -525,12 +543,16 @@ Movie entity = entityOpt.get();
 
     
 
+    
+
 
 // --- Dissocier ManyToMany ---
 
     
         if (entity.getCast() != null) {
         for (Artist item : new ArrayList<>(entity.getCast())) {
+        
+            item.getActedInMovies().remove(entity); // retire côté inverse
         
         }
         entity.getCast().clear(); // puis vide côté courant
@@ -545,6 +567,8 @@ Movie entity = entityOpt.get();
         if (entity.getGenres() != null) {
         for (Genre item : new ArrayList<>(entity.getGenres())) {
         
+            item.getMovies().remove(entity); // retire côté inverse
+        
         }
         entity.getGenres().clear(); // puis vide côté courant
         }
@@ -554,6 +578,8 @@ Movie entity = entityOpt.get();
         if (entity.getWatchlistUsers() != null) {
         for (UserProfile item : new ArrayList<>(entity.getWatchlistUsers())) {
         
+            item.getWatchlistMovies().remove(entity); // retire côté inverse
+        
         }
         entity.getWatchlistUsers().clear(); // puis vide côté courant
         }
@@ -562,6 +588,8 @@ Movie entity = entityOpt.get();
     
         if (entity.getRelatedMerchandise() != null) {
         for (Merchandise item : new ArrayList<>(entity.getRelatedMerchandise())) {
+        
+            item.getRelatedMovies().remove(entity); // retire côté inverse
         
         }
         entity.getRelatedMerchandise().clear(); // puis vide côté courant
@@ -575,6 +603,8 @@ Movie entity = entityOpt.get();
     
         if (entity.getFormats() != null) {
         for (MovieFormat item : new ArrayList<>(entity.getFormats())) {
+        
+            item.getMovies().remove(entity); // retire côté inverse
         
         }
         entity.getFormats().clear(); // puis vide côté courant
@@ -593,6 +623,8 @@ Movie entity = entityOpt.get();
         if (entity.getTags() != null) {
         for (ContentTag item : new ArrayList<>(entity.getTags())) {
         
+            item.getMovies().remove(entity); // retire côté inverse
+        
         }
         entity.getTags().clear(); // puis vide côté courant
         }
@@ -602,14 +634,29 @@ Movie entity = entityOpt.get();
         if (entity.getLanguages() != null) {
         for (ContentLanguage item : new ArrayList<>(entity.getLanguages())) {
         
+            item.getMovies().remove(entity); // retire côté inverse
+        
         }
         entity.getLanguages().clear(); // puis vide côté courant
+        }
+    
+
+    
+        if (entity.getPlatforms() != null) {
+        for (StreamingPlatform item : new ArrayList<>(entity.getPlatforms())) {
+        
+            item.getMovies().remove(entity); // retire côté inverse
+        
+        }
+        entity.getPlatforms().clear(); // puis vide côté courant
         }
     
 
 
 
 // --- Dissocier OneToOne ---
+
+    
 
     
 
@@ -688,6 +735,8 @@ Movie entity = entityOpt.get();
         if (entity.getContentRating() != null) {
         entity.setContentRating(null);
         }
+    
+
     
 
     

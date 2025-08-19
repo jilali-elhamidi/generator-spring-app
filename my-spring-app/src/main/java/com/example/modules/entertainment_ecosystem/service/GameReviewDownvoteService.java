@@ -7,6 +7,8 @@ import com.example.modules.entertainment_ecosystem.model.UserProfile;
 import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.GameReview;
 import com.example.modules.entertainment_ecosystem.repository.GameReviewRepository;
+import com.example.modules.entertainment_ecosystem.model.VideoGame;
+import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,18 +23,22 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
     protected final GameReviewDownvoteRepository gamereviewdownvoteRepository;
     private final UserProfileRepository userRepository;
     private final GameReviewRepository reviewRepository;
+    private final VideoGameRepository gameRepository;
 
-    public GameReviewDownvoteService(GameReviewDownvoteRepository repository,UserProfileRepository userRepository,GameReviewRepository reviewRepository)
+    public GameReviewDownvoteService(GameReviewDownvoteRepository repository,UserProfileRepository userRepository,GameReviewRepository reviewRepository,VideoGameRepository gameRepository)
     {
         super(repository);
         this.gamereviewdownvoteRepository = repository;
         this.userRepository = userRepository;
         this.reviewRepository = reviewRepository;
+        this.gameRepository = gameRepository;
     }
 
     @Override
     public GameReviewDownvote save(GameReviewDownvote gamereviewdownvote) {
 
+
+    
 
     
 
@@ -52,6 +58,14 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
         gamereviewdownvote.getReview().getId()
         ).orElseThrow(() -> new RuntimeException("GameReview not found"));
         gamereviewdownvote.setReview(existingReview);
+        }
+    
+    if (gamereviewdownvote.getGame() != null
+        && gamereviewdownvote.getGame().getId() != null) {
+        VideoGame existingGame = gameRepository.findById(
+        gamereviewdownvote.getGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+        gamereviewdownvote.setGame(existingGame);
         }
     
 
@@ -89,10 +103,23 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
         } else {
         existing.setReview(null);
         }
+        if (gamereviewdownvoteRequest.getGame() != null &&
+        gamereviewdownvoteRequest.getGame().getId() != null) {
+
+        VideoGame existingGame = gameRepository.findById(
+        gamereviewdownvoteRequest.getGame().getId()
+        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+        existing.setGame(existingGame);
+        } else {
+        existing.setGame(null);
+        }
 
 // Relations ManyToMany : synchronisation sécurisée
 
 // Relations OneToMany : synchronisation sécurisée
+
+    
 
     
 
@@ -114,8 +141,12 @@ GameReviewDownvote entity = entityOpt.get();
 
     
 
+    
+
 
 // --- Dissocier ManyToMany ---
+
+    
 
     
 
@@ -124,6 +155,8 @@ GameReviewDownvote entity = entityOpt.get();
 
 
 // --- Dissocier OneToOne ---
+
+    
 
     
 
@@ -141,6 +174,12 @@ GameReviewDownvote entity = entityOpt.get();
     
         if (entity.getReview() != null) {
         entity.setReview(null);
+        }
+    
+
+    
+        if (entity.getGame() != null) {
+        entity.setGame(null);
         }
     
 

@@ -50,7 +50,7 @@ public class PodcastEpisode extends BaseEntity {
             @JoinTable(name = "podcast_guest_appearances",
             joinColumns = @JoinColumn(name = "episode_id"),
             inverseJoinColumns = @JoinColumn(name = "guest_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("appearances")
             private List<PodcastGuest> guestAppearances;
             
 

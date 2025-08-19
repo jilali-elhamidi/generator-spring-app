@@ -210,6 +210,8 @@ Book entity = entityOpt.get();
         if (entity.getGenres() != null) {
         for (Genre item : new ArrayList<>(entity.getGenres())) {
         
+            item.getBookGenres().remove(entity); // retire côté inverse
+        
         }
         entity.getGenres().clear(); // puis vide côté courant
         }

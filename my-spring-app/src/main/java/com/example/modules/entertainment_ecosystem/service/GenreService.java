@@ -241,6 +241,8 @@ Genre entity = entityOpt.get();
         if (entity.getFavoriteUsers() != null) {
         for (UserProfile item : new ArrayList<>(entity.getFavoriteUsers())) {
         
+            item.getFavoriteGenres().remove(entity); // retire côté inverse
+        
         }
         entity.getFavoriteUsers().clear(); // puis vide côté courant
         }
@@ -258,6 +260,8 @@ Genre entity = entityOpt.get();
     
         if (entity.getPodcasts() != null) {
         for (Podcast item : new ArrayList<>(entity.getPodcasts())) {
+        
+            item.getGenres().remove(entity); // retire côté inverse
         
         }
         entity.getPodcasts().clear(); // puis vide côté courant

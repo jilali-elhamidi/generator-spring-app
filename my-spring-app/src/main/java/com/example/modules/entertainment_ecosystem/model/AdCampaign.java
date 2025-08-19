@@ -48,7 +48,7 @@ public class AdCampaign extends BaseEntity {
             @JoinTable(name = "ad_campaign_platforms",
             joinColumns = @JoinColumn(name = "platform_id"),
             inverseJoinColumns = @JoinColumn(name = "campaign_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("adCampaigns")
             private List<StreamingPlatform> displayedOnPlatforms;
             
 

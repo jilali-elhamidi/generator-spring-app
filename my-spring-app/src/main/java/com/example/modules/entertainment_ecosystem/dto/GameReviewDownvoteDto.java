@@ -10,6 +10,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.UserProfileSimpleDt
 
 import com.example.modules.entertainment_ecosystem.dtosimple.GameReviewSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.VideoGameSimpleDto;
+
 
 
 @Data
@@ -24,5 +26,7 @@ public class GameReviewDownvoteDto {
     private UserProfileSimpleDto user;
 
     private GameReviewSimpleDto review;
+
+    private VideoGameSimpleDto game;
 
 }

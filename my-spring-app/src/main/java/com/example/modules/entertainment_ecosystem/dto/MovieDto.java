@@ -36,6 +36,8 @@ import com.example.modules.entertainment_ecosystem.dtosimple.ContentTagSimpleDto
 
 import com.example.modules.entertainment_ecosystem.dtosimple.ContentLanguageSimpleDto;
 
+import com.example.modules.entertainment_ecosystem.dtosimple.StreamingPlatformSimpleDto;
+
 
 
 @Data
@@ -84,5 +86,7 @@ public class MovieDto {
     private List<ContentTagSimpleDto> tags;
 
     private List<ContentLanguageSimpleDto> languages;
+
+    private List<StreamingPlatformSimpleDto> platforms;
 
 }

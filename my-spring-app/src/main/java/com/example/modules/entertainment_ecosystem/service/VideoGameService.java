@@ -281,6 +281,23 @@ public class VideoGameService extends BaseService<VideoGame> {
     
         // Cherche la relation ManyToOne correspondante dans l'entité enfant
         
+            if (videogame.getGameReviewDownvotes() != null) {
+            List<GameReviewDownvote> managedGameReviewDownvotes = new ArrayList<>();
+            for (GameReviewDownvote item : videogame.getGameReviewDownvotes()) {
+            if (item.getId() != null) {
+            GameReviewDownvote existingItem = gameReviewDownvotesRepository.findById(item.getId())
+            .orElseThrow(() -> new RuntimeException("GameReviewDownvote not found"));
+            // Utilise le nom du champ ManyToOne côté enfant pour le setter
+            existingItem.setGame(videogame);
+            managedGameReviewDownvotes.add(existingItem);
+            } else {
+            item.setGame(videogame);
+            managedGameReviewDownvotes.add(item);
+            }
+            }
+            videogame.setGameReviewDownvotes(managedGameReviewDownvotes);
+            }
+        
     
 
     
@@ -757,6 +774,8 @@ VideoGame entity = entityOpt.get();
         if (entity.getGenres() != null) {
         for (Genre item : new ArrayList<>(entity.getGenres())) {
         
+            item.getVideoGames().remove(entity); // retire côté inverse
+        
         }
         entity.getGenres().clear(); // puis vide côté courant
         }
@@ -769,6 +788,8 @@ VideoGame entity = entityOpt.get();
     
         if (entity.getPlayedBy() != null) {
         for (UserProfile item : new ArrayList<>(entity.getPlayedBy())) {
+        
+            item.getPlayedGames().remove(entity); // retire côté inverse
         
         }
         entity.getPlayedBy().clear(); // puis vide côté courant
@@ -787,6 +808,8 @@ VideoGame entity = entityOpt.get();
         if (entity.getPlatforms() != null) {
         for (GamePlatform item : new ArrayList<>(entity.getPlatforms())) {
         
+            item.getVideoGames().remove(entity); // retire côté inverse
+        
         }
         entity.getPlatforms().clear(); // puis vide côté courant
         }
@@ -797,6 +820,8 @@ VideoGame entity = entityOpt.get();
     
         if (entity.getTags() != null) {
         for (ContentTag item : new ArrayList<>(entity.getTags())) {
+        
+            item.getVideoGames().remove(entity); // retire côté inverse
         
         }
         entity.getTags().clear(); // puis vide côté courant

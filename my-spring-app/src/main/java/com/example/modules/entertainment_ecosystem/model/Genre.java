@@ -49,8 +49,8 @@ public class Genre extends BaseEntity {
             @JsonIgnoreProperties("")
             private List<MusicTrack> musicTracks;
             
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "favoriteGenres", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("favoriteGenres")
             private List<UserProfile> favoriteUsers = new ArrayList<>();
         
     @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
@@ -61,7 +61,7 @@ public class Genre extends BaseEntity {
             @JoinTable(name = "podcast_genres",
             joinColumns = @JoinColumn(name = "genre_id"),
             inverseJoinColumns = @JoinColumn(name = "podcast_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("genres")
             private List<Podcast> podcasts;
             
 

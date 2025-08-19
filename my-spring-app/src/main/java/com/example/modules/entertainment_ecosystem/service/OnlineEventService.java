@@ -146,6 +146,8 @@ OnlineEvent entity = entityOpt.get();
         if (entity.getAttendees() != null) {
         for (UserProfile item : new ArrayList<>(entity.getAttendees())) {
         
+            item.getAttendedOnlineEvents().remove(entity); // retire côté inverse
+        
         }
         entity.getAttendees().clear(); // puis vide côté courant
         }

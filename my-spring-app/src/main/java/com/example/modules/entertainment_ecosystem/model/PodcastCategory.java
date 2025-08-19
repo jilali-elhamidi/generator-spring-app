@@ -31,7 +31,7 @@ public class PodcastCategory extends BaseEntity {
 // === Relations ===
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("categories")
             private List<Podcast> podcasts = new ArrayList<>();
         
 

@@ -45,18 +45,18 @@ public class Merchandise extends BaseEntity {
             @JoinTable(name = "merchandise_movies",
             joinColumns = @JoinColumn(name = "merchandise_id"),
             inverseJoinColumns = @JoinColumn(name = "movie_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("relatedMerchandise")
             private List<Movie> relatedMovies;
             
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "merchandise_shows",
             joinColumns = @JoinColumn(name = "merchandise_id"),
             inverseJoinColumns = @JoinColumn(name = "tvshow_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("relatedMerchandise")
             private List<TVShow> relatedShows;
             
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "ownedMerchandise", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("ownedMerchandise")
             private List<UserProfile> ownedByUsers = new ArrayList<>();
         
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})

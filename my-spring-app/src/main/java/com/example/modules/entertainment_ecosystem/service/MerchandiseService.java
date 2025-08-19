@@ -494,6 +494,8 @@ Merchandise entity = entityOpt.get();
         if (entity.getRelatedMovies() != null) {
         for (Movie item : new ArrayList<>(entity.getRelatedMovies())) {
         
+            item.getRelatedMerchandise().remove(entity); // retire côté inverse
+        
         }
         entity.getRelatedMovies().clear(); // puis vide côté courant
         }
@@ -503,6 +505,8 @@ Merchandise entity = entityOpt.get();
         if (entity.getRelatedShows() != null) {
         for (TVShow item : new ArrayList<>(entity.getRelatedShows())) {
         
+            item.getRelatedMerchandise().remove(entity); // retire côté inverse
+        
         }
         entity.getRelatedShows().clear(); // puis vide côté courant
         }
@@ -511,6 +515,8 @@ Merchandise entity = entityOpt.get();
     
         if (entity.getOwnedByUsers() != null) {
         for (UserProfile item : new ArrayList<>(entity.getOwnedByUsers())) {
+        
+            item.getOwnedMerchandise().remove(entity); // retire côté inverse
         
         }
         entity.getOwnedByUsers().clear(); // puis vide côté courant

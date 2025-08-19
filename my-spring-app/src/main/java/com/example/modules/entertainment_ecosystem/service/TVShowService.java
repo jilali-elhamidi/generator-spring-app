@@ -27,6 +27,8 @@ import com.example.modules.entertainment_ecosystem.model.ContentTag;
 import com.example.modules.entertainment_ecosystem.repository.ContentTagRepository;
 import com.example.modules.entertainment_ecosystem.model.ContentLanguage;
 import com.example.modules.entertainment_ecosystem.repository.ContentLanguageRepository;
+import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;
+import com.example.modules.entertainment_ecosystem.repository.StreamingPlatformRepository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +53,9 @@ public class TVShowService extends BaseService<TVShow> {
     private final ContentRatingRepository contentRatingRepository;
     private final ContentTagRepository tagsRepository;
     private final ContentLanguageRepository languagesRepository;
+    private final StreamingPlatformRepository platformsRepository;
 
-    public TVShowService(TVShowRepository repository,SeasonRepository seasonsRepository,ArtistRepository directorRepository,GenreRepository genresRepository,MerchandiseRepository relatedMerchandiseRepository,ProductionCompanyRepository productionCompanyRepository,ArtistRepository castRepository,StreamingContentLicenseRepository streamingLicensesRepository,ContentProviderRepository providerRepository,TVShowStudioRepository tvShowStudioRepository,ContentRatingRepository contentRatingRepository,ContentTagRepository tagsRepository,ContentLanguageRepository languagesRepository)
+    public TVShowService(TVShowRepository repository,SeasonRepository seasonsRepository,ArtistRepository directorRepository,GenreRepository genresRepository,MerchandiseRepository relatedMerchandiseRepository,ProductionCompanyRepository productionCompanyRepository,ArtistRepository castRepository,StreamingContentLicenseRepository streamingLicensesRepository,ContentProviderRepository providerRepository,TVShowStudioRepository tvShowStudioRepository,ContentRatingRepository contentRatingRepository,ContentTagRepository tagsRepository,ContentLanguageRepository languagesRepository,StreamingPlatformRepository platformsRepository)
     {
         super(repository);
         this.tvshowRepository = repository;
@@ -68,6 +71,7 @@ public class TVShowService extends BaseService<TVShow> {
         this.contentRatingRepository = contentRatingRepository;
         this.tagsRepository = tagsRepository;
         this.languagesRepository = languagesRepository;
+        this.platformsRepository = platformsRepository;
     }
 
     @Override
@@ -139,6 +143,8 @@ public class TVShowService extends BaseService<TVShow> {
     
 
     
+
+    
     if (tvshow.getDirector() != null
         && tvshow.getDirector().getId() != null) {
         Artist existingDirector = directorRepository.findById(
@@ -182,6 +188,7 @@ public class TVShowService extends BaseService<TVShow> {
         ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
         tvshow.setContentRating(existingContentRating);
         }
+    
     
     
     
@@ -304,6 +311,15 @@ public class TVShowService extends BaseService<TVShow> {
         existing.getLanguages().addAll(languagesList);
         }
 
+        if (tvshowRequest.getPlatforms() != null) {
+            existing.getPlatforms().clear();
+            List<StreamingPlatform> platformsList = tvshowRequest.getPlatforms().stream()
+                .map(item -> platformsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("StreamingPlatform not found")))
+                .collect(Collectors.toList());
+        existing.getPlatforms().addAll(platformsList);
+        }
+
 // Relations OneToMany : synchronisation sécurisée
         // Vider la collection existante
         existing.getSeasons().clear();
@@ -345,6 +361,8 @@ public class TVShowService extends BaseService<TVShow> {
         }
         }
         // NE PLUS FAIRE setCollection()
+
+    
 
     
 
@@ -424,6 +442,8 @@ TVShow entity = entityOpt.get();
 
     
 
+    
+
 
 // --- Dissocier ManyToMany ---
 
@@ -435,6 +455,8 @@ TVShow entity = entityOpt.get();
         if (entity.getGenres() != null) {
         for (Genre item : new ArrayList<>(entity.getGenres())) {
         
+            item.getTvShows().remove(entity); // retire côté inverse
+        
         }
         entity.getGenres().clear(); // puis vide côté courant
         }
@@ -443,6 +465,8 @@ TVShow entity = entityOpt.get();
     
         if (entity.getRelatedMerchandise() != null) {
         for (Merchandise item : new ArrayList<>(entity.getRelatedMerchandise())) {
+        
+            item.getRelatedShows().remove(entity); // retire côté inverse
         
         }
         entity.getRelatedMerchandise().clear(); // puis vide côté courant
@@ -454,6 +478,8 @@ TVShow entity = entityOpt.get();
     
         if (entity.getCast() != null) {
         for (Artist item : new ArrayList<>(entity.getCast())) {
+        
+            item.getActedInShows().remove(entity); // retire côté inverse
         
         }
         entity.getCast().clear(); // puis vide côté courant
@@ -472,6 +498,8 @@ TVShow entity = entityOpt.get();
         if (entity.getTags() != null) {
         for (ContentTag item : new ArrayList<>(entity.getTags())) {
         
+            item.getTvShows().remove(entity); // retire côté inverse
+        
         }
         entity.getTags().clear(); // puis vide côté courant
         }
@@ -481,14 +509,29 @@ TVShow entity = entityOpt.get();
         if (entity.getLanguages() != null) {
         for (ContentLanguage item : new ArrayList<>(entity.getLanguages())) {
         
+            item.getTvShows().remove(entity); // retire côté inverse
+        
         }
         entity.getLanguages().clear(); // puis vide côté courant
+        }
+    
+
+    
+        if (entity.getPlatforms() != null) {
+        for (StreamingPlatform item : new ArrayList<>(entity.getPlatforms())) {
+        
+            item.getTvShows().remove(entity); // retire côté inverse
+        
+        }
+        entity.getPlatforms().clear(); // puis vide côté courant
         }
     
 
 
 
 // --- Dissocier OneToOne ---
+
+    
 
     
 
@@ -555,6 +598,8 @@ TVShow entity = entityOpt.get();
         if (entity.getContentRating() != null) {
         entity.setContentRating(null);
         }
+    
+
     
 
     

@@ -5,8 +5,6 @@ import com.example.modules.entertainment_ecosystem.model.GameAchievement;
 import com.example.modules.entertainment_ecosystem.repository.GameAchievementRepository;
 import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.repository.VideoGameRepository;
-import com.example.modules.entertainment_ecosystem.model.UserProfile;
-import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
 import com.example.modules.entertainment_ecosystem.model.UserAchievement;
 import com.example.modules.entertainment_ecosystem.repository.UserAchievementRepository;
 
@@ -22,23 +20,19 @@ public class GameAchievementService extends BaseService<GameAchievement> {
 
     protected final GameAchievementRepository gameachievementRepository;
     private final VideoGameRepository gameRepository;
-    private final UserProfileRepository earnedByRepository;
     private final UserAchievementRepository userAchievementsRepository;
 
-    public GameAchievementService(GameAchievementRepository repository,VideoGameRepository gameRepository,UserProfileRepository earnedByRepository,UserAchievementRepository userAchievementsRepository)
+    public GameAchievementService(GameAchievementRepository repository,VideoGameRepository gameRepository,UserAchievementRepository userAchievementsRepository)
     {
         super(repository);
         this.gameachievementRepository = repository;
         this.gameRepository = gameRepository;
-        this.earnedByRepository = earnedByRepository;
         this.userAchievementsRepository = userAchievementsRepository;
     }
 
     @Override
     public GameAchievement save(GameAchievement gameachievement) {
 
-
-    
 
     
 
@@ -73,7 +67,6 @@ public class GameAchievementService extends BaseService<GameAchievement> {
         }
     
     
-    
 
         return gameachievementRepository.save(gameachievement);
     }
@@ -103,15 +96,6 @@ public class GameAchievementService extends BaseService<GameAchievement> {
 
 // Relations ManyToMany : synchronisation sécurisée
 
-        if (gameachievementRequest.getEarnedBy() != null) {
-            existing.getEarnedBy().clear();
-            List<UserProfile> earnedByList = gameachievementRequest.getEarnedBy().stream()
-                .map(item -> earnedByRepository.findById(item.getId())
-                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-                .collect(Collectors.toList());
-        existing.getEarnedBy().addAll(earnedByList);
-        }
-
 // Relations OneToMany : synchronisation sécurisée
         // Vider la collection existante
         existing.getUserAchievements().clear();
@@ -138,8 +122,6 @@ public class GameAchievementService extends BaseService<GameAchievement> {
 
     
 
-    
-
 
         return gameachievementRepository.save(existing);
     }
@@ -151,8 +133,6 @@ if (entityOpt.isEmpty()) return false;
 GameAchievement entity = entityOpt.get();
 
 // --- Dissocier OneToMany ---
-
-    
 
     
 
@@ -173,21 +153,10 @@ GameAchievement entity = entityOpt.get();
     
 
     
-        if (entity.getEarnedBy() != null) {
-        for (UserProfile item : new ArrayList<>(entity.getEarnedBy())) {
-        
-        }
-        entity.getEarnedBy().clear(); // puis vide côté courant
-        }
-    
-
-    
 
 
 
 // --- Dissocier OneToOne ---
-
-    
 
     
 
@@ -200,8 +169,6 @@ GameAchievement entity = entityOpt.get();
         if (entity.getGame() != null) {
         entity.setGame(null);
         }
-    
-
     
 
     

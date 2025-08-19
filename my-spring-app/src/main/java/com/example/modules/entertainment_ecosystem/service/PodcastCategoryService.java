@@ -83,6 +83,8 @@ PodcastCategory entity = entityOpt.get();
         if (entity.getPodcasts() != null) {
         for (Podcast item : new ArrayList<>(entity.getPodcasts())) {
         
+            item.getCategories().remove(entity); // retire côté inverse
+        
         }
         entity.getPodcasts().clear(); // puis vide côté courant
         }

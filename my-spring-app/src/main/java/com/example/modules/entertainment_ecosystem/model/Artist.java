@@ -39,8 +39,8 @@ public class Artist extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "favoriteArtists", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("favoriteArtists")
             private List<UserProfile> favoriteArtists = new ArrayList<>();
         
     @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -56,7 +56,7 @@ public class Artist extends BaseEntity {
         private List<Book> booksAuthored;
     
     @ManyToMany(mappedBy = "performers", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("performers")
             private List<LiveEvent> participatedInEvents = new ArrayList<>();
         
     @OneToMany(mappedBy = "host", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.EAGER)
@@ -81,7 +81,7 @@ public class Artist extends BaseEntity {
         private List<ArtistAward> awards;
     
     @ManyToMany(mappedBy = "cast", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("cast")
             private List<Movie> actedInMovies = new ArrayList<>();
         
     @OneToMany(mappedBy = "director", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -96,8 +96,8 @@ public class Artist extends BaseEntity {
         @JsonIgnoreProperties("artist")
         private List<DigitalAsset> managedAssets;
     
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "cast", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("cast")
             private List<TVShow> actedInShows = new ArrayList<>();
         
     @OneToMany(mappedBy = "artist", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)

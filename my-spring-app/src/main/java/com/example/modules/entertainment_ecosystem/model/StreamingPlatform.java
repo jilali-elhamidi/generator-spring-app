@@ -33,11 +33,11 @@ public class StreamingPlatform extends BaseEntity {
 
 // === Relations ===
 
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "platforms", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<Movie> movies = new ArrayList<>();
         
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "platforms", fetch = FetchType.LAZY)
             @JsonIgnoreProperties("")
             private List<TVShow> tvShows = new ArrayList<>();
         
@@ -56,7 +56,7 @@ public class StreamingPlatform extends BaseEntity {
         private OnlinePlatform onlinePlatform;
     
     @ManyToMany(mappedBy = "displayedOnPlatforms", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("displayedOnPlatforms")
             private List<AdCampaign> adCampaigns = new ArrayList<>();
         
 

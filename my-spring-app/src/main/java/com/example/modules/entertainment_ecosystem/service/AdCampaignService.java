@@ -117,6 +117,8 @@ AdCampaign entity = entityOpt.get();
         if (entity.getDisplayedOnPlatforms() != null) {
         for (StreamingPlatform item : new ArrayList<>(entity.getDisplayedOnPlatforms())) {
         
+            item.getAdCampaigns().remove(entity); // retire côté inverse
+        
         }
         entity.getDisplayedOnPlatforms().clear(); // puis vide côté courant
         }

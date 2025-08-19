@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.Review;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Subscription;import com.example.modules.entertainment_ecosystem.model.Episode;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.ForumThread;import com.example.modules.entertainment_ecosystem.model.ForumPost;import com.example.modules.entertainment_ecosystem.model.Achievement;import com.example.modules.entertainment_ecosystem.model.OnlineEvent;import com.example.modules.entertainment_ecosystem.model.OnlineEvent;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.Playlist;import com.example.modules.entertainment_ecosystem.model.UserWallet;import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;import com.example.modules.entertainment_ecosystem.model.GameSession;import com.example.modules.entertainment_ecosystem.model.GameReviewComment;import com.example.modules.entertainment_ecosystem.model.UserPlaylist;import com.example.modules.entertainment_ecosystem.model.UserPlaylistItem;import com.example.modules.entertainment_ecosystem.model.ReviewRating;import com.example.modules.entertainment_ecosystem.model.ReviewLike;import com.example.modules.entertainment_ecosystem.model.UserActivityLog;import com.example.modules.entertainment_ecosystem.model.UserSetting;import com.example.modules.entertainment_ecosystem.model.UserFollower;import com.example.modules.entertainment_ecosystem.model.UserFollower;import com.example.modules.entertainment_ecosystem.model.UserAchievement;import com.example.modules.entertainment_ecosystem.model.Notification;import com.example.modules.entertainment_ecosystem.model.MerchandiseReview;import com.example.modules.entertainment_ecosystem.model.UserPreference;import com.example.modules.entertainment_ecosystem.model.MerchandiseSale;import com.example.modules.entertainment_ecosystem.model.GamePlaySession;import com.example.modules.entertainment_ecosystem.model.GameReviewUpvote;import com.example.modules.entertainment_ecosystem.model.GameReviewDownvote;import com.example.modules.entertainment_ecosystem.model.UserMessage;import com.example.modules.entertainment_ecosystem.model.UserMessage;
+import com.example.modules.entertainment_ecosystem.model.Review;import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.Artist;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.Genre;import com.example.modules.entertainment_ecosystem.model.Subscription;import com.example.modules.entertainment_ecosystem.model.Episode;import com.example.modules.entertainment_ecosystem.model.VideoGame;import com.example.modules.entertainment_ecosystem.model.ForumThread;import com.example.modules.entertainment_ecosystem.model.ForumPost;import com.example.modules.entertainment_ecosystem.model.Achievement;import com.example.modules.entertainment_ecosystem.model.OnlineEvent;import com.example.modules.entertainment_ecosystem.model.OnlineEvent;import com.example.modules.entertainment_ecosystem.model.Merchandise;import com.example.modules.entertainment_ecosystem.model.Podcast;import com.example.modules.entertainment_ecosystem.model.MusicTrack;import com.example.modules.entertainment_ecosystem.model.Playlist;import com.example.modules.entertainment_ecosystem.model.UserWallet;import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;import com.example.modules.entertainment_ecosystem.model.GameSession;import com.example.modules.entertainment_ecosystem.model.GameReviewComment;import com.example.modules.entertainment_ecosystem.model.UserPlaylist;import com.example.modules.entertainment_ecosystem.model.UserPlaylistItem;import com.example.modules.entertainment_ecosystem.model.ReviewRating;import com.example.modules.entertainment_ecosystem.model.ReviewLike;import com.example.modules.entertainment_ecosystem.model.UserActivityLog;import com.example.modules.entertainment_ecosystem.model.UserSetting;import com.example.modules.entertainment_ecosystem.model.UserRole;import com.example.modules.entertainment_ecosystem.model.UserFollower;import com.example.modules.entertainment_ecosystem.model.UserFollower;import com.example.modules.entertainment_ecosystem.model.UserAchievement;import com.example.modules.entertainment_ecosystem.model.Notification;import com.example.modules.entertainment_ecosystem.model.MerchandiseReview;import com.example.modules.entertainment_ecosystem.model.UserPreference;import com.example.modules.entertainment_ecosystem.model.MerchandiseSale;import com.example.modules.entertainment_ecosystem.model.GamePlaySession;import com.example.modules.entertainment_ecosystem.model.GameReviewUpvote;import com.example.modules.entertainment_ecosystem.model.GameReviewDownvote;import com.example.modules.entertainment_ecosystem.model.UserMessage;import com.example.modules.entertainment_ecosystem.model.UserMessage;import com.example.modules.entertainment_ecosystem.model.FeatureFlag;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.util.ArrayList;
@@ -61,32 +61,32 @@ public class UserProfile extends BaseEntity {
             @JoinTable(name = "user_movie_watchlist",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "movie_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("watchlistUsers")
             private List<Movie> watchlistMovies;
             
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_favorite_artists",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "artist_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("favoriteArtists")
             private List<Artist> favoriteArtists;
             
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "followingUsers", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("followingUsers")
             private List<UserProfile> followedUsers = new ArrayList<>();
         
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_followers",
             joinColumns = @JoinColumn(name = "follower_id"),
             inverseJoinColumns = @JoinColumn(name = "followed_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("followedUsers")
             private List<UserProfile> followingUsers;
             
     @ManyToMany(fetch = FetchType.EAGER)
             @JoinTable(name = "user_favorite_genres",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("favoriteUsers")
             private List<Genre> favoriteGenres;
             
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -97,14 +97,14 @@ public class UserProfile extends BaseEntity {
             @JoinTable(name = "user_watched_episodes",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "episode_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("watchedByUsers")
             private List<Episode> watchedEpisodes;
             
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_games",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "game_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("playedBy")
             private List<VideoGame> playedGames;
             
     @OneToMany(mappedBy = "author", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -124,28 +124,28 @@ public class UserProfile extends BaseEntity {
         private List<OnlineEvent> hostedOnlineEvents;
     
     @ManyToMany(mappedBy = "attendees", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("attendees")
             private List<OnlineEvent> attendedOnlineEvents = new ArrayList<>();
         
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_merchandise",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "merchandise_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("ownedByUsers")
             private List<Merchandise> ownedMerchandise;
             
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_podcast_library",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "podcast_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("listeners")
             private List<Podcast> libraryPodcasts;
             
     @ManyToMany(fetch = FetchType.LAZY)
             @JoinTable(name = "user_music_history",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "track_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("listenedByUsers")
             private List<MusicTrack> listenedMusic;
             
     @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -193,6 +193,13 @@ public class UserProfile extends BaseEntity {
         @JsonIgnoreProperties("user")
         private List<UserSetting> settings;
     
+    @ManyToMany(fetch = FetchType.LAZY)
+            @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+            @JsonIgnoreProperties("")
+            private List<UserRole> UserRole;
+            
     @OneToMany(mappedBy = "followed", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
         @JsonIgnoreProperties("followed")
         private List<UserFollower> followers;
@@ -241,5 +248,12 @@ public class UserProfile extends BaseEntity {
         @JsonIgnoreProperties("receiver")
         private List<UserMessage> receivedMessages;
     
+    @ManyToMany(fetch = FetchType.LAZY)
+            @JoinTable(name = "user_feature_flags",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "feature_flag_id"))
+            @JsonIgnoreProperties("enabledForUsers")
+            private List<FeatureFlag> enabledFeatureFlags;
+            
 
 }

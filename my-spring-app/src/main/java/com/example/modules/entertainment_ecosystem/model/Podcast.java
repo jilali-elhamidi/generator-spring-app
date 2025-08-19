@@ -46,11 +46,11 @@ public class Podcast extends BaseEntity {
         private List<PodcastEpisode> episodes;
     
     @ManyToMany(mappedBy = "podcasts", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("podcasts")
             private List<Genre> genres = new ArrayList<>();
         
-    @ManyToMany(mappedBy = "", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("")
+    @ManyToMany(mappedBy = "libraryPodcasts", fetch = FetchType.LAZY)
+            @JsonIgnoreProperties("libraryPodcasts")
             private List<UserProfile> listeners = new ArrayList<>();
         
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -62,7 +62,7 @@ public class Podcast extends BaseEntity {
             @JoinTable(name = "podcast_categories",
             joinColumns = @JoinColumn(name = "podcast_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("podcasts")
             private List<PodcastCategory> categories;
             
     @OneToMany(mappedBy = "podcast", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -78,7 +78,7 @@ public class Podcast extends BaseEntity {
             @JoinTable(name = "podcast_languages",
             joinColumns = @JoinColumn(name = "podcast_id"),
             inverseJoinColumns = @JoinColumn(name = "language_id"))
-            @JsonIgnoreProperties("")
+            @JsonIgnoreProperties("podcasts")
             private List<ContentLanguage> languages;
             
 

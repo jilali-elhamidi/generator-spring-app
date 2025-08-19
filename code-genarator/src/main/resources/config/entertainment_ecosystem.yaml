@@ -62,6 +62,7 @@ entities:
         inverseJoinColumns: movie_id
         fetch: LAZY
         owner: true
+        inverseField: watchlistUsers
       - name: favoriteArtists
         type: Artist
         relationType: ManyToMany
@@ -70,14 +71,17 @@ entities:
         inverseJoinColumns: artist_id
         fetch: LAZY
         owner: true
+        inverseField: favoriteArtists
       - name: followedUsers
         type: UserProfile
         relationType: ManyToMany
         joinTable: user_followers
         joinColumns: followed_id
         inverseJoinColumns: follower_id
+        mappedBy: followingUsers
         fetch: LAZY
         owner: false
+        inverseField: followingUsers
       - name: followingUsers
         type: UserProfile
         relationType: ManyToMany
@@ -86,6 +90,7 @@ entities:
         inverseJoinColumns: followed_id
         fetch: LAZY
         owner: true
+        inverseField: followedUsers
       - name: favoriteGenres
         type: Genre
         relationType: ManyToMany
@@ -94,6 +99,7 @@ entities:
         inverseJoinColumns: genre_id
         fetch: EAGER
         owner: true
+        inverseField: favoriteUsers
       - name: subscriptions
         type: Subscription
         relationType: OneToMany
@@ -108,6 +114,7 @@ entities:
         inverseJoinColumns: episode_id
         fetch: LAZY
         owner: true
+        inverseField: watchedByUsers
       - name: playedGames
         type: VideoGame
         relationType: ManyToMany
@@ -116,6 +123,7 @@ entities:
         inverseJoinColumns: game_id
         fetch: LAZY
         owner: true
+        inverseField: playedBy
       - name: forumThreads
         type: ForumThread
         relationType: OneToMany
@@ -149,6 +157,7 @@ entities:
         mappedBy: attendees
         fetch: LAZY
         owner: false
+        inverseField: attendees
       - name: ownedMerchandise
         type: Merchandise
         relationType: ManyToMany
@@ -157,6 +166,7 @@ entities:
         inverseJoinColumns: merchandise_id
         fetch: LAZY
         owner: true
+        inverseField: ownedByUsers
       - name: libraryPodcasts
         type: Podcast
         relationType: ManyToMany
@@ -165,6 +175,7 @@ entities:
         inverseJoinColumns: podcast_id
         fetch: LAZY
         owner: true
+        inverseField: listeners
       - name: listenedMusic
         type: MusicTrack
         relationType: ManyToMany
@@ -173,6 +184,7 @@ entities:
         inverseJoinColumns: track_id
         fetch: LAZY
         owner: true
+        inverseField: listenedByUsers
       - name: playlists
         type: Playlist
         relationType: OneToMany
@@ -240,6 +252,14 @@ entities:
         mappedBy: user
         inverseField: user
         fetch: LAZY
+      - name: UserRole
+        type: UserRole
+        relationType: ManyToMany
+        joinTable: user_roles
+        joinColumns: user_id
+        inverseJoinColumns: role_id
+        fetch: LAZY
+        owner: true
       - name: followers
         type: UserFollower
         relationType: OneToMany
@@ -312,6 +332,15 @@ entities:
         mappedBy: receiver
         inverseField: receiver
         fetch: LAZY
+      - name: enabledFeatureFlags
+        type: FeatureFlag
+        relationType: ManyToMany
+        joinTable: user_feature_flags
+        joinColumns: user_id
+        inverseJoinColumns: feature_flag_id
+        fetch: LAZY
+        owner: true
+        inverseField: enabledForUsers
 
   - name: UserWallet
     fields:
@@ -423,8 +452,10 @@ entities:
         joinTable: user_favorite_artists
         joinColumns: artist_id
         inverseJoinColumns: user_id
+        mappedBy: favoriteArtists
         fetch: LAZY
         owner: false
+        inverseField: favoriteArtists
       - name: composedMusic
         type: MusicTrack
         relationType: OneToMany
@@ -452,6 +483,7 @@ entities:
         mappedBy: performers
         fetch: LAZY
         owner: false
+        inverseField: performers
       - name: hostedPodcasts
         type: Podcast
         relationType: OneToMany
@@ -491,6 +523,7 @@ entities:
         mappedBy: cast
         fetch: LAZY
         owner: false
+        inverseField: cast
       - name: directedMovies
         type: Movie
         relationType: OneToMany
@@ -515,8 +548,10 @@ entities:
         joinTable: tvshow_cast
         joinColumns: artist_id
         inverseJoinColumns: tvshow_id
+        mappedBy: cast
         fetch: LAZY
         owner: false
+        inverseField: cast
       - name: socialMediaLinks
         type: ArtistSocialMedia
         relationType: OneToMany
@@ -588,6 +623,7 @@ entities:
         inverseJoinColumns: artist_id
         fetch: LAZY
         owner: true
+        inverseField: actedInMovies
       - name: director
         type: Artist
         relationType: ManyToOne
@@ -608,14 +644,17 @@ entities:
         inverseJoinColumns: genre_id
         fetch: EAGER
         owner: true
+        inverseField: movies
       - name: watchlistUsers
         type: UserProfile
         relationType: ManyToMany
         joinTable: user_movie_watchlist
         joinColumns: movie_id
         inverseJoinColumns: user_id
+        mappedBy: watchlistMovies
         fetch: LAZY
         owner: false
+        inverseField: watchlistMovies
       - name: relatedMerchandise
         type: Merchandise
         relationType: ManyToMany
@@ -625,6 +664,7 @@ entities:
         mappedBy: relatedMovies
         fetch: LAZY
         owner: false
+        inverseField: relatedMovies
       - name: productionCompany
         type: ProductionCompany
         relationType: ManyToOne
@@ -645,6 +685,7 @@ entities:
         inverseJoinColumns: format_id
         fetch: EAGER
         owner: true
+        inverseField: movies
       - name: streamingLicenses
         type: StreamingContentLicense
         relationType: OneToMany
@@ -677,6 +718,7 @@ entities:
         inverseJoinColumns: movie_id
         fetch: LAZY
         owner: true
+        inverseField: movies
       - name: languages
         type: ContentLanguage
         relationType: ManyToMany
@@ -685,6 +727,16 @@ entities:
         inverseJoinColumns: language_id
         fetch: EAGER
         owner: true
+        inverseField: movies
+      - name: platforms
+        type: StreamingPlatform
+        relationType: ManyToMany
+        joinTable: movie_platforms
+        joinColumns: movie_id
+        inverseJoinColumns: platform_id
+        fetch: LAZY
+        owner: true
+        inverseField: movies
 
   - name: TVShow
     fields:
@@ -731,6 +783,7 @@ entities:
         inverseJoinColumns: genre_id
         fetch: EAGER
         owner: true
+        inverseField: tvShows
       - name: relatedMerchandise
         type: Merchandise
         relationType: ManyToMany
@@ -740,6 +793,7 @@ entities:
         mappedBy: relatedShows
         fetch: LAZY
         owner: false
+        inverseField: relatedShows
       - name: productionCompany
         type: ProductionCompany
         relationType: ManyToOne
@@ -754,6 +808,7 @@ entities:
         inverseJoinColumns: artist_id
         fetch: LAZY
         owner: true
+        inverseField: actedInShows
       - name: streamingLicenses
         type: StreamingContentLicense
         relationType: OneToMany
@@ -786,6 +841,7 @@ entities:
         inverseJoinColumns: tvshow_id
         fetch: LAZY
         owner: true
+        inverseField: tvShows
       - name: languages
         type: ContentLanguage
         relationType: ManyToMany
@@ -794,6 +850,16 @@ entities:
         inverseJoinColumns: language_id
         fetch: EAGER
         owner: true
+        inverseField: tvShows
+      - name: platforms
+        type: StreamingPlatform
+        relationType: ManyToMany
+        joinTable: tvshow_platforms
+        joinColumns: tvshow_id
+        inverseJoinColumns: platform_id
+        fetch: LAZY
+        owner: true
+        inverseField: tvShows
 
   - name: ProductionCompany
     fields:
@@ -888,8 +954,10 @@ entities:
         joinTable: user_watched_episodes
         joinColumns: episode_id
         inverseJoinColumns: user_id
+        mappedBy: watchedEpisodes
         fetch: LAZY
         owner: false
+        inverseField: watchedEpisodes
       - name: relatedPodcastEpisode
         type: PodcastEpisode
         relationType: OneToOne
@@ -947,8 +1015,10 @@ entities:
         joinTable: user_music_history
         joinColumns: track_id
         inverseJoinColumns: user_id
+        mappedBy: listenedMusic
         fetch: LAZY
         owner: false
+        inverseField: listenedMusic
       - name: playlistItems
         type: PlaylistItem
         relationType: OneToMany
@@ -969,6 +1039,7 @@ entities:
         inverseJoinColumns: format_id
         fetch: EAGER
         owner: true
+        inverseField: musicTracks
       - name: streamingLicenses
         type: StreamingContentLicense
         relationType: OneToMany
@@ -1075,6 +1146,7 @@ entities:
         inverseJoinColumns: genre_id
         fetch: EAGER
         owner: true
+        inverseField: bookGenres
 
   - name: Publisher
     fields:
@@ -1137,6 +1209,7 @@ entities:
         inverseJoinColumns: artist_id
         fetch: LAZY
         owner: true
+        inverseField: participatedInEvents
       - name: tickets
         type: Ticket
         relationType: OneToMany
@@ -1182,6 +1255,7 @@ entities:
         inverseJoinColumns: tag_id
         fetch: EAGER
         owner: true
+        inverseField: liveEvents
 
   - name: EventType
     fields:
@@ -1383,6 +1457,7 @@ entities:
         joinTable: movie_platforms
         joinColumns: platform_id
         inverseJoinColumns: movie_id
+        mappedBy: platforms
         fetch: LAZY
         owner: false
       - name: tvShows
@@ -1391,6 +1466,7 @@ entities:
         joinTable: tvshow_platforms
         joinColumns: platform_id
         inverseJoinColumns: tvshow_id
+        mappedBy: platforms
         fetch: LAZY
         owner: false
       - name: subscriptions
@@ -1420,6 +1496,7 @@ entities:
         mappedBy: displayedOnPlatforms
         fetch: LAZY
         owner: false
+        inverseField: displayedOnPlatforms
 
   - name: Subscription
     fields:
@@ -1548,8 +1625,10 @@ entities:
         joinTable: user_favorite_genres
         joinColumns: genre_id
         inverseJoinColumns: user_id
+        mappedBy: favoriteGenres
         fetch: LAZY
         owner: false
+        inverseField: favoriteGenres
       - name: videoGames
         type: VideoGame
         relationType: ManyToMany
@@ -1568,6 +1647,7 @@ entities:
         mappedBy: genres
         fetch: LAZY
         owner: true
+        inverseField: genres
 
   - name: VideoGame
     fields:
@@ -1608,6 +1688,7 @@ entities:
         inverseJoinColumns: genre_id
         fetch: EAGER
         owner: true
+        inverseField: videoGames
       - name: generalReviews
         type: Review
         relationType: OneToMany
@@ -1626,8 +1707,10 @@ entities:
         joinTable: user_games
         joinColumns: game_id
         inverseJoinColumns: user_id
+        mappedBy: playedGames
         fetch: LAZY
         owner: false
+        inverseField: playedGames
       - name: achievements
         type: GameAchievement
         relationType: OneToMany
@@ -1660,6 +1743,7 @@ entities:
         inverseJoinColumns: platform_id
         fetch: EAGER
         owner: true
+        inverseField: videoGames
       - name: contentRating
         type: ContentRating
         relationType: ManyToOne
@@ -1674,6 +1758,7 @@ entities:
         inverseJoinColumns: game_id
         fetch: LAZY
         owner: true
+        inverseField: videoGames
       - name: ratings
         type: VideoGameRating
         relationType: OneToMany
@@ -1760,14 +1845,6 @@ entities:
         joinColumn: game_id
         inverseField: achievements
         fetch: EAGER
-      - name: earnedBy
-        type: UserProfile
-        relationType: ManyToMany
-        joinTable: user_achievements
-        joinColumns: achievement_id
-        inverseJoinColumns: user_id
-        fetch: LAZY
-        owner: false
       - name: userAchievements
         type: UserAchievement
         relationType: OneToMany
@@ -1815,14 +1892,17 @@ entities:
         mappedBy: podcasts
         fetch: LAZY
         owner: false
+        inverseField: podcasts
       - name: listeners
         type: UserProfile
         relationType: ManyToMany
         joinTable: user_podcast_library
         joinColumns: podcast_id
         inverseJoinColumns: user_id
+        mappedBy: libraryPodcasts
         fetch: LAZY
         owner: false
+        inverseField: libraryPodcasts
       - name: publisher
         type: Publisher
         relationType: ManyToOne
@@ -1837,6 +1917,7 @@ entities:
         inverseJoinColumns: category_id
         fetch: EAGER
         owner: true
+        inverseField: podcasts
       - name: guests
         type: PodcastGuest
         relationType: OneToMany
@@ -1857,6 +1938,7 @@ entities:
         inverseJoinColumns: language_id
         fetch: EAGER
         owner: true
+        inverseField: podcasts
 
   - name: PodcastEpisode
     fields:
@@ -1897,6 +1979,7 @@ entities:
         inverseJoinColumns: guest_id
         fetch: LAZY
         owner: true
+        inverseField: appearances
 
   - name: OnlineEvent
     fields:
@@ -1937,6 +2020,7 @@ entities:
         inverseJoinColumns: user_id
         fetch: LAZY
         owner: true
+        inverseField: attendedOnlineEvents
       - name: type
         type: OnlineEventType
         relationType: ManyToOne
@@ -2025,6 +2109,7 @@ entities:
         inverseJoinColumns: movie_id
         fetch: LAZY
         owner: true
+        inverseField: relatedMerchandise
       - name: relatedShows
         type: TVShow
         relationType: ManyToMany
@@ -2033,14 +2118,17 @@ entities:
         inverseJoinColumns: tvshow_id
         fetch: LAZY
         owner: true
+        inverseField: relatedMerchandise
       - name: ownedByUsers
         type: UserProfile
         relationType: ManyToMany
         joinTable: user_merchandise
         joinColumns: merchandise_id
         inverseJoinColumns: user_id
+        mappedBy: ownedMerchandise
         fetch: LAZY
         owner: false
+        inverseField: ownedMerchandise
       - name: productType
         type: MerchandiseType
         relationType: ManyToOne
@@ -2848,6 +2936,7 @@ entities:
         mappedBy: platforms
         fetch: LAZY
         owner: false
+        inverseField: platforms
 
   - name: MovieFormat
     fields:
@@ -2868,6 +2957,7 @@ entities:
         mappedBy: formats
         fetch: LAZY
         owner: false
+        inverseField: formats
 
   - name: MusicFormat
     fields:
@@ -2888,6 +2978,7 @@ entities:
         mappedBy: formats
         fetch: LAZY
         owner: false
+        inverseField: formats
 
   - name: PodcastCategory
     fields:
@@ -2908,6 +2999,7 @@ entities:
         mappedBy: categories
         fetch: LAZY
         owner: false
+        inverseField: categories
 
   - name: StreamingContentLicense
     fields:
@@ -2981,6 +3073,7 @@ entities:
         inverseJoinColumns: guest_id
         fetch: LAZY
         owner: true
+        inverseField: guestAppearances
 
   - name: GameReviewComment
     fields:
@@ -3149,10 +3242,11 @@ entities:
       - name: merchandiseItem
         type: Merchandise
         relationType: OneToOne
+        joinColumn: merchandise_id
         mappedBy: inventory
         inverseField: inventory
         fetch: LAZY
-        owner: false
+        owner: true
       - name: warehouse
         type: Warehouse
         relationType: ManyToOne
@@ -3261,6 +3355,7 @@ entities:
         inverseJoinColumns: campaign_id
         fetch: LAZY
         owner: true
+        inverseField: adCampaigns
 
   - name: ReviewRating
     fields:
@@ -3359,6 +3454,7 @@ entities:
         joinTable: user_feature_flags
         joinColumns: flag_id
         inverseJoinColumns: user_id
+        mappedBy: enabledFeatureFlags
         fetch: LAZY
         owner: false
 
@@ -3494,6 +3590,7 @@ entities:
         joinTable: user_roles
         joinColumns: role_id
         inverseJoinColumns: user_id
+        mappedBy: UserRole
         fetch: LAZY
         owner: false
 
@@ -3516,6 +3613,7 @@ entities:
         mappedBy: tags
         fetch: LAZY
         owner: false
+        inverseField: tags
       - name: tvShows
         type: TVShow
         relationType: ManyToMany
@@ -3525,6 +3623,7 @@ entities:
         mappedBy: tags
         fetch: LAZY
         owner: false
+        inverseField: tags
       - name: videoGames
         type: VideoGame
         relationType: ManyToMany
@@ -3534,6 +3633,7 @@ entities:
         mappedBy: tags
         fetch: LAZY
         owner: false
+        inverseField: tags
       - name: liveEvents
         type: LiveEvent
         relationType: ManyToMany
@@ -3543,6 +3643,7 @@ entities:
         mappedBy: tags
         fetch: LAZY
         owner: false
+        inverseField: tags
 
   - name: MerchandiseReview
     fields:
@@ -3824,6 +3925,7 @@ entities:
         mappedBy: languages
         fetch: LAZY
         owner: false
+        inverseField: languages
       - name: tvShows
         type: TVShow
         relationType: ManyToMany
@@ -3833,6 +3935,7 @@ entities:
         mappedBy: languages
         fetch: LAZY
         owner: false
+        inverseField: languages
       - name: podcasts
         type: Podcast
         relationType: ManyToMany
@@ -3842,6 +3945,7 @@ entities:
         mappedBy: languages
         fetch: LAZY
         owner: false
+        inverseField: languages
 
   - name: ContentRatingBoard
     fields:
@@ -4038,6 +4142,12 @@ entities:
         relationType: ManyToOne
         joinColumn: review_id
         inverseField: downvotes
+        fetch: EAGER
+      - name: game
+        type: VideoGame
+        relationType: ManyToOne
+        joinColumn: game_id
+        inverseField: gameReviewDownvotes
         fetch: EAGER
 
   - name: UserMessage
