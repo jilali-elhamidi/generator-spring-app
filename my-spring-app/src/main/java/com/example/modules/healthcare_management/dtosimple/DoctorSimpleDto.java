@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DoctorSimpleDto {
+
     private Long id;
 
     private String firstName;

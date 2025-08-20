@@ -19,7 +19,7 @@ public class PaymentService extends BaseService<Payment> {
     protected final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
 
-    public PaymentService(PaymentRepository repository,OrderRepository orderRepository)
+    public PaymentService(PaymentRepository repository, OrderRepository orderRepository)
     {
         super(repository);
         this.paymentRepository = repository;
@@ -28,25 +28,21 @@ public class PaymentService extends BaseService<Payment> {
 
     @Override
     public Payment save(Payment payment) {
-
-
-    
-
-    
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (payment.getOrder() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
-            payment.setOrder(
-            orderRepository.findById(payment.getOrder().getId())
-            .orElseThrow(() -> new RuntimeException("order not found"))
-            );
-        
-        payment.getOrder().setPayment(payment);
-        }
 
-        return paymentRepository.save(payment);
-    }
+            payment.setOrder(
+                orderRepository.findById(payment.getOrder().getId())
+                    .orElseThrow(() -> new RuntimeException("order not found"))
+            );
+            payment.getOrder().setPayment(payment);
+        }
+        
+    return paymentRepository.save(payment);
+}
 
 
     public Payment update(Long id, Payment paymentRequest) {
@@ -58,70 +54,38 @@ public class PaymentService extends BaseService<Payment> {
         existing.setPaymentDate(paymentRequest.getPaymentDate());
         existing.setAmount(paymentRequest.getAmount());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+        if (paymentRequest.getOrder() != null &&paymentRequest.getOrder().getId() != null) {
 
-// Relations ManyToMany : synchronisation sécurisée
+        Order order = orderRepository.findById(paymentRequest.getOrder().getId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
 
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-        if (paymentRequest.getOrder() != null
-        && paymentRequest.getOrder().getId() != null) {
-
-        Order order = orderRepository.findById(
-        paymentRequest.getOrder().getId()
-        ).orElseThrow(() -> new RuntimeException("Order not found"));
-
-        // Mise à jour de la relation côté propriétaire
         existing.setOrder(order);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
-            order.setPayment(existing);
+        order.setPayment(existing);
         
         }
-
     
-
-
-        return paymentRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Payment> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Payment entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getOrder() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getOrder().setPayment(null);
-        // Dissocier côté direct
-        entity.setOrder(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return paymentRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Payment> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Payment entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getOrder() != null) {
+            entity.getOrder().setPayment(null);
+            entity.setOrder(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

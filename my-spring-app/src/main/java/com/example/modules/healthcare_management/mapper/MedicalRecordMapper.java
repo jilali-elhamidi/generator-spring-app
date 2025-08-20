@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface MedicalRecordMapper {
     List<MedicalRecordDto> toDtoList(List<MedicalRecord> medicalrecordList);
 
     List<MedicalRecord> toEntityList(List<MedicalRecordDto> medicalrecordDtoList);
+
+    void updateEntityFromDto(MedicalRecordDto dto, @MappingTarget MedicalRecord entity);
 
 }

@@ -46,8 +46,12 @@ public class PrescriptionController {
 
         Prescription entity = prescriptionMapper.toEntity(prescriptionDto);
         Prescription saved = prescriptionService.save(entity);
-        URI location = uriBuilder.path("/api/prescriptions/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/prescriptions/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(prescriptionMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class PrescriptionController {
             @PathVariable Long id,
             @Valid @RequestBody PrescriptionDto prescriptionDto) {
 
-        try {
-            Prescription updatedEntity = prescriptionService.update(
-                    id,
-                    prescriptionMapper.toEntity(prescriptionDto)
-            );
-            return ResponseEntity.ok(prescriptionMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Prescription entityToUpdate = prescriptionMapper.toEntity(prescriptionDto);
+        Prescription updatedEntity = prescriptionService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(prescriptionMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePrescription(@PathVariable Long id) {
-        prescriptionService.deleteById(id);
+        boolean deleted = prescriptionService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

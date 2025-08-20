@@ -46,8 +46,12 @@ public class MedicalRecordController {
 
         MedicalRecord entity = medicalrecordMapper.toEntity(medicalrecordDto);
         MedicalRecord saved = medicalrecordService.save(entity);
-        URI location = uriBuilder.path("/api/medicalrecords/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/medicalrecords/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(medicalrecordMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class MedicalRecordController {
             @PathVariable Long id,
             @Valid @RequestBody MedicalRecordDto medicalrecordDto) {
 
-        try {
-            MedicalRecord updatedEntity = medicalrecordService.update(
-                    id,
-                    medicalrecordMapper.toEntity(medicalrecordDto)
-            );
-            return ResponseEntity.ok(medicalrecordMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        MedicalRecord entityToUpdate = medicalrecordMapper.toEntity(medicalrecordDto);
+        MedicalRecord updatedEntity = medicalrecordService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(medicalrecordMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMedicalRecord(@PathVariable Long id) {
-        medicalrecordService.deleteById(id);
+        boolean deleted = medicalrecordService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

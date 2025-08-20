@@ -46,8 +46,12 @@ public class DoctorController {
 
         Doctor entity = doctorMapper.toEntity(doctorDto);
         Doctor saved = doctorService.save(entity);
-        URI location = uriBuilder.path("/api/doctors/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/doctors/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(doctorMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class DoctorController {
             @PathVariable Long id,
             @Valid @RequestBody DoctorDto doctorDto) {
 
-        try {
-            Doctor updatedEntity = doctorService.update(
-                    id,
-                    doctorMapper.toEntity(doctorDto)
-            );
-            return ResponseEntity.ok(doctorMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Doctor entityToUpdate = doctorMapper.toEntity(doctorDto);
+        Doctor updatedEntity = doctorService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(doctorMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
-        doctorService.deleteById(id);
+        boolean deleted = doctorService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

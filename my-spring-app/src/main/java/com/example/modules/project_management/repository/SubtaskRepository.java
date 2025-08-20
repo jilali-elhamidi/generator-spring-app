@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SubtaskRepository extends BaseRepository<Subtask, Long> {
+
 }

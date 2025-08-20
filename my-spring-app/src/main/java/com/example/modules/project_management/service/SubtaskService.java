@@ -22,7 +22,7 @@ public class SubtaskService extends BaseService<Subtask> {
     private final TaskRepository parentTaskRepository;
     private final TeamMemberRepository assigneeRepository;
 
-    public SubtaskService(SubtaskRepository repository,TaskRepository parentTaskRepository,TeamMemberRepository assigneeRepository)
+    public SubtaskService(SubtaskRepository repository, TaskRepository parentTaskRepository, TeamMemberRepository assigneeRepository)
     {
         super(repository);
         this.subtaskRepository = repository;
@@ -32,31 +32,32 @@ public class SubtaskService extends BaseService<Subtask> {
 
     @Override
     public Subtask save(Subtask subtask) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (subtask.getParentTask() != null &&
+            subtask.getParentTask().getId() != null) {
 
+            Task existingParentTask = parentTaskRepository.findById(
+                subtask.getParentTask().getId()
+            ).orElseThrow(() -> new RuntimeException("Task not found"));
 
-    
-
-    
-
-    if (subtask.getParentTask() != null
-        && subtask.getParentTask().getId() != null) {
-        Task existingParentTask = parentTaskRepository.findById(
-        subtask.getParentTask().getId()
-        ).orElseThrow(() -> new RuntimeException("Task not found"));
-        subtask.setParentTask(existingParentTask);
+            subtask.setParentTask(existingParentTask);
         }
-    
-    if (subtask.getAssignee() != null
-        && subtask.getAssignee().getId() != null) {
-        TeamMember existingAssignee = assigneeRepository.findById(
-        subtask.getAssignee().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-        subtask.setAssignee(existingAssignee);
-        }
-    
+        
+        if (subtask.getAssignee() != null &&
+            subtask.getAssignee().getId() != null) {
 
-        return subtaskRepository.save(subtask);
-    }
+            TeamMember existingAssignee = assigneeRepository.findById(
+                subtask.getAssignee().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+
+            subtask.setAssignee(existingAssignee);
+        }
+        
+    // ---------- OneToOne ----------
+    return subtaskRepository.save(subtask);
+}
 
 
     public Subtask update(Long id, Subtask subtaskRequest) {
@@ -67,85 +68,55 @@ public class SubtaskService extends BaseService<Subtask> {
         existing.setTitle(subtaskRequest.getTitle());
         existing.setStatus(subtaskRequest.getStatus());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (subtaskRequest.getParentTask() != null &&
-        subtaskRequest.getParentTask().getId() != null) {
+            subtaskRequest.getParentTask().getId() != null) {
 
-        Task existingParentTask = parentTaskRepository.findById(
-        subtaskRequest.getParentTask().getId()
-        ).orElseThrow(() -> new RuntimeException("Task not found"));
+            Task existingParentTask = parentTaskRepository.findById(
+                subtaskRequest.getParentTask().getId()
+            ).orElseThrow(() -> new RuntimeException("Task not found"));
 
-        existing.setParentTask(existingParentTask);
+            existing.setParentTask(existingParentTask);
         } else {
-        existing.setParentTask(null);
+            existing.setParentTask(null);
         }
+        
         if (subtaskRequest.getAssignee() != null &&
-        subtaskRequest.getAssignee().getId() != null) {
+            subtaskRequest.getAssignee().getId() != null) {
 
-        TeamMember existingAssignee = assigneeRepository.findById(
-        subtaskRequest.getAssignee().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+            TeamMember existingAssignee = assigneeRepository.findById(
+                subtaskRequest.getAssignee().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
 
-        existing.setAssignee(existingAssignee);
+            existing.setAssignee(existingAssignee);
         } else {
-        existing.setAssignee(null);
+            existing.setAssignee(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return subtaskRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Subtask> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Subtask entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getParentTask() != null) {
-        entity.setParentTask(null);
-        }
-    
-
-    
-        if (entity.getAssignee() != null) {
-        entity.setAssignee(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return subtaskRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Subtask> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Subtask entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getParentTask() != null) {
+            entity.setParentTask(null);
+        }
+        
+        if (entity.getAssignee() != null) {
+            entity.setAssignee(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

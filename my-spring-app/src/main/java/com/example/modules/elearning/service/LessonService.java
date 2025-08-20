@@ -7,9 +7,11 @@ import com.example.modules.elearning.model.Course;
 import com.example.modules.elearning.repository.CourseRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class LessonService extends BaseService<Lesson> {
@@ -17,7 +19,7 @@ public class LessonService extends BaseService<Lesson> {
     protected final LessonRepository lessonRepository;
     private final CourseRepository courseRepository;
 
-    public LessonService(LessonRepository repository,CourseRepository courseRepository)
+    public LessonService(LessonRepository repository, CourseRepository courseRepository)
     {
         super(repository);
         this.lessonRepository = repository;
@@ -26,15 +28,23 @@ public class LessonService extends BaseService<Lesson> {
 
     @Override
     public Lesson save(Lesson lesson) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (lesson.getCourse() != null &&
+            lesson.getCourse().getId() != null) {
 
-        if (lesson.getCourse() != null && lesson.getCourse().getId() != null) {
-        Course course = courseRepository.findById(lesson.getCourse().getId())
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-        lesson.setCourse(course);
+            Course existingCourse = courseRepository.findById(
+                lesson.getCourse().getId()
+            ).orElseThrow(() -> new RuntimeException("Course not found"));
+
+            lesson.setCourse(existingCourse);
         }
+        
+    // ---------- OneToOne ----------
 
-        return lessonRepository.save(lesson);
-    }
+    return lessonRepository.save(lesson);
+}
 
 
     public Lesson update(Long id, Lesson lessonRequest) {
@@ -44,19 +54,43 @@ public class LessonService extends BaseService<Lesson> {
     // Copier les champs simples
         existing.setTitle(lessonRequest.getTitle());
         existing.setContent(lessonRequest.getContent());
+        existing.setCreatedAt(lessonRequest.getCreatedAt());
+        existing.setUpdatedAt(lessonRequest.getUpdatedAt());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+        if (lessonRequest.getCourse() != null &&
+            lessonRequest.getCourse().getId() != null) {
 
-        if (lessonRequest.getCourse() != null && lessonRequest.getCourse().getId() != null) {
-        Course course = courseRepository.findById(lessonRequest.getCourse().getId())
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-        existing.setCourse(course);
+            Course existingCourse = courseRepository.findById(
+                lessonRequest.getCourse().getId()
+            ).orElseThrow(() -> new RuntimeException("Course not found"));
+
+            existing.setCourse(existingCourse);
+        } else {
+            existing.setCourse(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
+    return lessonRepository.save(existing);
+}
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Lesson> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
 
-// Relations OneToMany : synchronisation sécurisée
-
-        return lessonRepository.save(existing);
+        Lesson entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getCourse() != null) {
+            entity.setCourse(null);
+        }
+        
+        repository.delete(entity);
+        return true;
     }
 }

@@ -46,8 +46,12 @@ public class ReimbursementController {
 
         Reimbursement entity = reimbursementMapper.toEntity(reimbursementDto);
         Reimbursement saved = reimbursementService.save(entity);
-        URI location = uriBuilder.path("/api/reimbursements/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/reimbursements/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(reimbursementMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class ReimbursementController {
             @PathVariable Long id,
             @Valid @RequestBody ReimbursementDto reimbursementDto) {
 
-        try {
-            Reimbursement updatedEntity = reimbursementService.update(
-                    id,
-                    reimbursementMapper.toEntity(reimbursementDto)
-            );
-            return ResponseEntity.ok(reimbursementMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Reimbursement entityToUpdate = reimbursementMapper.toEntity(reimbursementDto);
+        Reimbursement updatedEntity = reimbursementService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(reimbursementMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReimbursement(@PathVariable Long id) {
-        reimbursementService.deleteById(id);
+        boolean deleted = reimbursementService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

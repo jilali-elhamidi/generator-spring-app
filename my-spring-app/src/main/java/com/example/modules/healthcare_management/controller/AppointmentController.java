@@ -46,8 +46,12 @@ public class AppointmentController {
 
         Appointment entity = appointmentMapper.toEntity(appointmentDto);
         Appointment saved = appointmentService.save(entity);
-        URI location = uriBuilder.path("/api/appointments/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/appointments/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(appointmentMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class AppointmentController {
             @PathVariable Long id,
             @Valid @RequestBody AppointmentDto appointmentDto) {
 
-        try {
-            Appointment updatedEntity = appointmentService.update(
-                    id,
-                    appointmentMapper.toEntity(appointmentDto)
-            );
-            return ResponseEntity.ok(appointmentMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Appointment entityToUpdate = appointmentMapper.toEntity(appointmentDto);
+        Appointment updatedEntity = appointmentService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(appointmentMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
-        appointmentService.deleteById(id);
+        boolean deleted = appointmentService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

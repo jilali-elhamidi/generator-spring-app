@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReimbursementRepository extends BaseRepository<Reimbursement, Long> {
+
 }

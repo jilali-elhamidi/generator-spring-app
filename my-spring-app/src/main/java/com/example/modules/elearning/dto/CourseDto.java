@@ -23,6 +23,10 @@ public class CourseDto {
 
     private String description;
 
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
     private List<LessonSimpleDto> lessons;
 
     private InstructorSimpleDto instructor;

@@ -22,7 +22,7 @@ public class InvoiceService extends BaseService<Invoice> {
     private final ProjectRepository projectRepository;
     private final ClientRepository clientRepository;
 
-    public InvoiceService(InvoiceRepository repository,ProjectRepository projectRepository,ClientRepository clientRepository)
+    public InvoiceService(InvoiceRepository repository, ProjectRepository projectRepository, ClientRepository clientRepository)
     {
         super(repository);
         this.invoiceRepository = repository;
@@ -32,31 +32,32 @@ public class InvoiceService extends BaseService<Invoice> {
 
     @Override
     public Invoice save(Invoice invoice) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (invoice.getProject() != null &&
+            invoice.getProject().getId() != null) {
 
+            Project existingProject = projectRepository.findById(
+                invoice.getProject().getId()
+            ).orElseThrow(() -> new RuntimeException("Project not found"));
 
-    
-
-    
-
-    if (invoice.getProject() != null
-        && invoice.getProject().getId() != null) {
-        Project existingProject = projectRepository.findById(
-        invoice.getProject().getId()
-        ).orElseThrow(() -> new RuntimeException("Project not found"));
-        invoice.setProject(existingProject);
+            invoice.setProject(existingProject);
         }
-    
-    if (invoice.getClient() != null
-        && invoice.getClient().getId() != null) {
-        Client existingClient = clientRepository.findById(
-        invoice.getClient().getId()
-        ).orElseThrow(() -> new RuntimeException("Client not found"));
-        invoice.setClient(existingClient);
-        }
-    
+        
+        if (invoice.getClient() != null &&
+            invoice.getClient().getId() != null) {
 
-        return invoiceRepository.save(invoice);
-    }
+            Client existingClient = clientRepository.findById(
+                invoice.getClient().getId()
+            ).orElseThrow(() -> new RuntimeException("Client not found"));
+
+            invoice.setClient(existingClient);
+        }
+        
+    // ---------- OneToOne ----------
+    return invoiceRepository.save(invoice);
+}
 
 
     public Invoice update(Long id, Invoice invoiceRequest) {
@@ -68,85 +69,55 @@ public class InvoiceService extends BaseService<Invoice> {
         existing.setAmount(invoiceRequest.getAmount());
         existing.setStatus(invoiceRequest.getStatus());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (invoiceRequest.getProject() != null &&
-        invoiceRequest.getProject().getId() != null) {
+            invoiceRequest.getProject().getId() != null) {
 
-        Project existingProject = projectRepository.findById(
-        invoiceRequest.getProject().getId()
-        ).orElseThrow(() -> new RuntimeException("Project not found"));
+            Project existingProject = projectRepository.findById(
+                invoiceRequest.getProject().getId()
+            ).orElseThrow(() -> new RuntimeException("Project not found"));
 
-        existing.setProject(existingProject);
+            existing.setProject(existingProject);
         } else {
-        existing.setProject(null);
+            existing.setProject(null);
         }
+        
         if (invoiceRequest.getClient() != null &&
-        invoiceRequest.getClient().getId() != null) {
+            invoiceRequest.getClient().getId() != null) {
 
-        Client existingClient = clientRepository.findById(
-        invoiceRequest.getClient().getId()
-        ).orElseThrow(() -> new RuntimeException("Client not found"));
+            Client existingClient = clientRepository.findById(
+                invoiceRequest.getClient().getId()
+            ).orElseThrow(() -> new RuntimeException("Client not found"));
 
-        existing.setClient(existingClient);
+            existing.setClient(existingClient);
         } else {
-        existing.setClient(null);
+            existing.setClient(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return invoiceRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Invoice> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Invoice entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getProject() != null) {
-        entity.setProject(null);
-        }
-    
-
-    
-        if (entity.getClient() != null) {
-        entity.setClient(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return invoiceRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Invoice> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Invoice entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getProject() != null) {
+            entity.setProject(null);
+        }
+        
+        if (entity.getClient() != null) {
+            entity.setClient(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

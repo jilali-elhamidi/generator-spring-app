@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface InstructorMapper {
     List<InstructorDto> toDtoList(List<Instructor> instructorList);
 
     List<Instructor> toEntityList(List<InstructorDto> instructorDtoList);
+
+    void updateEntityFromDto(InstructorDto dto, @MappingTarget Instructor entity);
 
 }

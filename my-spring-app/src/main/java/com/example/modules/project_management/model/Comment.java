@@ -1,46 +1,55 @@
 package com.example.modules.project_management.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Date;
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
-import java.util.Date;
-import com.example.modules.project_management.model.TeamMember;import com.example.modules.project_management.model.Task;
+
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "comment_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Comment extends BaseEntity {
 
-// === Attributs simples ===
-
-        @NotNull@Size(min = 1, max = 500)
+    // === Attributs simples ===
+    @NotNull
+    @Size(min = 1, max = 500)
     private String content;
 
-        @NotNull
+    @NotNull
     private Date commentDate;
 
 
-// === Relations ===
-
+    // === Relations ManyToOne ===
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "author_id")
-        @JsonIgnoreProperties("createdComments")
-        private TeamMember author;
+    @JoinColumn(name = "author_id")
+    @JsonIgnoreProperties("createdComments")
+    private TeamMember author;
     
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "task_id")
-        @JsonIgnoreProperties("comments")
-        private Task task;
+    @JoinColumn(name = "task_id")
+    @JsonIgnoreProperties("comments")
+    private Task task;
     
 
+    // === Relations OneToMany ===
+
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

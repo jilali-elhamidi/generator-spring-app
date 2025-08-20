@@ -22,7 +22,7 @@ public class OrderItemService extends BaseService<OrderItem> {
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
 
-    public OrderItemService(OrderItemRepository repository,ProductRepository productRepository,OrderRepository orderRepository)
+    public OrderItemService(OrderItemRepository repository, ProductRepository productRepository, OrderRepository orderRepository)
     {
         super(repository);
         this.orderitemRepository = repository;
@@ -32,31 +32,32 @@ public class OrderItemService extends BaseService<OrderItem> {
 
     @Override
     public OrderItem save(OrderItem orderitem) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (orderitem.getProduct() != null &&
+            orderitem.getProduct().getId() != null) {
 
+            Product existingProduct = productRepository.findById(
+                orderitem.getProduct().getId()
+            ).orElseThrow(() -> new RuntimeException("Product not found"));
 
-    
-
-    
-
-    if (orderitem.getProduct() != null
-        && orderitem.getProduct().getId() != null) {
-        Product existingProduct = productRepository.findById(
-        orderitem.getProduct().getId()
-        ).orElseThrow(() -> new RuntimeException("Product not found"));
-        orderitem.setProduct(existingProduct);
+            orderitem.setProduct(existingProduct);
         }
-    
-    if (orderitem.getOrder() != null
-        && orderitem.getOrder().getId() != null) {
-        Order existingOrder = orderRepository.findById(
-        orderitem.getOrder().getId()
-        ).orElseThrow(() -> new RuntimeException("Order not found"));
-        orderitem.setOrder(existingOrder);
-        }
-    
+        
+        if (orderitem.getOrder() != null &&
+            orderitem.getOrder().getId() != null) {
 
-        return orderitemRepository.save(orderitem);
-    }
+            Order existingOrder = orderRepository.findById(
+                orderitem.getOrder().getId()
+            ).orElseThrow(() -> new RuntimeException("Order not found"));
+
+            orderitem.setOrder(existingOrder);
+        }
+        
+    // ---------- OneToOne ----------
+    return orderitemRepository.save(orderitem);
+}
 
 
     public OrderItem update(Long id, OrderItem orderitemRequest) {
@@ -67,85 +68,55 @@ public class OrderItemService extends BaseService<OrderItem> {
         existing.setQuantity(orderitemRequest.getQuantity());
         existing.setPrice(orderitemRequest.getPrice());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (orderitemRequest.getProduct() != null &&
-        orderitemRequest.getProduct().getId() != null) {
+            orderitemRequest.getProduct().getId() != null) {
 
-        Product existingProduct = productRepository.findById(
-        orderitemRequest.getProduct().getId()
-        ).orElseThrow(() -> new RuntimeException("Product not found"));
+            Product existingProduct = productRepository.findById(
+                orderitemRequest.getProduct().getId()
+            ).orElseThrow(() -> new RuntimeException("Product not found"));
 
-        existing.setProduct(existingProduct);
+            existing.setProduct(existingProduct);
         } else {
-        existing.setProduct(null);
+            existing.setProduct(null);
         }
+        
         if (orderitemRequest.getOrder() != null &&
-        orderitemRequest.getOrder().getId() != null) {
+            orderitemRequest.getOrder().getId() != null) {
 
-        Order existingOrder = orderRepository.findById(
-        orderitemRequest.getOrder().getId()
-        ).orElseThrow(() -> new RuntimeException("Order not found"));
+            Order existingOrder = orderRepository.findById(
+                orderitemRequest.getOrder().getId()
+            ).orElseThrow(() -> new RuntimeException("Order not found"));
 
-        existing.setOrder(existingOrder);
+            existing.setOrder(existingOrder);
         } else {
-        existing.setOrder(null);
+            existing.setOrder(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return orderitemRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<OrderItem> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-OrderItem entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getProduct() != null) {
-        entity.setProduct(null);
-        }
-    
-
-    
-        if (entity.getOrder() != null) {
-        entity.setOrder(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return orderitemRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<OrderItem> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        OrderItem entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getProduct() != null) {
+            entity.setProduct(null);
+        }
+        
+        if (entity.getOrder() != null) {
+            entity.setOrder(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

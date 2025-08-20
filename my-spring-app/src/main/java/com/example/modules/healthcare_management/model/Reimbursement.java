@@ -1,28 +1,32 @@
 package com.example.modules.healthcare_management.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Date;
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
-import java.util.Date;
-import com.example.modules.healthcare_management.model.Invoice;
+
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "reimbursement_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Reimbursement extends BaseEntity {
 
-// === Attributs simples ===
-
+    // === Attributs simples ===
     @NotNull
     private Date ReimbursementDate;
 
@@ -33,12 +37,16 @@ public class Reimbursement extends BaseEntity {
     private String method;
 
 
-// === Relations ===
-
+    // === Relations ManyToOne ===
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "invoice_id")
     @JsonIgnoreProperties("Reimbursements")
     private Invoice invoice;
     
 
+    // === Relations OneToMany ===
+
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

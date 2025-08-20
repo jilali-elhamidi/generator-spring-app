@@ -1,35 +1,42 @@
 package com.example.modules.healthcare_management.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
 
-import com.example.modules.healthcare_management.model.Appointment;import com.example.modules.healthcare_management.model.Prescription;import com.example.modules.healthcare_management.model.Department;
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "doctor_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Doctor extends BaseEntity {
 
-// === Attributs simples ===
-
-    @NotNull@Size(min = 2, max = 50)
+    // === Attributs simples ===
+    @NotNull
+    @Size(min = 2, max = 50)
     private String firstName;
 
-    @NotNull@Size(min = 2, max = 50)
+    @NotNull
+    @Size(min = 2, max = 50)
     private String lastName;
 
-    @NotNull@Size(max = 100)
+    @NotNull
+    @Size(max = 100)
     private String specialty;
 
     @Email
@@ -39,20 +46,24 @@ public class Doctor extends BaseEntity {
     private String phoneNumber;
 
 
-// === Relations ===
-
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("doctor")
-    private List<Appointment> appointments;
-    
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("doctor")
-    private List<Prescription> prescriptions;
-    
+    // === Relations ManyToOne ===
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "department_id")
     @JsonIgnoreProperties("doctors")
     private Department department;
     
 
+    // === Relations OneToMany ===
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("doctor")
+    private List<Appointment> appointments = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("doctor")
+    private List<Prescription> prescriptions = new ArrayList<>();
+    
+
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

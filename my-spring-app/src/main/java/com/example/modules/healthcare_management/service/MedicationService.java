@@ -7,9 +7,11 @@ import com.example.modules.healthcare_management.model.Prescription;
 import com.example.modules.healthcare_management.repository.PrescriptionRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MedicationService extends BaseService<Medication> {
@@ -17,7 +19,7 @@ public class MedicationService extends BaseService<Medication> {
     protected final MedicationRepository medicationRepository;
     private final PrescriptionRepository prescriptionsRepository;
 
-    public MedicationService(MedicationRepository repository,PrescriptionRepository prescriptionsRepository)
+    public MedicationService(MedicationRepository repository, PrescriptionRepository prescriptionsRepository)
     {
         super(repository);
         this.medicationRepository = repository;
@@ -26,9 +28,26 @@ public class MedicationService extends BaseService<Medication> {
 
     @Override
     public Medication save(Medication medication) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (medication.getPrescriptions() != null &&
+            !medication.getPrescriptions().isEmpty()) {
 
-        return medicationRepository.save(medication);
-    }
+            List<Prescription> attachedPrescriptions = medication.getPrescriptions().stream()
+            .map(item -> prescriptionsRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("Prescription not found with id " + item.getId())))
+            .toList();
+
+            medication.setPrescriptions(attachedPrescriptions);
+
+            // côté propriétaire (Prescription → Medication)
+            attachedPrescriptions.forEach(it -> it.getMedications().add(medication));
+        }
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
+    return medicationRepository.save(medication);
+}
 
 
     public Medication update(Long id, Medication medicationRequest) {
@@ -40,21 +59,49 @@ public class MedicationService extends BaseService<Medication> {
         existing.setType(medicationRequest.getType());
         existing.setManufacturer(medicationRequest.getManufacturer());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (medicationRequest.getPrescriptions() != null) {
             existing.getPrescriptions().clear();
+
             List<Prescription> prescriptionsList = medicationRequest.getPrescriptions().stream()
                 .map(item -> prescriptionsRepository.findById(item.getId())
                     .orElseThrow(() -> new RuntimeException("Prescription not found")))
                 .collect(Collectors.toList());
-        existing.getPrescriptions().addAll(prescriptionsList);
+
+            existing.getPrescriptions().addAll(prescriptionsList);
+
+            // Mettre à jour le côté inverse
+            prescriptionsList.forEach(it -> {
+                if (!it.getMedications().contains(existing)) {
+                    it.getMedications().add(existing);
+                }
+            });
         }
+        
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return medicationRepository.save(existing);
+}
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Medication> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
 
-// Relations OneToMany : synchronisation sécurisée
-
-        return medicationRepository.save(existing);
+        Medication entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getPrescriptions() != null) {
+            for (Prescription item : new ArrayList<>(entity.getPrescriptions())) {
+                
+                item.getMedications().remove(entity); // retire côté inverse
+            }
+            entity.getPrescriptions().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
     }
 }

@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface PrescriptionMapper {
     List<PrescriptionDto> toDtoList(List<Prescription> prescriptionList);
 
     List<Prescription> toEntityList(List<PrescriptionDto> prescriptionDtoList);
+
+    void updateEntityFromDto(PrescriptionDto dto, @MappingTarget Prescription entity);
 
 }

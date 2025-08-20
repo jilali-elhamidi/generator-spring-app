@@ -46,8 +46,12 @@ public class DepartmentController {
 
         Department entity = departmentMapper.toEntity(departmentDto);
         Department saved = departmentService.save(entity);
-        URI location = uriBuilder.path("/api/departments/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/departments/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(departmentMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class DepartmentController {
             @PathVariable Long id,
             @Valid @RequestBody DepartmentDto departmentDto) {
 
-        try {
-            Department updatedEntity = departmentService.update(
-                    id,
-                    departmentMapper.toEntity(departmentDto)
-            );
-            return ResponseEntity.ok(departmentMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Department entityToUpdate = departmentMapper.toEntity(departmentDto);
+        Department updatedEntity = departmentService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(departmentMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
-        departmentService.deleteById(id);
+        boolean deleted = departmentService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

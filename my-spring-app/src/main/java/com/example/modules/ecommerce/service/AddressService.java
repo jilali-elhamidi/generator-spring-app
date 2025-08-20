@@ -19,7 +19,7 @@ public class AddressService extends BaseService<Address> {
     protected final AddressRepository addressRepository;
     private final UserRepository userRepository;
 
-    public AddressService(AddressRepository repository,UserRepository userRepository)
+    public AddressService(AddressRepository repository, UserRepository userRepository)
     {
         super(repository);
         this.addressRepository = repository;
@@ -28,21 +28,22 @@ public class AddressService extends BaseService<Address> {
 
     @Override
     public Address save(Address address) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (address.getUser() != null &&
+            address.getUser().getId() != null) {
 
+            User existingUser = userRepository.findById(
+                address.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("User not found"));
 
-    
-
-    if (address.getUser() != null
-        && address.getUser().getId() != null) {
-        User existingUser = userRepository.findById(
-        address.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("User not found"));
-        address.setUser(existingUser);
+            address.setUser(existingUser);
         }
-    
-
-        return addressRepository.save(address);
-    }
+        
+    // ---------- OneToOne ----------
+    return addressRepository.save(address);
+}
 
 
     public Address update(Long id, Address addressRequest) {
@@ -55,60 +56,39 @@ public class AddressService extends BaseService<Address> {
         existing.setPostalCode(addressRequest.getPostalCode());
         existing.setCountry(addressRequest.getCountry());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (addressRequest.getUser() != null &&
-        addressRequest.getUser().getId() != null) {
+            addressRequest.getUser().getId() != null) {
 
-        User existingUser = userRepository.findById(
-        addressRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("User not found"));
+            User existingUser = userRepository.findById(
+                addressRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("User not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return addressRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Address> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Address entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return addressRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Address> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Address entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

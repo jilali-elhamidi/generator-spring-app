@@ -7,9 +7,11 @@ import com.example.modules.healthcare_management.model.Invoice;
 import com.example.modules.healthcare_management.repository.InvoiceRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class ReimbursementService extends BaseService<Reimbursement> {
@@ -17,7 +19,7 @@ public class ReimbursementService extends BaseService<Reimbursement> {
     protected final ReimbursementRepository reimbursementRepository;
     private final InvoiceRepository invoiceRepository;
 
-    public ReimbursementService(ReimbursementRepository repository,InvoiceRepository invoiceRepository)
+    public ReimbursementService(ReimbursementRepository repository, InvoiceRepository invoiceRepository)
     {
         super(repository);
         this.reimbursementRepository = repository;
@@ -26,15 +28,22 @@ public class ReimbursementService extends BaseService<Reimbursement> {
 
     @Override
     public Reimbursement save(Reimbursement reimbursement) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (reimbursement.getInvoice() != null &&
+            reimbursement.getInvoice().getId() != null) {
 
-        if (reimbursement.getInvoice() != null && reimbursement.getInvoice().getId() != null) {
-        Invoice invoice = invoiceRepository.findById(reimbursement.getInvoice().getId())
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
-        reimbursement.setInvoice(invoice);
+            Invoice existingInvoice = invoiceRepository.findById(
+                reimbursement.getInvoice().getId()
+            ).orElseThrow(() -> new RuntimeException("Invoice not found"));
+
+            reimbursement.setInvoice(existingInvoice);
         }
-
-        return reimbursementRepository.save(reimbursement);
-    }
+        
+    // ---------- OneToOne ----------
+    return reimbursementRepository.save(reimbursement);
+}
 
 
     public Reimbursement update(Long id, Reimbursement reimbursementRequest) {
@@ -46,18 +55,39 @@ public class ReimbursementService extends BaseService<Reimbursement> {
         existing.setAmount(reimbursementRequest.getAmount());
         existing.setMethod(reimbursementRequest.getMethod());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+        if (reimbursementRequest.getInvoice() != null &&
+            reimbursementRequest.getInvoice().getId() != null) {
 
-        if (reimbursementRequest.getInvoice() != null && reimbursementRequest.getInvoice().getId() != null) {
-        Invoice invoice = invoiceRepository.findById(reimbursementRequest.getInvoice().getId())
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
-        existing.setInvoice(invoice);
+            Invoice existingInvoice = invoiceRepository.findById(
+                reimbursementRequest.getInvoice().getId()
+            ).orElseThrow(() -> new RuntimeException("Invoice not found"));
+
+            existing.setInvoice(existingInvoice);
+        } else {
+            existing.setInvoice(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return reimbursementRepository.save(existing);
+}
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Reimbursement> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-        return reimbursementRepository.save(existing);
+        Reimbursement entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getInvoice() != null) {
+            entity.setInvoice(null);
+        }
+        
+        repository.delete(entity);
+        return true;
     }
 }

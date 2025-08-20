@@ -7,9 +7,11 @@ import com.example.modules.healthcare_management.model.MedicalRecord;
 import com.example.modules.healthcare_management.repository.MedicalRecordRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MedicalFileService extends BaseService<MedicalFile> {
@@ -17,7 +19,7 @@ public class MedicalFileService extends BaseService<MedicalFile> {
     protected final MedicalFileRepository medicalfileRepository;
     private final MedicalRecordRepository recordRepository;
 
-    public MedicalFileService(MedicalFileRepository repository,MedicalRecordRepository recordRepository)
+    public MedicalFileService(MedicalFileRepository repository, MedicalRecordRepository recordRepository)
     {
         super(repository);
         this.medicalfileRepository = repository;
@@ -26,15 +28,22 @@ public class MedicalFileService extends BaseService<MedicalFile> {
 
     @Override
     public MedicalFile save(MedicalFile medicalfile) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (medicalfile.getRecord() != null &&
+            medicalfile.getRecord().getId() != null) {
 
-        if (medicalfile.getRecord() != null && medicalfile.getRecord().getId() != null) {
-        MedicalRecord record = recordRepository.findById(medicalfile.getRecord().getId())
-                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
-        medicalfile.setRecord(record);
+            MedicalRecord existingRecord = recordRepository.findById(
+                medicalfile.getRecord().getId()
+            ).orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+
+            medicalfile.setRecord(existingRecord);
         }
-
-        return medicalfileRepository.save(medicalfile);
-    }
+        
+    // ---------- OneToOne ----------
+    return medicalfileRepository.save(medicalfile);
+}
 
 
     public MedicalFile update(Long id, MedicalFile medicalfileRequest) {
@@ -45,18 +54,39 @@ public class MedicalFileService extends BaseService<MedicalFile> {
         existing.setFileUrl(medicalfileRequest.getFileUrl());
         existing.setFileType(medicalfileRequest.getFileType());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+        if (medicalfileRequest.getRecord() != null &&
+            medicalfileRequest.getRecord().getId() != null) {
 
-        if (medicalfileRequest.getRecord() != null && medicalfileRequest.getRecord().getId() != null) {
-        MedicalRecord record = recordRepository.findById(medicalfileRequest.getRecord().getId())
-                .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
-        existing.setRecord(record);
+            MedicalRecord existingRecord = recordRepository.findById(
+                medicalfileRequest.getRecord().getId()
+            ).orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
+
+            existing.setRecord(existingRecord);
+        } else {
+            existing.setRecord(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return medicalfileRepository.save(existing);
+}
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MedicalFile> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-        return medicalfileRepository.save(existing);
+        MedicalFile entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getRecord() != null) {
+            entity.setRecord(null);
+        }
+        
+        repository.delete(entity);
+        return true;
     }
 }

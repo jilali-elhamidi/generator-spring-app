@@ -3,10 +3,6 @@ module: elearning
 entities:
   - name: Course
     fields:
-      - name: id
-        type: Long
-        id: true
-        generatedValue: IDENTITY
       - name: title
         type: String
         validation:
@@ -39,10 +35,6 @@ entities:
 
   - name: Instructor
     fields:
-      - name: id
-        type: Long
-        id: true
-        generatedValue: IDENTITY
       - name: firstName
         type: String
         validation:
@@ -76,10 +68,6 @@ entities:
 
   - name: Lesson
     fields:
-      - name: id
-        type: Long
-        id: true
-        generatedValue: IDENTITY
       - name: title
         type: String
         validation:

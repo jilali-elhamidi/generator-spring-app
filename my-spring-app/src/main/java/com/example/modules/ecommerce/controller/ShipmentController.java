@@ -46,37 +46,35 @@ public class ShipmentController {
 
         Shipment entity = shipmentMapper.toEntity(shipmentDto);
         Shipment saved = shipmentService.save(entity);
-        URI location = uriBuilder.path("/api/shipments/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/shipments/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(shipmentMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ShipmentDto> updateShipment(
-                @PathVariable Long id,
-                @RequestBody ShipmentDto shipmentDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ShipmentDto> updateShipment(
+            @PathVariable Long id,
+            @Valid @RequestBody ShipmentDto shipmentDto) {
 
-                // Transformer le DTO en entity pour le service
-                Shipment entityToUpdate = shipmentMapper.toEntity(shipmentDto);
 
-                // Appel du service update
-                Shipment updatedEntity = shipmentService.update(id, entityToUpdate);
+        Shipment entityToUpdate = shipmentMapper.toEntity(shipmentDto);
+        Shipment updatedEntity = shipmentService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ShipmentDto updatedDto = shipmentMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(shipmentMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteShipment(@PathVariable Long id) {
-                    boolean deleted = shipmentService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteShipment(@PathVariable Long id) {
+        boolean deleted = shipmentService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -59,9 +59,6 @@ entities:
       - name: followers
         type: Profile
         relationType: ManyToMany
-        joinTable: profile_followers
-        joinColumns: followed_id
-        inverseJoinColumns: follower_id
         fetch: LAZY
         owner: false
         mappedBy: following
@@ -69,12 +66,9 @@ entities:
       - name: following
         type: Profile
         relationType: ManyToMany
-        joinTable: profile_followers
-        joinColumns: follower_id
-        inverseJoinColumns: followed_id
         fetch: LAZY
         owner: true
-        inverseField: follower
+        inverseField: followers
       - name: roles
         type: Role
         relationType: ManyToMany
@@ -83,6 +77,7 @@ entities:
         inverseJoinColumns: role_id
         fetch: EAGER
         owner: true
+        inverseField: profiles
       - name: groups
         type: Group
         relationType: ManyToMany
@@ -132,6 +127,7 @@ entities:
         joinTable: post_tags
         joinColumns: post_id
         inverseJoinColumns: tag_id
+        inverseField: posts
         fetch: LAZY
         owner: true
       - name: media
@@ -288,6 +284,7 @@ entities:
         joinTable: group_members
         joinColumns: group_id
         inverseJoinColumns: profile_id
+        inverseField: groups
         fetch: LAZY
         owner: true
       - name: posts
@@ -317,9 +314,9 @@ entities:
         type: Profile
         relationType: ManyToMany
         mappedBy: roles
-        inverseField: roles
         fetch: LAZY
         owner: false
+        inverseField: roles
 
   - name: MediaFile
     fields:

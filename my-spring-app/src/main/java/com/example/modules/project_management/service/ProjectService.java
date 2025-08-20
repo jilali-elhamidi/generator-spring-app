@@ -37,7 +37,7 @@ public class ProjectService extends BaseService<Project> {
     private final ClientRepository clientRepository;
     private final TeamRepository teamRepository;
 
-    public ProjectService(ProjectRepository repository,TaskRepository tasksRepository,TeamMemberRepository teamMembersRepository,TeamMemberRepository projectManagerRepository,DocumentRepository documentsRepository,MilestoneRepository milestonesRepository,ClientRepository clientRepository,TeamRepository teamRepository)
+    public ProjectService(ProjectRepository repository, TaskRepository tasksRepository, TeamMemberRepository teamMembersRepository, TeamMemberRepository projectManagerRepository, DocumentRepository documentsRepository, MilestoneRepository milestonesRepository, ClientRepository clientRepository, TeamRepository teamRepository)
     {
         super(repository);
         this.projectRepository = repository;
@@ -52,113 +52,107 @@ public class ProjectService extends BaseService<Project> {
 
     @Override
     public Project save(Project project) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (project.getTasks() != null) {
+    // ---------- OneToMany ----------
+        if (project.getTasks() != null) {
             List<Task> managedTasks = new ArrayList<>();
             for (Task item : project.getTasks()) {
-            if (item.getId() != null) {
-            Task existingItem = tasksRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Task not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setProject(project);
-            managedTasks.add(existingItem);
-            } else {
-            item.setProject(project);
-            managedTasks.add(item);
-            }
+                if (item.getId() != null) {
+                    Task existingItem = tasksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Task not found"));
+
+                     existingItem.setProject(project);
+                     managedTasks.add(existingItem);
+                } else {
+                    item.setProject(project);
+                    managedTasks.add(item);
+                }
             }
             project.setTasks(managedTasks);
-            }
-        
+        }
     
-
-    
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (project.getDocuments() != null) {
+        if (project.getDocuments() != null) {
             List<Document> managedDocuments = new ArrayList<>();
             for (Document item : project.getDocuments()) {
-            if (item.getId() != null) {
-            Document existingItem = documentsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Document not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setProject(project);
-            managedDocuments.add(existingItem);
-            } else {
-            item.setProject(project);
-            managedDocuments.add(item);
-            }
+                if (item.getId() != null) {
+                    Document existingItem = documentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Document not found"));
+
+                     existingItem.setProject(project);
+                     managedDocuments.add(existingItem);
+                } else {
+                    item.setProject(project);
+                    managedDocuments.add(item);
+                }
             }
             project.setDocuments(managedDocuments);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (project.getMilestones() != null) {
+        if (project.getMilestones() != null) {
             List<Milestone> managedMilestones = new ArrayList<>();
             for (Milestone item : project.getMilestones()) {
-            if (item.getId() != null) {
-            Milestone existingItem = milestonesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Milestone not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setProject(project);
-            managedMilestones.add(existingItem);
-            } else {
-            item.setProject(project);
-            managedMilestones.add(item);
-            }
+                if (item.getId() != null) {
+                    Milestone existingItem = milestonesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Milestone not found"));
+
+                     existingItem.setProject(project);
+                     managedMilestones.add(existingItem);
+                } else {
+                    item.setProject(project);
+                    managedMilestones.add(item);
+                }
             }
             project.setMilestones(managedMilestones);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+        if (project.getTeamMembers() != null &&
+            !project.getTeamMembers().isEmpty()) {
+
+            List<TeamMember> attachedTeamMembers = project.getTeamMembers().stream()
+            .map(item -> teamMembersRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("TeamMember not found with id " + item.getId())))
+            .toList();
+
+            project.setTeamMembers(attachedTeamMembers);
+
+            // côté propriétaire (TeamMember → Project)
+            attachedTeamMembers.forEach(it -> it.getProjects().add(project));
+        }
         
-    
+    // ---------- ManyToOne ----------
+        if (project.getProjectManager() != null &&
+            project.getProjectManager().getId() != null) {
 
-    
+            TeamMember existingProjectManager = projectManagerRepository.findById(
+                project.getProjectManager().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
 
-    
-
-    
-    
-    if (project.getProjectManager() != null
-        && project.getProjectManager().getId() != null) {
-        TeamMember existingProjectManager = projectManagerRepository.findById(
-        project.getProjectManager().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-        project.setProjectManager(existingProjectManager);
+            project.setProjectManager(existingProjectManager);
         }
-    
-    
-    
-    if (project.getClient() != null
-        && project.getClient().getId() != null) {
-        Client existingClient = clientRepository.findById(
-        project.getClient().getId()
-        ).orElseThrow(() -> new RuntimeException("Client not found"));
-        project.setClient(existingClient);
-        }
-    
-    if (project.getTeam() != null
-        && project.getTeam().getId() != null) {
-        Team existingTeam = teamRepository.findById(
-        project.getTeam().getId()
-        ).orElseThrow(() -> new RuntimeException("Team not found"));
-        project.setTeam(existingTeam);
-        }
-    
+        
+        if (project.getClient() != null &&
+            project.getClient().getId() != null) {
 
-        return projectRepository.save(project);
-    }
+            Client existingClient = clientRepository.findById(
+                project.getClient().getId()
+            ).orElseThrow(() -> new RuntimeException("Client not found"));
+
+            project.setClient(existingClient);
+        }
+        
+        if (project.getTeam() != null &&
+            project.getTeam().getId() != null) {
+
+            Team existingTeam = teamRepository.findById(
+                project.getTeam().getId()
+            ).orElseThrow(() -> new RuntimeException("Team not found"));
+
+            project.setTeam(existingTeam);
+        }
+        
+    // ---------- OneToOne ----------
+    return projectRepository.save(project);
+}
 
 
     public Project update(Long id, Project projectRequest) {
@@ -172,250 +166,172 @@ public class ProjectService extends BaseService<Project> {
         existing.setDeadline(projectRequest.getDeadline());
         existing.setStatus(projectRequest.getStatus());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (projectRequest.getProjectManager() != null &&
-        projectRequest.getProjectManager().getId() != null) {
+            projectRequest.getProjectManager().getId() != null) {
 
-        TeamMember existingProjectManager = projectManagerRepository.findById(
-        projectRequest.getProjectManager().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+            TeamMember existingProjectManager = projectManagerRepository.findById(
+                projectRequest.getProjectManager().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
 
-        existing.setProjectManager(existingProjectManager);
+            existing.setProjectManager(existingProjectManager);
         } else {
-        existing.setProjectManager(null);
+            existing.setProjectManager(null);
         }
+        
         if (projectRequest.getClient() != null &&
-        projectRequest.getClient().getId() != null) {
+            projectRequest.getClient().getId() != null) {
 
-        Client existingClient = clientRepository.findById(
-        projectRequest.getClient().getId()
-        ).orElseThrow(() -> new RuntimeException("Client not found"));
+            Client existingClient = clientRepository.findById(
+                projectRequest.getClient().getId()
+            ).orElseThrow(() -> new RuntimeException("Client not found"));
 
-        existing.setClient(existingClient);
+            existing.setClient(existingClient);
         } else {
-        existing.setClient(null);
+            existing.setClient(null);
         }
+        
         if (projectRequest.getTeam() != null &&
-        projectRequest.getTeam().getId() != null) {
+            projectRequest.getTeam().getId() != null) {
 
-        Team existingTeam = teamRepository.findById(
-        projectRequest.getTeam().getId()
-        ).orElseThrow(() -> new RuntimeException("Team not found"));
+            Team existingTeam = teamRepository.findById(
+                projectRequest.getTeam().getId()
+            ).orElseThrow(() -> new RuntimeException("Team not found"));
 
-        existing.setTeam(existingTeam);
+            existing.setTeam(existingTeam);
         } else {
-        existing.setTeam(null);
+            existing.setTeam(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
+        
+    // ---------- Relations ManyToOne ----------
         if (projectRequest.getTeamMembers() != null) {
             existing.getTeamMembers().clear();
+
             List<TeamMember> teamMembersList = projectRequest.getTeamMembers().stream()
                 .map(item -> teamMembersRepository.findById(item.getId())
                     .orElseThrow(() -> new RuntimeException("TeamMember not found")))
                 .collect(Collectors.toList());
-        existing.getTeamMembers().addAll(teamMembersList);
-        }
 
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+            existing.getTeamMembers().addAll(teamMembersList);
+
+            // Mettre à jour le côté inverse
+            teamMembersList.forEach(it -> {
+                if (!it.getProjects().contains(existing)) {
+                    it.getProjects().add(existing);
+                }
+            });
+        }
+        
+    // ---------- Relations OneToMany ----------
         existing.getTasks().clear();
 
         if (projectRequest.getTasks() != null) {
-        for (var item : projectRequest.getTasks()) {
-        Task existingItem;
-        if (item.getId() != null) {
-        existingItem = tasksRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Task not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setProject(existing);
+            for (var item : projectRequest.getTasks()) {
+                Task existingItem;
+                if (item.getId() != null) {
+                    existingItem = tasksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Task not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getTasks().add(existingItem);
+                existingItem.setProject(existing);
+                existing.getTasks().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getDocuments().clear();
 
         if (projectRequest.getDocuments() != null) {
-        for (var item : projectRequest.getDocuments()) {
-        Document existingItem;
-        if (item.getId() != null) {
-        existingItem = documentsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Document not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setProject(existing);
+            for (var item : projectRequest.getDocuments()) {
+                Document existingItem;
+                if (item.getId() != null) {
+                    existingItem = documentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Document not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getDocuments().add(existingItem);
+                existingItem.setProject(existing);
+                existing.getDocuments().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getMilestones().clear();
 
         if (projectRequest.getMilestones() != null) {
-        for (var item : projectRequest.getMilestones()) {
-        Milestone existingItem;
-        if (item.getId() != null) {
-        existingItem = milestonesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Milestone not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : projectRequest.getMilestones()) {
+                Milestone existingItem;
+                if (item.getId() != null) {
+                    existingItem = milestonesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Milestone not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setProject(existing);
+                existing.getMilestones().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setProject(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getMilestones().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-        return projectRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Project> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Project entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getTasks() != null) {
-        for (var child : entity.getTasks()) {
         
-            child.setProject(null); // retirer la référence inverse
-        
-        }
-        entity.getTasks().clear();
-        }
-    
-
-    
-
-    
-
-    
-        if (entity.getDocuments() != null) {
-        for (var child : entity.getDocuments()) {
-        
-            child.setProject(null); // retirer la référence inverse
-        
-        }
-        entity.getDocuments().clear();
-        }
-    
-
-    
-        if (entity.getMilestones() != null) {
-        for (var child : entity.getMilestones()) {
-        
-            child.setProject(null); // retirer la référence inverse
-        
-        }
-        entity.getMilestones().clear();
-        }
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-        if (entity.getTeamMembers() != null) {
-        entity.getTeamMembers().clear();
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-
-    
-        if (entity.getProjectManager() != null) {
-        entity.setProjectManager(null);
-        }
-    
-
-    
-
-    
-
-    
-        if (entity.getClient() != null) {
-        entity.setClient(null);
-        }
-    
-
-    
-        if (entity.getTeam() != null) {
-        entity.setTeam(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    // ---------- Relations OneToOne ----------
+    return projectRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Project> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Project entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getTasks() != null) {
+            for (var child : entity.getTasks()) {
+                // retirer la référence inverse
+                child.setProject(null);
+            }
+            entity.getTasks().clear();
+        }
+        
+        if (entity.getDocuments() != null) {
+            for (var child : entity.getDocuments()) {
+                // retirer la référence inverse
+                child.setProject(null);
+            }
+            entity.getDocuments().clear();
+        }
+        
+        if (entity.getMilestones() != null) {
+            for (var child : entity.getMilestones()) {
+                // retirer la référence inverse
+                child.setProject(null);
+            }
+            entity.getMilestones().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+        if (entity.getTeamMembers() != null) {
+            for (TeamMember item : new ArrayList<>(entity.getTeamMembers())) {
+                
+                item.getProjects().remove(entity); // retire côté inverse
+            }
+            entity.getTeamMembers().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getProjectManager() != null) {
+            entity.setProjectManager(null);
+        }
+        
+        if (entity.getClient() != null) {
+            entity.setClient(null);
+        }
+        
+        if (entity.getTeam() != null) {
+            entity.setTeam(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

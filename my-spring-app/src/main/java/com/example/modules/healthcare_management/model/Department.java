@@ -1,44 +1,49 @@
 package com.example.modules.healthcare_management.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
 
-import com.example.modules.healthcare_management.model.Doctor;import com.example.modules.healthcare_management.model.Doctor;
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "department_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Department extends BaseEntity {
 
-// === Attributs simples ===
-
-    @NotNull@Size(min = 3, max = 100)
+    // === Attributs simples ===
+    @NotNull
+    @Size(min = 3, max = 100)
     private String name;
 
     @Size(max = 255)
     private String description;
 
 
-// === Relations ===
+    // === Relations ManyToOne ===
 
+    // === Relations OneToMany ===
     @OneToMany(mappedBy = "department", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("department")
-    private List<Doctor> doctors;
+    private List<Doctor> doctors = new ArrayList<>();
     
-    @OneToOne(mappedBy = "", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("")
-    private Doctor head;
-        
 
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

@@ -19,4 +19,8 @@ public class InstructorSimpleDto {
 
     private String email;
 
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
 }

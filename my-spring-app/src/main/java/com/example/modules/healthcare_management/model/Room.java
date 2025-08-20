@@ -1,29 +1,34 @@
 package com.example.modules.healthcare_management.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
 
-import com.example.modules.healthcare_management.model.Appointment;
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "room_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Room extends BaseEntity {
 
-// === Attributs simples ===
-
-    @NotNull@Size(max = 10)
+    // === Attributs simples ===
+    @NotNull
+    @Size(max = 10)
     private String roomNumber;
 
     @NotNull
@@ -33,11 +38,15 @@ public class Room extends BaseEntity {
     private Integer capacity;
 
 
-// === Relations ===
+    // === Relations ManyToOne ===
 
+    // === Relations OneToMany ===
     @OneToMany(mappedBy = "room", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("room")
-    private List<Appointment> appointments;
+    private List<Appointment> appointments = new ArrayList<>();
     
 
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

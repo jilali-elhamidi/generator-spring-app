@@ -93,19 +93,17 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         {{~#each relationships}}
         {{~#if (eq relationType "OneToOne")}}
         if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
-            {{!-- Récupération de l'entité existante si nécessaire --}}
-            {{#if }}
-                // Vérifier si l'entité est déjà persistée
+            {{~#if }}
+
             {{../entityNameLowercase}}.set{{capitalize name}}(
                 {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
                     .orElseThrow(() -> new RuntimeException("{{name}} not found"))
             );
-            {{/if}}
+            {{~/if}}
             {{../entityNameLowercase}}.get{{capitalize name}}().set{{capitalize inverseField}}({{../entityNameLowercase}});
         }
         {{/if}}
         {{~/each}}
-
     return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
 }
 
@@ -179,26 +177,22 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         {{/if}}
         {{~/each}}
     // ---------- Relations OneToOne ----------
-        {{~#each relationships}}
-        {{~#if (eq relationType "OneToOne")}}
-            if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null &&
-            {{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
+    {{~#each relationships}}
+    {{~#if (eq relationType "OneToOne")}}
+        if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null &&{{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
 
-            {{type}} {{name}} = {{name}}Repository.findById(
-                {{entityNameLowercase}}Request.get{{capitalize name}}().getId()
-            ).orElseThrow(() -> new RuntimeException("{{type}} not found"));
+        {{type}} {{name}} = {{name}}Repository.findById({{entityNameLowercase}}Request.get{{capitalize name}}().getId())
+                .orElseThrow(() -> new RuntimeException("{{type}} not found"));
 
-            existing.set{{capitalize name}}({{name}});
-
-            {{#if mappedBy}}
-            {{name}}.set{{capitalize mappedBy}}(existing);
-            {{else if inverseField}}
-            {{name}}.set{{capitalize inverseField}}(existing);
-            {{/if}}
+        existing.set{{capitalize name}}({{name}});
+        {{~#if mappedBy}}
+        {{name}}.set{{capitalize mappedBy}}(existing);
+        {{else if inverseField}}
+        {{name}}.set{{capitalize inverseField}}(existing);
+        {{~/if}}
         }
-        {{/if}}
-        {{~/each}}
-
+    {{/if}}
+    {{~/each}}
     return {{entityNameLowercase}}Repository.save(existing);
 }
     @Transactional
@@ -212,9 +206,10 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         {{~#if (eq relationType "OneToMany")}}
         if (entity.get{{capitalize name}}() != null) {
             for (var child : entity.get{{capitalize name}}()) {
-                {{#if mappedBy}}
-                child.set{{capitalize mappedBy}}(null); // retirer la référence inverse
-                {{/if}}
+                {{~#if mappedBy}}
+                // retirer la référence inverse
+                child.set{{capitalize mappedBy}}(null);
+                {{~/if}}
             }
             entity.get{{capitalize name}}().clear();
         }
@@ -227,7 +222,7 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
             for ({{type}} item : new ArrayList<>(entity.get{{capitalize name}}())) {
                 {{#if inverseField}}
                 item.get{{capitalize inverseField}}().remove(entity); // retire côté inverse
-                {{/if}}
+                {{~/if}}
             }
             entity.get{{capitalize name}}().clear(); // puis vide côté courant
         }

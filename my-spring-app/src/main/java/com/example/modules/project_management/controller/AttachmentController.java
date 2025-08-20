@@ -46,37 +46,35 @@ public class AttachmentController {
 
         Attachment entity = attachmentMapper.toEntity(attachmentDto);
         Attachment saved = attachmentService.save(entity);
-        URI location = uriBuilder.path("/api/attachments/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/attachments/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(attachmentMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<AttachmentDto> updateAttachment(
-                @PathVariable Long id,
-                @RequestBody AttachmentDto attachmentDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<AttachmentDto> updateAttachment(
+            @PathVariable Long id,
+            @Valid @RequestBody AttachmentDto attachmentDto) {
 
-                // Transformer le DTO en entity pour le service
-                Attachment entityToUpdate = attachmentMapper.toEntity(attachmentDto);
 
-                // Appel du service update
-                Attachment updatedEntity = attachmentService.update(id, entityToUpdate);
+        Attachment entityToUpdate = attachmentMapper.toEntity(attachmentDto);
+        Attachment updatedEntity = attachmentService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                AttachmentDto updatedDto = attachmentMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(attachmentMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteAttachment(@PathVariable Long id) {
-                    boolean deleted = attachmentService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAttachment(@PathVariable Long id) {
+        boolean deleted = attachmentService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

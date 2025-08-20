@@ -22,7 +22,7 @@ public class TimeLogService extends BaseService<TimeLog> {
     private final TaskRepository taskRepository;
     private final TeamMemberRepository userRepository;
 
-    public TimeLogService(TimeLogRepository repository,TaskRepository taskRepository,TeamMemberRepository userRepository)
+    public TimeLogService(TimeLogRepository repository, TaskRepository taskRepository, TeamMemberRepository userRepository)
     {
         super(repository);
         this.timelogRepository = repository;
@@ -32,31 +32,32 @@ public class TimeLogService extends BaseService<TimeLog> {
 
     @Override
     public TimeLog save(TimeLog timelog) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (timelog.getTask() != null &&
+            timelog.getTask().getId() != null) {
 
+            Task existingTask = taskRepository.findById(
+                timelog.getTask().getId()
+            ).orElseThrow(() -> new RuntimeException("Task not found"));
 
-    
-
-    
-
-    if (timelog.getTask() != null
-        && timelog.getTask().getId() != null) {
-        Task existingTask = taskRepository.findById(
-        timelog.getTask().getId()
-        ).orElseThrow(() -> new RuntimeException("Task not found"));
-        timelog.setTask(existingTask);
+            timelog.setTask(existingTask);
         }
-    
-    if (timelog.getUser() != null
-        && timelog.getUser().getId() != null) {
-        TeamMember existingUser = userRepository.findById(
-        timelog.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-        timelog.setUser(existingUser);
-        }
-    
+        
+        if (timelog.getUser() != null &&
+            timelog.getUser().getId() != null) {
 
-        return timelogRepository.save(timelog);
-    }
+            TeamMember existingUser = userRepository.findById(
+                timelog.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+
+            timelog.setUser(existingUser);
+        }
+        
+    // ---------- OneToOne ----------
+    return timelogRepository.save(timelog);
+}
 
 
     public TimeLog update(Long id, TimeLog timelogRequest) {
@@ -68,85 +69,55 @@ public class TimeLogService extends BaseService<TimeLog> {
         existing.setHours(timelogRequest.getHours());
         existing.setDescription(timelogRequest.getDescription());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (timelogRequest.getTask() != null &&
-        timelogRequest.getTask().getId() != null) {
+            timelogRequest.getTask().getId() != null) {
 
-        Task existingTask = taskRepository.findById(
-        timelogRequest.getTask().getId()
-        ).orElseThrow(() -> new RuntimeException("Task not found"));
+            Task existingTask = taskRepository.findById(
+                timelogRequest.getTask().getId()
+            ).orElseThrow(() -> new RuntimeException("Task not found"));
 
-        existing.setTask(existingTask);
+            existing.setTask(existingTask);
         } else {
-        existing.setTask(null);
+            existing.setTask(null);
         }
+        
         if (timelogRequest.getUser() != null &&
-        timelogRequest.getUser().getId() != null) {
+            timelogRequest.getUser().getId() != null) {
 
-        TeamMember existingUser = userRepository.findById(
-        timelogRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+            TeamMember existingUser = userRepository.findById(
+                timelogRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return timelogRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<TimeLog> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-TimeLog entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getTask() != null) {
-        entity.setTask(null);
-        }
-    
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return timelogRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<TimeLog> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        TimeLog entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getTask() != null) {
+            entity.setTask(null);
+        }
+        
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

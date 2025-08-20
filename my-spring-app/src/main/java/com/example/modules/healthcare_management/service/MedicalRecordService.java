@@ -8,11 +8,14 @@ import com.example.modules.healthcare_management.repository.PatientRepository;
 import com.example.modules.healthcare_management.model.Doctor;
 import com.example.modules.healthcare_management.repository.DoctorRepository;
 import com.example.modules.healthcare_management.model.MedicalFile;
+import com.example.modules.healthcare_management.repository.MedicalFileRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class MedicalRecordService extends BaseService<MedicalRecord> {
@@ -20,38 +23,62 @@ public class MedicalRecordService extends BaseService<MedicalRecord> {
     protected final MedicalRecordRepository medicalrecordRepository;
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
+    private final MedicalFileRepository attachmentsRepository;
 
-    public MedicalRecordService(MedicalRecordRepository repository,PatientRepository patientRepository,DoctorRepository doctorRepository)
+    public MedicalRecordService(MedicalRecordRepository repository, PatientRepository patientRepository, DoctorRepository doctorRepository, MedicalFileRepository attachmentsRepository)
     {
         super(repository);
         this.medicalrecordRepository = repository;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
+        this.attachmentsRepository = attachmentsRepository;
     }
 
     @Override
     public MedicalRecord save(MedicalRecord medicalrecord) {
-
-        if (medicalrecord.getPatient() != null && medicalrecord.getPatient().getId() != null) {
-        Patient patient = patientRepository.findById(medicalrecord.getPatient().getId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
-        medicalrecord.setPatient(patient);
-        }
-
-        if (medicalrecord.getDoctor() != null && medicalrecord.getDoctor().getId() != null) {
-        Doctor doctor = doctorRepository.findById(medicalrecord.getDoctor().getId())
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
-        medicalrecord.setDoctor(doctor);
-        }
-
+    // ---------- OneToMany ----------
         if (medicalrecord.getAttachments() != null) {
+            List<MedicalFile> managedAttachments = new ArrayList<>();
             for (MedicalFile item : medicalrecord.getAttachments()) {
-            item.setRecord(medicalrecord);
-            }
-        }
+                if (item.getId() != null) {
+                    MedicalFile existingItem = attachmentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MedicalFile not found"));
 
-        return medicalrecordRepository.save(medicalrecord);
-    }
+                     existingItem.setRecord(medicalrecord);
+                     managedAttachments.add(existingItem);
+                } else {
+                    item.setRecord(medicalrecord);
+                    managedAttachments.add(item);
+                }
+            }
+            medicalrecord.setAttachments(managedAttachments);
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (medicalrecord.getPatient() != null &&
+            medicalrecord.getPatient().getId() != null) {
+
+            Patient existingPatient = patientRepository.findById(
+                medicalrecord.getPatient().getId()
+            ).orElseThrow(() -> new RuntimeException("Patient not found"));
+
+            medicalrecord.setPatient(existingPatient);
+        }
+        
+        if (medicalrecord.getDoctor() != null &&
+            medicalrecord.getDoctor().getId() != null) {
+
+            Doctor existingDoctor = doctorRepository.findById(
+                medicalrecord.getDoctor().getId()
+            ).orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+            medicalrecord.setDoctor(existingDoctor);
+        }
+        
+    // ---------- OneToOne ----------
+    return medicalrecordRepository.save(medicalrecord);
+}
 
 
     public MedicalRecord update(Long id, MedicalRecord medicalrecordRequest) {
@@ -63,32 +90,80 @@ public class MedicalRecordService extends BaseService<MedicalRecord> {
         existing.setDiagnosis(medicalrecordRequest.getDiagnosis());
         existing.setNotes(medicalrecordRequest.getNotes());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+        if (medicalrecordRequest.getPatient() != null &&
+            medicalrecordRequest.getPatient().getId() != null) {
 
-        if (medicalrecordRequest.getPatient() != null && medicalrecordRequest.getPatient().getId() != null) {
-        Patient patient = patientRepository.findById(medicalrecordRequest.getPatient().getId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
-        existing.setPatient(patient);
+            Patient existingPatient = patientRepository.findById(
+                medicalrecordRequest.getPatient().getId()
+            ).orElseThrow(() -> new RuntimeException("Patient not found"));
+
+            existing.setPatient(existingPatient);
+        } else {
+            existing.setPatient(null);
         }
+        
+        if (medicalrecordRequest.getDoctor() != null &&
+            medicalrecordRequest.getDoctor().getId() != null) {
 
-        if (medicalrecordRequest.getDoctor() != null && medicalrecordRequest.getDoctor().getId() != null) {
-        Doctor doctor = doctorRepository.findById(medicalrecordRequest.getDoctor().getId())
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
-        existing.setDoctor(doctor);
+            Doctor existingDoctor = doctorRepository.findById(
+                medicalrecordRequest.getDoctor().getId()
+            ).orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+            existing.setDoctor(existingDoctor);
+        } else {
+            existing.setDoctor(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getAttachments().clear();
+
         if (medicalrecordRequest.getAttachments() != null) {
             for (var item : medicalrecordRequest.getAttachments()) {
-            item.setRecord(existing);
-            existing.getAttachments().add(item);
+                MedicalFile existingItem;
+                if (item.getId() != null) {
+                    existingItem = attachmentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MedicalFile not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setRecord(existing);
+                existing.getAttachments().add(existingItem);
             }
         }
+        
+    // ---------- Relations OneToOne ----------
+    return medicalrecordRepository.save(existing);
+}
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MedicalRecord> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
 
-        return medicalrecordRepository.save(existing);
+        MedicalRecord entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getAttachments() != null) {
+            for (var child : entity.getAttachments()) {
+                // retirer la référence inverse
+                child.setRecord(null);
+            }
+            entity.getAttachments().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getPatient() != null) {
+            entity.setPatient(null);
+        }
+        
+        if (entity.getDoctor() != null) {
+            entity.setDoctor(null);
+        }
+        
+        repository.delete(entity);
+        return true;
     }
 }

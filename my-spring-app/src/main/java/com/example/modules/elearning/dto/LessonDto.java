@@ -21,6 +21,10 @@ public class LessonDto {
 
     private String content;
 
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
     private CourseSimpleDto course;
 
 }

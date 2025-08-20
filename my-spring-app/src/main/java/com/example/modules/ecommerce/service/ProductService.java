@@ -19,7 +19,7 @@ public class ProductService extends BaseService<Product> {
     protected final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository repository,CategoryRepository categoryRepository)
+    public ProductService(ProductRepository repository, CategoryRepository categoryRepository)
     {
         super(repository);
         this.productRepository = repository;
@@ -28,21 +28,22 @@ public class ProductService extends BaseService<Product> {
 
     @Override
     public Product save(Product product) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (product.getCategory() != null &&
+            product.getCategory().getId() != null) {
 
+            Category existingCategory = categoryRepository.findById(
+                product.getCategory().getId()
+            ).orElseThrow(() -> new RuntimeException("Category not found"));
 
-    
-
-    if (product.getCategory() != null
-        && product.getCategory().getId() != null) {
-        Category existingCategory = categoryRepository.findById(
-        product.getCategory().getId()
-        ).orElseThrow(() -> new RuntimeException("Category not found"));
-        product.setCategory(existingCategory);
+            product.setCategory(existingCategory);
         }
-    
-
-        return productRepository.save(product);
-    }
+        
+    // ---------- OneToOne ----------
+    return productRepository.save(product);
+}
 
 
     public Product update(Long id, Product productRequest) {
@@ -55,60 +56,39 @@ public class ProductService extends BaseService<Product> {
         existing.setPrice(productRequest.getPrice());
         existing.setDescription(productRequest.getDescription());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (productRequest.getCategory() != null &&
-        productRequest.getCategory().getId() != null) {
+            productRequest.getCategory().getId() != null) {
 
-        Category existingCategory = categoryRepository.findById(
-        productRequest.getCategory().getId()
-        ).orElseThrow(() -> new RuntimeException("Category not found"));
+            Category existingCategory = categoryRepository.findById(
+                productRequest.getCategory().getId()
+            ).orElseThrow(() -> new RuntimeException("Category not found"));
 
-        existing.setCategory(existingCategory);
+            existing.setCategory(existingCategory);
         } else {
-        existing.setCategory(null);
+            existing.setCategory(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return productRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Product> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Product entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getCategory() != null) {
-        entity.setCategory(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return productRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Product> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Product entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getCategory() != null) {
+            entity.setCategory(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

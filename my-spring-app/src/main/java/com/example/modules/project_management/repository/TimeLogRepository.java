@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TimeLogRepository extends BaseRepository<TimeLog, Long> {
+
 }

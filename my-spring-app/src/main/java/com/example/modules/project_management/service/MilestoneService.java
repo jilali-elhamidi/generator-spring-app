@@ -22,7 +22,7 @@ public class MilestoneService extends BaseService<Milestone> {
     private final ProjectRepository projectRepository;
     private final TaskRepository relatedTasksRepository;
 
-    public MilestoneService(MilestoneRepository repository,ProjectRepository projectRepository,TaskRepository relatedTasksRepository)
+    public MilestoneService(MilestoneRepository repository, ProjectRepository projectRepository, TaskRepository relatedTasksRepository)
     {
         super(repository);
         this.milestoneRepository = repository;
@@ -32,44 +32,39 @@ public class MilestoneService extends BaseService<Milestone> {
 
     @Override
     public Milestone save(Milestone milestone) {
-
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (milestone.getRelatedTasks() != null) {
+    // ---------- OneToMany ----------
+        if (milestone.getRelatedTasks() != null) {
             List<Task> managedRelatedTasks = new ArrayList<>();
             for (Task item : milestone.getRelatedTasks()) {
-            if (item.getId() != null) {
-            Task existingItem = relatedTasksRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Task not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setMilestone(milestone);
-            managedRelatedTasks.add(existingItem);
-            } else {
-            item.setMilestone(milestone);
-            managedRelatedTasks.add(item);
-            }
+                if (item.getId() != null) {
+                    Task existingItem = relatedTasksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Task not found"));
+
+                     existingItem.setMilestone(milestone);
+                     managedRelatedTasks.add(existingItem);
+                } else {
+                    item.setMilestone(milestone);
+                    managedRelatedTasks.add(item);
+                }
             }
             milestone.setRelatedTasks(managedRelatedTasks);
-            }
-        
-    
-
-    if (milestone.getProject() != null
-        && milestone.getProject().getId() != null) {
-        Project existingProject = projectRepository.findById(
-        milestone.getProject().getId()
-        ).orElseThrow(() -> new RuntimeException("Project not found"));
-        milestone.setProject(existingProject);
         }
     
-    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (milestone.getProject() != null &&
+            milestone.getProject().getId() != null) {
 
-        return milestoneRepository.save(milestone);
-    }
+            Project existingProject = projectRepository.findById(
+                milestone.getProject().getId()
+            ).orElseThrow(() -> new RuntimeException("Project not found"));
+
+            milestone.setProject(existingProject);
+        }
+        
+    // ---------- OneToOne ----------
+    return milestoneRepository.save(milestone);
+}
 
 
     public Milestone update(Long id, Milestone milestoneRequest) {
@@ -81,99 +76,64 @@ public class MilestoneService extends BaseService<Milestone> {
         existing.setDueDate(milestoneRequest.getDueDate());
         existing.setStatus(milestoneRequest.getStatus());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (milestoneRequest.getProject() != null &&
-        milestoneRequest.getProject().getId() != null) {
+            milestoneRequest.getProject().getId() != null) {
 
-        Project existingProject = projectRepository.findById(
-        milestoneRequest.getProject().getId()
-        ).orElseThrow(() -> new RuntimeException("Project not found"));
+            Project existingProject = projectRepository.findById(
+                milestoneRequest.getProject().getId()
+            ).orElseThrow(() -> new RuntimeException("Project not found"));
 
-        existing.setProject(existingProject);
+            existing.setProject(existingProject);
         } else {
-        existing.setProject(null);
+            existing.setProject(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getRelatedTasks().clear();
 
         if (milestoneRequest.getRelatedTasks() != null) {
-        for (var item : milestoneRequest.getRelatedTasks()) {
-        Task existingItem;
-        if (item.getId() != null) {
-        existingItem = relatedTasksRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Task not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : milestoneRequest.getRelatedTasks()) {
+                Task existingItem;
+                if (item.getId() != null) {
+                    existingItem = relatedTasksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Task not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setMilestone(existing);
+                existing.getRelatedTasks().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setMilestone(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getRelatedTasks().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-
-        return milestoneRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Milestone> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Milestone entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-        if (entity.getRelatedTasks() != null) {
-        for (var child : entity.getRelatedTasks()) {
         
-            child.setMilestone(null); // retirer la référence inverse
-        
-        }
-        entity.getRelatedTasks().clear();
-        }
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getProject() != null) {
-        entity.setProject(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    // ---------- Relations OneToOne ----------
+    return milestoneRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Milestone> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Milestone entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getRelatedTasks() != null) {
+            for (var child : entity.getRelatedTasks()) {
+                // retirer la référence inverse
+                child.setMilestone(null);
+            }
+            entity.getRelatedTasks().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getProject() != null) {
+            entity.setProject(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

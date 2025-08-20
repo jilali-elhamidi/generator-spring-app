@@ -22,7 +22,7 @@ public class UserService extends BaseService<User> {
     private final AddressRepository addressesRepository;
     private final OrderRepository ordersRepository;
 
-    public UserService(UserRepository repository,AddressRepository addressesRepository,OrderRepository ordersRepository)
+    public UserService(UserRepository repository, AddressRepository addressesRepository, OrderRepository ordersRepository)
     {
         super(repository);
         this.userRepository = repository;
@@ -32,57 +32,46 @@ public class UserService extends BaseService<User> {
 
     @Override
     public User save(User user) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (user.getAddresses() != null) {
+    // ---------- OneToMany ----------
+        if (user.getAddresses() != null) {
             List<Address> managedAddresses = new ArrayList<>();
             for (Address item : user.getAddresses()) {
-            if (item.getId() != null) {
-            Address existingItem = addressesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Address not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setUser(user);
-            managedAddresses.add(existingItem);
-            } else {
-            item.setUser(user);
-            managedAddresses.add(item);
-            }
+                if (item.getId() != null) {
+                    Address existingItem = addressesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Address not found"));
+
+                     existingItem.setUser(user);
+                     managedAddresses.add(existingItem);
+                } else {
+                    item.setUser(user);
+                    managedAddresses.add(item);
+                }
             }
             user.setAddresses(managedAddresses);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (user.getOrders() != null) {
+        if (user.getOrders() != null) {
             List<Order> managedOrders = new ArrayList<>();
             for (Order item : user.getOrders()) {
-            if (item.getId() != null) {
-            Order existingItem = ordersRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Order not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setUser(user);
-            managedOrders.add(existingItem);
-            } else {
-            item.setUser(user);
-            managedOrders.add(item);
-            }
+                if (item.getId() != null) {
+                    Order existingItem = ordersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Order not found"));
+
+                     existingItem.setUser(user);
+                     managedOrders.add(existingItem);
+                } else {
+                    item.setUser(user);
+                    managedOrders.add(item);
+                }
             }
             user.setOrders(managedOrders);
-            }
-        
+        }
     
-
-    
-    
-
-        return userRepository.save(user);
-    }
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
+    return userRepository.save(user);
+}
 
 
     public User update(Long id, User userRequest) {
@@ -94,113 +83,73 @@ public class UserService extends BaseService<User> {
         existing.setEmail(userRequest.getEmail());
         existing.setPhone(userRequest.getPhone());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getAddresses().clear();
 
         if (userRequest.getAddresses() != null) {
-        for (var item : userRequest.getAddresses()) {
-        Address existingItem;
-        if (item.getId() != null) {
-        existingItem = addressesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Address not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setUser(existing);
+            for (var item : userRequest.getAddresses()) {
+                Address existingItem;
+                if (item.getId() != null) {
+                    existingItem = addressesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Address not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getAddresses().add(existingItem);
+                existingItem.setUser(existing);
+                existing.getAddresses().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getOrders().clear();
 
         if (userRequest.getOrders() != null) {
-        for (var item : userRequest.getOrders()) {
-        Order existingItem;
-        if (item.getId() != null) {
-        existingItem = ordersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Order not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : userRequest.getOrders()) {
+                Order existingItem;
+                if (item.getId() != null) {
+                    existingItem = ordersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Order not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setUser(existing);
+                existing.getOrders().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setUser(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getOrders().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-
-        return userRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<User> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-User entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getAddresses() != null) {
-        for (var child : entity.getAddresses()) {
         
-            child.setUser(null); // retirer la référence inverse
-        
-        }
-        entity.getAddresses().clear();
-        }
-    
-
-    
-        if (entity.getOrders() != null) {
-        for (var child : entity.getOrders()) {
-        
-            child.setUser(null); // retirer la référence inverse
-        
-        }
-        entity.getOrders().clear();
-        }
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    // ---------- Relations OneToOne ----------
+    return userRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<User> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        User entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getAddresses() != null) {
+            for (var child : entity.getAddresses()) {
+                // retirer la référence inverse
+                child.setUser(null);
+            }
+            entity.getAddresses().clear();
+        }
+        
+        if (entity.getOrders() != null) {
+            for (var child : entity.getOrders()) {
+                // retirer la référence inverse
+                child.setUser(null);
+            }
+            entity.getOrders().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -19,7 +19,7 @@ public class ShipmentService extends BaseService<Shipment> {
     protected final ShipmentRepository shipmentRepository;
     private final OrderRepository orderRepository;
 
-    public ShipmentService(ShipmentRepository repository,OrderRepository orderRepository)
+    public ShipmentService(ShipmentRepository repository, OrderRepository orderRepository)
     {
         super(repository);
         this.shipmentRepository = repository;
@@ -28,25 +28,21 @@ public class ShipmentService extends BaseService<Shipment> {
 
     @Override
     public Shipment save(Shipment shipment) {
-
-
-    
-
-    
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (shipment.getOrder() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
-            shipment.setOrder(
-            orderRepository.findById(shipment.getOrder().getId())
-            .orElseThrow(() -> new RuntimeException("order not found"))
-            );
-        
-        shipment.getOrder().setShipment(shipment);
-        }
 
-        return shipmentRepository.save(shipment);
-    }
+            shipment.setOrder(
+                orderRepository.findById(shipment.getOrder().getId())
+                    .orElseThrow(() -> new RuntimeException("order not found"))
+            );
+            shipment.getOrder().setShipment(shipment);
+        }
+        
+    return shipmentRepository.save(shipment);
+}
 
 
     public Shipment update(Long id, Shipment shipmentRequest) {
@@ -58,70 +54,38 @@ public class ShipmentService extends BaseService<Shipment> {
         existing.setCarrier(shipmentRequest.getCarrier());
         existing.setTrackingNumber(shipmentRequest.getTrackingNumber());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+        if (shipmentRequest.getOrder() != null &&shipmentRequest.getOrder().getId() != null) {
 
-// Relations ManyToMany : synchronisation sécurisée
+        Order order = orderRepository.findById(shipmentRequest.getOrder().getId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
 
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-        if (shipmentRequest.getOrder() != null
-        && shipmentRequest.getOrder().getId() != null) {
-
-        Order order = orderRepository.findById(
-        shipmentRequest.getOrder().getId()
-        ).orElseThrow(() -> new RuntimeException("Order not found"));
-
-        // Mise à jour de la relation côté propriétaire
         existing.setOrder(order);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
-            order.setShipment(existing);
+        order.setShipment(existing);
         
         }
-
     
-
-
-        return shipmentRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Shipment> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Shipment entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getOrder() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getOrder().setShipment(null);
-        // Dissocier côté direct
-        entity.setOrder(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return shipmentRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Shipment> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Shipment entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getOrder() != null) {
+            entity.getOrder().setShipment(null);
+            entity.setOrder(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -22,7 +22,7 @@ public class CommentService extends BaseService<Comment> {
     private final TeamMemberRepository authorRepository;
     private final TaskRepository taskRepository;
 
-    public CommentService(CommentRepository repository,TeamMemberRepository authorRepository,TaskRepository taskRepository)
+    public CommentService(CommentRepository repository, TeamMemberRepository authorRepository, TaskRepository taskRepository)
     {
         super(repository);
         this.commentRepository = repository;
@@ -32,31 +32,32 @@ public class CommentService extends BaseService<Comment> {
 
     @Override
     public Comment save(Comment comment) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (comment.getAuthor() != null &&
+            comment.getAuthor().getId() != null) {
 
+            TeamMember existingAuthor = authorRepository.findById(
+                comment.getAuthor().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
 
-    
-
-    
-
-    if (comment.getAuthor() != null
-        && comment.getAuthor().getId() != null) {
-        TeamMember existingAuthor = authorRepository.findById(
-        comment.getAuthor().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-        comment.setAuthor(existingAuthor);
+            comment.setAuthor(existingAuthor);
         }
-    
-    if (comment.getTask() != null
-        && comment.getTask().getId() != null) {
-        Task existingTask = taskRepository.findById(
-        comment.getTask().getId()
-        ).orElseThrow(() -> new RuntimeException("Task not found"));
-        comment.setTask(existingTask);
-        }
-    
+        
+        if (comment.getTask() != null &&
+            comment.getTask().getId() != null) {
 
-        return commentRepository.save(comment);
-    }
+            Task existingTask = taskRepository.findById(
+                comment.getTask().getId()
+            ).orElseThrow(() -> new RuntimeException("Task not found"));
+
+            comment.setTask(existingTask);
+        }
+        
+    // ---------- OneToOne ----------
+    return commentRepository.save(comment);
+}
 
 
     public Comment update(Long id, Comment commentRequest) {
@@ -67,85 +68,55 @@ public class CommentService extends BaseService<Comment> {
         existing.setContent(commentRequest.getContent());
         existing.setCommentDate(commentRequest.getCommentDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (commentRequest.getAuthor() != null &&
-        commentRequest.getAuthor().getId() != null) {
+            commentRequest.getAuthor().getId() != null) {
 
-        TeamMember existingAuthor = authorRepository.findById(
-        commentRequest.getAuthor().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+            TeamMember existingAuthor = authorRepository.findById(
+                commentRequest.getAuthor().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
 
-        existing.setAuthor(existingAuthor);
+            existing.setAuthor(existingAuthor);
         } else {
-        existing.setAuthor(null);
+            existing.setAuthor(null);
         }
+        
         if (commentRequest.getTask() != null &&
-        commentRequest.getTask().getId() != null) {
+            commentRequest.getTask().getId() != null) {
 
-        Task existingTask = taskRepository.findById(
-        commentRequest.getTask().getId()
-        ).orElseThrow(() -> new RuntimeException("Task not found"));
+            Task existingTask = taskRepository.findById(
+                commentRequest.getTask().getId()
+            ).orElseThrow(() -> new RuntimeException("Task not found"));
 
-        existing.setTask(existingTask);
+            existing.setTask(existingTask);
         } else {
-        existing.setTask(null);
+            existing.setTask(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return commentRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Comment> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Comment entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getAuthor() != null) {
-        entity.setAuthor(null);
-        }
-    
-
-    
-        if (entity.getTask() != null) {
-        entity.setTask(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return commentRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Comment> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Comment entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getAuthor() != null) {
+            entity.setAuthor(null);
+        }
+        
+        if (entity.getTask() != null) {
+            entity.setTask(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

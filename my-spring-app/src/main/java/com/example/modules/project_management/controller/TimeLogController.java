@@ -46,37 +46,35 @@ public class TimeLogController {
 
         TimeLog entity = timelogMapper.toEntity(timelogDto);
         TimeLog saved = timelogService.save(entity);
-        URI location = uriBuilder.path("/api/timelogs/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/timelogs/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(timelogMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<TimeLogDto> updateTimeLog(
-                @PathVariable Long id,
-                @RequestBody TimeLogDto timelogDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<TimeLogDto> updateTimeLog(
+            @PathVariable Long id,
+            @Valid @RequestBody TimeLogDto timelogDto) {
 
-                // Transformer le DTO en entity pour le service
-                TimeLog entityToUpdate = timelogMapper.toEntity(timelogDto);
 
-                // Appel du service update
-                TimeLog updatedEntity = timelogService.update(id, entityToUpdate);
+        TimeLog entityToUpdate = timelogMapper.toEntity(timelogDto);
+        TimeLog updatedEntity = timelogService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                TimeLogDto updatedDto = timelogMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(timelogMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteTimeLog(@PathVariable Long id) {
-                    boolean deleted = timelogService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTimeLog(@PathVariable Long id) {
+        boolean deleted = timelogService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

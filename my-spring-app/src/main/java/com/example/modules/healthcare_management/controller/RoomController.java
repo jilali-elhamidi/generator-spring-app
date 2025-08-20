@@ -46,8 +46,12 @@ public class RoomController {
 
         Room entity = roomMapper.toEntity(roomDto);
         Room saved = roomService.save(entity);
-        URI location = uriBuilder.path("/api/rooms/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/rooms/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(roomMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class RoomController {
             @PathVariable Long id,
             @Valid @RequestBody RoomDto roomDto) {
 
-        try {
-            Room updatedEntity = roomService.update(
-                    id,
-                    roomMapper.toEntity(roomDto)
-            );
-            return ResponseEntity.ok(roomMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Room entityToUpdate = roomMapper.toEntity(roomDto);
+        Room updatedEntity = roomService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(roomMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
-        roomService.deleteById(id);
+        boolean deleted = roomService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

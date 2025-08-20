@@ -46,37 +46,35 @@ public class OrderItemController {
 
         OrderItem entity = orderitemMapper.toEntity(orderitemDto);
         OrderItem saved = orderitemService.save(entity);
-        URI location = uriBuilder.path("/api/orderitems/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/orderitems/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(orderitemMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<OrderItemDto> updateOrderItem(
-                @PathVariable Long id,
-                @RequestBody OrderItemDto orderitemDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<OrderItemDto> updateOrderItem(
+            @PathVariable Long id,
+            @Valid @RequestBody OrderItemDto orderitemDto) {
 
-                // Transformer le DTO en entity pour le service
-                OrderItem entityToUpdate = orderitemMapper.toEntity(orderitemDto);
 
-                // Appel du service update
-                OrderItem updatedEntity = orderitemService.update(id, entityToUpdate);
+        OrderItem entityToUpdate = orderitemMapper.toEntity(orderitemDto);
+        OrderItem updatedEntity = orderitemService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                OrderItemDto updatedDto = orderitemMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(orderitemMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
-                    boolean deleted = orderitemService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
+        boolean deleted = orderitemService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

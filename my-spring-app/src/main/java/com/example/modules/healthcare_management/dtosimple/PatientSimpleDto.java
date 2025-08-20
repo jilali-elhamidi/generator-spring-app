@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatientSimpleDto {
+
     private Long id;
 
     private String firstName;

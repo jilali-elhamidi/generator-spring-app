@@ -46,37 +46,35 @@ public class TeamMemberController {
 
         TeamMember entity = teammemberMapper.toEntity(teammemberDto);
         TeamMember saved = teammemberService.save(entity);
-        URI location = uriBuilder.path("/api/teammembers/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/teammembers/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(teammemberMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<TeamMemberDto> updateTeamMember(
-                @PathVariable Long id,
-                @RequestBody TeamMemberDto teammemberDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<TeamMemberDto> updateTeamMember(
+            @PathVariable Long id,
+            @Valid @RequestBody TeamMemberDto teammemberDto) {
 
-                // Transformer le DTO en entity pour le service
-                TeamMember entityToUpdate = teammemberMapper.toEntity(teammemberDto);
 
-                // Appel du service update
-                TeamMember updatedEntity = teammemberService.update(id, entityToUpdate);
+        TeamMember entityToUpdate = teammemberMapper.toEntity(teammemberDto);
+        TeamMember updatedEntity = teammemberService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                TeamMemberDto updatedDto = teammemberMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(teammemberMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteTeamMember(@PathVariable Long id) {
-                    boolean deleted = teammemberService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTeamMember(@PathVariable Long id) {
+        boolean deleted = teammemberService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

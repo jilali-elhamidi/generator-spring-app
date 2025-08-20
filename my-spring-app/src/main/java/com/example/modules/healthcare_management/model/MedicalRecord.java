@@ -1,40 +1,44 @@
 package com.example.modules.healthcare_management.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Date;
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
-import java.util.Date;
-import com.example.modules.healthcare_management.model.Patient;import com.example.modules.healthcare_management.model.Doctor;import com.example.modules.healthcare_management.model.MedicalFile;
+
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "medicalrecord_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class MedicalRecord extends BaseEntity {
 
-// === Attributs simples ===
-
+    // === Attributs simples ===
     @NotNull
     private Date recordDate;
 
-    @NotNull@Size(max = 255)
+    @NotNull
+    @Size(max = 255)
     private String diagnosis;
 
     @Size(max = 500)
     private String notes;
 
 
-// === Relations ===
-
+    // === Relations ManyToOne ===
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "patient_id")
     @JsonIgnoreProperties("medicalRecords")
@@ -45,9 +49,14 @@ public class MedicalRecord extends BaseEntity {
     @JsonIgnoreProperties("")
     private Doctor doctor;
     
+
+    // === Relations OneToMany ===
     @OneToMany(mappedBy = "record", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("record")
-    private List<MedicalFile> attachments;
+    private List<MedicalFile> attachments = new ArrayList<>();
     
 
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

@@ -46,37 +46,35 @@ public class CategoryController {
 
         Category entity = categoryMapper.toEntity(categoryDto);
         Category saved = categoryService.save(entity);
-        URI location = uriBuilder.path("/api/categorys/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/categorys/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(categoryMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<CategoryDto> updateCategory(
-                @PathVariable Long id,
-                @RequestBody CategoryDto categoryDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryDto> updateCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoryDto categoryDto) {
 
-                // Transformer le DTO en entity pour le service
-                Category entityToUpdate = categoryMapper.toEntity(categoryDto);
 
-                // Appel du service update
-                Category updatedEntity = categoryService.update(id, entityToUpdate);
+        Category entityToUpdate = categoryMapper.toEntity(categoryDto);
+        Category updatedEntity = categoryService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                CategoryDto updatedDto = categoryMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(categoryMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-                    boolean deleted = categoryService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+        boolean deleted = categoryService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

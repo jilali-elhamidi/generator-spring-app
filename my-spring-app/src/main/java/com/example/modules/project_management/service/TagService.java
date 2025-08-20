@@ -19,7 +19,7 @@ public class TagService extends BaseService<Tag> {
     protected final TagRepository tagRepository;
     private final TaskRepository tasksRepository;
 
-    public TagService(TagRepository repository,TaskRepository tasksRepository)
+    public TagService(TagRepository repository, TaskRepository tasksRepository)
     {
         super(repository);
         this.tagRepository = repository;
@@ -28,14 +28,26 @@ public class TagService extends BaseService<Tag> {
 
     @Override
     public Tag save(Tag tag) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (tag.getTasks() != null &&
+            !tag.getTasks().isEmpty()) {
 
+            List<Task> attachedTasks = tag.getTasks().stream()
+            .map(item -> tasksRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("Task not found with id " + item.getId())))
+            .toList();
 
-    
+            tag.setTasks(attachedTasks);
 
-    
-
-        return tagRepository.save(tag);
-    }
+            // côté propriétaire (Task → Tag)
+            attachedTasks.forEach(it -> it.getTags().add(tag));
+        }
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
+    return tagRepository.save(tag);
+}
 
 
     public Tag update(Long id, Tag tagRequest) {
@@ -45,58 +57,49 @@ public class TagService extends BaseService<Tag> {
     // Copier les champs simples
         existing.setName(tagRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (tagRequest.getTasks() != null) {
             existing.getTasks().clear();
+
             List<Task> tasksList = tagRequest.getTasks().stream()
                 .map(item -> tasksRepository.findById(item.getId())
                     .orElseThrow(() -> new RuntimeException("Task not found")))
                 .collect(Collectors.toList());
-        existing.getTasks().addAll(tasksList);
+
+            existing.getTasks().addAll(tasksList);
+
+            // Mettre à jour le côté inverse
+            tasksList.forEach(it -> {
+                if (!it.getTags().contains(existing)) {
+                    it.getTags().add(existing);
+                }
+            });
         }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return tagRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Tag> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Tag entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getTasks() != null) {
-        entity.getTasks().clear();
-        }
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return tagRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Tag> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Tag entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getTasks() != null) {
+            for (Task item : new ArrayList<>(entity.getTasks())) {
+                
+                item.getTags().remove(entity); // retire côté inverse
+            }
+            entity.getTasks().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

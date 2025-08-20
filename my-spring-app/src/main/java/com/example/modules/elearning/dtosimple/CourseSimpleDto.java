@@ -17,4 +17,8 @@ public class CourseSimpleDto {
 
     private String description;
 
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
 }

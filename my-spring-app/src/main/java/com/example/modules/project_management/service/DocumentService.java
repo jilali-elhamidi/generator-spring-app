@@ -25,7 +25,7 @@ public class DocumentService extends BaseService<Document> {
     private final TeamMemberRepository uploadedByRepository;
     private final DocumentTypeRepository typeRepository;
 
-    public DocumentService(DocumentRepository repository,ProjectRepository projectRepository,TeamMemberRepository uploadedByRepository,DocumentTypeRepository typeRepository)
+    public DocumentService(DocumentRepository repository, ProjectRepository projectRepository, TeamMemberRepository uploadedByRepository, DocumentTypeRepository typeRepository)
     {
         super(repository);
         this.documentRepository = repository;
@@ -36,41 +36,42 @@ public class DocumentService extends BaseService<Document> {
 
     @Override
     public Document save(Document document) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (document.getProject() != null &&
+            document.getProject().getId() != null) {
 
+            Project existingProject = projectRepository.findById(
+                document.getProject().getId()
+            ).orElseThrow(() -> new RuntimeException("Project not found"));
 
-    
-
-    
-
-    
-
-    if (document.getProject() != null
-        && document.getProject().getId() != null) {
-        Project existingProject = projectRepository.findById(
-        document.getProject().getId()
-        ).orElseThrow(() -> new RuntimeException("Project not found"));
-        document.setProject(existingProject);
+            document.setProject(existingProject);
         }
-    
-    if (document.getUploadedBy() != null
-        && document.getUploadedBy().getId() != null) {
-        TeamMember existingUploadedBy = uploadedByRepository.findById(
-        document.getUploadedBy().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-        document.setUploadedBy(existingUploadedBy);
-        }
-    
-    if (document.getType() != null
-        && document.getType().getId() != null) {
-        DocumentType existingType = typeRepository.findById(
-        document.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("DocumentType not found"));
-        document.setType(existingType);
-        }
-    
+        
+        if (document.getUploadedBy() != null &&
+            document.getUploadedBy().getId() != null) {
 
-        return documentRepository.save(document);
-    }
+            TeamMember existingUploadedBy = uploadedByRepository.findById(
+                document.getUploadedBy().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+
+            document.setUploadedBy(existingUploadedBy);
+        }
+        
+        if (document.getType() != null &&
+            document.getType().getId() != null) {
+
+            DocumentType existingType = typeRepository.findById(
+                document.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("DocumentType not found"));
+
+            document.setType(existingType);
+        }
+        
+    // ---------- OneToOne ----------
+    return documentRepository.save(document);
+}
 
 
     public Document update(Long id, Document documentRequest) {
@@ -82,110 +83,71 @@ public class DocumentService extends BaseService<Document> {
         existing.setFileUrl(documentRequest.getFileUrl());
         existing.setUploadDate(documentRequest.getUploadDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (documentRequest.getProject() != null &&
-        documentRequest.getProject().getId() != null) {
+            documentRequest.getProject().getId() != null) {
 
-        Project existingProject = projectRepository.findById(
-        documentRequest.getProject().getId()
-        ).orElseThrow(() -> new RuntimeException("Project not found"));
+            Project existingProject = projectRepository.findById(
+                documentRequest.getProject().getId()
+            ).orElseThrow(() -> new RuntimeException("Project not found"));
 
-        existing.setProject(existingProject);
+            existing.setProject(existingProject);
         } else {
-        existing.setProject(null);
+            existing.setProject(null);
         }
+        
         if (documentRequest.getUploadedBy() != null &&
-        documentRequest.getUploadedBy().getId() != null) {
+            documentRequest.getUploadedBy().getId() != null) {
 
-        TeamMember existingUploadedBy = uploadedByRepository.findById(
-        documentRequest.getUploadedBy().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+            TeamMember existingUploadedBy = uploadedByRepository.findById(
+                documentRequest.getUploadedBy().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
 
-        existing.setUploadedBy(existingUploadedBy);
+            existing.setUploadedBy(existingUploadedBy);
         } else {
-        existing.setUploadedBy(null);
+            existing.setUploadedBy(null);
         }
+        
         if (documentRequest.getType() != null &&
-        documentRequest.getType().getId() != null) {
+            documentRequest.getType().getId() != null) {
 
-        DocumentType existingType = typeRepository.findById(
-        documentRequest.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("DocumentType not found"));
+            DocumentType existingType = typeRepository.findById(
+                documentRequest.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("DocumentType not found"));
 
-        existing.setType(existingType);
+            existing.setType(existingType);
         } else {
-        existing.setType(null);
+            existing.setType(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-
-        return documentRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Document> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Document entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getProject() != null) {
-        entity.setProject(null);
-        }
-    
-
-    
-        if (entity.getUploadedBy() != null) {
-        entity.setUploadedBy(null);
-        }
-    
-
-    
-        if (entity.getType() != null) {
-        entity.setType(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return documentRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Document> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Document entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getProject() != null) {
+            entity.setProject(null);
+        }
+        
+        if (entity.getUploadedBy() != null) {
+            entity.setUploadedBy(null);
+        }
+        
+        if (entity.getType() != null) {
+            entity.setType(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

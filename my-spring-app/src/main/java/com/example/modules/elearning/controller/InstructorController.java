@@ -46,8 +46,12 @@ public class InstructorController {
 
         Instructor entity = instructorMapper.toEntity(instructorDto);
         Instructor saved = instructorService.save(entity);
-        URI location = uriBuilder.path("/api/instructors/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/instructors/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(instructorMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class InstructorController {
             @PathVariable Long id,
             @Valid @RequestBody InstructorDto instructorDto) {
 
-        try {
-            Instructor updatedEntity = instructorService.update(
-                    id,
-                    instructorMapper.toEntity(instructorDto)
-            );
-            return ResponseEntity.ok(instructorMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Instructor entityToUpdate = instructorMapper.toEntity(instructorDto);
+        Instructor updatedEntity = instructorService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(instructorMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInstructor(@PathVariable Long id) {
-        instructorService.deleteById(id);
+        boolean deleted = instructorService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

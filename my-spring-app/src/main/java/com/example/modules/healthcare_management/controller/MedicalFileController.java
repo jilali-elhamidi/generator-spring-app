@@ -46,8 +46,12 @@ public class MedicalFileController {
 
         MedicalFile entity = medicalfileMapper.toEntity(medicalfileDto);
         MedicalFile saved = medicalfileService.save(entity);
-        URI location = uriBuilder.path("/api/medicalfiles/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/medicalfiles/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(medicalfileMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class MedicalFileController {
             @PathVariable Long id,
             @Valid @RequestBody MedicalFileDto medicalfileDto) {
 
-        try {
-            MedicalFile updatedEntity = medicalfileService.update(
-                    id,
-                    medicalfileMapper.toEntity(medicalfileDto)
-            );
-            return ResponseEntity.ok(medicalfileMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        MedicalFile entityToUpdate = medicalfileMapper.toEntity(medicalfileDto);
+        MedicalFile updatedEntity = medicalfileService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(medicalfileMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMedicalFile(@PathVariable Long id) {
-        medicalfileService.deleteById(id);
+        boolean deleted = medicalfileService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

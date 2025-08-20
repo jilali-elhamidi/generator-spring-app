@@ -46,8 +46,12 @@ public class CourseController {
 
         Course entity = courseMapper.toEntity(courseDto);
         Course saved = courseService.save(entity);
-        URI location = uriBuilder.path("/api/courses/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/courses/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(courseMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class CourseController {
             @PathVariable Long id,
             @Valid @RequestBody CourseDto courseDto) {
 
-        try {
-            Course updatedEntity = courseService.update(
-                    id,
-                    courseMapper.toEntity(courseDto)
-            );
-            return ResponseEntity.ok(courseMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Course entityToUpdate = courseMapper.toEntity(courseDto);
+        Course updatedEntity = courseService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(courseMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
-        courseService.deleteById(id);
+        boolean deleted = courseService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

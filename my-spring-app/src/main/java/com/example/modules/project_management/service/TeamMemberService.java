@@ -34,7 +34,7 @@ public class TeamMemberService extends BaseService<TeamMember> {
     private final TeamRepository teamRepository;
     private final TeamRepository managedTeamRepository;
 
-    public TeamMemberService(TeamMemberRepository repository,TaskRepository assignedTasksRepository,ProjectRepository projectsRepository,ProjectRepository managedProjectsRepository,CommentRepository createdCommentsRepository,TeamRepository teamRepository,TeamRepository managedTeamRepository)
+    public TeamMemberService(TeamMemberRepository repository, TaskRepository assignedTasksRepository, ProjectRepository projectsRepository, ProjectRepository managedProjectsRepository, CommentRepository createdCommentsRepository, TeamRepository teamRepository, TeamRepository managedTeamRepository)
     {
         super(repository);
         this.teammemberRepository = repository;
@@ -48,107 +48,96 @@ public class TeamMemberService extends BaseService<TeamMember> {
 
     @Override
     public TeamMember save(TeamMember teammember) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (teammember.getAssignedTasks() != null) {
+    // ---------- OneToMany ----------
+        if (teammember.getAssignedTasks() != null) {
             List<Task> managedAssignedTasks = new ArrayList<>();
             for (Task item : teammember.getAssignedTasks()) {
-            if (item.getId() != null) {
-            Task existingItem = assignedTasksRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Task not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setAssignee(teammember);
-            managedAssignedTasks.add(existingItem);
-            } else {
-            item.setAssignee(teammember);
-            managedAssignedTasks.add(item);
-            }
+                if (item.getId() != null) {
+                    Task existingItem = assignedTasksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Task not found"));
+
+                     existingItem.setAssignee(teammember);
+                     managedAssignedTasks.add(existingItem);
+                } else {
+                    item.setAssignee(teammember);
+                    managedAssignedTasks.add(item);
+                }
             }
             teammember.setAssignedTasks(managedAssignedTasks);
-            }
-        
+        }
     
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (teammember.getManagedProjects() != null) {
+        if (teammember.getManagedProjects() != null) {
             List<Project> managedManagedProjects = new ArrayList<>();
             for (Project item : teammember.getManagedProjects()) {
-            if (item.getId() != null) {
-            Project existingItem = managedProjectsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Project not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setProjectManager(teammember);
-            managedManagedProjects.add(existingItem);
-            } else {
-            item.setProjectManager(teammember);
-            managedManagedProjects.add(item);
-            }
+                if (item.getId() != null) {
+                    Project existingItem = managedProjectsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Project not found"));
+
+                     existingItem.setProjectManager(teammember);
+                     managedManagedProjects.add(existingItem);
+                } else {
+                    item.setProjectManager(teammember);
+                    managedManagedProjects.add(item);
+                }
             }
             teammember.setManagedProjects(managedManagedProjects);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (teammember.getCreatedComments() != null) {
+        if (teammember.getCreatedComments() != null) {
             List<Comment> managedCreatedComments = new ArrayList<>();
             for (Comment item : teammember.getCreatedComments()) {
-            if (item.getId() != null) {
-            Comment existingItem = createdCommentsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Comment not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setAuthor(teammember);
-            managedCreatedComments.add(existingItem);
-            } else {
-            item.setAuthor(teammember);
-            managedCreatedComments.add(item);
-            }
+                if (item.getId() != null) {
+                    Comment existingItem = createdCommentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+                     existingItem.setAuthor(teammember);
+                     managedCreatedComments.add(existingItem);
+                } else {
+                    item.setAuthor(teammember);
+                    managedCreatedComments.add(item);
+                }
             }
             teammember.setCreatedComments(managedCreatedComments);
-            }
-        
-    
-
-    
-
-    
-
-    
-    
-    
-    
-    if (teammember.getTeam() != null
-        && teammember.getTeam().getId() != null) {
-        Team existingTeam = teamRepository.findById(
-        teammember.getTeam().getId()
-        ).orElseThrow(() -> new RuntimeException("Team not found"));
-        teammember.setTeam(existingTeam);
         }
     
-    
+    // ---------- ManyToMany ----------
+        if (teammember.getProjects() != null &&
+            !teammember.getProjects().isEmpty()) {
+
+            List<Project> attachedProjects = teammember.getProjects().stream()
+            .map(item -> projectsRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("Project not found with id " + item.getId())))
+            .toList();
+
+            teammember.setProjects(attachedProjects);
+
+            // côté propriétaire (Project → TeamMember)
+            attachedProjects.forEach(it -> it.getTeamMembers().add(teammember));
+        }
+        
+    // ---------- ManyToOne ----------
+        if (teammember.getTeam() != null &&
+            teammember.getTeam().getId() != null) {
+
+            Team existingTeam = teamRepository.findById(
+                teammember.getTeam().getId()
+            ).orElseThrow(() -> new RuntimeException("Team not found"));
+
+            teammember.setTeam(existingTeam);
+        }
+        
+    // ---------- OneToOne ----------
         if (teammember.getManagedTeam() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
-            teammember.setManagedTeam(
-            managedTeamRepository.findById(teammember.getManagedTeam().getId())
-            .orElseThrow(() -> new RuntimeException("managedTeam not found"))
-            );
-        
-        teammember.getManagedTeam().setTeamLead(teammember);
-        }
 
-        return teammemberRepository.save(teammember);
-    }
+            teammember.setManagedTeam(
+                managedTeamRepository.findById(teammember.getManagedTeam().getId())
+                    .orElseThrow(() -> new RuntimeException("managedTeam not found"))
+            );
+            teammember.getManagedTeam().setTeamLead(teammember);
+        }
+        
+    return teammemberRepository.save(teammember);
+}
 
 
     public TeamMember update(Long id, TeamMember teammemberRequest) {
@@ -160,235 +149,155 @@ public class TeamMemberService extends BaseService<TeamMember> {
         existing.setEmail(teammemberRequest.getEmail());
         existing.setRole(teammemberRequest.getRole());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (teammemberRequest.getTeam() != null &&
-        teammemberRequest.getTeam().getId() != null) {
+            teammemberRequest.getTeam().getId() != null) {
 
-        Team existingTeam = teamRepository.findById(
-        teammemberRequest.getTeam().getId()
-        ).orElseThrow(() -> new RuntimeException("Team not found"));
+            Team existingTeam = teamRepository.findById(
+                teammemberRequest.getTeam().getId()
+            ).orElseThrow(() -> new RuntimeException("Team not found"));
 
-        existing.setTeam(existingTeam);
+            existing.setTeam(existingTeam);
         } else {
-        existing.setTeam(null);
+            existing.setTeam(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
+        
+    // ---------- Relations ManyToOne ----------
         if (teammemberRequest.getProjects() != null) {
             existing.getProjects().clear();
+
             List<Project> projectsList = teammemberRequest.getProjects().stream()
                 .map(item -> projectsRepository.findById(item.getId())
                     .orElseThrow(() -> new RuntimeException("Project not found")))
                 .collect(Collectors.toList());
-        existing.getProjects().addAll(projectsList);
-        }
 
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+            existing.getProjects().addAll(projectsList);
+
+            // Mettre à jour le côté inverse
+            projectsList.forEach(it -> {
+                if (!it.getTeamMembers().contains(existing)) {
+                    it.getTeamMembers().add(existing);
+                }
+            });
+        }
+        
+    // ---------- Relations OneToMany ----------
         existing.getAssignedTasks().clear();
 
         if (teammemberRequest.getAssignedTasks() != null) {
-        for (var item : teammemberRequest.getAssignedTasks()) {
-        Task existingItem;
-        if (item.getId() != null) {
-        existingItem = assignedTasksRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Task not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setAssignee(existing);
+            for (var item : teammemberRequest.getAssignedTasks()) {
+                Task existingItem;
+                if (item.getId() != null) {
+                    existingItem = assignedTasksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Task not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getAssignedTasks().add(existingItem);
+                existingItem.setAssignee(existing);
+                existing.getAssignedTasks().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getManagedProjects().clear();
 
         if (teammemberRequest.getManagedProjects() != null) {
-        for (var item : teammemberRequest.getManagedProjects()) {
-        Project existingItem;
-        if (item.getId() != null) {
-        existingItem = managedProjectsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Project not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setProjectManager(existing);
+            for (var item : teammemberRequest.getManagedProjects()) {
+                Project existingItem;
+                if (item.getId() != null) {
+                    existingItem = managedProjectsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Project not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getManagedProjects().add(existingItem);
+                existingItem.setProjectManager(existing);
+                existing.getManagedProjects().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getCreatedComments().clear();
 
         if (teammemberRequest.getCreatedComments() != null) {
-        for (var item : teammemberRequest.getCreatedComments()) {
-        Comment existingItem;
-        if (item.getId() != null) {
-        existingItem = createdCommentsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Comment not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : teammemberRequest.getCreatedComments()) {
+                Comment existingItem;
+                if (item.getId() != null) {
+                    existingItem = createdCommentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Comment not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setAuthor(existing);
+                existing.getCreatedComments().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setAuthor(existing);
+        
+    // ---------- Relations OneToOne ----------
+        if (teammemberRequest.getManagedTeam() != null &&teammemberRequest.getManagedTeam().getId() != null) {
 
-        // Ajouter directement dans la collection existante
-        existing.getCreatedComments().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
+        Team managedTeam = managedTeamRepository.findById(teammemberRequest.getManagedTeam().getId())
+                .orElseThrow(() -> new RuntimeException("Team not found"));
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-        if (teammemberRequest.getManagedTeam() != null
-        && teammemberRequest.getManagedTeam().getId() != null) {
-
-        Team managedTeam = managedTeamRepository.findById(
-        teammemberRequest.getManagedTeam().getId()
-        ).orElseThrow(() -> new RuntimeException("Team not found"));
-
-        // Mise à jour de la relation côté propriétaire
         existing.setManagedTeam(managedTeam);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
-            managedTeam.setTeamLead(existing);
+        managedTeam.setTeamLead(existing);
         
         }
-
     
-
-
-        return teammemberRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<TeamMember> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-TeamMember entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getAssignedTasks() != null) {
-        for (var child : entity.getAssignedTasks()) {
-        
-            child.setAssignee(null); // retirer la référence inverse
-        
-        }
-        entity.getAssignedTasks().clear();
-        }
-    
-
-    
-
-    
-        if (entity.getManagedProjects() != null) {
-        for (var child : entity.getManagedProjects()) {
-        
-            child.setProjectManager(null); // retirer la référence inverse
-        
-        }
-        entity.getManagedProjects().clear();
-        }
-    
-
-    
-        if (entity.getCreatedComments() != null) {
-        for (var child : entity.getCreatedComments()) {
-        
-            child.setAuthor(null); // retirer la référence inverse
-        
-        }
-        entity.getCreatedComments().clear();
-        }
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-        if (entity.getProjects() != null) {
-        entity.getProjects().clear();
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getManagedTeam() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getManagedTeam().setTeamLead(null);
-        // Dissocier côté direct
-        entity.setManagedTeam(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getTeam() != null) {
-        entity.setTeam(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return teammemberRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<TeamMember> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        TeamMember entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getAssignedTasks() != null) {
+            for (var child : entity.getAssignedTasks()) {
+                // retirer la référence inverse
+                child.setAssignee(null);
+            }
+            entity.getAssignedTasks().clear();
+        }
+        
+        if (entity.getManagedProjects() != null) {
+            for (var child : entity.getManagedProjects()) {
+                // retirer la référence inverse
+                child.setProjectManager(null);
+            }
+            entity.getManagedProjects().clear();
+        }
+        
+        if (entity.getCreatedComments() != null) {
+            for (var child : entity.getCreatedComments()) {
+                // retirer la référence inverse
+                child.setAuthor(null);
+            }
+            entity.getCreatedComments().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+        if (entity.getProjects() != null) {
+            for (Project item : new ArrayList<>(entity.getProjects())) {
+                
+                item.getTeamMembers().remove(entity); // retire côté inverse
+            }
+            entity.getProjects().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+        if (entity.getManagedTeam() != null) {
+            entity.getManagedTeam().setTeamLead(null);
+            entity.setManagedTeam(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getTeam() != null) {
+            entity.setTeam(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

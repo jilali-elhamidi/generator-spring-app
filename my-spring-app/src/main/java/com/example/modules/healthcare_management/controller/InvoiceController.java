@@ -46,8 +46,12 @@ public class InvoiceController {
 
         Invoice entity = invoiceMapper.toEntity(invoiceDto);
         Invoice saved = invoiceService.save(entity);
-        URI location = uriBuilder.path("/api/invoices/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/invoices/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(invoiceMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class InvoiceController {
             @PathVariable Long id,
             @Valid @RequestBody InvoiceDto invoiceDto) {
 
-        try {
-            Invoice updatedEntity = invoiceService.update(
-                    id,
-                    invoiceMapper.toEntity(invoiceDto)
-            );
-            return ResponseEntity.ok(invoiceMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Invoice entityToUpdate = invoiceMapper.toEntity(invoiceDto);
+        Invoice updatedEntity = invoiceService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(invoiceMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {
-        invoiceService.deleteById(id);
+        boolean deleted = invoiceService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

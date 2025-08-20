@@ -7,6 +7,7 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.mapstruct.MappingTarget;
 import java.util.List;
 
 
@@ -25,5 +26,7 @@ public interface ReimbursementMapper {
     List<ReimbursementDto> toDtoList(List<Reimbursement> reimbursementList);
 
     List<Reimbursement> toEntityList(List<ReimbursementDto> reimbursementDtoList);
+
+    void updateEntityFromDto(ReimbursementDto dto, @MappingTarget Reimbursement entity);
 
 }

@@ -133,11 +133,6 @@ entities:
         mappedBy: department
         inverseField: department
         fetch: LAZY
-      - name: head
-        type: Doctor
-        relationType: OneToOne
-        joinColumn: head_id
-        fetch: EAGER
 
   - name: Appointment
     fields:
@@ -284,6 +279,7 @@ entities:
         joinTable: prescription_medications
         joinColumns: prescription_id
         inverseJoinColumns: medication_id
+        inverseField: prescriptions
         fetch: EAGER
         owner: true
 

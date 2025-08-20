@@ -10,8 +10,6 @@ import com.example.modules.healthcare_management.dtosimple.DoctorSimpleDto;
 
 
 
-
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,7 +22,5 @@ public class DepartmentDto {
     private String description;
 
     private List<DoctorSimpleDto> doctors;
-
-    
 
 }

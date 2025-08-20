@@ -6,42 +6,65 @@ import com.example.modules.healthcare_management.repository.InvoiceRepository;
 import com.example.modules.healthcare_management.model.Patient;
 import com.example.modules.healthcare_management.repository.PatientRepository;
 import com.example.modules.healthcare_management.model.Reimbursement;
+import com.example.modules.healthcare_management.repository.ReimbursementRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class InvoiceService extends BaseService<Invoice> {
 
     protected final InvoiceRepository invoiceRepository;
     private final PatientRepository patientRepository;
+    private final ReimbursementRepository ReimbursementsRepository;
 
-    public InvoiceService(InvoiceRepository repository,PatientRepository patientRepository)
+    public InvoiceService(InvoiceRepository repository, PatientRepository patientRepository, ReimbursementRepository ReimbursementsRepository)
     {
         super(repository);
         this.invoiceRepository = repository;
         this.patientRepository = patientRepository;
+        this.ReimbursementsRepository = ReimbursementsRepository;
     }
 
     @Override
     public Invoice save(Invoice invoice) {
-
-        if (invoice.getPatient() != null && invoice.getPatient().getId() != null) {
-        Patient patient = patientRepository.findById(invoice.getPatient().getId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
-        invoice.setPatient(patient);
-        }
-
+    // ---------- OneToMany ----------
         if (invoice.getReimbursements() != null) {
+            List<Reimbursement> managedReimbursements = new ArrayList<>();
             for (Reimbursement item : invoice.getReimbursements()) {
-            item.setInvoice(invoice);
-            }
-        }
+                if (item.getId() != null) {
+                    Reimbursement existingItem = ReimbursementsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Reimbursement not found"));
 
-        return invoiceRepository.save(invoice);
-    }
+                     existingItem.setInvoice(invoice);
+                     managedReimbursements.add(existingItem);
+                } else {
+                    item.setInvoice(invoice);
+                    managedReimbursements.add(item);
+                }
+            }
+            invoice.setReimbursements(managedReimbursements);
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (invoice.getPatient() != null &&
+            invoice.getPatient().getId() != null) {
+
+            Patient existingPatient = patientRepository.findById(
+                invoice.getPatient().getId()
+            ).orElseThrow(() -> new RuntimeException("Patient not found"));
+
+            invoice.setPatient(existingPatient);
+        }
+        
+    // ---------- OneToOne ----------
+    return invoiceRepository.save(invoice);
+}
 
 
     public Invoice update(Long id, Invoice invoiceRequest) {
@@ -53,26 +76,64 @@ public class InvoiceService extends BaseService<Invoice> {
         existing.setTotalAmount(invoiceRequest.getTotalAmount());
         existing.setStatus(invoiceRequest.getStatus());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+        if (invoiceRequest.getPatient() != null &&
+            invoiceRequest.getPatient().getId() != null) {
 
-        if (invoiceRequest.getPatient() != null && invoiceRequest.getPatient().getId() != null) {
-        Patient patient = patientRepository.findById(invoiceRequest.getPatient().getId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
-        existing.setPatient(patient);
+            Patient existingPatient = patientRepository.findById(
+                invoiceRequest.getPatient().getId()
+            ).orElseThrow(() -> new RuntimeException("Patient not found"));
+
+            existing.setPatient(existingPatient);
+        } else {
+            existing.setPatient(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getReimbursements().clear();
+
         if (invoiceRequest.getReimbursements() != null) {
             for (var item : invoiceRequest.getReimbursements()) {
-            item.setInvoice(existing);
-            existing.getReimbursements().add(item);
+                Reimbursement existingItem;
+                if (item.getId() != null) {
+                    existingItem = ReimbursementsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Reimbursement not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setInvoice(existing);
+                existing.getReimbursements().add(existingItem);
             }
         }
+        
+    // ---------- Relations OneToOne ----------
+    return invoiceRepository.save(existing);
+}
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Invoice> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
 
-        return invoiceRepository.save(existing);
+        Invoice entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getReimbursements() != null) {
+            for (var child : entity.getReimbursements()) {
+                // retirer la référence inverse
+                child.setInvoice(null);
+            }
+            entity.getReimbursements().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getPatient() != null) {
+            entity.setPatient(null);
+        }
+        
+        repository.delete(entity);
+        return true;
     }
 }

@@ -1,47 +1,57 @@
 package com.example.modules.ecommerce.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
 
-import com.example.modules.ecommerce.model.Category;
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "product_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Product extends BaseEntity {
 
-// === Attributs simples ===
-
-        @NotNull@Size(min = 2, max = 100)
+    // === Attributs simples ===
+    @NotNull
+    @Size(min = 2, max = 100)
     private String name;
 
-        @NotNull
+    @NotNull
     private Integer stock;
 
-        @NotNull@Min(2)
+    @NotNull
+    @Min(2)
     private Double price;
 
-        @Size(max = 500)
+    @Size(max = 500)
     private String description;
 
 
-// === Relations ===
-
+    // === Relations ManyToOne ===
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "category_id")
-        @JsonIgnoreProperties("products")
-        private Category category;
+    @JoinColumn(name = "category_id")
+    @JsonIgnoreProperties("products")
+    private Category category;
     
 
+    // === Relations OneToMany ===
+
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

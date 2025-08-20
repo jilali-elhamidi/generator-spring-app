@@ -105,6 +105,7 @@ entities:
         joinTable: project_members
         joinColumns: project_id
         inverseJoinColumns: member_id
+        inverseField: projects
         fetch: LAZY
         owner: true
       - name: projectManager
@@ -197,6 +198,7 @@ entities:
         joinTable: task_tags
         joinColumns: task_id
         inverseJoinColumns: tag_id
+        inverseField: tasks
         fetch: EAGER
         owner: true
       - name: attachments

@@ -46,8 +46,12 @@ public class PatientController {
 
         Patient entity = patientMapper.toEntity(patientDto);
         Patient saved = patientService.save(entity);
-        URI location = uriBuilder.path("/api/patients/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/patients/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(patientMapper.toDto(saved));
     }
 
@@ -56,20 +60,21 @@ public class PatientController {
             @PathVariable Long id,
             @Valid @RequestBody PatientDto patientDto) {
 
-        try {
-            Patient updatedEntity = patientService.update(
-                    id,
-                    patientMapper.toEntity(patientDto)
-            );
-            return ResponseEntity.ok(patientMapper.toDto(updatedEntity));
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+
+        Patient entityToUpdate = patientMapper.toEntity(patientDto);
+        Patient updatedEntity = patientService.update(id, entityToUpdate);
+
+        return ResponseEntity.ok(patientMapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
-        patientService.deleteById(id);
+        boolean deleted = patientService.deleteById(id);
+
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.noContent().build();
     }
 }

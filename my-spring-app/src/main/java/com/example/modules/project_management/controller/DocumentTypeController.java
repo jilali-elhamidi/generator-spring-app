@@ -46,37 +46,35 @@ public class DocumentTypeController {
 
         DocumentType entity = documenttypeMapper.toEntity(documenttypeDto);
         DocumentType saved = documenttypeService.save(entity);
-        URI location = uriBuilder.path("/api/documenttypes/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/documenttypes/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(documenttypeMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<DocumentTypeDto> updateDocumentType(
-                @PathVariable Long id,
-                @RequestBody DocumentTypeDto documenttypeDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<DocumentTypeDto> updateDocumentType(
+            @PathVariable Long id,
+            @Valid @RequestBody DocumentTypeDto documenttypeDto) {
 
-                // Transformer le DTO en entity pour le service
-                DocumentType entityToUpdate = documenttypeMapper.toEntity(documenttypeDto);
 
-                // Appel du service update
-                DocumentType updatedEntity = documenttypeService.update(id, entityToUpdate);
+        DocumentType entityToUpdate = documenttypeMapper.toEntity(documenttypeDto);
+        DocumentType updatedEntity = documenttypeService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                DocumentTypeDto updatedDto = documenttypeMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(documenttypeMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteDocumentType(@PathVariable Long id) {
-                    boolean deleted = documenttypeService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDocumentType(@PathVariable Long id) {
+        boolean deleted = documenttypeService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

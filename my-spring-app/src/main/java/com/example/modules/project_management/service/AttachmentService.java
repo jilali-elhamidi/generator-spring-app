@@ -22,7 +22,7 @@ public class AttachmentService extends BaseService<Attachment> {
     private final TaskRepository taskRepository;
     private final TeamMemberRepository uploadedByRepository;
 
-    public AttachmentService(AttachmentRepository repository,TaskRepository taskRepository,TeamMemberRepository uploadedByRepository)
+    public AttachmentService(AttachmentRepository repository, TaskRepository taskRepository, TeamMemberRepository uploadedByRepository)
     {
         super(repository);
         this.attachmentRepository = repository;
@@ -32,31 +32,32 @@ public class AttachmentService extends BaseService<Attachment> {
 
     @Override
     public Attachment save(Attachment attachment) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (attachment.getTask() != null &&
+            attachment.getTask().getId() != null) {
 
+            Task existingTask = taskRepository.findById(
+                attachment.getTask().getId()
+            ).orElseThrow(() -> new RuntimeException("Task not found"));
 
-    
-
-    
-
-    if (attachment.getTask() != null
-        && attachment.getTask().getId() != null) {
-        Task existingTask = taskRepository.findById(
-        attachment.getTask().getId()
-        ).orElseThrow(() -> new RuntimeException("Task not found"));
-        attachment.setTask(existingTask);
+            attachment.setTask(existingTask);
         }
-    
-    if (attachment.getUploadedBy() != null
-        && attachment.getUploadedBy().getId() != null) {
-        TeamMember existingUploadedBy = uploadedByRepository.findById(
-        attachment.getUploadedBy().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-        attachment.setUploadedBy(existingUploadedBy);
-        }
-    
+        
+        if (attachment.getUploadedBy() != null &&
+            attachment.getUploadedBy().getId() != null) {
 
-        return attachmentRepository.save(attachment);
-    }
+            TeamMember existingUploadedBy = uploadedByRepository.findById(
+                attachment.getUploadedBy().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+
+            attachment.setUploadedBy(existingUploadedBy);
+        }
+        
+    // ---------- OneToOne ----------
+    return attachmentRepository.save(attachment);
+}
 
 
     public Attachment update(Long id, Attachment attachmentRequest) {
@@ -68,85 +69,55 @@ public class AttachmentService extends BaseService<Attachment> {
         existing.setFileUrl(attachmentRequest.getFileUrl());
         existing.setUploadDate(attachmentRequest.getUploadDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (attachmentRequest.getTask() != null &&
-        attachmentRequest.getTask().getId() != null) {
+            attachmentRequest.getTask().getId() != null) {
 
-        Task existingTask = taskRepository.findById(
-        attachmentRequest.getTask().getId()
-        ).orElseThrow(() -> new RuntimeException("Task not found"));
+            Task existingTask = taskRepository.findById(
+                attachmentRequest.getTask().getId()
+            ).orElseThrow(() -> new RuntimeException("Task not found"));
 
-        existing.setTask(existingTask);
+            existing.setTask(existingTask);
         } else {
-        existing.setTask(null);
+            existing.setTask(null);
         }
+        
         if (attachmentRequest.getUploadedBy() != null &&
-        attachmentRequest.getUploadedBy().getId() != null) {
+            attachmentRequest.getUploadedBy().getId() != null) {
 
-        TeamMember existingUploadedBy = uploadedByRepository.findById(
-        attachmentRequest.getUploadedBy().getId()
-        ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
+            TeamMember existingUploadedBy = uploadedByRepository.findById(
+                attachmentRequest.getUploadedBy().getId()
+            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
 
-        existing.setUploadedBy(existingUploadedBy);
+            existing.setUploadedBy(existingUploadedBy);
         } else {
-        existing.setUploadedBy(null);
+            existing.setUploadedBy(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return attachmentRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Attachment> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Attachment entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getTask() != null) {
-        entity.setTask(null);
-        }
-    
-
-    
-        if (entity.getUploadedBy() != null) {
-        entity.setUploadedBy(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return attachmentRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Attachment> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Attachment entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getTask() != null) {
+            entity.setTask(null);
+        }
+        
+        if (entity.getUploadedBy() != null) {
+            entity.setUploadedBy(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

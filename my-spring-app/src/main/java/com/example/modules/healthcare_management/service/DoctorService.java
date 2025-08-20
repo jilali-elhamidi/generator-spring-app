@@ -4,51 +4,88 @@ import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Doctor;
 import com.example.modules.healthcare_management.repository.DoctorRepository;
 import com.example.modules.healthcare_management.model.Appointment;
+import com.example.modules.healthcare_management.repository.AppointmentRepository;
 import com.example.modules.healthcare_management.model.Prescription;
+import com.example.modules.healthcare_management.repository.PrescriptionRepository;
 import com.example.modules.healthcare_management.model.Department;
 import com.example.modules.healthcare_management.repository.DepartmentRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class DoctorService extends BaseService<Doctor> {
 
     protected final DoctorRepository doctorRepository;
+    private final AppointmentRepository appointmentsRepository;
+    private final PrescriptionRepository prescriptionsRepository;
     private final DepartmentRepository departmentRepository;
 
-    public DoctorService(DoctorRepository repository,DepartmentRepository departmentRepository)
+    public DoctorService(DoctorRepository repository, AppointmentRepository appointmentsRepository, PrescriptionRepository prescriptionsRepository, DepartmentRepository departmentRepository)
     {
         super(repository);
         this.doctorRepository = repository;
+        this.appointmentsRepository = appointmentsRepository;
+        this.prescriptionsRepository = prescriptionsRepository;
         this.departmentRepository = departmentRepository;
     }
 
     @Override
     public Doctor save(Doctor doctor) {
-
-        if (doctor.getDepartment() != null && doctor.getDepartment().getId() != null) {
-        Department department = departmentRepository.findById(doctor.getDepartment().getId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
-        doctor.setDepartment(department);
-        }
-
+    // ---------- OneToMany ----------
         if (doctor.getAppointments() != null) {
+            List<Appointment> managedAppointments = new ArrayList<>();
             for (Appointment item : doctor.getAppointments()) {
-            item.setDoctor(doctor);
-            }
-        }
+                if (item.getId() != null) {
+                    Appointment existingItem = appointmentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
+                     existingItem.setDoctor(doctor);
+                     managedAppointments.add(existingItem);
+                } else {
+                    item.setDoctor(doctor);
+                    managedAppointments.add(item);
+                }
+            }
+            doctor.setAppointments(managedAppointments);
+        }
+    
         if (doctor.getPrescriptions() != null) {
+            List<Prescription> managedPrescriptions = new ArrayList<>();
             for (Prescription item : doctor.getPrescriptions()) {
-            item.setDoctor(doctor);
-            }
-        }
+                if (item.getId() != null) {
+                    Prescription existingItem = prescriptionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Prescription not found"));
 
-        return doctorRepository.save(doctor);
-    }
+                     existingItem.setDoctor(doctor);
+                     managedPrescriptions.add(existingItem);
+                } else {
+                    item.setDoctor(doctor);
+                    managedPrescriptions.add(item);
+                }
+            }
+            doctor.setPrescriptions(managedPrescriptions);
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (doctor.getDepartment() != null &&
+            doctor.getDepartment().getId() != null) {
+
+            Department existingDepartment = departmentRepository.findById(
+                doctor.getDepartment().getId()
+            ).orElseThrow(() -> new RuntimeException("Department not found"));
+
+            doctor.setDepartment(existingDepartment);
+        }
+        
+    // ---------- OneToOne ----------
+    return doctorRepository.save(doctor);
+}
 
 
     public Doctor update(Long id, Doctor doctorRequest) {
@@ -62,34 +99,89 @@ public class DoctorService extends BaseService<Doctor> {
         existing.setEmail(doctorRequest.getEmail());
         existing.setPhoneNumber(doctorRequest.getPhoneNumber());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+        if (doctorRequest.getDepartment() != null &&
+            doctorRequest.getDepartment().getId() != null) {
 
-        if (doctorRequest.getDepartment() != null && doctorRequest.getDepartment().getId() != null) {
-        Department department = departmentRepository.findById(doctorRequest.getDepartment().getId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
-        existing.setDepartment(department);
+            Department existingDepartment = departmentRepository.findById(
+                doctorRequest.getDepartment().getId()
+            ).orElseThrow(() -> new RuntimeException("Department not found"));
+
+            existing.setDepartment(existingDepartment);
+        } else {
+            existing.setDepartment(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getAppointments().clear();
+
         if (doctorRequest.getAppointments() != null) {
             for (var item : doctorRequest.getAppointments()) {
-            item.setDoctor(existing);
-            existing.getAppointments().add(item);
+                Appointment existingItem;
+                if (item.getId() != null) {
+                    existingItem = appointmentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setDoctor(existing);
+                existing.getAppointments().add(existingItem);
             }
         }
-
+        
         existing.getPrescriptions().clear();
+
         if (doctorRequest.getPrescriptions() != null) {
             for (var item : doctorRequest.getPrescriptions()) {
-            item.setDoctor(existing);
-            existing.getPrescriptions().add(item);
+                Prescription existingItem;
+                if (item.getId() != null) {
+                    existingItem = prescriptionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Prescription not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setDoctor(existing);
+                existing.getPrescriptions().add(existingItem);
             }
         }
+        
+    // ---------- Relations OneToOne ----------
+    return doctorRepository.save(existing);
+}
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Doctor> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
 
-        return doctorRepository.save(existing);
+        Doctor entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getAppointments() != null) {
+            for (var child : entity.getAppointments()) {
+                // retirer la référence inverse
+                child.setDoctor(null);
+            }
+            entity.getAppointments().clear();
+        }
+        
+        if (entity.getPrescriptions() != null) {
+            for (var child : entity.getPrescriptions()) {
+                // retirer la référence inverse
+                child.setDoctor(null);
+            }
+            entity.getPrescriptions().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getDepartment() != null) {
+            entity.setDepartment(null);
+        }
+        
+        repository.delete(entity);
+        return true;
     }
 }
