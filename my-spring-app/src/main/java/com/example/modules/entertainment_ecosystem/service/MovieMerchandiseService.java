@@ -19,7 +19,7 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
     protected final MovieMerchandiseRepository moviemerchandiseRepository;
     private final MovieRepository movieRepository;
 
-    public MovieMerchandiseService(MovieMerchandiseRepository repository,MovieRepository movieRepository)
+    public MovieMerchandiseService(MovieMerchandiseRepository repository, MovieRepository movieRepository)
     {
         super(repository);
         this.moviemerchandiseRepository = repository;
@@ -28,24 +28,23 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
 
     @Override
     public MovieMerchandise save(MovieMerchandise moviemerchandise) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (moviemerchandise.getMovie() != null &&
+            moviemerchandise.getMovie().getId() != null) {
 
+            Movie existingMovie = movieRepository.findById(
+                moviemerchandise.getMovie().getId()
+            ).orElseThrow(() -> new RuntimeException("Movie not found"));
 
-    
-
-
-    
-
-    if (moviemerchandise.getMovie() != null
-        && moviemerchandise.getMovie().getId() != null) {
-        Movie existingMovie = movieRepository.findById(
-        moviemerchandise.getMovie().getId()
-        ).orElseThrow(() -> new RuntimeException("Movie not found"));
-        moviemerchandise.setMovie(existingMovie);
+            moviemerchandise.setMovie(existingMovie);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return moviemerchandiseRepository.save(moviemerchandise);
-    }
+    return moviemerchandiseRepository.save(moviemerchandise);
+}
 
 
     public MovieMerchandise update(Long id, MovieMerchandise moviemerchandiseRequest) {
@@ -56,61 +55,40 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
         existing.setName(moviemerchandiseRequest.getName());
         existing.setPrice(moviemerchandiseRequest.getPrice());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (moviemerchandiseRequest.getMovie() != null &&
-        moviemerchandiseRequest.getMovie().getId() != null) {
+            moviemerchandiseRequest.getMovie().getId() != null) {
 
-        Movie existingMovie = movieRepository.findById(
-        moviemerchandiseRequest.getMovie().getId()
-        ).orElseThrow(() -> new RuntimeException("Movie not found"));
+            Movie existingMovie = movieRepository.findById(
+                moviemerchandiseRequest.getMovie().getId()
+            ).orElseThrow(() -> new RuntimeException("Movie not found"));
 
-        existing.setMovie(existingMovie);
+            existing.setMovie(existingMovie);
         } else {
-        existing.setMovie(null);
+            existing.setMovie(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return moviemerchandiseRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MovieMerchandise> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MovieMerchandise entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getMovie() != null) {
-        entity.setMovie(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return moviemerchandiseRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MovieMerchandise> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MovieMerchandise entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getMovie() != null) {
+            entity.setMovie(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

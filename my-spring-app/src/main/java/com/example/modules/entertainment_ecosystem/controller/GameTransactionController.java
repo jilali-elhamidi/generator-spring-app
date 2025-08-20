@@ -46,37 +46,35 @@ public class GameTransactionController {
 
         GameTransaction entity = gametransactionMapper.toEntity(gametransactionDto);
         GameTransaction saved = gametransactionService.save(entity);
-        URI location = uriBuilder.path("/api/gametransactions/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/gametransactions/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(gametransactionMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<GameTransactionDto> updateGameTransaction(
-                @PathVariable Long id,
-                @RequestBody GameTransactionDto gametransactionDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<GameTransactionDto> updateGameTransaction(
+            @PathVariable Long id,
+            @Valid @RequestBody GameTransactionDto gametransactionDto) {
 
-                // Transformer le DTO en entity pour le service
-                GameTransaction entityToUpdate = gametransactionMapper.toEntity(gametransactionDto);
 
-                // Appel du service update
-                GameTransaction updatedEntity = gametransactionService.update(id, entityToUpdate);
+        GameTransaction entityToUpdate = gametransactionMapper.toEntity(gametransactionDto);
+        GameTransaction updatedEntity = gametransactionService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                GameTransactionDto updatedDto = gametransactionMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(gametransactionMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteGameTransaction(@PathVariable Long id) {
-                    boolean deleted = gametransactionService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGameTransaction(@PathVariable Long id) {
+        boolean deleted = gametransactionService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

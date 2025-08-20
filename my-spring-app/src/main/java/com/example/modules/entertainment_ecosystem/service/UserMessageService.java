@@ -25,7 +25,7 @@ public class UserMessageService extends BaseService<UserMessage> {
     private final UserProfileRepository receiverRepository;
     private final MessageThreadRepository threadRepository;
 
-    public UserMessageService(UserMessageRepository repository,UserProfileRepository senderRepository,UserProfileRepository receiverRepository,MessageThreadRepository threadRepository)
+    public UserMessageService(UserMessageRepository repository, UserProfileRepository senderRepository, UserProfileRepository receiverRepository, MessageThreadRepository threadRepository)
     {
         super(repository);
         this.usermessageRepository = repository;
@@ -36,48 +36,43 @@ public class UserMessageService extends BaseService<UserMessage> {
 
     @Override
     public UserMessage save(UserMessage usermessage) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (usermessage.getSender() != null &&
+            usermessage.getSender().getId() != null) {
 
+            UserProfile existingSender = senderRepository.findById(
+                usermessage.getSender().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    if (usermessage.getSender() != null
-        && usermessage.getSender().getId() != null) {
-        UserProfile existingSender = senderRepository.findById(
-        usermessage.getSender().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        usermessage.setSender(existingSender);
+            usermessage.setSender(existingSender);
         }
-    
-    if (usermessage.getReceiver() != null
-        && usermessage.getReceiver().getId() != null) {
-        UserProfile existingReceiver = receiverRepository.findById(
-        usermessage.getReceiver().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        usermessage.setReceiver(existingReceiver);
-        }
-    
-    if (usermessage.getThread() != null
-        && usermessage.getThread().getId() != null) {
-        MessageThread existingThread = threadRepository.findById(
-        usermessage.getThread().getId()
-        ).orElseThrow(() -> new RuntimeException("MessageThread not found"));
-        usermessage.setThread(existingThread);
-        }
-    
+        
+        if (usermessage.getReceiver() != null &&
+            usermessage.getReceiver().getId() != null) {
 
-        return usermessageRepository.save(usermessage);
-    }
+            UserProfile existingReceiver = receiverRepository.findById(
+                usermessage.getReceiver().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            usermessage.setReceiver(existingReceiver);
+        }
+        
+        if (usermessage.getThread() != null &&
+            usermessage.getThread().getId() != null) {
+
+            MessageThread existingThread = threadRepository.findById(
+                usermessage.getThread().getId()
+            ).orElseThrow(() -> new RuntimeException("MessageThread not found"));
+
+            usermessage.setThread(existingThread);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return usermessageRepository.save(usermessage);
+}
 
 
     public UserMessage update(Long id, UserMessage usermessageRequest) {
@@ -90,111 +85,72 @@ public class UserMessageService extends BaseService<UserMessage> {
         existing.setSentDate(usermessageRequest.getSentDate());
         existing.setIsRead(usermessageRequest.getIsRead());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (usermessageRequest.getSender() != null &&
-        usermessageRequest.getSender().getId() != null) {
+            usermessageRequest.getSender().getId() != null) {
 
-        UserProfile existingSender = senderRepository.findById(
-        usermessageRequest.getSender().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingSender = senderRepository.findById(
+                usermessageRequest.getSender().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setSender(existingSender);
+            existing.setSender(existingSender);
         } else {
-        existing.setSender(null);
+            existing.setSender(null);
         }
+        
         if (usermessageRequest.getReceiver() != null &&
-        usermessageRequest.getReceiver().getId() != null) {
+            usermessageRequest.getReceiver().getId() != null) {
 
-        UserProfile existingReceiver = receiverRepository.findById(
-        usermessageRequest.getReceiver().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingReceiver = receiverRepository.findById(
+                usermessageRequest.getReceiver().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setReceiver(existingReceiver);
+            existing.setReceiver(existingReceiver);
         } else {
-        existing.setReceiver(null);
+            existing.setReceiver(null);
         }
+        
         if (usermessageRequest.getThread() != null &&
-        usermessageRequest.getThread().getId() != null) {
+            usermessageRequest.getThread().getId() != null) {
 
-        MessageThread existingThread = threadRepository.findById(
-        usermessageRequest.getThread().getId()
-        ).orElseThrow(() -> new RuntimeException("MessageThread not found"));
+            MessageThread existingThread = threadRepository.findById(
+                usermessageRequest.getThread().getId()
+            ).orElseThrow(() -> new RuntimeException("MessageThread not found"));
 
-        existing.setThread(existingThread);
+            existing.setThread(existingThread);
         } else {
-        existing.setThread(null);
+            existing.setThread(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-
-        return usermessageRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserMessage> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserMessage entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getSender() != null) {
-        entity.setSender(null);
-        }
-    
-
-    
-        if (entity.getReceiver() != null) {
-        entity.setReceiver(null);
-        }
-    
-
-    
-        if (entity.getThread() != null) {
-        entity.setThread(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return usermessageRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserMessage> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserMessage entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getSender() != null) {
+            entity.setSender(null);
+        }
+        
+        if (entity.getReceiver() != null) {
+            entity.setReceiver(null);
+        }
+        
+        if (entity.getThread() != null) {
+            entity.setThread(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

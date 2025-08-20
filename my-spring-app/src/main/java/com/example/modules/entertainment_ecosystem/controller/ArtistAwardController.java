@@ -46,37 +46,35 @@ public class ArtistAwardController {
 
         ArtistAward entity = artistawardMapper.toEntity(artistawardDto);
         ArtistAward saved = artistawardService.save(entity);
-        URI location = uriBuilder.path("/api/artistawards/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/artistawards/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(artistawardMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ArtistAwardDto> updateArtistAward(
-                @PathVariable Long id,
-                @RequestBody ArtistAwardDto artistawardDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ArtistAwardDto> updateArtistAward(
+            @PathVariable Long id,
+            @Valid @RequestBody ArtistAwardDto artistawardDto) {
 
-                // Transformer le DTO en entity pour le service
-                ArtistAward entityToUpdate = artistawardMapper.toEntity(artistawardDto);
 
-                // Appel du service update
-                ArtistAward updatedEntity = artistawardService.update(id, entityToUpdate);
+        ArtistAward entityToUpdate = artistawardMapper.toEntity(artistawardDto);
+        ArtistAward updatedEntity = artistawardService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ArtistAwardDto updatedDto = artistawardMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(artistawardMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteArtistAward(@PathVariable Long id) {
-                    boolean deleted = artistawardService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteArtistAward(@PathVariable Long id) {
+        boolean deleted = artistawardService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

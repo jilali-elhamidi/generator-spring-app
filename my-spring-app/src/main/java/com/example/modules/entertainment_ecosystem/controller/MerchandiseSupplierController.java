@@ -46,37 +46,35 @@ public class MerchandiseSupplierController {
 
         MerchandiseSupplier entity = merchandisesupplierMapper.toEntity(merchandisesupplierDto);
         MerchandiseSupplier saved = merchandisesupplierService.save(entity);
-        URI location = uriBuilder.path("/api/merchandisesuppliers/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/merchandisesuppliers/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(merchandisesupplierMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MerchandiseSupplierDto> updateMerchandiseSupplier(
-                @PathVariable Long id,
-                @RequestBody MerchandiseSupplierDto merchandisesupplierDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MerchandiseSupplierDto> updateMerchandiseSupplier(
+            @PathVariable Long id,
+            @Valid @RequestBody MerchandiseSupplierDto merchandisesupplierDto) {
 
-                // Transformer le DTO en entity pour le service
-                MerchandiseSupplier entityToUpdate = merchandisesupplierMapper.toEntity(merchandisesupplierDto);
 
-                // Appel du service update
-                MerchandiseSupplier updatedEntity = merchandisesupplierService.update(id, entityToUpdate);
+        MerchandiseSupplier entityToUpdate = merchandisesupplierMapper.toEntity(merchandisesupplierDto);
+        MerchandiseSupplier updatedEntity = merchandisesupplierService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MerchandiseSupplierDto updatedDto = merchandisesupplierMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(merchandisesupplierMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMerchandiseSupplier(@PathVariable Long id) {
-                    boolean deleted = merchandisesupplierService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMerchandiseSupplier(@PathVariable Long id) {
+        boolean deleted = merchandisesupplierService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

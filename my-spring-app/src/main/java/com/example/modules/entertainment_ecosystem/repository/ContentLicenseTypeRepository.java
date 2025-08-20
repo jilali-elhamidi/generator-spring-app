@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ContentLicenseTypeRepository extends BaseRepository<ContentLicenseType, Long> {
+
 }

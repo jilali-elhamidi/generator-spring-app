@@ -46,37 +46,35 @@ public class MerchandiseShippingStatusController {
 
         MerchandiseShippingStatus entity = merchandiseshippingstatusMapper.toEntity(merchandiseshippingstatusDto);
         MerchandiseShippingStatus saved = merchandiseshippingstatusService.save(entity);
-        URI location = uriBuilder.path("/api/merchandiseshippingstatuss/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/merchandiseshippingstatuss/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(merchandiseshippingstatusMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MerchandiseShippingStatusDto> updateMerchandiseShippingStatus(
-                @PathVariable Long id,
-                @RequestBody MerchandiseShippingStatusDto merchandiseshippingstatusDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MerchandiseShippingStatusDto> updateMerchandiseShippingStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody MerchandiseShippingStatusDto merchandiseshippingstatusDto) {
 
-                // Transformer le DTO en entity pour le service
-                MerchandiseShippingStatus entityToUpdate = merchandiseshippingstatusMapper.toEntity(merchandiseshippingstatusDto);
 
-                // Appel du service update
-                MerchandiseShippingStatus updatedEntity = merchandiseshippingstatusService.update(id, entityToUpdate);
+        MerchandiseShippingStatus entityToUpdate = merchandiseshippingstatusMapper.toEntity(merchandiseshippingstatusDto);
+        MerchandiseShippingStatus updatedEntity = merchandiseshippingstatusService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MerchandiseShippingStatusDto updatedDto = merchandiseshippingstatusMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(merchandiseshippingstatusMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMerchandiseShippingStatus(@PathVariable Long id) {
-                    boolean deleted = merchandiseshippingstatusService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMerchandiseShippingStatus(@PathVariable Long id) {
+        boolean deleted = merchandiseshippingstatusService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

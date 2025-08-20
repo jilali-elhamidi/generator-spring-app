@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AdPlacementRepository extends BaseRepository<AdPlacement, Long> {
+
 }

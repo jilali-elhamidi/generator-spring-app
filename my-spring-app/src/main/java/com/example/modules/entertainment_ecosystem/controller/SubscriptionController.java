@@ -46,37 +46,35 @@ public class SubscriptionController {
 
         Subscription entity = subscriptionMapper.toEntity(subscriptionDto);
         Subscription saved = subscriptionService.save(entity);
-        URI location = uriBuilder.path("/api/subscriptions/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/subscriptions/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(subscriptionMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<SubscriptionDto> updateSubscription(
-                @PathVariable Long id,
-                @RequestBody SubscriptionDto subscriptionDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<SubscriptionDto> updateSubscription(
+            @PathVariable Long id,
+            @Valid @RequestBody SubscriptionDto subscriptionDto) {
 
-                // Transformer le DTO en entity pour le service
-                Subscription entityToUpdate = subscriptionMapper.toEntity(subscriptionDto);
 
-                // Appel du service update
-                Subscription updatedEntity = subscriptionService.update(id, entityToUpdate);
+        Subscription entityToUpdate = subscriptionMapper.toEntity(subscriptionDto);
+        Subscription updatedEntity = subscriptionService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                SubscriptionDto updatedDto = subscriptionMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(subscriptionMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteSubscription(@PathVariable Long id) {
-                    boolean deleted = subscriptionService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSubscription(@PathVariable Long id) {
+        boolean deleted = subscriptionService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

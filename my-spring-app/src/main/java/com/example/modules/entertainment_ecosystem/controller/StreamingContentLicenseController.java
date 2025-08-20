@@ -46,37 +46,35 @@ public class StreamingContentLicenseController {
 
         StreamingContentLicense entity = streamingcontentlicenseMapper.toEntity(streamingcontentlicenseDto);
         StreamingContentLicense saved = streamingcontentlicenseService.save(entity);
-        URI location = uriBuilder.path("/api/streamingcontentlicenses/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/streamingcontentlicenses/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(streamingcontentlicenseMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<StreamingContentLicenseDto> updateStreamingContentLicense(
-                @PathVariable Long id,
-                @RequestBody StreamingContentLicenseDto streamingcontentlicenseDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<StreamingContentLicenseDto> updateStreamingContentLicense(
+            @PathVariable Long id,
+            @Valid @RequestBody StreamingContentLicenseDto streamingcontentlicenseDto) {
 
-                // Transformer le DTO en entity pour le service
-                StreamingContentLicense entityToUpdate = streamingcontentlicenseMapper.toEntity(streamingcontentlicenseDto);
 
-                // Appel du service update
-                StreamingContentLicense updatedEntity = streamingcontentlicenseService.update(id, entityToUpdate);
+        StreamingContentLicense entityToUpdate = streamingcontentlicenseMapper.toEntity(streamingcontentlicenseDto);
+        StreamingContentLicense updatedEntity = streamingcontentlicenseService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                StreamingContentLicenseDto updatedDto = streamingcontentlicenseMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(streamingcontentlicenseMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteStreamingContentLicense(@PathVariable Long id) {
-                    boolean deleted = streamingcontentlicenseService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteStreamingContentLicense(@PathVariable Long id) {
+        boolean deleted = streamingcontentlicenseService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

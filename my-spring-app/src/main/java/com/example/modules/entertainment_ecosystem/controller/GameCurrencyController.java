@@ -46,37 +46,35 @@ public class GameCurrencyController {
 
         GameCurrency entity = gamecurrencyMapper.toEntity(gamecurrencyDto);
         GameCurrency saved = gamecurrencyService.save(entity);
-        URI location = uriBuilder.path("/api/gamecurrencys/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/gamecurrencys/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(gamecurrencyMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<GameCurrencyDto> updateGameCurrency(
-                @PathVariable Long id,
-                @RequestBody GameCurrencyDto gamecurrencyDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<GameCurrencyDto> updateGameCurrency(
+            @PathVariable Long id,
+            @Valid @RequestBody GameCurrencyDto gamecurrencyDto) {
 
-                // Transformer le DTO en entity pour le service
-                GameCurrency entityToUpdate = gamecurrencyMapper.toEntity(gamecurrencyDto);
 
-                // Appel du service update
-                GameCurrency updatedEntity = gamecurrencyService.update(id, entityToUpdate);
+        GameCurrency entityToUpdate = gamecurrencyMapper.toEntity(gamecurrencyDto);
+        GameCurrency updatedEntity = gamecurrencyService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                GameCurrencyDto updatedDto = gamecurrencyMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(gamecurrencyMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteGameCurrency(@PathVariable Long id) {
-                    boolean deleted = gamecurrencyService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGameCurrency(@PathVariable Long id) {
+        boolean deleted = gamecurrencyService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

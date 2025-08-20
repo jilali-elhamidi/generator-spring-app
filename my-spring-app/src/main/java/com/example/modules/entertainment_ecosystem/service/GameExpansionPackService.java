@@ -22,7 +22,7 @@ public class GameExpansionPackService extends BaseService<GameExpansionPack> {
     private final VideoGameRepository baseGameRepository;
     private final DigitalPurchaseRepository purchasesRepository;
 
-    public GameExpansionPackService(GameExpansionPackRepository repository,VideoGameRepository baseGameRepository,DigitalPurchaseRepository purchasesRepository)
+    public GameExpansionPackService(GameExpansionPackRepository repository, VideoGameRepository baseGameRepository, DigitalPurchaseRepository purchasesRepository)
     {
         super(repository);
         this.gameexpansionpackRepository = repository;
@@ -32,49 +32,40 @@ public class GameExpansionPackService extends BaseService<GameExpansionPack> {
 
     @Override
     public GameExpansionPack save(GameExpansionPack gameexpansionpack) {
-
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (gameexpansionpack.getPurchases() != null) {
+    // ---------- OneToMany ----------
+        if (gameexpansionpack.getPurchases() != null) {
             List<DigitalPurchase> managedPurchases = new ArrayList<>();
             for (DigitalPurchase item : gameexpansionpack.getPurchases()) {
-            if (item.getId() != null) {
-            DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setExpansionPack(gameexpansionpack);
-            managedPurchases.add(existingItem);
-            } else {
-            item.setExpansionPack(gameexpansionpack);
-            managedPurchases.add(item);
-            }
+                if (item.getId() != null) {
+                    DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+
+                     existingItem.setExpansionPack(gameexpansionpack);
+                     managedPurchases.add(existingItem);
+                } else {
+                    item.setExpansionPack(gameexpansionpack);
+                    managedPurchases.add(item);
+                }
             }
             gameexpansionpack.setPurchases(managedPurchases);
-            }
-        
-    
-
-
-    
-
-    
-
-    if (gameexpansionpack.getBaseGame() != null
-        && gameexpansionpack.getBaseGame().getId() != null) {
-        VideoGame existingBaseGame = baseGameRepository.findById(
-        gameexpansionpack.getBaseGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        gameexpansionpack.setBaseGame(existingBaseGame);
         }
     
-    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (gameexpansionpack.getBaseGame() != null &&
+            gameexpansionpack.getBaseGame().getId() != null) {
 
-        return gameexpansionpackRepository.save(gameexpansionpack);
-    }
+            VideoGame existingBaseGame = baseGameRepository.findById(
+                gameexpansionpack.getBaseGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+            gameexpansionpack.setBaseGame(existingBaseGame);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return gameexpansionpackRepository.save(gameexpansionpack);
+}
 
 
     public GameExpansionPack update(Long id, GameExpansionPack gameexpansionpackRequest) {
@@ -86,100 +77,66 @@ public class GameExpansionPackService extends BaseService<GameExpansionPack> {
         existing.setReleaseDate(gameexpansionpackRequest.getReleaseDate());
         existing.setPrice(gameexpansionpackRequest.getPrice());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (gameexpansionpackRequest.getBaseGame() != null &&
-        gameexpansionpackRequest.getBaseGame().getId() != null) {
+            gameexpansionpackRequest.getBaseGame().getId() != null) {
 
-        VideoGame existingBaseGame = baseGameRepository.findById(
-        gameexpansionpackRequest.getBaseGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            VideoGame existingBaseGame = baseGameRepository.findById(
+                gameexpansionpackRequest.getBaseGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-        existing.setBaseGame(existingBaseGame);
+            existing.setBaseGame(existingBaseGame);
         } else {
-        existing.setBaseGame(null);
+            existing.setBaseGame(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getPurchases().clear();
 
         if (gameexpansionpackRequest.getPurchases() != null) {
-        for (var item : gameexpansionpackRequest.getPurchases()) {
-        DigitalPurchase existingItem;
-        if (item.getId() != null) {
-        existingItem = purchasesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : gameexpansionpackRequest.getPurchases()) {
+                DigitalPurchase existingItem;
+                if (item.getId() != null) {
+                    existingItem = purchasesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setExpansionPack(existing);
+                existing.getPurchases().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setExpansionPack(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getPurchases().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-
-        return gameexpansionpackRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GameExpansionPack> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GameExpansionPack entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-        if (entity.getPurchases() != null) {
-        for (var child : entity.getPurchases()) {
         
-            child.setExpansionPack(null); // retirer la référence inverse
-        
-        }
-        entity.getPurchases().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getBaseGame() != null) {
-        entity.setBaseGame(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return gameexpansionpackRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GameExpansionPack> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GameExpansionPack entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getPurchases() != null) {
+            for (var child : entity.getPurchases()) {
+                
+                child.setExpansionPack(null); // retirer la référence inverse
+                
+            }
+            entity.getPurchases().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getBaseGame() != null) {
+            entity.setBaseGame(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

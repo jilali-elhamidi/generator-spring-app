@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StreamingPlatformRepository extends BaseRepository<StreamingPlatform, Long> {
+
 }

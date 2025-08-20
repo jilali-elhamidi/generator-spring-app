@@ -25,7 +25,7 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
     private final GameReviewRepository reviewRepository;
     private final VideoGameRepository gameRepository;
 
-    public GameReviewDownvoteService(GameReviewDownvoteRepository repository,UserProfileRepository userRepository,GameReviewRepository reviewRepository,VideoGameRepository gameRepository)
+    public GameReviewDownvoteService(GameReviewDownvoteRepository repository, UserProfileRepository userRepository, GameReviewRepository reviewRepository, VideoGameRepository gameRepository)
     {
         super(repository);
         this.gamereviewdownvoteRepository = repository;
@@ -36,48 +36,43 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
 
     @Override
     public GameReviewDownvote save(GameReviewDownvote gamereviewdownvote) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (gamereviewdownvote.getUser() != null &&
+            gamereviewdownvote.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                gamereviewdownvote.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    if (gamereviewdownvote.getUser() != null
-        && gamereviewdownvote.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        gamereviewdownvote.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        gamereviewdownvote.setUser(existingUser);
+            gamereviewdownvote.setUser(existingUser);
         }
-    
-    if (gamereviewdownvote.getReview() != null
-        && gamereviewdownvote.getReview().getId() != null) {
-        GameReview existingReview = reviewRepository.findById(
-        gamereviewdownvote.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("GameReview not found"));
-        gamereviewdownvote.setReview(existingReview);
-        }
-    
-    if (gamereviewdownvote.getGame() != null
-        && gamereviewdownvote.getGame().getId() != null) {
-        VideoGame existingGame = gameRepository.findById(
-        gamereviewdownvote.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        gamereviewdownvote.setGame(existingGame);
-        }
-    
+        
+        if (gamereviewdownvote.getReview() != null &&
+            gamereviewdownvote.getReview().getId() != null) {
 
-        return gamereviewdownvoteRepository.save(gamereviewdownvote);
-    }
+            GameReview existingReview = reviewRepository.findById(
+                gamereviewdownvote.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("GameReview not found"));
+
+            gamereviewdownvote.setReview(existingReview);
+        }
+        
+        if (gamereviewdownvote.getGame() != null &&
+            gamereviewdownvote.getGame().getId() != null) {
+
+            VideoGame existingGame = gameRepository.findById(
+                gamereviewdownvote.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+            gamereviewdownvote.setGame(existingGame);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return gamereviewdownvoteRepository.save(gamereviewdownvote);
+}
 
 
     public GameReviewDownvote update(Long id, GameReviewDownvote gamereviewdownvoteRequest) {
@@ -87,111 +82,72 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
     // Copier les champs simples
         existing.setDownvoteDate(gamereviewdownvoteRequest.getDownvoteDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (gamereviewdownvoteRequest.getUser() != null &&
-        gamereviewdownvoteRequest.getUser().getId() != null) {
+            gamereviewdownvoteRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        gamereviewdownvoteRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                gamereviewdownvoteRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (gamereviewdownvoteRequest.getReview() != null &&
-        gamereviewdownvoteRequest.getReview().getId() != null) {
+            gamereviewdownvoteRequest.getReview().getId() != null) {
 
-        GameReview existingReview = reviewRepository.findById(
-        gamereviewdownvoteRequest.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("GameReview not found"));
+            GameReview existingReview = reviewRepository.findById(
+                gamereviewdownvoteRequest.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("GameReview not found"));
 
-        existing.setReview(existingReview);
+            existing.setReview(existingReview);
         } else {
-        existing.setReview(null);
+            existing.setReview(null);
         }
+        
         if (gamereviewdownvoteRequest.getGame() != null &&
-        gamereviewdownvoteRequest.getGame().getId() != null) {
+            gamereviewdownvoteRequest.getGame().getId() != null) {
 
-        VideoGame existingGame = gameRepository.findById(
-        gamereviewdownvoteRequest.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            VideoGame existingGame = gameRepository.findById(
+                gamereviewdownvoteRequest.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-        existing.setGame(existingGame);
+            existing.setGame(existingGame);
         } else {
-        existing.setGame(null);
+            existing.setGame(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-
-        return gamereviewdownvoteRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GameReviewDownvote> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GameReviewDownvote entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getReview() != null) {
-        entity.setReview(null);
-        }
-    
-
-    
-        if (entity.getGame() != null) {
-        entity.setGame(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return gamereviewdownvoteRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GameReviewDownvote> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GameReviewDownvote entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getReview() != null) {
+            entity.setReview(null);
+        }
+        
+        if (entity.getGame() != null) {
+            entity.setGame(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

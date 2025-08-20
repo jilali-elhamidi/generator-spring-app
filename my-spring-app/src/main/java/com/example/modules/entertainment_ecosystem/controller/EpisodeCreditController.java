@@ -46,37 +46,35 @@ public class EpisodeCreditController {
 
         EpisodeCredit entity = episodecreditMapper.toEntity(episodecreditDto);
         EpisodeCredit saved = episodecreditService.save(entity);
-        URI location = uriBuilder.path("/api/episodecredits/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/episodecredits/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(episodecreditMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<EpisodeCreditDto> updateEpisodeCredit(
-                @PathVariable Long id,
-                @RequestBody EpisodeCreditDto episodecreditDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<EpisodeCreditDto> updateEpisodeCredit(
+            @PathVariable Long id,
+            @Valid @RequestBody EpisodeCreditDto episodecreditDto) {
 
-                // Transformer le DTO en entity pour le service
-                EpisodeCredit entityToUpdate = episodecreditMapper.toEntity(episodecreditDto);
 
-                // Appel du service update
-                EpisodeCredit updatedEntity = episodecreditService.update(id, entityToUpdate);
+        EpisodeCredit entityToUpdate = episodecreditMapper.toEntity(episodecreditDto);
+        EpisodeCredit updatedEntity = episodecreditService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                EpisodeCreditDto updatedDto = episodecreditMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(episodecreditMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteEpisodeCredit(@PathVariable Long id) {
-                    boolean deleted = episodecreditService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEpisodeCredit(@PathVariable Long id) {
+        boolean deleted = episodecreditService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -46,37 +46,35 @@ public class EmployeeRoleController {
 
         EmployeeRole entity = employeeroleMapper.toEntity(employeeroleDto);
         EmployeeRole saved = employeeroleService.save(entity);
-        URI location = uriBuilder.path("/api/employeeroles/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/employeeroles/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(employeeroleMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<EmployeeRoleDto> updateEmployeeRole(
-                @PathVariable Long id,
-                @RequestBody EmployeeRoleDto employeeroleDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<EmployeeRoleDto> updateEmployeeRole(
+            @PathVariable Long id,
+            @Valid @RequestBody EmployeeRoleDto employeeroleDto) {
 
-                // Transformer le DTO en entity pour le service
-                EmployeeRole entityToUpdate = employeeroleMapper.toEntity(employeeroleDto);
 
-                // Appel du service update
-                EmployeeRole updatedEntity = employeeroleService.update(id, entityToUpdate);
+        EmployeeRole entityToUpdate = employeeroleMapper.toEntity(employeeroleDto);
+        EmployeeRole updatedEntity = employeeroleService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                EmployeeRoleDto updatedDto = employeeroleMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(employeeroleMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteEmployeeRole(@PathVariable Long id) {
-                    boolean deleted = employeeroleService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmployeeRole(@PathVariable Long id) {
+        boolean deleted = employeeroleService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

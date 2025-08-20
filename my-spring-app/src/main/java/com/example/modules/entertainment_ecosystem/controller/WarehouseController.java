@@ -46,37 +46,35 @@ public class WarehouseController {
 
         Warehouse entity = warehouseMapper.toEntity(warehouseDto);
         Warehouse saved = warehouseService.save(entity);
-        URI location = uriBuilder.path("/api/warehouses/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/warehouses/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(warehouseMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<WarehouseDto> updateWarehouse(
-                @PathVariable Long id,
-                @RequestBody WarehouseDto warehouseDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<WarehouseDto> updateWarehouse(
+            @PathVariable Long id,
+            @Valid @RequestBody WarehouseDto warehouseDto) {
 
-                // Transformer le DTO en entity pour le service
-                Warehouse entityToUpdate = warehouseMapper.toEntity(warehouseDto);
 
-                // Appel du service update
-                Warehouse updatedEntity = warehouseService.update(id, entityToUpdate);
+        Warehouse entityToUpdate = warehouseMapper.toEntity(warehouseDto);
+        Warehouse updatedEntity = warehouseService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                WarehouseDto updatedDto = warehouseMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(warehouseMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteWarehouse(@PathVariable Long id) {
-                    boolean deleted = warehouseService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteWarehouse(@PathVariable Long id) {
+        boolean deleted = warehouseService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

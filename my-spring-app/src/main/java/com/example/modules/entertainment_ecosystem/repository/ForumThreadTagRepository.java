@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ForumThreadTagRepository extends BaseRepository<ForumThreadTag, Long> {
+
 }

@@ -19,7 +19,7 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
     protected final ArtistAwardRepository artistawardRepository;
     private final ArtistRepository artistRepository;
 
-    public ArtistAwardService(ArtistAwardRepository repository,ArtistRepository artistRepository)
+    public ArtistAwardService(ArtistAwardRepository repository, ArtistRepository artistRepository)
     {
         super(repository);
         this.artistawardRepository = repository;
@@ -28,24 +28,23 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
 
     @Override
     public ArtistAward save(ArtistAward artistaward) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (artistaward.getArtist() != null &&
+            artistaward.getArtist().getId() != null) {
 
+            Artist existingArtist = artistRepository.findById(
+                artistaward.getArtist().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
 
-    
-
-
-    
-
-    if (artistaward.getArtist() != null
-        && artistaward.getArtist().getId() != null) {
-        Artist existingArtist = artistRepository.findById(
-        artistaward.getArtist().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
-        artistaward.setArtist(existingArtist);
+            artistaward.setArtist(existingArtist);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return artistawardRepository.save(artistaward);
-    }
+    return artistawardRepository.save(artistaward);
+}
 
 
     public ArtistAward update(Long id, ArtistAward artistawardRequest) {
@@ -56,61 +55,40 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
         existing.setName(artistawardRequest.getName());
         existing.setYear(artistawardRequest.getYear());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (artistawardRequest.getArtist() != null &&
-        artistawardRequest.getArtist().getId() != null) {
+            artistawardRequest.getArtist().getId() != null) {
 
-        Artist existingArtist = artistRepository.findById(
-        artistawardRequest.getArtist().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+            Artist existingArtist = artistRepository.findById(
+                artistawardRequest.getArtist().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
 
-        existing.setArtist(existingArtist);
+            existing.setArtist(existingArtist);
         } else {
-        existing.setArtist(null);
+            existing.setArtist(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return artistawardRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ArtistAward> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ArtistAward entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getArtist() != null) {
-        entity.setArtist(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return artistawardRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ArtistAward> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ArtistAward entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getArtist() != null) {
+            entity.setArtist(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

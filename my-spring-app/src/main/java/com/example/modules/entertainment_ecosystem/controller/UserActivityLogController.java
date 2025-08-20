@@ -46,37 +46,35 @@ public class UserActivityLogController {
 
         UserActivityLog entity = useractivitylogMapper.toEntity(useractivitylogDto);
         UserActivityLog saved = useractivitylogService.save(entity);
-        URI location = uriBuilder.path("/api/useractivitylogs/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/useractivitylogs/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(useractivitylogMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserActivityLogDto> updateUserActivityLog(
-                @PathVariable Long id,
-                @RequestBody UserActivityLogDto useractivitylogDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserActivityLogDto> updateUserActivityLog(
+            @PathVariable Long id,
+            @Valid @RequestBody UserActivityLogDto useractivitylogDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserActivityLog entityToUpdate = useractivitylogMapper.toEntity(useractivitylogDto);
 
-                // Appel du service update
-                UserActivityLog updatedEntity = useractivitylogService.update(id, entityToUpdate);
+        UserActivityLog entityToUpdate = useractivitylogMapper.toEntity(useractivitylogDto);
+        UserActivityLog updatedEntity = useractivitylogService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserActivityLogDto updatedDto = useractivitylogMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(useractivitylogMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserActivityLog(@PathVariable Long id) {
-                    boolean deleted = useractivitylogService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserActivityLog(@PathVariable Long id) {
+        boolean deleted = useractivitylogService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -19,7 +19,7 @@ public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
     protected final TVShowMerchandiseRepository tvshowmerchandiseRepository;
     private final TVShowRepository tvShowRepository;
 
-    public TVShowMerchandiseService(TVShowMerchandiseRepository repository,TVShowRepository tvShowRepository)
+    public TVShowMerchandiseService(TVShowMerchandiseRepository repository, TVShowRepository tvShowRepository)
     {
         super(repository);
         this.tvshowmerchandiseRepository = repository;
@@ -28,24 +28,23 @@ public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
 
     @Override
     public TVShowMerchandise save(TVShowMerchandise tvshowmerchandise) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (tvshowmerchandise.getTvShow() != null &&
+            tvshowmerchandise.getTvShow().getId() != null) {
 
+            TVShow existingTvShow = tvShowRepository.findById(
+                tvshowmerchandise.getTvShow().getId()
+            ).orElseThrow(() -> new RuntimeException("TVShow not found"));
 
-    
-
-
-    
-
-    if (tvshowmerchandise.getTvShow() != null
-        && tvshowmerchandise.getTvShow().getId() != null) {
-        TVShow existingTvShow = tvShowRepository.findById(
-        tvshowmerchandise.getTvShow().getId()
-        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
-        tvshowmerchandise.setTvShow(existingTvShow);
+            tvshowmerchandise.setTvShow(existingTvShow);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return tvshowmerchandiseRepository.save(tvshowmerchandise);
-    }
+    return tvshowmerchandiseRepository.save(tvshowmerchandise);
+}
 
 
     public TVShowMerchandise update(Long id, TVShowMerchandise tvshowmerchandiseRequest) {
@@ -56,61 +55,40 @@ public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
         existing.setName(tvshowmerchandiseRequest.getName());
         existing.setPrice(tvshowmerchandiseRequest.getPrice());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (tvshowmerchandiseRequest.getTvShow() != null &&
-        tvshowmerchandiseRequest.getTvShow().getId() != null) {
+            tvshowmerchandiseRequest.getTvShow().getId() != null) {
 
-        TVShow existingTvShow = tvShowRepository.findById(
-        tvshowmerchandiseRequest.getTvShow().getId()
-        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
+            TVShow existingTvShow = tvShowRepository.findById(
+                tvshowmerchandiseRequest.getTvShow().getId()
+            ).orElseThrow(() -> new RuntimeException("TVShow not found"));
 
-        existing.setTvShow(existingTvShow);
+            existing.setTvShow(existingTvShow);
         } else {
-        existing.setTvShow(null);
+            existing.setTvShow(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return tvshowmerchandiseRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<TVShowMerchandise> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-TVShowMerchandise entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getTvShow() != null) {
-        entity.setTvShow(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return tvshowmerchandiseRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<TVShowMerchandise> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        TVShowMerchandise entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getTvShow() != null) {
+            entity.setTvShow(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

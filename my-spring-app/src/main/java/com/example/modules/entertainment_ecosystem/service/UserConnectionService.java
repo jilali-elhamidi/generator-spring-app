@@ -25,7 +25,7 @@ public class UserConnectionService extends BaseService<UserConnection> {
     private final UserProfileRepository user2Repository;
     private final ConnectionTypeRepository typeRepository;
 
-    public UserConnectionService(UserConnectionRepository repository,UserProfileRepository user1Repository,UserProfileRepository user2Repository,ConnectionTypeRepository typeRepository)
+    public UserConnectionService(UserConnectionRepository repository, UserProfileRepository user1Repository, UserProfileRepository user2Repository, ConnectionTypeRepository typeRepository)
     {
         super(repository);
         this.userconnectionRepository = repository;
@@ -36,48 +36,43 @@ public class UserConnectionService extends BaseService<UserConnection> {
 
     @Override
     public UserConnection save(UserConnection userconnection) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (userconnection.getUser1() != null &&
+            userconnection.getUser1().getId() != null) {
 
+            UserProfile existingUser1 = user1Repository.findById(
+                userconnection.getUser1().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    if (userconnection.getUser1() != null
-        && userconnection.getUser1().getId() != null) {
-        UserProfile existingUser1 = user1Repository.findById(
-        userconnection.getUser1().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userconnection.setUser1(existingUser1);
+            userconnection.setUser1(existingUser1);
         }
-    
-    if (userconnection.getUser2() != null
-        && userconnection.getUser2().getId() != null) {
-        UserProfile existingUser2 = user2Repository.findById(
-        userconnection.getUser2().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userconnection.setUser2(existingUser2);
-        }
-    
-    if (userconnection.getType() != null
-        && userconnection.getType().getId() != null) {
-        ConnectionType existingType = typeRepository.findById(
-        userconnection.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("ConnectionType not found"));
-        userconnection.setType(existingType);
-        }
-    
+        
+        if (userconnection.getUser2() != null &&
+            userconnection.getUser2().getId() != null) {
 
-        return userconnectionRepository.save(userconnection);
-    }
+            UserProfile existingUser2 = user2Repository.findById(
+                userconnection.getUser2().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            userconnection.setUser2(existingUser2);
+        }
+        
+        if (userconnection.getType() != null &&
+            userconnection.getType().getId() != null) {
+
+            ConnectionType existingType = typeRepository.findById(
+                userconnection.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("ConnectionType not found"));
+
+            userconnection.setType(existingType);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return userconnectionRepository.save(userconnection);
+}
 
 
     public UserConnection update(Long id, UserConnection userconnectionRequest) {
@@ -87,111 +82,72 @@ public class UserConnectionService extends BaseService<UserConnection> {
     // Copier les champs simples
         existing.setConnectionDate(userconnectionRequest.getConnectionDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (userconnectionRequest.getUser1() != null &&
-        userconnectionRequest.getUser1().getId() != null) {
+            userconnectionRequest.getUser1().getId() != null) {
 
-        UserProfile existingUser1 = user1Repository.findById(
-        userconnectionRequest.getUser1().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser1 = user1Repository.findById(
+                userconnectionRequest.getUser1().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser1(existingUser1);
+            existing.setUser1(existingUser1);
         } else {
-        existing.setUser1(null);
+            existing.setUser1(null);
         }
+        
         if (userconnectionRequest.getUser2() != null &&
-        userconnectionRequest.getUser2().getId() != null) {
+            userconnectionRequest.getUser2().getId() != null) {
 
-        UserProfile existingUser2 = user2Repository.findById(
-        userconnectionRequest.getUser2().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser2 = user2Repository.findById(
+                userconnectionRequest.getUser2().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser2(existingUser2);
+            existing.setUser2(existingUser2);
         } else {
-        existing.setUser2(null);
+            existing.setUser2(null);
         }
+        
         if (userconnectionRequest.getType() != null &&
-        userconnectionRequest.getType().getId() != null) {
+            userconnectionRequest.getType().getId() != null) {
 
-        ConnectionType existingType = typeRepository.findById(
-        userconnectionRequest.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("ConnectionType not found"));
+            ConnectionType existingType = typeRepository.findById(
+                userconnectionRequest.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("ConnectionType not found"));
 
-        existing.setType(existingType);
+            existing.setType(existingType);
         } else {
-        existing.setType(null);
+            existing.setType(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-
-        return userconnectionRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserConnection> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserConnection entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser1() != null) {
-        entity.setUser1(null);
-        }
-    
-
-    
-        if (entity.getUser2() != null) {
-        entity.setUser2(null);
-        }
-    
-
-    
-        if (entity.getType() != null) {
-        entity.setType(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return userconnectionRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserConnection> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserConnection entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser1() != null) {
+            entity.setUser1(null);
+        }
+        
+        if (entity.getUser2() != null) {
+            entity.setUser2(null);
+        }
+        
+        if (entity.getType() != null) {
+            entity.setType(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

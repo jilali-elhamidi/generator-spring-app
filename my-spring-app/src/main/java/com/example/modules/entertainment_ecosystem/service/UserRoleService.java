@@ -19,7 +19,7 @@ public class UserRoleService extends BaseService<UserRole> {
     protected final UserRoleRepository userroleRepository;
     private final UserProfileRepository usersRepository;
 
-    public UserRoleService(UserRoleRepository repository,UserProfileRepository usersRepository)
+    public UserRoleService(UserRoleRepository repository, UserProfileRepository usersRepository)
     {
         super(repository);
         this.userroleRepository = repository;
@@ -28,31 +28,27 @@ public class UserRoleService extends BaseService<UserRole> {
 
     @Override
     public UserRole save(UserRole userrole) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (userrole.getUsers() != null &&
+            !userrole.getUsers().isEmpty()) {
 
+            List<UserProfile> attachedUsers = userrole.getUsers().stream()
+            .map(item -> usersRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+            .toList();
 
-    
+            userrole.setUsers(attachedUsers);
 
-
-    
-        if (userrole.getUsers() != null
-        && !userrole.getUsers().isEmpty()) {
-
-        List<UserProfile> attachedUsers = userrole.getUsers().stream()
-        .map(item -> usersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-        .toList();
-
-        userrole.setUsers(attachedUsers);
-
-        // côté propriétaire (UserProfile → UserRole)
-        attachedUsers.forEach(it -> it.getUserRoles().add(userrole));
+            // côté propriétaire (UserProfile → UserRole)
+            attachedUsers.forEach(it -> it.getUserRoles().add(userrole));
         }
-    
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-    
-
-        return userroleRepository.save(userrole);
-    }
+    return userroleRepository.save(userrole);
+}
 
 
     public UserRole update(Long id, UserRole userroleRequest) {
@@ -62,72 +58,51 @@ public class UserRoleService extends BaseService<UserRole> {
     // Copier les champs simples
         existing.setName(userroleRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (userroleRequest.getUsers() != null) {
-        existing.getUsers().clear();
+            existing.getUsers().clear();
 
-        List<UserProfile> usersList = userroleRequest.getUsers().stream()
-        .map(item -> usersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-        .collect(Collectors.toList());
+            List<UserProfile> usersList = userroleRequest.getUsers().stream()
+                .map(item -> usersRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+                .collect(Collectors.toList());
 
-        existing.getUsers().addAll(usersList);
+            existing.getUsers().addAll(usersList);
 
-        // Mettre à jour le côté inverse
-        usersList.forEach(it -> {
-        if (!it.getUserRoles().contains(existing)) {
-        it.getUserRoles().add(existing);
+            // Mettre à jour le côté inverse
+            usersList.forEach(it -> {
+                if (!it.getUserRoles().contains(existing)) {
+                    it.getUserRoles().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return userroleRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserRole> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserRole entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getUsers() != null) {
-        for (UserProfile item : new ArrayList<>(entity.getUsers())) {
         
-            item.getUserRoles().remove(entity); // retire côté inverse
-        
-        }
-        entity.getUsers().clear(); // puis vide côté courant
-        }
-    
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return userroleRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserRole> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserRole entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getUsers() != null) {
+            for (UserProfile item : new ArrayList<>(entity.getUsers())) {
+                
+                item.getUserRoles().remove(entity); // retire côté inverse
+                
+            }
+            entity.getUsers().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

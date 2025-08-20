@@ -22,7 +22,7 @@ public class MusicVideoService extends BaseService<MusicVideo> {
     private final MusicTrackRepository musicTrackRepository;
     private final ArtistRepository directorRepository;
 
-    public MusicVideoService(MusicVideoRepository repository,MusicTrackRepository musicTrackRepository,ArtistRepository directorRepository)
+    public MusicVideoService(MusicVideoRepository repository, MusicTrackRepository musicTrackRepository, ArtistRepository directorRepository)
     {
         super(repository);
         this.musicvideoRepository = repository;
@@ -32,36 +32,33 @@ public class MusicVideoService extends BaseService<MusicVideo> {
 
     @Override
     public MusicVideo save(MusicVideo musicvideo) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (musicvideo.getMusicTrack() != null &&
+            musicvideo.getMusicTrack().getId() != null) {
 
+            MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                musicvideo.getMusicTrack().getId()
+            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (musicvideo.getMusicTrack() != null
-        && musicvideo.getMusicTrack().getId() != null) {
-        MusicTrack existingMusicTrack = musicTrackRepository.findById(
-        musicvideo.getMusicTrack().getId()
-        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        musicvideo.setMusicTrack(existingMusicTrack);
+            musicvideo.setMusicTrack(existingMusicTrack);
         }
-    
-    if (musicvideo.getDirector() != null
-        && musicvideo.getDirector().getId() != null) {
-        Artist existingDirector = directorRepository.findById(
-        musicvideo.getDirector().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
-        musicvideo.setDirector(existingDirector);
-        }
-    
+        
+        if (musicvideo.getDirector() != null &&
+            musicvideo.getDirector().getId() != null) {
 
-        return musicvideoRepository.save(musicvideo);
-    }
+            Artist existingDirector = directorRepository.findById(
+                musicvideo.getDirector().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+            musicvideo.setDirector(existingDirector);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return musicvideoRepository.save(musicvideo);
+}
 
 
     public MusicVideo update(Long id, MusicVideo musicvideoRequest) {
@@ -73,86 +70,56 @@ public class MusicVideoService extends BaseService<MusicVideo> {
         existing.setReleaseDate(musicvideoRequest.getReleaseDate());
         existing.setDurationSeconds(musicvideoRequest.getDurationSeconds());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (musicvideoRequest.getMusicTrack() != null &&
-        musicvideoRequest.getMusicTrack().getId() != null) {
+            musicvideoRequest.getMusicTrack().getId() != null) {
 
-        MusicTrack existingMusicTrack = musicTrackRepository.findById(
-        musicvideoRequest.getMusicTrack().getId()
-        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+            MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                musicvideoRequest.getMusicTrack().getId()
+            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
 
-        existing.setMusicTrack(existingMusicTrack);
+            existing.setMusicTrack(existingMusicTrack);
         } else {
-        existing.setMusicTrack(null);
+            existing.setMusicTrack(null);
         }
+        
         if (musicvideoRequest.getDirector() != null &&
-        musicvideoRequest.getDirector().getId() != null) {
+            musicvideoRequest.getDirector().getId() != null) {
 
-        Artist existingDirector = directorRepository.findById(
-        musicvideoRequest.getDirector().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+            Artist existingDirector = directorRepository.findById(
+                musicvideoRequest.getDirector().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
 
-        existing.setDirector(existingDirector);
+            existing.setDirector(existingDirector);
         } else {
-        existing.setDirector(null);
+            existing.setDirector(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return musicvideoRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MusicVideo> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MusicVideo entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getMusicTrack() != null) {
-        entity.setMusicTrack(null);
-        }
-    
-
-    
-        if (entity.getDirector() != null) {
-        entity.setDirector(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return musicvideoRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MusicVideo> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MusicVideo entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getMusicTrack() != null) {
+            entity.setMusicTrack(null);
+        }
+        
+        if (entity.getDirector() != null) {
+            entity.setDirector(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

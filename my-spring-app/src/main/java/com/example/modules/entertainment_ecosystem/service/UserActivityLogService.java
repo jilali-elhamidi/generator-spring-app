@@ -19,7 +19,7 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
     protected final UserActivityLogRepository useractivitylogRepository;
     private final UserProfileRepository userRepository;
 
-    public UserActivityLogService(UserActivityLogRepository repository,UserProfileRepository userRepository)
+    public UserActivityLogService(UserActivityLogRepository repository, UserProfileRepository userRepository)
     {
         super(repository);
         this.useractivitylogRepository = repository;
@@ -28,24 +28,23 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
 
     @Override
     public UserActivityLog save(UserActivityLog useractivitylog) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (useractivitylog.getUser() != null &&
+            useractivitylog.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                useractivitylog.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-
-    
-
-    if (useractivitylog.getUser() != null
-        && useractivitylog.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        useractivitylog.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        useractivitylog.setUser(existingUser);
+            useractivitylog.setUser(existingUser);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return useractivitylogRepository.save(useractivitylog);
-    }
+    return useractivitylogRepository.save(useractivitylog);
+}
 
 
     public UserActivityLog update(Long id, UserActivityLog useractivitylogRequest) {
@@ -57,61 +56,40 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
         existing.setActivityDate(useractivitylogRequest.getActivityDate());
         existing.setDetails(useractivitylogRequest.getDetails());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (useractivitylogRequest.getUser() != null &&
-        useractivitylogRequest.getUser().getId() != null) {
+            useractivitylogRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        useractivitylogRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                useractivitylogRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return useractivitylogRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserActivityLog> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserActivityLog entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return useractivitylogRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserActivityLog> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserActivityLog entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

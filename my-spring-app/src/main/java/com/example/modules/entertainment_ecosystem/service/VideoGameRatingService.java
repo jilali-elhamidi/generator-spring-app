@@ -19,7 +19,7 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
     protected final VideoGameRatingRepository videogameratingRepository;
     private final VideoGameRepository gameRepository;
 
-    public VideoGameRatingService(VideoGameRatingRepository repository,VideoGameRepository gameRepository)
+    public VideoGameRatingService(VideoGameRatingRepository repository, VideoGameRepository gameRepository)
     {
         super(repository);
         this.videogameratingRepository = repository;
@@ -28,24 +28,23 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
 
     @Override
     public VideoGameRating save(VideoGameRating videogamerating) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (videogamerating.getGame() != null &&
+            videogamerating.getGame().getId() != null) {
 
+            VideoGame existingGame = gameRepository.findById(
+                videogamerating.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-    
-
-
-    
-
-    if (videogamerating.getGame() != null
-        && videogamerating.getGame().getId() != null) {
-        VideoGame existingGame = gameRepository.findById(
-        videogamerating.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        videogamerating.setGame(existingGame);
+            videogamerating.setGame(existingGame);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return videogameratingRepository.save(videogamerating);
-    }
+    return videogameratingRepository.save(videogamerating);
+}
 
 
     public VideoGameRating update(Long id, VideoGameRating videogameratingRequest) {
@@ -56,61 +55,40 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
         existing.setRatingSystem(videogameratingRequest.getRatingSystem());
         existing.setRating(videogameratingRequest.getRating());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (videogameratingRequest.getGame() != null &&
-        videogameratingRequest.getGame().getId() != null) {
+            videogameratingRequest.getGame().getId() != null) {
 
-        VideoGame existingGame = gameRepository.findById(
-        videogameratingRequest.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            VideoGame existingGame = gameRepository.findById(
+                videogameratingRequest.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-        existing.setGame(existingGame);
+            existing.setGame(existingGame);
         } else {
-        existing.setGame(null);
+            existing.setGame(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return videogameratingRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<VideoGameRating> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-VideoGameRating entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getGame() != null) {
-        entity.setGame(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return videogameratingRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<VideoGameRating> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        VideoGameRating entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getGame() != null) {
+            entity.setGame(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

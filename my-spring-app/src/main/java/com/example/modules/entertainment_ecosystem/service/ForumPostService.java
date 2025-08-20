@@ -31,7 +31,7 @@ public class ForumPostService extends BaseService<ForumPost> {
     private final ForumPostRepository parentPostRepository;
     private final ReportedContentRepository reportedContentRepository;
 
-    public ForumPostService(ForumPostRepository repository,UserProfileRepository authorRepository,ForumThreadRepository threadRepository,ForumPostRepository repliesRepository,ForumPostRepository parentPostRepository,ReportedContentRepository reportedContentRepository)
+    public ForumPostService(ForumPostRepository repository, UserProfileRepository authorRepository, ForumThreadRepository threadRepository, ForumPostRepository repliesRepository, ForumPostRepository parentPostRepository, ReportedContentRepository reportedContentRepository)
     {
         super(repository);
         this.forumpostRepository = repository;
@@ -44,98 +44,77 @@ public class ForumPostService extends BaseService<ForumPost> {
 
     @Override
     public ForumPost save(ForumPost forumpost) {
-
-
-    
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (forumpost.getReplies() != null) {
+    // ---------- OneToMany ----------
+        if (forumpost.getReplies() != null) {
             List<ForumPost> managedReplies = new ArrayList<>();
             for (ForumPost item : forumpost.getReplies()) {
-            if (item.getId() != null) {
-            ForumPost existingItem = repliesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("ForumPost not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setParentPost(forumpost);
-            managedReplies.add(existingItem);
-            } else {
-            item.setParentPost(forumpost);
-            managedReplies.add(item);
-            }
+                if (item.getId() != null) {
+                    ForumPost existingItem = repliesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumPost not found"));
+
+                     existingItem.setParentPost(forumpost);
+                     managedReplies.add(existingItem);
+                } else {
+                    item.setParentPost(forumpost);
+                    managedReplies.add(item);
+                }
             }
             forumpost.setReplies(managedReplies);
-            }
-        
+        }
     
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (forumpost.getReportedContent() != null) {
+        if (forumpost.getReportedContent() != null) {
             List<ReportedContent> managedReportedContent = new ArrayList<>();
             for (ReportedContent item : forumpost.getReportedContent()) {
-            if (item.getId() != null) {
-            ReportedContent existingItem = reportedContentRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("ReportedContent not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setForumPost(forumpost);
-            managedReportedContent.add(existingItem);
-            } else {
-            item.setForumPost(forumpost);
-            managedReportedContent.add(item);
-            }
+                if (item.getId() != null) {
+                    ReportedContent existingItem = reportedContentRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReportedContent not found"));
+
+                     existingItem.setForumPost(forumpost);
+                     managedReportedContent.add(existingItem);
+                } else {
+                    item.setForumPost(forumpost);
+                    managedReportedContent.add(item);
+                }
             }
             forumpost.setReportedContent(managedReportedContent);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (forumpost.getAuthor() != null &&
+            forumpost.getAuthor().getId() != null) {
+
+            UserProfile existingAuthor = authorRepository.findById(
+                forumpost.getAuthor().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            forumpost.setAuthor(existingAuthor);
+        }
         
-    
+        if (forumpost.getThread() != null &&
+            forumpost.getThread().getId() != null) {
 
+            ForumThread existingThread = threadRepository.findById(
+                forumpost.getThread().getId()
+            ).orElseThrow(() -> new RuntimeException("ForumThread not found"));
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    if (forumpost.getAuthor() != null
-        && forumpost.getAuthor().getId() != null) {
-        UserProfile existingAuthor = authorRepository.findById(
-        forumpost.getAuthor().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        forumpost.setAuthor(existingAuthor);
+            forumpost.setThread(existingThread);
         }
-    
-    if (forumpost.getThread() != null
-        && forumpost.getThread().getId() != null) {
-        ForumThread existingThread = threadRepository.findById(
-        forumpost.getThread().getId()
-        ).orElseThrow(() -> new RuntimeException("ForumThread not found"));
-        forumpost.setThread(existingThread);
-        }
-    
-    
-    if (forumpost.getParentPost() != null
-        && forumpost.getParentPost().getId() != null) {
-        ForumPost existingParentPost = parentPostRepository.findById(
-        forumpost.getParentPost().getId()
-        ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
-        forumpost.setParentPost(existingParentPost);
-        }
-    
-    
+        
+        if (forumpost.getParentPost() != null &&
+            forumpost.getParentPost().getId() != null) {
 
-        return forumpostRepository.save(forumpost);
-    }
+            ForumPost existingParentPost = parentPostRepository.findById(
+                forumpost.getParentPost().getId()
+            ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
+
+            forumpost.setParentPost(existingParentPost);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return forumpostRepository.save(forumpost);
+}
 
 
     public ForumPost update(Long id, ForumPost forumpostRequest) {
@@ -146,189 +125,124 @@ public class ForumPostService extends BaseService<ForumPost> {
         existing.setContent(forumpostRequest.getContent());
         existing.setPostDate(forumpostRequest.getPostDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (forumpostRequest.getAuthor() != null &&
-        forumpostRequest.getAuthor().getId() != null) {
+            forumpostRequest.getAuthor().getId() != null) {
 
-        UserProfile existingAuthor = authorRepository.findById(
-        forumpostRequest.getAuthor().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingAuthor = authorRepository.findById(
+                forumpostRequest.getAuthor().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setAuthor(existingAuthor);
+            existing.setAuthor(existingAuthor);
         } else {
-        existing.setAuthor(null);
+            existing.setAuthor(null);
         }
+        
         if (forumpostRequest.getThread() != null &&
-        forumpostRequest.getThread().getId() != null) {
+            forumpostRequest.getThread().getId() != null) {
 
-        ForumThread existingThread = threadRepository.findById(
-        forumpostRequest.getThread().getId()
-        ).orElseThrow(() -> new RuntimeException("ForumThread not found"));
+            ForumThread existingThread = threadRepository.findById(
+                forumpostRequest.getThread().getId()
+            ).orElseThrow(() -> new RuntimeException("ForumThread not found"));
 
-        existing.setThread(existingThread);
+            existing.setThread(existingThread);
         } else {
-        existing.setThread(null);
+            existing.setThread(null);
         }
+        
         if (forumpostRequest.getParentPost() != null &&
-        forumpostRequest.getParentPost().getId() != null) {
+            forumpostRequest.getParentPost().getId() != null) {
 
-        ForumPost existingParentPost = parentPostRepository.findById(
-        forumpostRequest.getParentPost().getId()
-        ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
+            ForumPost existingParentPost = parentPostRepository.findById(
+                forumpostRequest.getParentPost().getId()
+            ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
 
-        existing.setParentPost(existingParentPost);
+            existing.setParentPost(existingParentPost);
         } else {
-        existing.setParentPost(null);
+            existing.setParentPost(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getReplies().clear();
 
         if (forumpostRequest.getReplies() != null) {
-        for (var item : forumpostRequest.getReplies()) {
-        ForumPost existingItem;
-        if (item.getId() != null) {
-        existingItem = repliesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ForumPost not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setParentPost(existing);
+            for (var item : forumpostRequest.getReplies()) {
+                ForumPost existingItem;
+                if (item.getId() != null) {
+                    existingItem = repliesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumPost not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getReplies().add(existingItem);
+                existingItem.setParentPost(existing);
+                existing.getReplies().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getReportedContent().clear();
 
         if (forumpostRequest.getReportedContent() != null) {
-        for (var item : forumpostRequest.getReportedContent()) {
-        ReportedContent existingItem;
-        if (item.getId() != null) {
-        existingItem = reportedContentRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ReportedContent not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : forumpostRequest.getReportedContent()) {
+                ReportedContent existingItem;
+                if (item.getId() != null) {
+                    existingItem = reportedContentRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReportedContent not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setForumPost(existing);
+                existing.getReportedContent().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setForumPost(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getReportedContent().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-        return forumpostRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ForumPost> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ForumPost entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-        if (entity.getReplies() != null) {
-        for (var child : entity.getReplies()) {
         
-            child.setParentPost(null); // retirer la référence inverse
-        
-        }
-        entity.getReplies().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-    
-
-    
-        if (entity.getReportedContent() != null) {
-        for (var child : entity.getReportedContent()) {
-        
-            child.setForumPost(null); // retirer la référence inverse
-        
-        }
-        entity.getReportedContent().clear();
-        }
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getAuthor() != null) {
-        entity.setAuthor(null);
-        }
-    
-
-    
-        if (entity.getThread() != null) {
-        entity.setThread(null);
-        }
-    
-
-    
-
-    
-        if (entity.getParentPost() != null) {
-        entity.setParentPost(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return forumpostRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ForumPost> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ForumPost entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getReplies() != null) {
+            for (var child : entity.getReplies()) {
+                
+                child.setParentPost(null); // retirer la référence inverse
+                
+            }
+            entity.getReplies().clear();
+        }
+        
+        if (entity.getReportedContent() != null) {
+            for (var child : entity.getReportedContent()) {
+                
+                child.setForumPost(null); // retirer la référence inverse
+                
+            }
+            entity.getReportedContent().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getAuthor() != null) {
+            entity.setAuthor(null);
+        }
+        
+        if (entity.getThread() != null) {
+            entity.setThread(null);
+        }
+        
+        if (entity.getParentPost() != null) {
+            entity.setParentPost(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

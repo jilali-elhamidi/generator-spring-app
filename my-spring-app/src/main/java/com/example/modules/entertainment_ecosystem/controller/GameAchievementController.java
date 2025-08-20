@@ -46,37 +46,35 @@ public class GameAchievementController {
 
         GameAchievement entity = gameachievementMapper.toEntity(gameachievementDto);
         GameAchievement saved = gameachievementService.save(entity);
-        URI location = uriBuilder.path("/api/gameachievements/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/gameachievements/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(gameachievementMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<GameAchievementDto> updateGameAchievement(
-                @PathVariable Long id,
-                @RequestBody GameAchievementDto gameachievementDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<GameAchievementDto> updateGameAchievement(
+            @PathVariable Long id,
+            @Valid @RequestBody GameAchievementDto gameachievementDto) {
 
-                // Transformer le DTO en entity pour le service
-                GameAchievement entityToUpdate = gameachievementMapper.toEntity(gameachievementDto);
 
-                // Appel du service update
-                GameAchievement updatedEntity = gameachievementService.update(id, entityToUpdate);
+        GameAchievement entityToUpdate = gameachievementMapper.toEntity(gameachievementDto);
+        GameAchievement updatedEntity = gameachievementService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                GameAchievementDto updatedDto = gameachievementMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(gameachievementMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteGameAchievement(@PathVariable Long id) {
-                    boolean deleted = gameachievementService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGameAchievement(@PathVariable Long id) {
+        boolean deleted = gameachievementService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

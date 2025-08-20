@@ -46,37 +46,35 @@ public class UserProfileController {
 
         UserProfile entity = userprofileMapper.toEntity(userprofileDto);
         UserProfile saved = userprofileService.save(entity);
-        URI location = uriBuilder.path("/api/userprofiles/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userprofiles/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userprofileMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserProfileDto> updateUserProfile(
-                @PathVariable Long id,
-                @RequestBody UserProfileDto userprofileDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserProfileDto> updateUserProfile(
+            @PathVariable Long id,
+            @Valid @RequestBody UserProfileDto userprofileDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserProfile entityToUpdate = userprofileMapper.toEntity(userprofileDto);
 
-                // Appel du service update
-                UserProfile updatedEntity = userprofileService.update(id, entityToUpdate);
+        UserProfile entityToUpdate = userprofileMapper.toEntity(userprofileDto);
+        UserProfile updatedEntity = userprofileService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserProfileDto updatedDto = userprofileMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userprofileMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserProfile(@PathVariable Long id) {
-                    boolean deleted = userprofileService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserProfile(@PathVariable Long id) {
+        boolean deleted = userprofileService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

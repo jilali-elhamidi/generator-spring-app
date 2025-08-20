@@ -46,37 +46,35 @@ public class MerchandiseController {
 
         Merchandise entity = merchandiseMapper.toEntity(merchandiseDto);
         Merchandise saved = merchandiseService.save(entity);
-        URI location = uriBuilder.path("/api/merchandises/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/merchandises/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(merchandiseMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MerchandiseDto> updateMerchandise(
-                @PathVariable Long id,
-                @RequestBody MerchandiseDto merchandiseDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MerchandiseDto> updateMerchandise(
+            @PathVariable Long id,
+            @Valid @RequestBody MerchandiseDto merchandiseDto) {
 
-                // Transformer le DTO en entity pour le service
-                Merchandise entityToUpdate = merchandiseMapper.toEntity(merchandiseDto);
 
-                // Appel du service update
-                Merchandise updatedEntity = merchandiseService.update(id, entityToUpdate);
+        Merchandise entityToUpdate = merchandiseMapper.toEntity(merchandiseDto);
+        Merchandise updatedEntity = merchandiseService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MerchandiseDto updatedDto = merchandiseMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(merchandiseMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMerchandise(@PathVariable Long id) {
-                    boolean deleted = merchandiseService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMerchandise(@PathVariable Long id) {
+        boolean deleted = merchandiseService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

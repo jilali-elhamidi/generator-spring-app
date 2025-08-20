@@ -19,7 +19,7 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
     protected final ContentRatingBoardRepository contentratingboardRepository;
     private final ContentRatingRepository ratingsRepository;
 
-    public ContentRatingBoardService(ContentRatingBoardRepository repository,ContentRatingRepository ratingsRepository)
+    public ContentRatingBoardService(ContentRatingBoardRepository repository, ContentRatingRepository ratingsRepository)
     {
         super(repository);
         this.contentratingboardRepository = repository;
@@ -28,37 +28,30 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
 
     @Override
     public ContentRatingBoard save(ContentRatingBoard contentratingboard) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (contentratingboard.getRatings() != null) {
+    // ---------- OneToMany ----------
+        if (contentratingboard.getRatings() != null) {
             List<ContentRating> managedRatings = new ArrayList<>();
             for (ContentRating item : contentratingboard.getRatings()) {
-            if (item.getId() != null) {
-            ContentRating existingItem = ratingsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("ContentRating not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setBoard(contentratingboard);
-            managedRatings.add(existingItem);
-            } else {
-            item.setBoard(contentratingboard);
-            managedRatings.add(item);
-            }
+                if (item.getId() != null) {
+                    ContentRating existingItem = ratingsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ContentRating not found"));
+
+                     existingItem.setBoard(contentratingboard);
+                     managedRatings.add(existingItem);
+                } else {
+                    item.setBoard(contentratingboard);
+                    managedRatings.add(item);
+                }
             }
             contentratingboard.setRatings(managedRatings);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return contentratingboardRepository.save(contentratingboard);
-    }
+    return contentratingboardRepository.save(contentratingboard);
+}
 
 
     public ContentRatingBoard update(Long id, ContentRatingBoard contentratingboardRequest) {
@@ -69,75 +62,50 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
         existing.setName(contentratingboardRequest.getName());
         existing.setCountry(contentratingboardRequest.getCountry());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getRatings().clear();
 
         if (contentratingboardRequest.getRatings() != null) {
-        for (var item : contentratingboardRequest.getRatings()) {
-        ContentRating existingItem;
-        if (item.getId() != null) {
-        existingItem = ratingsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ContentRating not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : contentratingboardRequest.getRatings()) {
+                ContentRating existingItem;
+                if (item.getId() != null) {
+                    existingItem = ratingsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ContentRating not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setBoard(existing);
+                existing.getRatings().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setBoard(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getRatings().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return contentratingboardRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ContentRatingBoard> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ContentRatingBoard entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getRatings() != null) {
-        for (var child : entity.getRatings()) {
         
-            child.setBoard(null); // retirer la référence inverse
-        
-        }
-        entity.getRatings().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return contentratingboardRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ContentRatingBoard> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ContentRatingBoard entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getRatings() != null) {
+            for (var child : entity.getRatings()) {
+                
+                child.setBoard(null); // retirer la référence inverse
+                
+            }
+            entity.getRatings().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

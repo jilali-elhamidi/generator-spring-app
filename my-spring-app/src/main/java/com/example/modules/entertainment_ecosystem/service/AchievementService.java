@@ -19,7 +19,7 @@ public class AchievementService extends BaseService<Achievement> {
     protected final AchievementRepository achievementRepository;
     private final UserProfileRepository userRepository;
 
-    public AchievementService(AchievementRepository repository,UserProfileRepository userRepository)
+    public AchievementService(AchievementRepository repository, UserProfileRepository userRepository)
     {
         super(repository);
         this.achievementRepository = repository;
@@ -28,24 +28,23 @@ public class AchievementService extends BaseService<Achievement> {
 
     @Override
     public Achievement save(Achievement achievement) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (achievement.getUser() != null &&
+            achievement.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                achievement.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-
-    
-
-    if (achievement.getUser() != null
-        && achievement.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        achievement.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        achievement.setUser(existingUser);
+            achievement.setUser(existingUser);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return achievementRepository.save(achievement);
-    }
+    return achievementRepository.save(achievement);
+}
 
 
     public Achievement update(Long id, Achievement achievementRequest) {
@@ -57,61 +56,40 @@ public class AchievementService extends BaseService<Achievement> {
         existing.setDescription(achievementRequest.getDescription());
         existing.setAchievementDate(achievementRequest.getAchievementDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (achievementRequest.getUser() != null &&
-        achievementRequest.getUser().getId() != null) {
+            achievementRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        achievementRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                achievementRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return achievementRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Achievement> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Achievement entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return achievementRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Achievement> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Achievement entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

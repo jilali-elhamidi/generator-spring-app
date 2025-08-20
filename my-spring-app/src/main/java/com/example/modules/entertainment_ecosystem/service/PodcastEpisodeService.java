@@ -25,7 +25,7 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
     private final EpisodeRepository relatedEpisodeRepository;
     private final PodcastGuestRepository guestAppearancesRepository;
 
-    public PodcastEpisodeService(PodcastEpisodeRepository repository,PodcastRepository podcastRepository,EpisodeRepository relatedEpisodeRepository,PodcastGuestRepository guestAppearancesRepository)
+    public PodcastEpisodeService(PodcastEpisodeRepository repository, PodcastRepository podcastRepository, EpisodeRepository relatedEpisodeRepository, PodcastGuestRepository guestAppearancesRepository)
     {
         super(repository);
         this.podcastepisodeRepository = repository;
@@ -36,59 +36,49 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
 
     @Override
     public PodcastEpisode save(PodcastEpisode podcastepisode) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (podcastepisode.getGuestAppearances() != null &&
+            !podcastepisode.getGuestAppearances().isEmpty()) {
 
+            List<PodcastGuest> attachedGuestAppearances = podcastepisode.getGuestAppearances().stream()
+            .map(item -> guestAppearancesRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("PodcastGuest not found with id " + item.getId())))
+            .toList();
 
-    
+            podcastepisode.setGuestAppearances(attachedGuestAppearances);
 
-    
-
-    
-
-
-    
-
-    
-
-    
-        if (podcastepisode.getGuestAppearances() != null
-        && !podcastepisode.getGuestAppearances().isEmpty()) {
-
-        List<PodcastGuest> attachedGuestAppearances = podcastepisode.getGuestAppearances().stream()
-        .map(item -> guestAppearancesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("PodcastGuest not found with id " + item.getId())))
-        .toList();
-
-        podcastepisode.setGuestAppearances(attachedGuestAppearances);
-
-        // côté propriétaire (PodcastGuest → PodcastEpisode)
-        attachedGuestAppearances.forEach(it -> it.getAppearances().add(podcastepisode));
+            // côté propriétaire (PodcastGuest → PodcastEpisode)
+            attachedGuestAppearances.forEach(it -> it.getAppearances().add(podcastepisode));
         }
-    
+        
+    // ---------- ManyToOne ----------
+        if (podcastepisode.getPodcast() != null &&
+            podcastepisode.getPodcast().getId() != null) {
 
-    if (podcastepisode.getPodcast() != null
-        && podcastepisode.getPodcast().getId() != null) {
-        Podcast existingPodcast = podcastRepository.findById(
-        podcastepisode.getPodcast().getId()
-        ).orElseThrow(() -> new RuntimeException("Podcast not found"));
-        podcastepisode.setPodcast(existingPodcast);
+            Podcast existingPodcast = podcastRepository.findById(
+                podcastepisode.getPodcast().getId()
+            ).orElseThrow(() -> new RuntimeException("Podcast not found"));
+
+            podcastepisode.setPodcast(existingPodcast);
         }
-    
-    
-    
+        
+    // ---------- OneToOne ----------
         if (podcastepisode.getRelatedEpisode() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             podcastepisode.setRelatedEpisode(
-            relatedEpisodeRepository.findById(podcastepisode.getRelatedEpisode().getId())
-            .orElseThrow(() -> new RuntimeException("relatedEpisode not found"))
+                relatedEpisodeRepository.findById(podcastepisode.getRelatedEpisode().getId())
+                    .orElseThrow(() -> new RuntimeException("relatedEpisode not found"))
             );
-        
-        podcastepisode.getRelatedEpisode().setRelatedPodcastEpisode(podcastepisode);
+            
+            podcastepisode.getRelatedEpisode().setRelatedPodcastEpisode(podcastepisode);
         }
+        
 
-        return podcastepisodeRepository.save(podcastepisode);
-    }
+    return podcastepisodeRepository.save(podcastepisode);
+}
 
 
     public PodcastEpisode update(Long id, PodcastEpisode podcastepisodeRequest) {
@@ -100,132 +90,86 @@ public class PodcastEpisodeService extends BaseService<PodcastEpisode> {
         existing.setReleaseDate(podcastepisodeRequest.getReleaseDate());
         existing.setDurationMinutes(podcastepisodeRequest.getDurationMinutes());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (podcastepisodeRequest.getPodcast() != null &&
-        podcastepisodeRequest.getPodcast().getId() != null) {
+            podcastepisodeRequest.getPodcast().getId() != null) {
 
-        Podcast existingPodcast = podcastRepository.findById(
-        podcastepisodeRequest.getPodcast().getId()
-        ).orElseThrow(() -> new RuntimeException("Podcast not found"));
+            Podcast existingPodcast = podcastRepository.findById(
+                podcastepisodeRequest.getPodcast().getId()
+            ).orElseThrow(() -> new RuntimeException("Podcast not found"));
 
-        existing.setPodcast(existingPodcast);
+            existing.setPodcast(existingPodcast);
         } else {
-        existing.setPodcast(null);
+            existing.setPodcast(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
+        
+    // ---------- Relations ManyToOne ----------
         if (podcastepisodeRequest.getGuestAppearances() != null) {
-        existing.getGuestAppearances().clear();
+            existing.getGuestAppearances().clear();
 
-        List<PodcastGuest> guestAppearancesList = podcastepisodeRequest.getGuestAppearances().stream()
-        .map(item -> guestAppearancesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("PodcastGuest not found")))
-        .collect(Collectors.toList());
+            List<PodcastGuest> guestAppearancesList = podcastepisodeRequest.getGuestAppearances().stream()
+                .map(item -> guestAppearancesRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("PodcastGuest not found")))
+                .collect(Collectors.toList());
 
-        existing.getGuestAppearances().addAll(guestAppearancesList);
+            existing.getGuestAppearances().addAll(guestAppearancesList);
 
-        // Mettre à jour le côté inverse
-        guestAppearancesList.forEach(it -> {
-        if (!it.getAppearances().contains(existing)) {
-        it.getAppearances().add(existing);
+            // Mettre à jour le côté inverse
+            guestAppearancesList.forEach(it -> {
+                if (!it.getAppearances().contains(existing)) {
+                    it.getAppearances().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-        if (podcastepisodeRequest.getRelatedEpisode() != null
-        && podcastepisodeRequest.getRelatedEpisode().getId() != null) {
-
-        Episode relatedEpisode = relatedEpisodeRepository.findById(
-        podcastepisodeRequest.getRelatedEpisode().getId()
-        ).orElseThrow(() -> new RuntimeException("Episode not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setRelatedEpisode(relatedEpisode);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (podcastepisodeRequest.getRelatedEpisode() != null &&
+            podcastepisodeRequest.getRelatedEpisode().getId() != null) {
+
+            Episode relatedEpisode = relatedEpisodeRepository.findById(
+                podcastepisodeRequest.getRelatedEpisode().getId()
+            ).orElseThrow(() -> new RuntimeException("Episode not found"));
+
+            existing.setRelatedEpisode(relatedEpisode);
+
+            
             relatedEpisode.setRelatedPodcastEpisode(existing);
+            
+        }
         
-        }
 
-    
-
-    
-
-
-        return podcastepisodeRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<PodcastEpisode> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-PodcastEpisode entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-        if (entity.getGuestAppearances() != null) {
-        for (PodcastGuest item : new ArrayList<>(entity.getGuestAppearances())) {
-        
-            item.getAppearances().remove(entity); // retire côté inverse
-        
-        }
-        entity.getGuestAppearances().clear(); // puis vide côté courant
-        }
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-        if (entity.getRelatedEpisode() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getRelatedEpisode().setRelatedPodcastEpisode(null);
-        // Dissocier côté direct
-        entity.setRelatedEpisode(null);
-        }
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getPodcast() != null) {
-        entity.setPodcast(null);
-        }
-    
-
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return podcastepisodeRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<PodcastEpisode> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        PodcastEpisode entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getGuestAppearances() != null) {
+            for (PodcastGuest item : new ArrayList<>(entity.getGuestAppearances())) {
+                
+                item.getAppearances().remove(entity); // retire côté inverse
+                
+            }
+            entity.getGuestAppearances().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+        if (entity.getRelatedEpisode() != null) {
+            entity.getRelatedEpisode().setRelatedPodcastEpisode(null);
+            entity.setRelatedEpisode(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getPodcast() != null) {
+            entity.setPodcast(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -4,19 +4,8 @@ import com.example.core.service.BaseService;
 import com.example.modules.{{module}}.model.{{entityName}};
 import com.example.modules.{{module}}.repository.{{entityName}}Repository;
 {{~#each relationships}}
-{{~#if (eq relationType "ManyToOne")}}
 import com.example.modules.{{../module}}.model.{{type}};
 import com.example.modules.{{../module}}.repository.{{type}}Repository;
-{{~else if (eq relationType "OneToMany")}}
-import com.example.modules.{{../module}}.model.{{type}};
-import com.example.modules.{{../module}}.repository.{{type}}Repository;
-{{~else if (eq relationType "ManyToMany")}}
-import com.example.modules.{{../module}}.model.{{type}};
-import com.example.modules.{{../module}}.repository.{{type}}Repository;
-{{~else if (eq relationType "OneToOne")}}
-import com.example.modules.{{../module}}.model.{{type}};
-import com.example.modules.{{../module}}.repository.{{type}}Repository;
-{{~/if}}
 {{~/each}}
 
 import org.springframework.stereotype.Service;
@@ -31,114 +20,94 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 
     protected final {{entityName}}Repository {{entityNameLowercase}}Repository;
 {{~#each relationships}}
-{{~#if (eq relationType "ManyToOne")}}
     private final {{type}}Repository {{name}}Repository;
-{{~/if}}
-{{~#if (eq relationType "ManyToMany")}}
-    private final {{type}}Repository {{name}}Repository;
-{{~/if}}
-{{~#if (eq relationType "OneToMany")}}
-    private final {{type}}Repository {{name}}Repository;
-{{~/if}}
-{{~#if (eq relationType "OneToOne")}}
-    private final {{type}}Repository {{name}}Repository;
-{{~/if}}
 {{~/each}}
 
-    public {{entityName}}Service({{entityName}}Repository repository{{~#each relationships}}{{~#if (eq relationType "ManyToOne")}},{{type}}Repository {{name}}Repository{{~/if}}{{~#if (eq relationType "OneToMany")}},{{type}}Repository {{name}}Repository{{~/if}}{{~#if (eq relationType "ManyToMany")}},{{type}}Repository {{name}}Repository{{~/if}}{{~#if (eq relationType "OneToOne")}},{{type}}Repository {{name}}Repository{{~/if}}{{~/each}})
+    public {{entityName}}Service({{entityName}}Repository repository {{~#each relationships}}, {{type}}Repository {{name}}Repository{{/each}})
     {
         super(repository);
         this.{{entityNameLowercase}}Repository = repository;
         {{~#each relationships}}
-        {{~#if (eq relationType "ManyToOne")}}
         this.{{name}}Repository = {{name}}Repository;
-        {{~/if}}
-        {{~#if (eq relationType "ManyToMany")}}
-        this.{{name}}Repository = {{name}}Repository;
-        {{~/if}}
-        {{~#if (eq relationType "OneToMany")}}
-        this.{{name}}Repository = {{name}}Repository;
-        {{~/if}}
-        {{~#if (eq relationType "OneToOne")}}
-        this.{{name}}Repository = {{name}}Repository;
-        {{~/if}}
-    {{~/each}}
+        {{~/each}}
     }
 
     @Override
     public {{entityName}} save({{entityName}} {{entityNameLowercase}}) {
-
-{{#each relationships}}
-    {{#if (eq relationType "OneToMany")}}
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        {{#with (lookupInverseRelationship type mappedBy)}}
-            if ({{../entityNameLowercase}}.get{{capitalize ../name}}() != null) {
+    // ---------- OneToMany ----------
+        {{~#each relationships}}
+        {{~#if (eq relationType "OneToMany")}}
+        {{~#with (lookupInverseRelationship type mappedBy)}}
+        if ({{../entityNameLowercase}}.get{{capitalize ../name}}() != null) {
             List<{{../type}}> managed{{capitalize ../name}} = new ArrayList<>();
             for ({{../type}} item : {{../entityNameLowercase}}.get{{capitalize ../name}}()) {
-            if (item.getId() != null) {
-            {{../type}} existingItem = {{../name}}Repository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("{{../type}} not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.set{{capitalize name}}({{../entityNameLowercase}});
-            managed{{capitalize ../name}}.add(existingItem);
-            } else {
-            item.set{{capitalize name}}({{../entityNameLowercase}});
-            managed{{capitalize ../name}}.add(item);
-            }
+                if (item.getId() != null) {
+                    {{../type}} existingItem = {{../name}}Repository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("{{../type}} not found"));
+
+                     existingItem.set{{capitalize name}}({{../entityNameLowercase}});
+                     managed{{capitalize ../name}}.add(existingItem);
+                } else {
+                    item.set{{capitalize name}}({{../entityNameLowercase}});
+                    managed{{capitalize ../name}}.add(item);
+                }
             }
             {{../entityNameLowercase}}.set{{capitalize ../name}}(managed{{capitalize ../name}});
-            }
-        {{/with}}
-    {{/if}}
-{{/each}}
-{{#each relationships}}
-    {{#if (eq relationType "ManyToMany")}}
-        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null
-        && !{{../entityNameLowercase}}.get{{capitalize name}}().isEmpty()) {
-
-        List<{{type}}> attached{{capitalize name}} = {{../entityNameLowercase}}.get{{capitalize name}}().stream()
-        .map(item -> {{name}}Repository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("{{type}} not found with id " + item.getId())))
-        .toList();
-
-        {{../entityNameLowercase}}.set{{capitalize name}}(attached{{capitalize name}});
-
-        // côté propriétaire ({{type}} → {{../entityName}})
-        attached{{capitalize name}}.forEach(it -> it.get{{capitalize inverseField}}().add({{../entityNameLowercase}}));
         }
+    {{~/with}}
     {{/if}}
-{{/each}}
+    {{~/each}}
+    // ---------- ManyToMany ----------
+        {{~#each relationships}}
+        {{~#if (eq relationType "ManyToMany")}}
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null &&
+            !{{../entityNameLowercase}}.get{{capitalize name}}().isEmpty()) {
 
-{{~#each relationships}}
-    {{#if (eq relationType "ManyToOne")~}}
-        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null
-        && {{../entityNameLowercase}}.get{{capitalize name}}().getId() != null) {
-        {{type}} existing{{capitalize name}} = {{name}}Repository.findById(
-        {{../entityNameLowercase}}.get{{capitalize name}}().getId()
-        ).orElseThrow(() -> new RuntimeException("{{type}} not found"));
-        {{../entityNameLowercase}}.set{{capitalize name}}(existing{{capitalize name}});
+            List<{{type}}> attached{{capitalize name}} = {{../entityNameLowercase}}.get{{capitalize name}}().stream()
+            .map(item -> {{name}}Repository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("{{type}} not found with id " + item.getId())))
+            .toList();
+
+            {{../entityNameLowercase}}.set{{capitalize name}}(attached{{capitalize name}});
+
+            // côté propriétaire ({{type}} → {{../entityName}})
+            attached{{capitalize name}}.forEach(it -> it.get{{capitalize inverseField}}().add({{../entityNameLowercase}}));
         }
-    {{/if}}
-{{~/each}}
-
-{{~#each relationships}}
-    {{~#if (eq relationType "OneToOne")}}
-        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
-        {{!-- Récupération de l'entité existante si nécessaire --}}
-        {{#if }}
-            // Vérifier si l'entité est déjà persistée
-            {{../entityNameLowercase}}.set{{capitalize name}}(
-            {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
-            .orElseThrow(() -> new RuntimeException("{{name}} not found"))
-            );
         {{/if}}
-        {{../entityNameLowercase}}.get{{capitalize name}}().set{{capitalize inverseField}}({{../entityNameLowercase}});
-        }
-{{~/if}}
-{{~/each}}
+        {{~/each}}
+    // ---------- ManyToOne ----------
+        {{~#each relationships}}
+        {{~#if (eq relationType "ManyToOne")}}
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null &&
+            {{../entityNameLowercase}}.get{{capitalize name}}().getId() != null) {
 
-        return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
-    }
+            {{type}} existing{{capitalize name}} = {{name}}Repository.findById(
+                {{../entityNameLowercase}}.get{{capitalize name}}().getId()
+            ).orElseThrow(() -> new RuntimeException("{{type}} not found"));
+
+            {{../entityNameLowercase}}.set{{capitalize name}}(existing{{capitalize name}});
+        }
+        {{/if}}
+        {{~/each}}
+    // ---------- OneToOne ----------
+        {{~#each relationships}}
+        {{~#if (eq relationType "OneToOne")}}
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
+            {{!-- Récupération de l'entité existante si nécessaire --}}
+            {{#if }}
+                // Vérifier si l'entité est déjà persistée
+            {{../entityNameLowercase}}.set{{capitalize name}}(
+                {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
+                    .orElseThrow(() -> new RuntimeException("{{name}} not found"))
+            );
+            {{/if}}
+            {{../entityNameLowercase}}.get{{capitalize name}}().set{{capitalize inverseField}}({{../entityNameLowercase}});
+        }
+        {{/if}}
+        {{~/each}}
+
+    return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
+}
 
 
     public {{entityName}} update(Long id, {{entityName}} {{entityNameLowercase}}Request) {
@@ -150,156 +119,138 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         existing.set{{capitalize name}}({{entityNameLowercase}}Request.get{{capitalize name}}());
     {{~/each}}
 
-// Relations ManyToOne : mise à jour conditionnelle
-{{~#each relationships}}
-    {{~#if (eq relationType "ManyToOne")}}
+    // ---------- Relations ManyToOne ----------
+        {{~#each relationships}}
+        {{~#if (eq relationType "ManyToOne")}}
         if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null &&
-        {{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
+            {{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
 
-        {{type}} existing{{capitalize name}} = {{name}}Repository.findById(
-        {{entityNameLowercase}}Request.get{{capitalize name}}().getId()
-        ).orElseThrow(() -> new RuntimeException("{{type}} not found"));
+            {{type}} existing{{capitalize name}} = {{name}}Repository.findById(
+                {{entityNameLowercase}}Request.get{{capitalize name}}().getId()
+            ).orElseThrow(() -> new RuntimeException("{{type}} not found"));
 
-        existing.set{{capitalize name}}(existing{{capitalize name}});
+            existing.set{{capitalize name}}(existing{{capitalize name}});
         } else {
-        existing.set{{capitalize name}}(null);
+            existing.set{{capitalize name}}(null);
         }
-    {{~/if}}
-{{~/each}}
-
-// Relations ManyToMany : synchronisation sécurisée
-{{~#each relationships}}
-
-    {{~#if (eq relationType "ManyToMany")}}
+        {{/if}}
+        {{~/each}}
+    // ---------- Relations ManyToOne ----------
+        {{~#each relationships}}
+        {{~#if (eq relationType "ManyToMany")}}
         if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
-        existing.get{{capitalize name}}().clear();
+            existing.get{{capitalize name}}().clear();
 
-        List<{{type}}> {{name}}List = {{entityNameLowercase}}Request.get{{capitalize name}}().stream()
-        .map(item -> {{name}}Repository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("{{type}} not found")))
-        .collect(Collectors.toList());
+            List<{{type}}> {{name}}List = {{entityNameLowercase}}Request.get{{capitalize name}}().stream()
+                .map(item -> {{name}}Repository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("{{type}} not found")))
+                .collect(Collectors.toList());
 
-        existing.get{{capitalize name}}().addAll({{name}}List);
+            existing.get{{capitalize name}}().addAll({{name}}List);
 
-        // Mettre à jour le côté inverse
-        {{name}}List.forEach(it -> {
-        if (!it.get{{capitalize inverseField}}().contains(existing)) {
-        it.get{{capitalize inverseField}}().add(existing);
+            // Mettre à jour le côté inverse
+            {{name}}List.forEach(it -> {
+                if (!it.get{{capitalize inverseField}}().contains(existing)) {
+                    it.get{{capitalize inverseField}}().add(existing);
+                }
+            });
         }
-        });
-        }
-    {{~/if}}
-{{~/each}}
-
-// Relations OneToMany : synchronisation sécurisée
-{{~#each relationships}}
-    {{~#if (eq relationType "OneToMany")}}
-        // Vider la collection existante
+        {{/if}}
+        {{~/each}}
+    // ---------- Relations OneToMany ----------
+        {{~#each relationships}}
+        {{~#if (eq relationType "OneToMany")}}
         existing.get{{capitalize name}}().clear();
 
         if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
-        for (var item : {{entityNameLowercase}}Request.get{{capitalize name}}()) {
-        {{type}} existingItem;
-        if (item.getId() != null) {
-        existingItem = {{name}}Repository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("{{type}} not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : {{entityNameLowercase}}Request.get{{capitalize name}}()) {
+                {{type}} existingItem;
+                if (item.getId() != null) {
+                    existingItem = {{name}}Repository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("{{type}} not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.set{{capitalize mappedBy}}(existing);
+                existing.get{{capitalize name}}().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.set{{capitalize mappedBy}}(existing);
+        {{/if}}
+        {{~/each}}
+    // ---------- Relations OneToOne ----------
+        {{~#each relationships}}
+        {{~#if (eq relationType "OneToOne")}}
+            if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null &&
+            {{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
 
-        // Ajouter directement dans la collection existante
-        existing.get{{capitalize name}}().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-    {{~/if}}
-{{~/each}}
-{{#each relationships}}
-    {{#if (eq relationType "OneToOne")}}
+            {{type}} {{name}} = {{name}}Repository.findById(
+                {{entityNameLowercase}}Request.get{{capitalize name}}().getId()
+            ).orElseThrow(() -> new RuntimeException("{{type}} not found"));
 
-        if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null
-        && {{entityNameLowercase}}Request.get{{capitalize name}}().getId() != null) {
+            existing.set{{capitalize name}}({{name}});
 
-        {{type}} {{name}} = {{name}}Repository.findById(
-        {{entityNameLowercase}}Request.get{{capitalize name}}().getId()
-        ).orElseThrow(() -> new RuntimeException("{{type}} not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.set{{capitalize name}}({{name}});
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        {{#if mappedBy}}
+            {{#if mappedBy}}
             {{name}}.set{{capitalize mappedBy}}(existing);
-        {{else if inverseField}}
+            {{else if inverseField}}
             {{name}}.set{{capitalize inverseField}}(existing);
+            {{/if}}
+        }
         {{/if}}
-        }
+        {{~/each}}
 
-    {{/if}}
-{{/each}}
-
-        return {{entityNameLowercase}}Repository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<{{entityName}}> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-{{entityName}} entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-{{#each relationships}}
-    {{#if (eq relationType "OneToMany")}}
-        if (entity.get{{capitalize name}}() != null) {
-        for (var child : entity.get{{capitalize name}}()) {
-        {{#if mappedBy}}
-            child.set{{capitalize mappedBy}}(null); // retirer la référence inverse
-        {{/if}}
-        }
-        entity.get{{capitalize name}}().clear();
-        }
-    {{/if}}
-{{/each}}
-
-// --- Dissocier ManyToMany ---
-{{#each relationships}}
-    {{#if (eq relationType "ManyToMany")}}
-        if (entity.get{{capitalize name}}() != null) {
-        for ({{type}} item : new ArrayList<>(entity.get{{capitalize name}}())) {
-        {{#if inverseField}}
-            item.get{{capitalize inverseField}}().remove(entity); // retire côté inverse
-        {{/if}}
-        }
-        entity.get{{capitalize name}}().clear(); // puis vide côté courant
-        }
-    {{/if}}
-{{/each}}
-
-
-// --- Dissocier OneToOne ---
-{{#each relationships}}
-    {{#if (eq relationType "OneToOne")}}
-        if (entity.get{{capitalize name}}() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.get{{capitalize name}}().set{{capitalize inverseField}}(null);
-        // Dissocier côté direct
-        entity.set{{capitalize name}}(null);
-        }
-    {{/if}}
-{{/each}}
-
-// --- Dissocier ManyToOne ---
-{{#each relationships}}
-    {{#if (eq relationType "ManyToOne")}}
-        if (entity.get{{capitalize name}}() != null) {
-        entity.set{{capitalize name}}(null);
-        }
-    {{/if}}
-{{/each}}
-
-repository.delete(entity);
-return true;
+    return {{entityNameLowercase}}Repository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<{{entityName}}> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        {{entityName}} entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        {{~#each relationships}}
+        {{~#if (eq relationType "OneToMany")}}
+        if (entity.get{{capitalize name}}() != null) {
+            for (var child : entity.get{{capitalize name}}()) {
+                {{#if mappedBy}}
+                child.set{{capitalize mappedBy}}(null); // retirer la référence inverse
+                {{/if}}
+            }
+            entity.get{{capitalize name}}().clear();
+        }
+        {{/if}}
+        {{~/each}}
+    // --- Dissocier ManyToMany ---
+        {{~#each relationships}}
+        {{~#if (eq relationType "ManyToMany")}}
+        if (entity.get{{capitalize name}}() != null) {
+            for ({{type}} item : new ArrayList<>(entity.get{{capitalize name}}())) {
+                {{#if inverseField}}
+                item.get{{capitalize inverseField}}().remove(entity); // retire côté inverse
+                {{/if}}
+            }
+            entity.get{{capitalize name}}().clear(); // puis vide côté courant
+        }
+        {{/if}}
+        {{~/each}}
+    // --- Dissocier OneToOne ---
+        {{~#each relationships}}
+        {{~#if (eq relationType "OneToOne")}}
+        if (entity.get{{capitalize name}}() != null) {
+            entity.get{{capitalize name}}().set{{capitalize inverseField}}(null);
+            entity.set{{capitalize name}}(null);
+        }
+        {{/if}}
+        {{~/each}}
+    // --- Dissocier ManyToOne ---
+        {{~#each relationships}}
+        {{~#if (eq relationType "ManyToOne")}}
+        if (entity.get{{capitalize name}}() != null) {
+            entity.set{{capitalize name}}(null);
+        }
+        {{/if}}
+        {{~/each}}
+        repository.delete(entity);
+        return true;
+    }
 }

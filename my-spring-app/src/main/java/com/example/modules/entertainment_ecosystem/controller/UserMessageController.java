@@ -46,37 +46,35 @@ public class UserMessageController {
 
         UserMessage entity = usermessageMapper.toEntity(usermessageDto);
         UserMessage saved = usermessageService.save(entity);
-        URI location = uriBuilder.path("/api/usermessages/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/usermessages/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(usermessageMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserMessageDto> updateUserMessage(
-                @PathVariable Long id,
-                @RequestBody UserMessageDto usermessageDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserMessageDto> updateUserMessage(
+            @PathVariable Long id,
+            @Valid @RequestBody UserMessageDto usermessageDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserMessage entityToUpdate = usermessageMapper.toEntity(usermessageDto);
 
-                // Appel du service update
-                UserMessage updatedEntity = usermessageService.update(id, entityToUpdate);
+        UserMessage entityToUpdate = usermessageMapper.toEntity(usermessageDto);
+        UserMessage updatedEntity = usermessageService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserMessageDto updatedDto = usermessageMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(usermessageMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserMessage(@PathVariable Long id) {
-                    boolean deleted = usermessageService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserMessage(@PathVariable Long id) {
+        boolean deleted = usermessageService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

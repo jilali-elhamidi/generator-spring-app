@@ -46,37 +46,35 @@ public class UserRatingController {
 
         UserRating entity = userratingMapper.toEntity(userratingDto);
         UserRating saved = userratingService.save(entity);
-        URI location = uriBuilder.path("/api/userratings/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userratings/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userratingMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserRatingDto> updateUserRating(
-                @PathVariable Long id,
-                @RequestBody UserRatingDto userratingDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserRatingDto> updateUserRating(
+            @PathVariable Long id,
+            @Valid @RequestBody UserRatingDto userratingDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserRating entityToUpdate = userratingMapper.toEntity(userratingDto);
 
-                // Appel du service update
-                UserRating updatedEntity = userratingService.update(id, entityToUpdate);
+        UserRating entityToUpdate = userratingMapper.toEntity(userratingDto);
+        UserRating updatedEntity = userratingService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserRatingDto updatedDto = userratingMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userratingMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserRating(@PathVariable Long id) {
-                    boolean deleted = userratingService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserRating(@PathVariable Long id) {
+        boolean deleted = userratingService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

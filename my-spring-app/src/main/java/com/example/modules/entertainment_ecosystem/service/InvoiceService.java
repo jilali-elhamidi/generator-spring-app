@@ -19,7 +19,7 @@ public class InvoiceService extends BaseService<Invoice> {
     protected final InvoiceRepository invoiceRepository;
     private final TransactionRepository transactionRepository;
 
-    public InvoiceService(InvoiceRepository repository,TransactionRepository transactionRepository)
+    public InvoiceService(InvoiceRepository repository, TransactionRepository transactionRepository)
     {
         super(repository);
         this.invoiceRepository = repository;
@@ -28,28 +28,25 @@ public class InvoiceService extends BaseService<Invoice> {
 
     @Override
     public Invoice save(Invoice invoice) {
-
-
-    
-
-
-    
-
-    
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (invoice.getTransaction() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             invoice.setTransaction(
-            transactionRepository.findById(invoice.getTransaction().getId())
-            .orElseThrow(() -> new RuntimeException("transaction not found"))
+                transactionRepository.findById(invoice.getTransaction().getId())
+                    .orElseThrow(() -> new RuntimeException("transaction not found"))
             );
-        
-        invoice.getTransaction().setRelatedInvoice(invoice);
+            
+            invoice.getTransaction().setRelatedInvoice(invoice);
         }
+        
 
-        return invoiceRepository.save(invoice);
-    }
+    return invoiceRepository.save(invoice);
+}
 
 
     public Invoice update(Long id, Invoice invoiceRequest) {
@@ -60,71 +57,43 @@ public class InvoiceService extends BaseService<Invoice> {
         existing.setInvoiceDate(invoiceRequest.getInvoiceDate());
         existing.setAmount(invoiceRequest.getAmount());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (invoiceRequest.getTransaction() != null &&
+            invoiceRequest.getTransaction().getId() != null) {
 
-// Relations ManyToMany : synchronisation sécurisée
+            Transaction transaction = transactionRepository.findById(
+                invoiceRequest.getTransaction().getId()
+            ).orElseThrow(() -> new RuntimeException("Transaction not found"));
 
-// Relations OneToMany : synchronisation sécurisée
+            existing.setTransaction(transaction);
 
-    
-
-        if (invoiceRequest.getTransaction() != null
-        && invoiceRequest.getTransaction().getId() != null) {
-
-        Transaction transaction = transactionRepository.findById(
-        invoiceRequest.getTransaction().getId()
-        ).orElseThrow(() -> new RuntimeException("Transaction not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setTransaction(transaction);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
+            
             transaction.setRelatedInvoice(existing);
+            
+        }
         
-        }
 
-    
-
-
-        return invoiceRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Invoice> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Invoice entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getTransaction() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getTransaction().setRelatedInvoice(null);
-        // Dissocier côté direct
-        entity.setTransaction(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return invoiceRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Invoice> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Invoice entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getTransaction() != null) {
+            entity.getTransaction().setRelatedInvoice(null);
+            entity.setTransaction(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

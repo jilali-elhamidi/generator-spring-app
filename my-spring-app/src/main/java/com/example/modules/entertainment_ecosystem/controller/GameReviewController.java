@@ -46,37 +46,35 @@ public class GameReviewController {
 
         GameReview entity = gamereviewMapper.toEntity(gamereviewDto);
         GameReview saved = gamereviewService.save(entity);
-        URI location = uriBuilder.path("/api/gamereviews/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/gamereviews/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(gamereviewMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<GameReviewDto> updateGameReview(
-                @PathVariable Long id,
-                @RequestBody GameReviewDto gamereviewDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<GameReviewDto> updateGameReview(
+            @PathVariable Long id,
+            @Valid @RequestBody GameReviewDto gamereviewDto) {
 
-                // Transformer le DTO en entity pour le service
-                GameReview entityToUpdate = gamereviewMapper.toEntity(gamereviewDto);
 
-                // Appel du service update
-                GameReview updatedEntity = gamereviewService.update(id, entityToUpdate);
+        GameReview entityToUpdate = gamereviewMapper.toEntity(gamereviewDto);
+        GameReview updatedEntity = gamereviewService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                GameReviewDto updatedDto = gamereviewMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(gamereviewMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteGameReview(@PathVariable Long id) {
-                    boolean deleted = gamereviewService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGameReview(@PathVariable Long id) {
+        boolean deleted = gamereviewService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

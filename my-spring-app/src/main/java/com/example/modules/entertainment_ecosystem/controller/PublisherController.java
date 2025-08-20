@@ -46,37 +46,35 @@ public class PublisherController {
 
         Publisher entity = publisherMapper.toEntity(publisherDto);
         Publisher saved = publisherService.save(entity);
-        URI location = uriBuilder.path("/api/publishers/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/publishers/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(publisherMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<PublisherDto> updatePublisher(
-                @PathVariable Long id,
-                @RequestBody PublisherDto publisherDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<PublisherDto> updatePublisher(
+            @PathVariable Long id,
+            @Valid @RequestBody PublisherDto publisherDto) {
 
-                // Transformer le DTO en entity pour le service
-                Publisher entityToUpdate = publisherMapper.toEntity(publisherDto);
 
-                // Appel du service update
-                Publisher updatedEntity = publisherService.update(id, entityToUpdate);
+        Publisher entityToUpdate = publisherMapper.toEntity(publisherDto);
+        Publisher updatedEntity = publisherService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                PublisherDto updatedDto = publisherMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(publisherMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deletePublisher(@PathVariable Long id) {
-                    boolean deleted = publisherService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePublisher(@PathVariable Long id) {
+        boolean deleted = publisherService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

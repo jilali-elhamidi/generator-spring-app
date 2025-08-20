@@ -19,7 +19,7 @@ public class UserLoyaltyProgramService extends BaseService<UserLoyaltyProgram> {
     protected final UserLoyaltyProgramRepository userloyaltyprogramRepository;
     private final UserProfileRepository userRepository;
 
-    public UserLoyaltyProgramService(UserLoyaltyProgramRepository repository,UserProfileRepository userRepository)
+    public UserLoyaltyProgramService(UserLoyaltyProgramRepository repository, UserProfileRepository userRepository)
     {
         super(repository);
         this.userloyaltyprogramRepository = repository;
@@ -28,28 +28,25 @@ public class UserLoyaltyProgramService extends BaseService<UserLoyaltyProgram> {
 
     @Override
     public UserLoyaltyProgram save(UserLoyaltyProgram userloyaltyprogram) {
-
-
-    
-
-
-    
-
-    
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (userloyaltyprogram.getUser() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             userloyaltyprogram.setUser(
-            userRepository.findById(userloyaltyprogram.getUser().getId())
-            .orElseThrow(() -> new RuntimeException("user not found"))
+                userRepository.findById(userloyaltyprogram.getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("user not found"))
             );
-        
-        userloyaltyprogram.getUser().setLoyaltyProgram(userloyaltyprogram);
+            
+            userloyaltyprogram.getUser().setLoyaltyProgram(userloyaltyprogram);
         }
+        
 
-        return userloyaltyprogramRepository.save(userloyaltyprogram);
-    }
+    return userloyaltyprogramRepository.save(userloyaltyprogram);
+}
 
 
     public UserLoyaltyProgram update(Long id, UserLoyaltyProgram userloyaltyprogramRequest) {
@@ -60,71 +57,43 @@ public class UserLoyaltyProgramService extends BaseService<UserLoyaltyProgram> {
         existing.setName(userloyaltyprogramRequest.getName());
         existing.setPointsBalance(userloyaltyprogramRequest.getPointsBalance());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (userloyaltyprogramRequest.getUser() != null &&
+            userloyaltyprogramRequest.getUser().getId() != null) {
 
-// Relations ManyToMany : synchronisation sécurisée
+            UserProfile user = userRepository.findById(
+                userloyaltyprogramRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-// Relations OneToMany : synchronisation sécurisée
+            existing.setUser(user);
 
-    
-
-        if (userloyaltyprogramRequest.getUser() != null
-        && userloyaltyprogramRequest.getUser().getId() != null) {
-
-        UserProfile user = userRepository.findById(
-        userloyaltyprogramRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setUser(user);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
+            
             user.setLoyaltyProgram(existing);
+            
+        }
         
-        }
 
-    
-
-
-        return userloyaltyprogramRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserLoyaltyProgram> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserLoyaltyProgram entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getUser() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getUser().setLoyaltyProgram(null);
-        // Dissocier côté direct
-        entity.setUser(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return userloyaltyprogramRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserLoyaltyProgram> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserLoyaltyProgram entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getUser() != null) {
+            entity.getUser().setLoyaltyProgram(null);
+            entity.setUser(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

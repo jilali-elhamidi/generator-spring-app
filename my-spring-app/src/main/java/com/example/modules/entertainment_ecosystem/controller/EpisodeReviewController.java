@@ -46,37 +46,35 @@ public class EpisodeReviewController {
 
         EpisodeReview entity = episodereviewMapper.toEntity(episodereviewDto);
         EpisodeReview saved = episodereviewService.save(entity);
-        URI location = uriBuilder.path("/api/episodereviews/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/episodereviews/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(episodereviewMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<EpisodeReviewDto> updateEpisodeReview(
-                @PathVariable Long id,
-                @RequestBody EpisodeReviewDto episodereviewDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<EpisodeReviewDto> updateEpisodeReview(
+            @PathVariable Long id,
+            @Valid @RequestBody EpisodeReviewDto episodereviewDto) {
 
-                // Transformer le DTO en entity pour le service
-                EpisodeReview entityToUpdate = episodereviewMapper.toEntity(episodereviewDto);
 
-                // Appel du service update
-                EpisodeReview updatedEntity = episodereviewService.update(id, entityToUpdate);
+        EpisodeReview entityToUpdate = episodereviewMapper.toEntity(episodereviewDto);
+        EpisodeReview updatedEntity = episodereviewService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                EpisodeReviewDto updatedDto = episodereviewMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(episodereviewMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteEpisodeReview(@PathVariable Long id) {
-                    boolean deleted = episodereviewService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEpisodeReview(@PathVariable Long id) {
+        boolean deleted = episodereviewService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -46,37 +46,35 @@ public class TVShowStudioController {
 
         TVShowStudio entity = tvshowstudioMapper.toEntity(tvshowstudioDto);
         TVShowStudio saved = tvshowstudioService.save(entity);
-        URI location = uriBuilder.path("/api/tvshowstudios/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/tvshowstudios/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(tvshowstudioMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<TVShowStudioDto> updateTVShowStudio(
-                @PathVariable Long id,
-                @RequestBody TVShowStudioDto tvshowstudioDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<TVShowStudioDto> updateTVShowStudio(
+            @PathVariable Long id,
+            @Valid @RequestBody TVShowStudioDto tvshowstudioDto) {
 
-                // Transformer le DTO en entity pour le service
-                TVShowStudio entityToUpdate = tvshowstudioMapper.toEntity(tvshowstudioDto);
 
-                // Appel du service update
-                TVShowStudio updatedEntity = tvshowstudioService.update(id, entityToUpdate);
+        TVShowStudio entityToUpdate = tvshowstudioMapper.toEntity(tvshowstudioDto);
+        TVShowStudio updatedEntity = tvshowstudioService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                TVShowStudioDto updatedDto = tvshowstudioMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(tvshowstudioMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteTVShowStudio(@PathVariable Long id) {
-                    boolean deleted = tvshowstudioService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTVShowStudio(@PathVariable Long id) {
+        boolean deleted = tvshowstudioService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -1,41 +1,50 @@
 package com.example.modules.entertainment_ecosystem.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.ArtistSocialMedia;
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.ArrayList;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "socialmediaplatform_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class SocialMediaPlatform extends BaseEntity {
 
-// === Attributs simples ===
-
-        @NotNull@Size(min = 2, max = 50)
+    // === Attributs simples ===
+    @NotNull
+    @Size(min = 2, max = 50)
     private String name;
 
-        @NotNull@Size(max = 255)
+    @NotNull
+    @Size(max = 255)
     private String url;
 
 
-// === Relations ===
+    // === Relations ManyToOne ===
 
+    // === Relations OneToMany ===
     @OneToMany(mappedBy = "platform", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("platform")
-        private List<ArtistSocialMedia> artistSocialMedia;
+    @JsonIgnoreProperties("platform")
+    private List<ArtistSocialMedia> artistSocialMedia = new ArrayList<>();
     
 
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

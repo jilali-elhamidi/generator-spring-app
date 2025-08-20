@@ -22,7 +22,7 @@ public class GameAchievementService extends BaseService<GameAchievement> {
     private final VideoGameRepository gameRepository;
     private final UserAchievementRepository userAchievementsRepository;
 
-    public GameAchievementService(GameAchievementRepository repository,VideoGameRepository gameRepository,UserAchievementRepository userAchievementsRepository)
+    public GameAchievementService(GameAchievementRepository repository, VideoGameRepository gameRepository, UserAchievementRepository userAchievementsRepository)
     {
         super(repository);
         this.gameachievementRepository = repository;
@@ -32,49 +32,40 @@ public class GameAchievementService extends BaseService<GameAchievement> {
 
     @Override
     public GameAchievement save(GameAchievement gameachievement) {
-
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (gameachievement.getUserAchievements() != null) {
+    // ---------- OneToMany ----------
+        if (gameachievement.getUserAchievements() != null) {
             List<UserAchievement> managedUserAchievements = new ArrayList<>();
             for (UserAchievement item : gameachievement.getUserAchievements()) {
-            if (item.getId() != null) {
-            UserAchievement existingItem = userAchievementsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("UserAchievement not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setAchievement(gameachievement);
-            managedUserAchievements.add(existingItem);
-            } else {
-            item.setAchievement(gameachievement);
-            managedUserAchievements.add(item);
-            }
+                if (item.getId() != null) {
+                    UserAchievement existingItem = userAchievementsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserAchievement not found"));
+
+                     existingItem.setAchievement(gameachievement);
+                     managedUserAchievements.add(existingItem);
+                } else {
+                    item.setAchievement(gameachievement);
+                    managedUserAchievements.add(item);
+                }
             }
             gameachievement.setUserAchievements(managedUserAchievements);
-            }
-        
-    
-
-
-    
-
-    
-
-    if (gameachievement.getGame() != null
-        && gameachievement.getGame().getId() != null) {
-        VideoGame existingGame = gameRepository.findById(
-        gameachievement.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        gameachievement.setGame(existingGame);
         }
     
-    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (gameachievement.getGame() != null &&
+            gameachievement.getGame().getId() != null) {
 
-        return gameachievementRepository.save(gameachievement);
-    }
+            VideoGame existingGame = gameRepository.findById(
+                gameachievement.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+            gameachievement.setGame(existingGame);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return gameachievementRepository.save(gameachievement);
+}
 
 
     public GameAchievement update(Long id, GameAchievement gameachievementRequest) {
@@ -86,100 +77,66 @@ public class GameAchievementService extends BaseService<GameAchievement> {
         existing.setDescription(gameachievementRequest.getDescription());
         existing.setAchievementDate(gameachievementRequest.getAchievementDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (gameachievementRequest.getGame() != null &&
-        gameachievementRequest.getGame().getId() != null) {
+            gameachievementRequest.getGame().getId() != null) {
 
-        VideoGame existingGame = gameRepository.findById(
-        gameachievementRequest.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            VideoGame existingGame = gameRepository.findById(
+                gameachievementRequest.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-        existing.setGame(existingGame);
+            existing.setGame(existingGame);
         } else {
-        existing.setGame(null);
+            existing.setGame(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getUserAchievements().clear();
 
         if (gameachievementRequest.getUserAchievements() != null) {
-        for (var item : gameachievementRequest.getUserAchievements()) {
-        UserAchievement existingItem;
-        if (item.getId() != null) {
-        existingItem = userAchievementsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserAchievement not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : gameachievementRequest.getUserAchievements()) {
+                UserAchievement existingItem;
+                if (item.getId() != null) {
+                    existingItem = userAchievementsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserAchievement not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setAchievement(existing);
+                existing.getUserAchievements().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setAchievement(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getUserAchievements().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-
-        return gameachievementRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GameAchievement> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GameAchievement entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-        if (entity.getUserAchievements() != null) {
-        for (var child : entity.getUserAchievements()) {
         
-            child.setAchievement(null); // retirer la référence inverse
-        
-        }
-        entity.getUserAchievements().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getGame() != null) {
-        entity.setGame(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return gameachievementRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GameAchievement> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GameAchievement entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getUserAchievements() != null) {
+            for (var child : entity.getUserAchievements()) {
+                
+                child.setAchievement(null); // retirer la référence inverse
+                
+            }
+            entity.getUserAchievements().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getGame() != null) {
+            entity.setGame(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

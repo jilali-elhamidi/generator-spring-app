@@ -46,37 +46,35 @@ public class EventLocationController {
 
         EventLocation entity = eventlocationMapper.toEntity(eventlocationDto);
         EventLocation saved = eventlocationService.save(entity);
-        URI location = uriBuilder.path("/api/eventlocations/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/eventlocations/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(eventlocationMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<EventLocationDto> updateEventLocation(
-                @PathVariable Long id,
-                @RequestBody EventLocationDto eventlocationDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<EventLocationDto> updateEventLocation(
+            @PathVariable Long id,
+            @Valid @RequestBody EventLocationDto eventlocationDto) {
 
-                // Transformer le DTO en entity pour le service
-                EventLocation entityToUpdate = eventlocationMapper.toEntity(eventlocationDto);
 
-                // Appel du service update
-                EventLocation updatedEntity = eventlocationService.update(id, entityToUpdate);
+        EventLocation entityToUpdate = eventlocationMapper.toEntity(eventlocationDto);
+        EventLocation updatedEntity = eventlocationService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                EventLocationDto updatedDto = eventlocationMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(eventlocationMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteEventLocation(@PathVariable Long id) {
-                    boolean deleted = eventlocationService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEventLocation(@PathVariable Long id) {
+        boolean deleted = eventlocationService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

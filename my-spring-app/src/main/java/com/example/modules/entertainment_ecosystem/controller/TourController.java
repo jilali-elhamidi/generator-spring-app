@@ -46,37 +46,35 @@ public class TourController {
 
         Tour entity = tourMapper.toEntity(tourDto);
         Tour saved = tourService.save(entity);
-        URI location = uriBuilder.path("/api/tours/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/tours/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(tourMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<TourDto> updateTour(
-                @PathVariable Long id,
-                @RequestBody TourDto tourDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<TourDto> updateTour(
+            @PathVariable Long id,
+            @Valid @RequestBody TourDto tourDto) {
 
-                // Transformer le DTO en entity pour le service
-                Tour entityToUpdate = tourMapper.toEntity(tourDto);
 
-                // Appel du service update
-                Tour updatedEntity = tourService.update(id, entityToUpdate);
+        Tour entityToUpdate = tourMapper.toEntity(tourDto);
+        Tour updatedEntity = tourService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                TourDto updatedDto = tourMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(tourMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteTour(@PathVariable Long id) {
-                    boolean deleted = tourService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTour(@PathVariable Long id) {
+        boolean deleted = tourService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

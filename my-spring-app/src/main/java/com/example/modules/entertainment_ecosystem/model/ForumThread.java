@@ -1,57 +1,65 @@
 package com.example.modules.entertainment_ecosystem.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Date;
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
-import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.ForumPost;import com.example.modules.entertainment_ecosystem.model.ForumCategory;import com.example.modules.entertainment_ecosystem.model.ForumThreadTag;
+
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.ArrayList;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "forumthread_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class ForumThread extends BaseEntity {
 
-// === Attributs simples ===
-
-        @NotNull@Size(min = 5, max = 255)
+    // === Attributs simples ===
+    @NotNull
+    @Size(min = 5, max = 255)
     private String title;
 
-        @NotNull
+    @NotNull
     private Date creationDate;
 
     private Date lastPostDate;
 
 
-// === Relations ===
-
+    // === Relations ManyToOne ===
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "author_id")
-        @JsonIgnoreProperties("forumThreads")
-        private UserProfile author;
+    @JoinColumn(name = "author_id")
+    @JsonIgnoreProperties("forumThreads")
+    private UserProfile author;
     
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "category_id")
+    @JsonIgnoreProperties("threads")
+    private ForumCategory category;
+    
+
+    // === Relations OneToMany ===
     @OneToMany(mappedBy = "thread", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("thread")
-        private List<ForumPost> forumPosts;
+    @JsonIgnoreProperties("thread")
+    private List<ForumPost> forumPosts = new ArrayList<>();
     
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "category_id")
-        @JsonIgnoreProperties("threads")
-        private ForumCategory category;
-    
-    @ManyToMany(mappedBy = "threads", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("threads")
-            private List<ForumThreadTag> tags = new ArrayList<>();
-        
 
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
+    @ManyToMany(mappedBy = "threads", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("threads")
+    private List<ForumThreadTag> tags = new ArrayList<>();
+    
 }

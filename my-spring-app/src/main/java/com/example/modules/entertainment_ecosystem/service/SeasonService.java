@@ -22,7 +22,7 @@ public class SeasonService extends BaseService<Season> {
     private final TVShowRepository showRepository;
     private final EpisodeRepository episodesRepository;
 
-    public SeasonService(SeasonRepository repository,TVShowRepository showRepository,EpisodeRepository episodesRepository)
+    public SeasonService(SeasonRepository repository, TVShowRepository showRepository, EpisodeRepository episodesRepository)
     {
         super(repository);
         this.seasonRepository = repository;
@@ -32,49 +32,40 @@ public class SeasonService extends BaseService<Season> {
 
     @Override
     public Season save(Season season) {
-
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (season.getEpisodes() != null) {
+    // ---------- OneToMany ----------
+        if (season.getEpisodes() != null) {
             List<Episode> managedEpisodes = new ArrayList<>();
             for (Episode item : season.getEpisodes()) {
-            if (item.getId() != null) {
-            Episode existingItem = episodesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Episode not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setSeason(season);
-            managedEpisodes.add(existingItem);
-            } else {
-            item.setSeason(season);
-            managedEpisodes.add(item);
-            }
+                if (item.getId() != null) {
+                    Episode existingItem = episodesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Episode not found"));
+
+                     existingItem.setSeason(season);
+                     managedEpisodes.add(existingItem);
+                } else {
+                    item.setSeason(season);
+                    managedEpisodes.add(item);
+                }
             }
             season.setEpisodes(managedEpisodes);
-            }
-        
-    
-
-
-    
-
-    
-
-    if (season.getShow() != null
-        && season.getShow().getId() != null) {
-        TVShow existingShow = showRepository.findById(
-        season.getShow().getId()
-        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
-        season.setShow(existingShow);
         }
     
-    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (season.getShow() != null &&
+            season.getShow().getId() != null) {
 
-        return seasonRepository.save(season);
-    }
+            TVShow existingShow = showRepository.findById(
+                season.getShow().getId()
+            ).orElseThrow(() -> new RuntimeException("TVShow not found"));
+
+            season.setShow(existingShow);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return seasonRepository.save(season);
+}
 
 
     public Season update(Long id, Season seasonRequest) {
@@ -84,100 +75,66 @@ public class SeasonService extends BaseService<Season> {
     // Copier les champs simples
         existing.setSeasonNumber(seasonRequest.getSeasonNumber());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (seasonRequest.getShow() != null &&
-        seasonRequest.getShow().getId() != null) {
+            seasonRequest.getShow().getId() != null) {
 
-        TVShow existingShow = showRepository.findById(
-        seasonRequest.getShow().getId()
-        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
+            TVShow existingShow = showRepository.findById(
+                seasonRequest.getShow().getId()
+            ).orElseThrow(() -> new RuntimeException("TVShow not found"));
 
-        existing.setShow(existingShow);
+            existing.setShow(existingShow);
         } else {
-        existing.setShow(null);
+            existing.setShow(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getEpisodes().clear();
 
         if (seasonRequest.getEpisodes() != null) {
-        for (var item : seasonRequest.getEpisodes()) {
-        Episode existingItem;
-        if (item.getId() != null) {
-        existingItem = episodesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Episode not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : seasonRequest.getEpisodes()) {
+                Episode existingItem;
+                if (item.getId() != null) {
+                    existingItem = episodesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Episode not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setSeason(existing);
+                existing.getEpisodes().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setSeason(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getEpisodes().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-
-        return seasonRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Season> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Season entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-        if (entity.getEpisodes() != null) {
-        for (var child : entity.getEpisodes()) {
         
-            child.setSeason(null); // retirer la référence inverse
-        
-        }
-        entity.getEpisodes().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getShow() != null) {
-        entity.setShow(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return seasonRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Season> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Season entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getEpisodes() != null) {
+            for (var child : entity.getEpisodes()) {
+                
+                child.setSeason(null); // retirer la référence inverse
+                
+            }
+            entity.getEpisodes().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getShow() != null) {
+            entity.setShow(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

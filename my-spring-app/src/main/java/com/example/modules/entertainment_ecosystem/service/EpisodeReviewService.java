@@ -22,7 +22,7 @@ public class EpisodeReviewService extends BaseService<EpisodeReview> {
     private final UserProfileRepository userRepository;
     private final EpisodeRepository episodeRepository;
 
-    public EpisodeReviewService(EpisodeReviewRepository repository,UserProfileRepository userRepository,EpisodeRepository episodeRepository)
+    public EpisodeReviewService(EpisodeReviewRepository repository, UserProfileRepository userRepository, EpisodeRepository episodeRepository)
     {
         super(repository);
         this.episodereviewRepository = repository;
@@ -32,36 +32,33 @@ public class EpisodeReviewService extends BaseService<EpisodeReview> {
 
     @Override
     public EpisodeReview save(EpisodeReview episodereview) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (episodereview.getUser() != null &&
+            episodereview.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                episodereview.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (episodereview.getUser() != null
-        && episodereview.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        episodereview.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        episodereview.setUser(existingUser);
+            episodereview.setUser(existingUser);
         }
-    
-    if (episodereview.getEpisode() != null
-        && episodereview.getEpisode().getId() != null) {
-        Episode existingEpisode = episodeRepository.findById(
-        episodereview.getEpisode().getId()
-        ).orElseThrow(() -> new RuntimeException("Episode not found"));
-        episodereview.setEpisode(existingEpisode);
-        }
-    
+        
+        if (episodereview.getEpisode() != null &&
+            episodereview.getEpisode().getId() != null) {
 
-        return episodereviewRepository.save(episodereview);
-    }
+            Episode existingEpisode = episodeRepository.findById(
+                episodereview.getEpisode().getId()
+            ).orElseThrow(() -> new RuntimeException("Episode not found"));
+
+            episodereview.setEpisode(existingEpisode);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return episodereviewRepository.save(episodereview);
+}
 
 
     public EpisodeReview update(Long id, EpisodeReview episodereviewRequest) {
@@ -73,86 +70,56 @@ public class EpisodeReviewService extends BaseService<EpisodeReview> {
         existing.setComment(episodereviewRequest.getComment());
         existing.setReviewDate(episodereviewRequest.getReviewDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (episodereviewRequest.getUser() != null &&
-        episodereviewRequest.getUser().getId() != null) {
+            episodereviewRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        episodereviewRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                episodereviewRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (episodereviewRequest.getEpisode() != null &&
-        episodereviewRequest.getEpisode().getId() != null) {
+            episodereviewRequest.getEpisode().getId() != null) {
 
-        Episode existingEpisode = episodeRepository.findById(
-        episodereviewRequest.getEpisode().getId()
-        ).orElseThrow(() -> new RuntimeException("Episode not found"));
+            Episode existingEpisode = episodeRepository.findById(
+                episodereviewRequest.getEpisode().getId()
+            ).orElseThrow(() -> new RuntimeException("Episode not found"));
 
-        existing.setEpisode(existingEpisode);
+            existing.setEpisode(existingEpisode);
         } else {
-        existing.setEpisode(null);
+            existing.setEpisode(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return episodereviewRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<EpisodeReview> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-EpisodeReview entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getEpisode() != null) {
-        entity.setEpisode(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return episodereviewRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<EpisodeReview> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        EpisodeReview entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getEpisode() != null) {
+            entity.setEpisode(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

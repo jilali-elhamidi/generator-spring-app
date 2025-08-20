@@ -22,7 +22,7 @@ public class NotificationService extends BaseService<Notification> {
     private final UserProfileRepository recipientRepository;
     private final NotificationTypeRepository typeRepository;
 
-    public NotificationService(NotificationRepository repository,UserProfileRepository recipientRepository,NotificationTypeRepository typeRepository)
+    public NotificationService(NotificationRepository repository, UserProfileRepository recipientRepository, NotificationTypeRepository typeRepository)
     {
         super(repository);
         this.notificationRepository = repository;
@@ -32,36 +32,33 @@ public class NotificationService extends BaseService<Notification> {
 
     @Override
     public Notification save(Notification notification) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (notification.getRecipient() != null &&
+            notification.getRecipient().getId() != null) {
 
+            UserProfile existingRecipient = recipientRepository.findById(
+                notification.getRecipient().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (notification.getRecipient() != null
-        && notification.getRecipient().getId() != null) {
-        UserProfile existingRecipient = recipientRepository.findById(
-        notification.getRecipient().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        notification.setRecipient(existingRecipient);
+            notification.setRecipient(existingRecipient);
         }
-    
-    if (notification.getType() != null
-        && notification.getType().getId() != null) {
-        NotificationType existingType = typeRepository.findById(
-        notification.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("NotificationType not found"));
-        notification.setType(existingType);
-        }
-    
+        
+        if (notification.getType() != null &&
+            notification.getType().getId() != null) {
 
-        return notificationRepository.save(notification);
-    }
+            NotificationType existingType = typeRepository.findById(
+                notification.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("NotificationType not found"));
+
+            notification.setType(existingType);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return notificationRepository.save(notification);
+}
 
 
     public Notification update(Long id, Notification notificationRequest) {
@@ -74,86 +71,56 @@ public class NotificationService extends BaseService<Notification> {
         existing.setSentDate(notificationRequest.getSentDate());
         existing.setIsRead(notificationRequest.getIsRead());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (notificationRequest.getRecipient() != null &&
-        notificationRequest.getRecipient().getId() != null) {
+            notificationRequest.getRecipient().getId() != null) {
 
-        UserProfile existingRecipient = recipientRepository.findById(
-        notificationRequest.getRecipient().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingRecipient = recipientRepository.findById(
+                notificationRequest.getRecipient().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setRecipient(existingRecipient);
+            existing.setRecipient(existingRecipient);
         } else {
-        existing.setRecipient(null);
+            existing.setRecipient(null);
         }
+        
         if (notificationRequest.getType() != null &&
-        notificationRequest.getType().getId() != null) {
+            notificationRequest.getType().getId() != null) {
 
-        NotificationType existingType = typeRepository.findById(
-        notificationRequest.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("NotificationType not found"));
+            NotificationType existingType = typeRepository.findById(
+                notificationRequest.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("NotificationType not found"));
 
-        existing.setType(existingType);
+            existing.setType(existingType);
         } else {
-        existing.setType(null);
+            existing.setType(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return notificationRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Notification> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Notification entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getRecipient() != null) {
-        entity.setRecipient(null);
-        }
-    
-
-    
-        if (entity.getType() != null) {
-        entity.setType(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return notificationRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Notification> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Notification entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getRecipient() != null) {
+            entity.setRecipient(null);
+        }
+        
+        if (entity.getType() != null) {
+            entity.setType(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

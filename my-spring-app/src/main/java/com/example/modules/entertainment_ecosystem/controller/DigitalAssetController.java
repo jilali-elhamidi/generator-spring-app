@@ -46,37 +46,35 @@ public class DigitalAssetController {
 
         DigitalAsset entity = digitalassetMapper.toEntity(digitalassetDto);
         DigitalAsset saved = digitalassetService.save(entity);
-        URI location = uriBuilder.path("/api/digitalassets/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/digitalassets/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(digitalassetMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<DigitalAssetDto> updateDigitalAsset(
-                @PathVariable Long id,
-                @RequestBody DigitalAssetDto digitalassetDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<DigitalAssetDto> updateDigitalAsset(
+            @PathVariable Long id,
+            @Valid @RequestBody DigitalAssetDto digitalassetDto) {
 
-                // Transformer le DTO en entity pour le service
-                DigitalAsset entityToUpdate = digitalassetMapper.toEntity(digitalassetDto);
 
-                // Appel du service update
-                DigitalAsset updatedEntity = digitalassetService.update(id, entityToUpdate);
+        DigitalAsset entityToUpdate = digitalassetMapper.toEntity(digitalassetDto);
+        DigitalAsset updatedEntity = digitalassetService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                DigitalAssetDto updatedDto = digitalassetMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(digitalassetMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteDigitalAsset(@PathVariable Long id) {
-                    boolean deleted = digitalassetService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDigitalAsset(@PathVariable Long id) {
+        boolean deleted = digitalassetService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

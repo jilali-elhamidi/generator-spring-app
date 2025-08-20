@@ -34,7 +34,7 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
     private final TransactionRepository transactionRepository;
     private final GameExpansionPackRepository expansionPackRepository;
 
-    public DigitalPurchaseService(DigitalPurchaseRepository repository,UserProfileRepository userRepository,MovieRepository movieRepository,MusicTrackRepository musicTrackRepository,VideoGameRepository videoGameRepository,TransactionRepository transactionRepository,GameExpansionPackRepository expansionPackRepository)
+    public DigitalPurchaseService(DigitalPurchaseRepository repository, UserProfileRepository userRepository, MovieRepository movieRepository, MusicTrackRepository musicTrackRepository, VideoGameRepository videoGameRepository, TransactionRepository transactionRepository, GameExpansionPackRepository expansionPackRepository)
     {
         super(repository);
         this.digitalpurchaseRepository = repository;
@@ -48,88 +48,75 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
 
     @Override
     public DigitalPurchase save(DigitalPurchase digitalpurchase) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (digitalpurchase.getUser() != null &&
+            digitalpurchase.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                digitalpurchase.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    if (digitalpurchase.getUser() != null
-        && digitalpurchase.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        digitalpurchase.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        digitalpurchase.setUser(existingUser);
+            digitalpurchase.setUser(existingUser);
         }
-    
-    if (digitalpurchase.getMovie() != null
-        && digitalpurchase.getMovie().getId() != null) {
-        Movie existingMovie = movieRepository.findById(
-        digitalpurchase.getMovie().getId()
-        ).orElseThrow(() -> new RuntimeException("Movie not found"));
-        digitalpurchase.setMovie(existingMovie);
+        
+        if (digitalpurchase.getMovie() != null &&
+            digitalpurchase.getMovie().getId() != null) {
+
+            Movie existingMovie = movieRepository.findById(
+                digitalpurchase.getMovie().getId()
+            ).orElseThrow(() -> new RuntimeException("Movie not found"));
+
+            digitalpurchase.setMovie(existingMovie);
         }
-    
-    if (digitalpurchase.getMusicTrack() != null
-        && digitalpurchase.getMusicTrack().getId() != null) {
-        MusicTrack existingMusicTrack = musicTrackRepository.findById(
-        digitalpurchase.getMusicTrack().getId()
-        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        digitalpurchase.setMusicTrack(existingMusicTrack);
+        
+        if (digitalpurchase.getMusicTrack() != null &&
+            digitalpurchase.getMusicTrack().getId() != null) {
+
+            MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                digitalpurchase.getMusicTrack().getId()
+            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+
+            digitalpurchase.setMusicTrack(existingMusicTrack);
         }
-    
-    if (digitalpurchase.getVideoGame() != null
-        && digitalpurchase.getVideoGame().getId() != null) {
-        VideoGame existingVideoGame = videoGameRepository.findById(
-        digitalpurchase.getVideoGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        digitalpurchase.setVideoGame(existingVideoGame);
+        
+        if (digitalpurchase.getVideoGame() != null &&
+            digitalpurchase.getVideoGame().getId() != null) {
+
+            VideoGame existingVideoGame = videoGameRepository.findById(
+                digitalpurchase.getVideoGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+            digitalpurchase.setVideoGame(existingVideoGame);
         }
-    
-    
-    if (digitalpurchase.getExpansionPack() != null
-        && digitalpurchase.getExpansionPack().getId() != null) {
-        GameExpansionPack existingExpansionPack = expansionPackRepository.findById(
-        digitalpurchase.getExpansionPack().getId()
-        ).orElseThrow(() -> new RuntimeException("GameExpansionPack not found"));
-        digitalpurchase.setExpansionPack(existingExpansionPack);
+        
+        if (digitalpurchase.getExpansionPack() != null &&
+            digitalpurchase.getExpansionPack().getId() != null) {
+
+            GameExpansionPack existingExpansionPack = expansionPackRepository.findById(
+                digitalpurchase.getExpansionPack().getId()
+            ).orElseThrow(() -> new RuntimeException("GameExpansionPack not found"));
+
+            digitalpurchase.setExpansionPack(existingExpansionPack);
         }
-    
+        
+    // ---------- OneToOne ----------
         if (digitalpurchase.getTransaction() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             digitalpurchase.setTransaction(
-            transactionRepository.findById(digitalpurchase.getTransaction().getId())
-            .orElseThrow(() -> new RuntimeException("transaction not found"))
+                transactionRepository.findById(digitalpurchase.getTransaction().getId())
+                    .orElseThrow(() -> new RuntimeException("transaction not found"))
             );
-        
-        digitalpurchase.getTransaction().setDigitalPurchase(digitalpurchase);
+            
+            digitalpurchase.getTransaction().setDigitalPurchase(digitalpurchase);
         }
+        
 
-        return digitalpurchaseRepository.save(digitalpurchase);
-    }
+    return digitalpurchaseRepository.save(digitalpurchase);
+}
 
 
     public DigitalPurchase update(Long id, DigitalPurchase digitalpurchaseRequest) {
@@ -140,196 +127,123 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
         existing.setPurchaseDate(digitalpurchaseRequest.getPurchaseDate());
         existing.setPrice(digitalpurchaseRequest.getPrice());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (digitalpurchaseRequest.getUser() != null &&
-        digitalpurchaseRequest.getUser().getId() != null) {
+            digitalpurchaseRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        digitalpurchaseRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                digitalpurchaseRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (digitalpurchaseRequest.getMovie() != null &&
-        digitalpurchaseRequest.getMovie().getId() != null) {
+            digitalpurchaseRequest.getMovie().getId() != null) {
 
-        Movie existingMovie = movieRepository.findById(
-        digitalpurchaseRequest.getMovie().getId()
-        ).orElseThrow(() -> new RuntimeException("Movie not found"));
+            Movie existingMovie = movieRepository.findById(
+                digitalpurchaseRequest.getMovie().getId()
+            ).orElseThrow(() -> new RuntimeException("Movie not found"));
 
-        existing.setMovie(existingMovie);
+            existing.setMovie(existingMovie);
         } else {
-        existing.setMovie(null);
+            existing.setMovie(null);
         }
+        
         if (digitalpurchaseRequest.getMusicTrack() != null &&
-        digitalpurchaseRequest.getMusicTrack().getId() != null) {
+            digitalpurchaseRequest.getMusicTrack().getId() != null) {
 
-        MusicTrack existingMusicTrack = musicTrackRepository.findById(
-        digitalpurchaseRequest.getMusicTrack().getId()
-        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+            MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                digitalpurchaseRequest.getMusicTrack().getId()
+            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
 
-        existing.setMusicTrack(existingMusicTrack);
+            existing.setMusicTrack(existingMusicTrack);
         } else {
-        existing.setMusicTrack(null);
+            existing.setMusicTrack(null);
         }
+        
         if (digitalpurchaseRequest.getVideoGame() != null &&
-        digitalpurchaseRequest.getVideoGame().getId() != null) {
+            digitalpurchaseRequest.getVideoGame().getId() != null) {
 
-        VideoGame existingVideoGame = videoGameRepository.findById(
-        digitalpurchaseRequest.getVideoGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            VideoGame existingVideoGame = videoGameRepository.findById(
+                digitalpurchaseRequest.getVideoGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-        existing.setVideoGame(existingVideoGame);
+            existing.setVideoGame(existingVideoGame);
         } else {
-        existing.setVideoGame(null);
+            existing.setVideoGame(null);
         }
+        
         if (digitalpurchaseRequest.getExpansionPack() != null &&
-        digitalpurchaseRequest.getExpansionPack().getId() != null) {
+            digitalpurchaseRequest.getExpansionPack().getId() != null) {
 
-        GameExpansionPack existingExpansionPack = expansionPackRepository.findById(
-        digitalpurchaseRequest.getExpansionPack().getId()
-        ).orElseThrow(() -> new RuntimeException("GameExpansionPack not found"));
+            GameExpansionPack existingExpansionPack = expansionPackRepository.findById(
+                digitalpurchaseRequest.getExpansionPack().getId()
+            ).orElseThrow(() -> new RuntimeException("GameExpansionPack not found"));
 
-        existing.setExpansionPack(existingExpansionPack);
+            existing.setExpansionPack(existingExpansionPack);
         } else {
-        existing.setExpansionPack(null);
+            existing.setExpansionPack(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-    
-
-    
-
-        if (digitalpurchaseRequest.getTransaction() != null
-        && digitalpurchaseRequest.getTransaction().getId() != null) {
-
-        Transaction transaction = transactionRepository.findById(
-        digitalpurchaseRequest.getTransaction().getId()
-        ).orElseThrow(() -> new RuntimeException("Transaction not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setTransaction(transaction);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (digitalpurchaseRequest.getTransaction() != null &&
+            digitalpurchaseRequest.getTransaction().getId() != null) {
+
+            Transaction transaction = transactionRepository.findById(
+                digitalpurchaseRequest.getTransaction().getId()
+            ).orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+            existing.setTransaction(transaction);
+
+            
             transaction.setDigitalPurchase(existing);
+            
+        }
         
-        }
 
-    
-
-    
-
-
-        return digitalpurchaseRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<DigitalPurchase> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-DigitalPurchase entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getTransaction() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getTransaction().setDigitalPurchase(null);
-        // Dissocier côté direct
-        entity.setTransaction(null);
-        }
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getMovie() != null) {
-        entity.setMovie(null);
-        }
-    
-
-    
-        if (entity.getMusicTrack() != null) {
-        entity.setMusicTrack(null);
-        }
-    
-
-    
-        if (entity.getVideoGame() != null) {
-        entity.setVideoGame(null);
-        }
-    
-
-    
-
-    
-        if (entity.getExpansionPack() != null) {
-        entity.setExpansionPack(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return digitalpurchaseRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<DigitalPurchase> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        DigitalPurchase entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getTransaction() != null) {
+            entity.getTransaction().setDigitalPurchase(null);
+            entity.setTransaction(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getMovie() != null) {
+            entity.setMovie(null);
+        }
+        
+        if (entity.getMusicTrack() != null) {
+            entity.setMusicTrack(null);
+        }
+        
+        if (entity.getVideoGame() != null) {
+            entity.setVideoGame(null);
+        }
+        
+        if (entity.getExpansionPack() != null) {
+            entity.setExpansionPack(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

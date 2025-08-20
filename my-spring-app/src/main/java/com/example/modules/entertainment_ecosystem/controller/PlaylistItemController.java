@@ -46,37 +46,35 @@ public class PlaylistItemController {
 
         PlaylistItem entity = playlistitemMapper.toEntity(playlistitemDto);
         PlaylistItem saved = playlistitemService.save(entity);
-        URI location = uriBuilder.path("/api/playlistitems/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/playlistitems/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(playlistitemMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<PlaylistItemDto> updatePlaylistItem(
-                @PathVariable Long id,
-                @RequestBody PlaylistItemDto playlistitemDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<PlaylistItemDto> updatePlaylistItem(
+            @PathVariable Long id,
+            @Valid @RequestBody PlaylistItemDto playlistitemDto) {
 
-                // Transformer le DTO en entity pour le service
-                PlaylistItem entityToUpdate = playlistitemMapper.toEntity(playlistitemDto);
 
-                // Appel du service update
-                PlaylistItem updatedEntity = playlistitemService.update(id, entityToUpdate);
+        PlaylistItem entityToUpdate = playlistitemMapper.toEntity(playlistitemDto);
+        PlaylistItem updatedEntity = playlistitemService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                PlaylistItemDto updatedDto = playlistitemMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(playlistitemMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deletePlaylistItem(@PathVariable Long id) {
-                    boolean deleted = playlistitemService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePlaylistItem(@PathVariable Long id) {
+        boolean deleted = playlistitemService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

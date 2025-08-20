@@ -46,37 +46,35 @@ public class ForumCategoryController {
 
         ForumCategory entity = forumcategoryMapper.toEntity(forumcategoryDto);
         ForumCategory saved = forumcategoryService.save(entity);
-        URI location = uriBuilder.path("/api/forumcategorys/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/forumcategorys/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(forumcategoryMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ForumCategoryDto> updateForumCategory(
-                @PathVariable Long id,
-                @RequestBody ForumCategoryDto forumcategoryDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ForumCategoryDto> updateForumCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody ForumCategoryDto forumcategoryDto) {
 
-                // Transformer le DTO en entity pour le service
-                ForumCategory entityToUpdate = forumcategoryMapper.toEntity(forumcategoryDto);
 
-                // Appel du service update
-                ForumCategory updatedEntity = forumcategoryService.update(id, entityToUpdate);
+        ForumCategory entityToUpdate = forumcategoryMapper.toEntity(forumcategoryDto);
+        ForumCategory updatedEntity = forumcategoryService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ForumCategoryDto updatedDto = forumcategoryMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(forumcategoryMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteForumCategory(@PathVariable Long id) {
-                    boolean deleted = forumcategoryService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteForumCategory(@PathVariable Long id) {
+        boolean deleted = forumcategoryService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

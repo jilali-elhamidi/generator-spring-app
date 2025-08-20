@@ -46,37 +46,35 @@ public class MusicVideoController {
 
         MusicVideo entity = musicvideoMapper.toEntity(musicvideoDto);
         MusicVideo saved = musicvideoService.save(entity);
-        URI location = uriBuilder.path("/api/musicvideos/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/musicvideos/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(musicvideoMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MusicVideoDto> updateMusicVideo(
-                @PathVariable Long id,
-                @RequestBody MusicVideoDto musicvideoDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MusicVideoDto> updateMusicVideo(
+            @PathVariable Long id,
+            @Valid @RequestBody MusicVideoDto musicvideoDto) {
 
-                // Transformer le DTO en entity pour le service
-                MusicVideo entityToUpdate = musicvideoMapper.toEntity(musicvideoDto);
 
-                // Appel du service update
-                MusicVideo updatedEntity = musicvideoService.update(id, entityToUpdate);
+        MusicVideo entityToUpdate = musicvideoMapper.toEntity(musicvideoDto);
+        MusicVideo updatedEntity = musicvideoService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MusicVideoDto updatedDto = musicvideoMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(musicvideoMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMusicVideo(@PathVariable Long id) {
-                    boolean deleted = musicvideoService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMusicVideo(@PathVariable Long id) {
+        boolean deleted = musicvideoService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -19,7 +19,7 @@ public class ShiftService extends BaseService<Shift> {
     protected final ShiftRepository shiftRepository;
     private final EmployeeRepository employeeRepository;
 
-    public ShiftService(ShiftRepository repository,EmployeeRepository employeeRepository)
+    public ShiftService(ShiftRepository repository, EmployeeRepository employeeRepository)
     {
         super(repository);
         this.shiftRepository = repository;
@@ -28,24 +28,23 @@ public class ShiftService extends BaseService<Shift> {
 
     @Override
     public Shift save(Shift shift) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (shift.getEmployee() != null &&
+            shift.getEmployee().getId() != null) {
 
+            Employee existingEmployee = employeeRepository.findById(
+                shift.getEmployee().getId()
+            ).orElseThrow(() -> new RuntimeException("Employee not found"));
 
-    
-
-
-    
-
-    if (shift.getEmployee() != null
-        && shift.getEmployee().getId() != null) {
-        Employee existingEmployee = employeeRepository.findById(
-        shift.getEmployee().getId()
-        ).orElseThrow(() -> new RuntimeException("Employee not found"));
-        shift.setEmployee(existingEmployee);
+            shift.setEmployee(existingEmployee);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return shiftRepository.save(shift);
-    }
+    return shiftRepository.save(shift);
+}
 
 
     public Shift update(Long id, Shift shiftRequest) {
@@ -57,61 +56,40 @@ public class ShiftService extends BaseService<Shift> {
         existing.setStartTime(shiftRequest.getStartTime());
         existing.setEndTime(shiftRequest.getEndTime());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (shiftRequest.getEmployee() != null &&
-        shiftRequest.getEmployee().getId() != null) {
+            shiftRequest.getEmployee().getId() != null) {
 
-        Employee existingEmployee = employeeRepository.findById(
-        shiftRequest.getEmployee().getId()
-        ).orElseThrow(() -> new RuntimeException("Employee not found"));
+            Employee existingEmployee = employeeRepository.findById(
+                shiftRequest.getEmployee().getId()
+            ).orElseThrow(() -> new RuntimeException("Employee not found"));
 
-        existing.setEmployee(existingEmployee);
+            existing.setEmployee(existingEmployee);
         } else {
-        existing.setEmployee(null);
+            existing.setEmployee(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return shiftRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Shift> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Shift entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getEmployee() != null) {
-        entity.setEmployee(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return shiftRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Shift> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Shift entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getEmployee() != null) {
+            entity.setEmployee(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

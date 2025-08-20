@@ -46,37 +46,35 @@ public class MusicFormatController {
 
         MusicFormat entity = musicformatMapper.toEntity(musicformatDto);
         MusicFormat saved = musicformatService.save(entity);
-        URI location = uriBuilder.path("/api/musicformats/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/musicformats/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(musicformatMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MusicFormatDto> updateMusicFormat(
-                @PathVariable Long id,
-                @RequestBody MusicFormatDto musicformatDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MusicFormatDto> updateMusicFormat(
+            @PathVariable Long id,
+            @Valid @RequestBody MusicFormatDto musicformatDto) {
 
-                // Transformer le DTO en entity pour le service
-                MusicFormat entityToUpdate = musicformatMapper.toEntity(musicformatDto);
 
-                // Appel du service update
-                MusicFormat updatedEntity = musicformatService.update(id, entityToUpdate);
+        MusicFormat entityToUpdate = musicformatMapper.toEntity(musicformatDto);
+        MusicFormat updatedEntity = musicformatService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MusicFormatDto updatedDto = musicformatMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(musicformatMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMusicFormat(@PathVariable Long id) {
-                    boolean deleted = musicformatService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMusicFormat(@PathVariable Long id) {
+        boolean deleted = musicformatService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

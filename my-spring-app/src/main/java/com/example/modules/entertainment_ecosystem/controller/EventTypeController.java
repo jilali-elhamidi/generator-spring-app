@@ -46,37 +46,35 @@ public class EventTypeController {
 
         EventType entity = eventtypeMapper.toEntity(eventtypeDto);
         EventType saved = eventtypeService.save(entity);
-        URI location = uriBuilder.path("/api/eventtypes/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/eventtypes/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(eventtypeMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<EventTypeDto> updateEventType(
-                @PathVariable Long id,
-                @RequestBody EventTypeDto eventtypeDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<EventTypeDto> updateEventType(
+            @PathVariable Long id,
+            @Valid @RequestBody EventTypeDto eventtypeDto) {
 
-                // Transformer le DTO en entity pour le service
-                EventType entityToUpdate = eventtypeMapper.toEntity(eventtypeDto);
 
-                // Appel du service update
-                EventType updatedEntity = eventtypeService.update(id, entityToUpdate);
+        EventType entityToUpdate = eventtypeMapper.toEntity(eventtypeDto);
+        EventType updatedEntity = eventtypeService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                EventTypeDto updatedDto = eventtypeMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(eventtypeMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteEventType(@PathVariable Long id) {
-                    boolean deleted = eventtypeService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEventType(@PathVariable Long id) {
+        boolean deleted = eventtypeService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

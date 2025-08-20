@@ -1,59 +1,68 @@
 package com.example.modules.entertainment_ecosystem.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Date;
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
-import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.Sponsor;import com.example.modules.entertainment_ecosystem.model.StreamingPlatform;import com.example.modules.entertainment_ecosystem.model.AdPlacement;
+
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.ArrayList;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "adcampaign_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class AdCampaign extends BaseEntity {
 
-// === Attributs simples ===
-
-        @NotNull@Size(min = 2, max = 100)
+    // === Attributs simples ===
+    @NotNull
+    @Size(min = 2, max = 100)
     private String name;
 
-        @NotNull
+    @NotNull
     private Date startDate;
 
-        @NotNull
+    @NotNull
     private Date endDate;
 
-        @NotNull
+    @NotNull
     private Double budget;
 
 
-// === Relations ===
-
+    // === Relations ManyToOne ===
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "advertiser_id")
-        @JsonIgnoreProperties("adCampaigns")
-        private Sponsor advertiser;
-    
-    @ManyToMany(fetch = FetchType.LAZY)
-            @JoinTable(name = "ad_campaign_platforms",
-            joinColumns = @JoinColumn(name = "platform_id"),
-            inverseJoinColumns = @JoinColumn(name = "campaign_id"))
-            @JsonIgnoreProperties("adCampaigns")
-            private List<StreamingPlatform> displayedOnPlatforms;
-            
-    @OneToMany(mappedBy = "campaign", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("campaign")
-        private List<AdPlacement> adPlacements;
+    @JoinColumn(name = "advertiser_id")
+    @JsonIgnoreProperties("adCampaigns")
+    private Sponsor advertiser;
     
 
+    // === Relations OneToMany ===
+    @OneToMany(mappedBy = "campaign", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("campaign")
+    private List<AdPlacement> adPlacements = new ArrayList<>();
+    
+
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "ad_campaign_platforms",
+        joinColumns = @JoinColumn(name = "platform_id"),
+        inverseJoinColumns = @JoinColumn(name = "campaign_id"))
+    @JsonIgnoreProperties("adCampaigns")
+    private List<StreamingPlatform> displayedOnPlatforms = new ArrayList<>();
+    
+    
 }

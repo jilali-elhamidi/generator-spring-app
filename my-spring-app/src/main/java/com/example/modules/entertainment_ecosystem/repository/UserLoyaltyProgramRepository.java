@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserLoyaltyProgramRepository extends BaseRepository<UserLoyaltyProgram, Long> {
+
 }

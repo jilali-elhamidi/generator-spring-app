@@ -19,7 +19,7 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
     protected final TVShowStudioRepository tvshowstudioRepository;
     private final TVShowRepository tvShowsRepository;
 
-    public TVShowStudioService(TVShowStudioRepository repository,TVShowRepository tvShowsRepository)
+    public TVShowStudioService(TVShowStudioRepository repository, TVShowRepository tvShowsRepository)
     {
         super(repository);
         this.tvshowstudioRepository = repository;
@@ -28,37 +28,30 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
 
     @Override
     public TVShowStudio save(TVShowStudio tvshowstudio) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (tvshowstudio.getTvShows() != null) {
+    // ---------- OneToMany ----------
+        if (tvshowstudio.getTvShows() != null) {
             List<TVShow> managedTvShows = new ArrayList<>();
             for (TVShow item : tvshowstudio.getTvShows()) {
-            if (item.getId() != null) {
-            TVShow existingItem = tvShowsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("TVShow not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setTvShowStudio(tvshowstudio);
-            managedTvShows.add(existingItem);
-            } else {
-            item.setTvShowStudio(tvshowstudio);
-            managedTvShows.add(item);
-            }
+                if (item.getId() != null) {
+                    TVShow existingItem = tvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+
+                     existingItem.setTvShowStudio(tvshowstudio);
+                     managedTvShows.add(existingItem);
+                } else {
+                    item.setTvShowStudio(tvshowstudio);
+                    managedTvShows.add(item);
+                }
             }
             tvshowstudio.setTvShows(managedTvShows);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return tvshowstudioRepository.save(tvshowstudio);
-    }
+    return tvshowstudioRepository.save(tvshowstudio);
+}
 
 
     public TVShowStudio update(Long id, TVShowStudio tvshowstudioRequest) {
@@ -69,75 +62,50 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
         existing.setName(tvshowstudioRequest.getName());
         existing.setLocation(tvshowstudioRequest.getLocation());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getTvShows().clear();
 
         if (tvshowstudioRequest.getTvShows() != null) {
-        for (var item : tvshowstudioRequest.getTvShows()) {
-        TVShow existingItem;
-        if (item.getId() != null) {
-        existingItem = tvShowsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : tvshowstudioRequest.getTvShows()) {
+                TVShow existingItem;
+                if (item.getId() != null) {
+                    existingItem = tvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setTvShowStudio(existing);
+                existing.getTvShows().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setTvShowStudio(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getTvShows().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return tvshowstudioRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<TVShowStudio> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-TVShowStudio entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getTvShows() != null) {
-        for (var child : entity.getTvShows()) {
         
-            child.setTvShowStudio(null); // retirer la référence inverse
-        
-        }
-        entity.getTvShows().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return tvshowstudioRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<TVShowStudio> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        TVShowStudio entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getTvShows() != null) {
+            for (var child : entity.getTvShows()) {
+                
+                child.setTvShowStudio(null); // retirer la référence inverse
+                
+            }
+            entity.getTvShows().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -46,37 +46,35 @@ public class ReviewCommentController {
 
         ReviewComment entity = reviewcommentMapper.toEntity(reviewcommentDto);
         ReviewComment saved = reviewcommentService.save(entity);
-        URI location = uriBuilder.path("/api/reviewcomments/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/reviewcomments/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(reviewcommentMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ReviewCommentDto> updateReviewComment(
-                @PathVariable Long id,
-                @RequestBody ReviewCommentDto reviewcommentDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ReviewCommentDto> updateReviewComment(
+            @PathVariable Long id,
+            @Valid @RequestBody ReviewCommentDto reviewcommentDto) {
 
-                // Transformer le DTO en entity pour le service
-                ReviewComment entityToUpdate = reviewcommentMapper.toEntity(reviewcommentDto);
 
-                // Appel du service update
-                ReviewComment updatedEntity = reviewcommentService.update(id, entityToUpdate);
+        ReviewComment entityToUpdate = reviewcommentMapper.toEntity(reviewcommentDto);
+        ReviewComment updatedEntity = reviewcommentService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ReviewCommentDto updatedDto = reviewcommentMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(reviewcommentMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteReviewComment(@PathVariable Long id) {
-                    boolean deleted = reviewcommentService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReviewComment(@PathVariable Long id) {
+        boolean deleted = reviewcommentService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

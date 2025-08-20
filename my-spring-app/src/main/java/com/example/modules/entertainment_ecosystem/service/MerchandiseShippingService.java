@@ -28,7 +28,7 @@ public class MerchandiseShippingService extends BaseService<MerchandiseShipping>
     private final MerchandiseShippingMethodRepository shippingMethodRepository;
     private final MerchandiseShippingStatusRepository statusHistoryRepository;
 
-    public MerchandiseShippingService(MerchandiseShippingRepository repository,MerchandiseRepository merchandiseItemRepository,MerchandiseOrderRepository orderRepository,MerchandiseShippingMethodRepository shippingMethodRepository,MerchandiseShippingStatusRepository statusHistoryRepository)
+    public MerchandiseShippingService(MerchandiseShippingRepository repository, MerchandiseRepository merchandiseItemRepository, MerchandiseOrderRepository orderRepository, MerchandiseShippingMethodRepository shippingMethodRepository, MerchandiseShippingStatusRepository statusHistoryRepository)
     {
         super(repository);
         this.merchandiseshippingRepository = repository;
@@ -40,77 +40,62 @@ public class MerchandiseShippingService extends BaseService<MerchandiseShipping>
 
     @Override
     public MerchandiseShipping save(MerchandiseShipping merchandiseshipping) {
-
-
-    
-
-    
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (merchandiseshipping.getStatusHistory() != null) {
+    // ---------- OneToMany ----------
+        if (merchandiseshipping.getStatusHistory() != null) {
             List<MerchandiseShippingStatus> managedStatusHistory = new ArrayList<>();
             for (MerchandiseShippingStatus item : merchandiseshipping.getStatusHistory()) {
-            if (item.getId() != null) {
-            MerchandiseShippingStatus existingItem = statusHistoryRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("MerchandiseShippingStatus not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setShipment(merchandiseshipping);
-            managedStatusHistory.add(existingItem);
-            } else {
-            item.setShipment(merchandiseshipping);
-            managedStatusHistory.add(item);
-            }
+                if (item.getId() != null) {
+                    MerchandiseShippingStatus existingItem = statusHistoryRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MerchandiseShippingStatus not found"));
+
+                     existingItem.setShipment(merchandiseshipping);
+                     managedStatusHistory.add(existingItem);
+                } else {
+                    item.setShipment(merchandiseshipping);
+                    managedStatusHistory.add(item);
+                }
             }
             merchandiseshipping.setStatusHistory(managedStatusHistory);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (merchandiseshipping.getMerchandiseItem() != null &&
+            merchandiseshipping.getMerchandiseItem().getId() != null) {
+
+            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                merchandiseshipping.getMerchandiseItem().getId()
+            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+
+            merchandiseshipping.setMerchandiseItem(existingMerchandiseItem);
+        }
         
-    
+        if (merchandiseshipping.getShippingMethod() != null &&
+            merchandiseshipping.getShippingMethod().getId() != null) {
 
+            MerchandiseShippingMethod existingShippingMethod = shippingMethodRepository.findById(
+                merchandiseshipping.getShippingMethod().getId()
+            ).orElseThrow(() -> new RuntimeException("MerchandiseShippingMethod not found"));
 
-    
-
-    
-
-    
-
-    
-
-    if (merchandiseshipping.getMerchandiseItem() != null
-        && merchandiseshipping.getMerchandiseItem().getId() != null) {
-        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-        merchandiseshipping.getMerchandiseItem().getId()
-        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        merchandiseshipping.setMerchandiseItem(existingMerchandiseItem);
+            merchandiseshipping.setShippingMethod(existingShippingMethod);
         }
-    
-    
-    if (merchandiseshipping.getShippingMethod() != null
-        && merchandiseshipping.getShippingMethod().getId() != null) {
-        MerchandiseShippingMethod existingShippingMethod = shippingMethodRepository.findById(
-        merchandiseshipping.getShippingMethod().getId()
-        ).orElseThrow(() -> new RuntimeException("MerchandiseShippingMethod not found"));
-        merchandiseshipping.setShippingMethod(existingShippingMethod);
-        }
-    
-    
+        
+    // ---------- OneToOne ----------
         if (merchandiseshipping.getOrder() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             merchandiseshipping.setOrder(
-            orderRepository.findById(merchandiseshipping.getOrder().getId())
-            .orElseThrow(() -> new RuntimeException("order not found"))
+                orderRepository.findById(merchandiseshipping.getOrder().getId())
+                    .orElseThrow(() -> new RuntimeException("order not found"))
             );
-        
-        merchandiseshipping.getOrder().setShippingDetails(merchandiseshipping);
+            
+            merchandiseshipping.getOrder().setShippingDetails(merchandiseshipping);
         }
+        
 
-        return merchandiseshippingRepository.save(merchandiseshipping);
-    }
+    return merchandiseshippingRepository.save(merchandiseshipping);
+}
 
 
     public MerchandiseShipping update(Long id, MerchandiseShipping merchandiseshippingRequest) {
@@ -122,160 +107,101 @@ public class MerchandiseShippingService extends BaseService<MerchandiseShipping>
         existing.setCarrier(merchandiseshippingRequest.getCarrier());
         existing.setTrackingNumber(merchandiseshippingRequest.getTrackingNumber());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (merchandiseshippingRequest.getMerchandiseItem() != null &&
-        merchandiseshippingRequest.getMerchandiseItem().getId() != null) {
+            merchandiseshippingRequest.getMerchandiseItem().getId() != null) {
 
-        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-        merchandiseshippingRequest.getMerchandiseItem().getId()
-        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                merchandiseshippingRequest.getMerchandiseItem().getId()
+            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
 
-        existing.setMerchandiseItem(existingMerchandiseItem);
+            existing.setMerchandiseItem(existingMerchandiseItem);
         } else {
-        existing.setMerchandiseItem(null);
+            existing.setMerchandiseItem(null);
         }
+        
         if (merchandiseshippingRequest.getShippingMethod() != null &&
-        merchandiseshippingRequest.getShippingMethod().getId() != null) {
+            merchandiseshippingRequest.getShippingMethod().getId() != null) {
 
-        MerchandiseShippingMethod existingShippingMethod = shippingMethodRepository.findById(
-        merchandiseshippingRequest.getShippingMethod().getId()
-        ).orElseThrow(() -> new RuntimeException("MerchandiseShippingMethod not found"));
+            MerchandiseShippingMethod existingShippingMethod = shippingMethodRepository.findById(
+                merchandiseshippingRequest.getShippingMethod().getId()
+            ).orElseThrow(() -> new RuntimeException("MerchandiseShippingMethod not found"));
 
-        existing.setShippingMethod(existingShippingMethod);
+            existing.setShippingMethod(existingShippingMethod);
         } else {
-        existing.setShippingMethod(null);
+            existing.setShippingMethod(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getStatusHistory().clear();
 
         if (merchandiseshippingRequest.getStatusHistory() != null) {
-        for (var item : merchandiseshippingRequest.getStatusHistory()) {
-        MerchandiseShippingStatus existingItem;
-        if (item.getId() != null) {
-        existingItem = statusHistoryRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("MerchandiseShippingStatus not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : merchandiseshippingRequest.getStatusHistory()) {
+                MerchandiseShippingStatus existingItem;
+                if (item.getId() != null) {
+                    existingItem = statusHistoryRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MerchandiseShippingStatus not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setShipment(existing);
+                existing.getStatusHistory().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setShipment(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getStatusHistory().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-        if (merchandiseshippingRequest.getOrder() != null
-        && merchandiseshippingRequest.getOrder().getId() != null) {
-
-        MerchandiseOrder order = orderRepository.findById(
-        merchandiseshippingRequest.getOrder().getId()
-        ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setOrder(order);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations OneToOne ----------
+            if (merchandiseshippingRequest.getOrder() != null &&
+            merchandiseshippingRequest.getOrder().getId() != null) {
+
+            MerchandiseOrder order = orderRepository.findById(
+                merchandiseshippingRequest.getOrder().getId()
+            ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
+
+            existing.setOrder(order);
+
+            
             order.setShippingDetails(existing);
+            
+        }
         
-        }
 
-    
-
-    
-
-    
-
-
-        return merchandiseshippingRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MerchandiseShipping> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MerchandiseShipping entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-    
-        if (entity.getStatusHistory() != null) {
-        for (var child : entity.getStatusHistory()) {
-        
-            child.setShipment(null); // retirer la référence inverse
-        
-        }
-        entity.getStatusHistory().clear();
-        }
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-        if (entity.getOrder() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getOrder().setShippingDetails(null);
-        // Dissocier côté direct
-        entity.setOrder(null);
-        }
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getMerchandiseItem() != null) {
-        entity.setMerchandiseItem(null);
-        }
-    
-
-    
-
-    
-        if (entity.getShippingMethod() != null) {
-        entity.setShippingMethod(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return merchandiseshippingRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MerchandiseShipping> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MerchandiseShipping entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getStatusHistory() != null) {
+            for (var child : entity.getStatusHistory()) {
+                
+                child.setShipment(null); // retirer la référence inverse
+                
+            }
+            entity.getStatusHistory().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getOrder() != null) {
+            entity.getOrder().setShippingDetails(null);
+            entity.setOrder(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getMerchandiseItem() != null) {
+            entity.setMerchandiseItem(null);
+        }
+        
+        if (entity.getShippingMethod() != null) {
+            entity.setShippingMethod(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

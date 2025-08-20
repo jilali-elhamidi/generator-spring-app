@@ -46,37 +46,35 @@ public class MusicTrackController {
 
         MusicTrack entity = musictrackMapper.toEntity(musictrackDto);
         MusicTrack saved = musictrackService.save(entity);
-        URI location = uriBuilder.path("/api/musictracks/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/musictracks/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(musictrackMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MusicTrackDto> updateMusicTrack(
-                @PathVariable Long id,
-                @RequestBody MusicTrackDto musictrackDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MusicTrackDto> updateMusicTrack(
+            @PathVariable Long id,
+            @Valid @RequestBody MusicTrackDto musictrackDto) {
 
-                // Transformer le DTO en entity pour le service
-                MusicTrack entityToUpdate = musictrackMapper.toEntity(musictrackDto);
 
-                // Appel du service update
-                MusicTrack updatedEntity = musictrackService.update(id, entityToUpdate);
+        MusicTrack entityToUpdate = musictrackMapper.toEntity(musictrackDto);
+        MusicTrack updatedEntity = musictrackService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MusicTrackDto updatedDto = musictrackMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(musictrackMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMusicTrack(@PathVariable Long id) {
-                    boolean deleted = musictrackService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMusicTrack(@PathVariable Long id) {
+        boolean deleted = musictrackService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -46,37 +46,35 @@ public class AdPlacementController {
 
         AdPlacement entity = adplacementMapper.toEntity(adplacementDto);
         AdPlacement saved = adplacementService.save(entity);
-        URI location = uriBuilder.path("/api/adplacements/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/adplacements/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(adplacementMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<AdPlacementDto> updateAdPlacement(
-                @PathVariable Long id,
-                @RequestBody AdPlacementDto adplacementDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<AdPlacementDto> updateAdPlacement(
+            @PathVariable Long id,
+            @Valid @RequestBody AdPlacementDto adplacementDto) {
 
-                // Transformer le DTO en entity pour le service
-                AdPlacement entityToUpdate = adplacementMapper.toEntity(adplacementDto);
 
-                // Appel du service update
-                AdPlacement updatedEntity = adplacementService.update(id, entityToUpdate);
+        AdPlacement entityToUpdate = adplacementMapper.toEntity(adplacementDto);
+        AdPlacement updatedEntity = adplacementService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                AdPlacementDto updatedDto = adplacementMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(adplacementMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteAdPlacement(@PathVariable Long id) {
-                    boolean deleted = adplacementService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAdPlacement(@PathVariable Long id) {
+        boolean deleted = adplacementService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

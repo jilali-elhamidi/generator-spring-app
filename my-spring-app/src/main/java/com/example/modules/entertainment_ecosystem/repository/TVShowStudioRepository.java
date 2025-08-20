@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TVShowStudioRepository extends BaseRepository<TVShowStudio, Long> {
+
 }

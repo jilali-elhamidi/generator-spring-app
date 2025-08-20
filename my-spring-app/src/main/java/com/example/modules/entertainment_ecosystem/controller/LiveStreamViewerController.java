@@ -46,37 +46,35 @@ public class LiveStreamViewerController {
 
         LiveStreamViewer entity = livestreamviewerMapper.toEntity(livestreamviewerDto);
         LiveStreamViewer saved = livestreamviewerService.save(entity);
-        URI location = uriBuilder.path("/api/livestreamviewers/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/livestreamviewers/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(livestreamviewerMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<LiveStreamViewerDto> updateLiveStreamViewer(
-                @PathVariable Long id,
-                @RequestBody LiveStreamViewerDto livestreamviewerDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<LiveStreamViewerDto> updateLiveStreamViewer(
+            @PathVariable Long id,
+            @Valid @RequestBody LiveStreamViewerDto livestreamviewerDto) {
 
-                // Transformer le DTO en entity pour le service
-                LiveStreamViewer entityToUpdate = livestreamviewerMapper.toEntity(livestreamviewerDto);
 
-                // Appel du service update
-                LiveStreamViewer updatedEntity = livestreamviewerService.update(id, entityToUpdate);
+        LiveStreamViewer entityToUpdate = livestreamviewerMapper.toEntity(livestreamviewerDto);
+        LiveStreamViewer updatedEntity = livestreamviewerService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                LiveStreamViewerDto updatedDto = livestreamviewerMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(livestreamviewerMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteLiveStreamViewer(@PathVariable Long id) {
-                    boolean deleted = livestreamviewerService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLiveStreamViewer(@PathVariable Long id) {
+        boolean deleted = livestreamviewerService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

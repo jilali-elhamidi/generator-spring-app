@@ -46,37 +46,35 @@ public class OnlineEventTypeController {
 
         OnlineEventType entity = onlineeventtypeMapper.toEntity(onlineeventtypeDto);
         OnlineEventType saved = onlineeventtypeService.save(entity);
-        URI location = uriBuilder.path("/api/onlineeventtypes/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/onlineeventtypes/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(onlineeventtypeMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<OnlineEventTypeDto> updateOnlineEventType(
-                @PathVariable Long id,
-                @RequestBody OnlineEventTypeDto onlineeventtypeDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<OnlineEventTypeDto> updateOnlineEventType(
+            @PathVariable Long id,
+            @Valid @RequestBody OnlineEventTypeDto onlineeventtypeDto) {
 
-                // Transformer le DTO en entity pour le service
-                OnlineEventType entityToUpdate = onlineeventtypeMapper.toEntity(onlineeventtypeDto);
 
-                // Appel du service update
-                OnlineEventType updatedEntity = onlineeventtypeService.update(id, entityToUpdate);
+        OnlineEventType entityToUpdate = onlineeventtypeMapper.toEntity(onlineeventtypeDto);
+        OnlineEventType updatedEntity = onlineeventtypeService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                OnlineEventTypeDto updatedDto = onlineeventtypeMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(onlineeventtypeMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteOnlineEventType(@PathVariable Long id) {
-                    boolean deleted = onlineeventtypeService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOnlineEventType(@PathVariable Long id) {
+        boolean deleted = onlineeventtypeService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

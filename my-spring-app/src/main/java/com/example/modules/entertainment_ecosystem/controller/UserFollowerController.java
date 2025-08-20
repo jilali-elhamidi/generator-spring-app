@@ -46,37 +46,35 @@ public class UserFollowerController {
 
         UserFollower entity = userfollowerMapper.toEntity(userfollowerDto);
         UserFollower saved = userfollowerService.save(entity);
-        URI location = uriBuilder.path("/api/userfollowers/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userfollowers/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userfollowerMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserFollowerDto> updateUserFollower(
-                @PathVariable Long id,
-                @RequestBody UserFollowerDto userfollowerDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserFollowerDto> updateUserFollower(
+            @PathVariable Long id,
+            @Valid @RequestBody UserFollowerDto userfollowerDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserFollower entityToUpdate = userfollowerMapper.toEntity(userfollowerDto);
 
-                // Appel du service update
-                UserFollower updatedEntity = userfollowerService.update(id, entityToUpdate);
+        UserFollower entityToUpdate = userfollowerMapper.toEntity(userfollowerDto);
+        UserFollower updatedEntity = userfollowerService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserFollowerDto updatedDto = userfollowerMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userfollowerMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserFollower(@PathVariable Long id) {
-                    boolean deleted = userfollowerService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserFollower(@PathVariable Long id) {
+        boolean deleted = userfollowerService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

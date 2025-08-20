@@ -46,37 +46,35 @@ public class ManagerController {
 
         Manager entity = managerMapper.toEntity(managerDto);
         Manager saved = managerService.save(entity);
-        URI location = uriBuilder.path("/api/managers/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/managers/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(managerMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ManagerDto> updateManager(
-                @PathVariable Long id,
-                @RequestBody ManagerDto managerDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ManagerDto> updateManager(
+            @PathVariable Long id,
+            @Valid @RequestBody ManagerDto managerDto) {
 
-                // Transformer le DTO en entity pour le service
-                Manager entityToUpdate = managerMapper.toEntity(managerDto);
 
-                // Appel du service update
-                Manager updatedEntity = managerService.update(id, entityToUpdate);
+        Manager entityToUpdate = managerMapper.toEntity(managerDto);
+        Manager updatedEntity = managerService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ManagerDto updatedDto = managerMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(managerMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteManager(@PathVariable Long id) {
-                    boolean deleted = managerService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteManager(@PathVariable Long id) {
+        boolean deleted = managerService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

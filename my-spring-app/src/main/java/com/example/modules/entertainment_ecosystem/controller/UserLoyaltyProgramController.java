@@ -46,37 +46,35 @@ public class UserLoyaltyProgramController {
 
         UserLoyaltyProgram entity = userloyaltyprogramMapper.toEntity(userloyaltyprogramDto);
         UserLoyaltyProgram saved = userloyaltyprogramService.save(entity);
-        URI location = uriBuilder.path("/api/userloyaltyprograms/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userloyaltyprograms/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userloyaltyprogramMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserLoyaltyProgramDto> updateUserLoyaltyProgram(
-                @PathVariable Long id,
-                @RequestBody UserLoyaltyProgramDto userloyaltyprogramDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserLoyaltyProgramDto> updateUserLoyaltyProgram(
+            @PathVariable Long id,
+            @Valid @RequestBody UserLoyaltyProgramDto userloyaltyprogramDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserLoyaltyProgram entityToUpdate = userloyaltyprogramMapper.toEntity(userloyaltyprogramDto);
 
-                // Appel du service update
-                UserLoyaltyProgram updatedEntity = userloyaltyprogramService.update(id, entityToUpdate);
+        UserLoyaltyProgram entityToUpdate = userloyaltyprogramMapper.toEntity(userloyaltyprogramDto);
+        UserLoyaltyProgram updatedEntity = userloyaltyprogramService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserLoyaltyProgramDto updatedDto = userloyaltyprogramMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userloyaltyprogramMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserLoyaltyProgram(@PathVariable Long id) {
-                    boolean deleted = userloyaltyprogramService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserLoyaltyProgram(@PathVariable Long id) {
+        boolean deleted = userloyaltyprogramService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

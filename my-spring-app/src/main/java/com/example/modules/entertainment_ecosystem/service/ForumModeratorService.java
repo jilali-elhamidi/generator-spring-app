@@ -22,7 +22,7 @@ public class ForumModeratorService extends BaseService<ForumModerator> {
     private final UserProfileRepository userRepository;
     private final ForumCategoryRepository moderatedCategoriesRepository;
 
-    public ForumModeratorService(ForumModeratorRepository repository,UserProfileRepository userRepository,ForumCategoryRepository moderatedCategoriesRepository)
+    public ForumModeratorService(ForumModeratorRepository repository, UserProfileRepository userRepository, ForumCategoryRepository moderatedCategoriesRepository)
     {
         super(repository);
         this.forummoderatorRepository = repository;
@@ -32,47 +32,39 @@ public class ForumModeratorService extends BaseService<ForumModerator> {
 
     @Override
     public ForumModerator save(ForumModerator forummoderator) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (forummoderator.getModeratedCategories() != null &&
+            !forummoderator.getModeratedCategories().isEmpty()) {
 
+            List<ForumCategory> attachedModeratedCategories = forummoderator.getModeratedCategories().stream()
+            .map(item -> moderatedCategoriesRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("ForumCategory not found with id " + item.getId())))
+            .toList();
 
-    
+            forummoderator.setModeratedCategories(attachedModeratedCategories);
 
-    
-
-
-    
-
-    
-        if (forummoderator.getModeratedCategories() != null
-        && !forummoderator.getModeratedCategories().isEmpty()) {
-
-        List<ForumCategory> attachedModeratedCategories = forummoderator.getModeratedCategories().stream()
-        .map(item -> moderatedCategoriesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ForumCategory not found with id " + item.getId())))
-        .toList();
-
-        forummoderator.setModeratedCategories(attachedModeratedCategories);
-
-        // côté propriétaire (ForumCategory → ForumModerator)
-        attachedModeratedCategories.forEach(it -> it.getModerators().add(forummoderator));
+            // côté propriétaire (ForumCategory → ForumModerator)
+            attachedModeratedCategories.forEach(it -> it.getModerators().add(forummoderator));
         }
-    
-
-    
-    
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (forummoderator.getUser() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             forummoderator.setUser(
-            userRepository.findById(forummoderator.getUser().getId())
-            .orElseThrow(() -> new RuntimeException("user not found"))
+                userRepository.findById(forummoderator.getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("user not found"))
             );
-        
-        forummoderator.getUser().setModerator(forummoderator);
+            
+            forummoderator.getUser().setModerator(forummoderator);
         }
+        
 
-        return forummoderatorRepository.save(forummoderator);
-    }
+    return forummoderatorRepository.save(forummoderator);
+}
 
 
     public ForumModerator update(Long id, ForumModerator forummoderatorRequest) {
@@ -82,107 +74,70 @@ public class ForumModeratorService extends BaseService<ForumModerator> {
     // Copier les champs simples
         existing.setModeratorSince(forummoderatorRequest.getModeratorSince());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (forummoderatorRequest.getModeratedCategories() != null) {
-        existing.getModeratedCategories().clear();
+            existing.getModeratedCategories().clear();
 
-        List<ForumCategory> moderatedCategoriesList = forummoderatorRequest.getModeratedCategories().stream()
-        .map(item -> moderatedCategoriesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ForumCategory not found")))
-        .collect(Collectors.toList());
+            List<ForumCategory> moderatedCategoriesList = forummoderatorRequest.getModeratedCategories().stream()
+                .map(item -> moderatedCategoriesRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("ForumCategory not found")))
+                .collect(Collectors.toList());
 
-        existing.getModeratedCategories().addAll(moderatedCategoriesList);
+            existing.getModeratedCategories().addAll(moderatedCategoriesList);
 
-        // Mettre à jour le côté inverse
-        moderatedCategoriesList.forEach(it -> {
-        if (!it.getModerators().contains(existing)) {
-        it.getModerators().add(existing);
+            // Mettre à jour le côté inverse
+            moderatedCategoriesList.forEach(it -> {
+                if (!it.getModerators().contains(existing)) {
+                    it.getModerators().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-        if (forummoderatorRequest.getUser() != null
-        && forummoderatorRequest.getUser().getId() != null) {
-
-        UserProfile user = userRepository.findById(
-        forummoderatorRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setUser(user);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (forummoderatorRequest.getUser() != null &&
+            forummoderatorRequest.getUser().getId() != null) {
+
+            UserProfile user = userRepository.findById(
+                forummoderatorRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            existing.setUser(user);
+
+            
             user.setModerator(existing);
+            
+        }
         
-        }
 
-    
-
-    
-
-
-        return forummoderatorRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ForumModerator> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ForumModerator entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-        if (entity.getModeratedCategories() != null) {
-        for (ForumCategory item : new ArrayList<>(entity.getModeratedCategories())) {
-        
-            item.getModerators().remove(entity); // retire côté inverse
-        
-        }
-        entity.getModeratedCategories().clear(); // puis vide côté courant
-        }
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getUser() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getUser().setModerator(null);
-        // Dissocier côté direct
-        entity.setUser(null);
-        }
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return forummoderatorRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ForumModerator> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ForumModerator entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getModeratedCategories() != null) {
+            for (ForumCategory item : new ArrayList<>(entity.getModeratedCategories())) {
+                
+                item.getModerators().remove(entity); // retire côté inverse
+                
+            }
+            entity.getModeratedCategories().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+        if (entity.getUser() != null) {
+            entity.getUser().setModerator(null);
+            entity.setUser(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -46,37 +46,35 @@ public class ContractController {
 
         Contract entity = contractMapper.toEntity(contractDto);
         Contract saved = contractService.save(entity);
-        URI location = uriBuilder.path("/api/contracts/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/contracts/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(contractMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ContractDto> updateContract(
-                @PathVariable Long id,
-                @RequestBody ContractDto contractDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ContractDto> updateContract(
+            @PathVariable Long id,
+            @Valid @RequestBody ContractDto contractDto) {
 
-                // Transformer le DTO en entity pour le service
-                Contract entityToUpdate = contractMapper.toEntity(contractDto);
 
-                // Appel du service update
-                Contract updatedEntity = contractService.update(id, entityToUpdate);
+        Contract entityToUpdate = contractMapper.toEntity(contractDto);
+        Contract updatedEntity = contractService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ContractDto updatedDto = contractMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(contractMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
-                    boolean deleted = contractService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
+        boolean deleted = contractService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

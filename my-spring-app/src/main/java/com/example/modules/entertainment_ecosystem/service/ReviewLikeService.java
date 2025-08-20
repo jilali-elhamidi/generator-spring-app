@@ -22,7 +22,7 @@ public class ReviewLikeService extends BaseService<ReviewLike> {
     private final UserProfileRepository userRepository;
     private final ReviewRepository reviewRepository;
 
-    public ReviewLikeService(ReviewLikeRepository repository,UserProfileRepository userRepository,ReviewRepository reviewRepository)
+    public ReviewLikeService(ReviewLikeRepository repository, UserProfileRepository userRepository, ReviewRepository reviewRepository)
     {
         super(repository);
         this.reviewlikeRepository = repository;
@@ -32,36 +32,33 @@ public class ReviewLikeService extends BaseService<ReviewLike> {
 
     @Override
     public ReviewLike save(ReviewLike reviewlike) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (reviewlike.getUser() != null &&
+            reviewlike.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                reviewlike.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (reviewlike.getUser() != null
-        && reviewlike.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        reviewlike.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        reviewlike.setUser(existingUser);
+            reviewlike.setUser(existingUser);
         }
-    
-    if (reviewlike.getReview() != null
-        && reviewlike.getReview().getId() != null) {
-        Review existingReview = reviewRepository.findById(
-        reviewlike.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("Review not found"));
-        reviewlike.setReview(existingReview);
-        }
-    
+        
+        if (reviewlike.getReview() != null &&
+            reviewlike.getReview().getId() != null) {
 
-        return reviewlikeRepository.save(reviewlike);
-    }
+            Review existingReview = reviewRepository.findById(
+                reviewlike.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("Review not found"));
+
+            reviewlike.setReview(existingReview);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return reviewlikeRepository.save(reviewlike);
+}
 
 
     public ReviewLike update(Long id, ReviewLike reviewlikeRequest) {
@@ -71,86 +68,56 @@ public class ReviewLikeService extends BaseService<ReviewLike> {
     // Copier les champs simples
         existing.setLikeDate(reviewlikeRequest.getLikeDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (reviewlikeRequest.getUser() != null &&
-        reviewlikeRequest.getUser().getId() != null) {
+            reviewlikeRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        reviewlikeRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                reviewlikeRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (reviewlikeRequest.getReview() != null &&
-        reviewlikeRequest.getReview().getId() != null) {
+            reviewlikeRequest.getReview().getId() != null) {
 
-        Review existingReview = reviewRepository.findById(
-        reviewlikeRequest.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("Review not found"));
+            Review existingReview = reviewRepository.findById(
+                reviewlikeRequest.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("Review not found"));
 
-        existing.setReview(existingReview);
+            existing.setReview(existingReview);
         } else {
-        existing.setReview(null);
+            existing.setReview(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return reviewlikeRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ReviewLike> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ReviewLike entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getReview() != null) {
-        entity.setReview(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return reviewlikeRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ReviewLike> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ReviewLike entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getReview() != null) {
+            entity.setReview(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

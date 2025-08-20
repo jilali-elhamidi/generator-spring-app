@@ -46,37 +46,35 @@ public class UserRoleController {
 
         UserRole entity = userroleMapper.toEntity(userroleDto);
         UserRole saved = userroleService.save(entity);
-        URI location = uriBuilder.path("/api/userroles/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userroles/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userroleMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserRoleDto> updateUserRole(
-                @PathVariable Long id,
-                @RequestBody UserRoleDto userroleDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserRoleDto> updateUserRole(
+            @PathVariable Long id,
+            @Valid @RequestBody UserRoleDto userroleDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserRole entityToUpdate = userroleMapper.toEntity(userroleDto);
 
-                // Appel du service update
-                UserRole updatedEntity = userroleService.update(id, entityToUpdate);
+        UserRole entityToUpdate = userroleMapper.toEntity(userroleDto);
+        UserRole updatedEntity = userroleService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserRoleDto updatedDto = userroleMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userroleMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserRole(@PathVariable Long id) {
-                    boolean deleted = userroleService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserRole(@PathVariable Long id) {
+        boolean deleted = userroleService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

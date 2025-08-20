@@ -46,37 +46,35 @@ public class ContentLicenseTypeController {
 
         ContentLicenseType entity = contentlicensetypeMapper.toEntity(contentlicensetypeDto);
         ContentLicenseType saved = contentlicensetypeService.save(entity);
-        URI location = uriBuilder.path("/api/contentlicensetypes/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/contentlicensetypes/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(contentlicensetypeMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ContentLicenseTypeDto> updateContentLicenseType(
-                @PathVariable Long id,
-                @RequestBody ContentLicenseTypeDto contentlicensetypeDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ContentLicenseTypeDto> updateContentLicenseType(
+            @PathVariable Long id,
+            @Valid @RequestBody ContentLicenseTypeDto contentlicensetypeDto) {
 
-                // Transformer le DTO en entity pour le service
-                ContentLicenseType entityToUpdate = contentlicensetypeMapper.toEntity(contentlicensetypeDto);
 
-                // Appel du service update
-                ContentLicenseType updatedEntity = contentlicensetypeService.update(id, entityToUpdate);
+        ContentLicenseType entityToUpdate = contentlicensetypeMapper.toEntity(contentlicensetypeDto);
+        ContentLicenseType updatedEntity = contentlicensetypeService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ContentLicenseTypeDto updatedDto = contentlicensetypeMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(contentlicensetypeMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteContentLicenseType(@PathVariable Long id) {
-                    boolean deleted = contentlicensetypeService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteContentLicenseType(@PathVariable Long id) {
+        boolean deleted = contentlicensetypeService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

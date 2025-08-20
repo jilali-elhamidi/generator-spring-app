@@ -22,7 +22,7 @@ public class GamePlatformService extends BaseService<GamePlatform> {
     private final VideoGameRepository videoGamesRepository;
     private final GamePlatformTypeRepository typeRepository;
 
-    public GamePlatformService(GamePlatformRepository repository,VideoGameRepository videoGamesRepository,GamePlatformTypeRepository typeRepository)
+    public GamePlatformService(GamePlatformRepository repository, VideoGameRepository videoGamesRepository, GamePlatformTypeRepository typeRepository)
     {
         super(repository);
         this.gameplatformRepository = repository;
@@ -32,43 +32,37 @@ public class GamePlatformService extends BaseService<GamePlatform> {
 
     @Override
     public GamePlatform save(GamePlatform gameplatform) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (gameplatform.getVideoGames() != null &&
+            !gameplatform.getVideoGames().isEmpty()) {
 
+            List<VideoGame> attachedVideoGames = gameplatform.getVideoGames().stream()
+            .map(item -> videoGamesRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId())))
+            .toList();
 
-    
+            gameplatform.setVideoGames(attachedVideoGames);
 
-    
-
-
-    
-        if (gameplatform.getVideoGames() != null
-        && !gameplatform.getVideoGames().isEmpty()) {
-
-        List<VideoGame> attachedVideoGames = gameplatform.getVideoGames().stream()
-        .map(item -> videoGamesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId())))
-        .toList();
-
-        gameplatform.setVideoGames(attachedVideoGames);
-
-        // côté propriétaire (VideoGame → GamePlatform)
-        attachedVideoGames.forEach(it -> it.getPlatforms().add(gameplatform));
+            // côté propriétaire (VideoGame → GamePlatform)
+            attachedVideoGames.forEach(it -> it.getPlatforms().add(gameplatform));
         }
-    
+        
+    // ---------- ManyToOne ----------
+        if (gameplatform.getType() != null &&
+            gameplatform.getType().getId() != null) {
 
-    
+            GamePlatformType existingType = typeRepository.findById(
+                gameplatform.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("GamePlatformType not found"));
 
-    
-    if (gameplatform.getType() != null
-        && gameplatform.getType().getId() != null) {
-        GamePlatformType existingType = typeRepository.findById(
-        gameplatform.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("GamePlatformType not found"));
-        gameplatform.setType(existingType);
+            gameplatform.setType(existingType);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return gameplatformRepository.save(gameplatform);
-    }
+    return gameplatformRepository.save(gameplatform);
+}
 
 
     public GamePlatform update(Long id, GamePlatform gameplatformRequest) {
@@ -78,97 +72,67 @@ public class GamePlatformService extends BaseService<GamePlatform> {
     // Copier les champs simples
         existing.setName(gameplatformRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (gameplatformRequest.getType() != null &&
-        gameplatformRequest.getType().getId() != null) {
+            gameplatformRequest.getType().getId() != null) {
 
-        GamePlatformType existingType = typeRepository.findById(
-        gameplatformRequest.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("GamePlatformType not found"));
+            GamePlatformType existingType = typeRepository.findById(
+                gameplatformRequest.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("GamePlatformType not found"));
 
-        existing.setType(existingType);
+            existing.setType(existingType);
         } else {
-        existing.setType(null);
+            existing.setType(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
+        
+    // ---------- Relations ManyToOne ----------
         if (gameplatformRequest.getVideoGames() != null) {
-        existing.getVideoGames().clear();
+            existing.getVideoGames().clear();
 
-        List<VideoGame> videoGamesList = gameplatformRequest.getVideoGames().stream()
-        .map(item -> videoGamesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("VideoGame not found")))
-        .collect(Collectors.toList());
+            List<VideoGame> videoGamesList = gameplatformRequest.getVideoGames().stream()
+                .map(item -> videoGamesRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("VideoGame not found")))
+                .collect(Collectors.toList());
 
-        existing.getVideoGames().addAll(videoGamesList);
+            existing.getVideoGames().addAll(videoGamesList);
 
-        // Mettre à jour le côté inverse
-        videoGamesList.forEach(it -> {
-        if (!it.getPlatforms().contains(existing)) {
-        it.getPlatforms().add(existing);
+            // Mettre à jour le côté inverse
+            videoGamesList.forEach(it -> {
+                if (!it.getPlatforms().contains(existing)) {
+                    it.getPlatforms().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return gameplatformRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GamePlatform> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GamePlatform entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getVideoGames() != null) {
-        for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
         
-            item.getPlatforms().remove(entity); // retire côté inverse
-        
-        }
-        entity.getVideoGames().clear(); // puis vide côté courant
-        }
-    
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-        if (entity.getType() != null) {
-        entity.setType(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return gameplatformRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GamePlatform> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GamePlatform entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getVideoGames() != null) {
+            for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
+                
+                item.getPlatforms().remove(entity); // retire côté inverse
+                
+            }
+            entity.getVideoGames().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getType() != null) {
+            entity.setType(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

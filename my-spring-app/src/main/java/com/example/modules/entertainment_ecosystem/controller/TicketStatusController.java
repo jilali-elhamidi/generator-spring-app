@@ -46,37 +46,35 @@ public class TicketStatusController {
 
         TicketStatus entity = ticketstatusMapper.toEntity(ticketstatusDto);
         TicketStatus saved = ticketstatusService.save(entity);
-        URI location = uriBuilder.path("/api/ticketstatuss/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/ticketstatuss/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(ticketstatusMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<TicketStatusDto> updateTicketStatus(
-                @PathVariable Long id,
-                @RequestBody TicketStatusDto ticketstatusDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<TicketStatusDto> updateTicketStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody TicketStatusDto ticketstatusDto) {
 
-                // Transformer le DTO en entity pour le service
-                TicketStatus entityToUpdate = ticketstatusMapper.toEntity(ticketstatusDto);
 
-                // Appel du service update
-                TicketStatus updatedEntity = ticketstatusService.update(id, entityToUpdate);
+        TicketStatus entityToUpdate = ticketstatusMapper.toEntity(ticketstatusDto);
+        TicketStatus updatedEntity = ticketstatusService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                TicketStatusDto updatedDto = ticketstatusMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(ticketstatusMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteTicketStatus(@PathVariable Long id) {
-                    boolean deleted = ticketstatusService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTicketStatus(@PathVariable Long id) {
+        boolean deleted = ticketstatusService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

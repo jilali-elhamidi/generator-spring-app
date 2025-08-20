@@ -46,37 +46,35 @@ public class NotificationController {
 
         Notification entity = notificationMapper.toEntity(notificationDto);
         Notification saved = notificationService.save(entity);
-        URI location = uriBuilder.path("/api/notifications/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/notifications/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(notificationMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<NotificationDto> updateNotification(
-                @PathVariable Long id,
-                @RequestBody NotificationDto notificationDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<NotificationDto> updateNotification(
+            @PathVariable Long id,
+            @Valid @RequestBody NotificationDto notificationDto) {
 
-                // Transformer le DTO en entity pour le service
-                Notification entityToUpdate = notificationMapper.toEntity(notificationDto);
 
-                // Appel du service update
-                Notification updatedEntity = notificationService.update(id, entityToUpdate);
+        Notification entityToUpdate = notificationMapper.toEntity(notificationDto);
+        Notification updatedEntity = notificationService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                NotificationDto updatedDto = notificationMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(notificationMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
-                    boolean deleted = notificationService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
+        boolean deleted = notificationService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

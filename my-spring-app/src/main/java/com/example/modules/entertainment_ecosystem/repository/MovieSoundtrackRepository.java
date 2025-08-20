@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MovieSoundtrackRepository extends BaseRepository<MovieSoundtrack, Long> {
+
 }

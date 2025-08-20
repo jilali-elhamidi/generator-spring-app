@@ -46,37 +46,35 @@ public class ConnectionTypeController {
 
         ConnectionType entity = connectiontypeMapper.toEntity(connectiontypeDto);
         ConnectionType saved = connectiontypeService.save(entity);
-        URI location = uriBuilder.path("/api/connectiontypes/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/connectiontypes/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(connectiontypeMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ConnectionTypeDto> updateConnectionType(
-                @PathVariable Long id,
-                @RequestBody ConnectionTypeDto connectiontypeDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ConnectionTypeDto> updateConnectionType(
+            @PathVariable Long id,
+            @Valid @RequestBody ConnectionTypeDto connectiontypeDto) {
 
-                // Transformer le DTO en entity pour le service
-                ConnectionType entityToUpdate = connectiontypeMapper.toEntity(connectiontypeDto);
 
-                // Appel du service update
-                ConnectionType updatedEntity = connectiontypeService.update(id, entityToUpdate);
+        ConnectionType entityToUpdate = connectiontypeMapper.toEntity(connectiontypeDto);
+        ConnectionType updatedEntity = connectiontypeService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ConnectionTypeDto updatedDto = connectiontypeMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(connectiontypeMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteConnectionType(@PathVariable Long id) {
-                    boolean deleted = connectiontypeService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteConnectionType(@PathVariable Long id) {
+        boolean deleted = connectiontypeService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserActivityLogRepository extends BaseRepository<UserActivityLog, Long> {
+
 }

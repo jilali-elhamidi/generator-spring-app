@@ -46,37 +46,35 @@ public class GameExpansionPackController {
 
         GameExpansionPack entity = gameexpansionpackMapper.toEntity(gameexpansionpackDto);
         GameExpansionPack saved = gameexpansionpackService.save(entity);
-        URI location = uriBuilder.path("/api/gameexpansionpacks/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/gameexpansionpacks/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(gameexpansionpackMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<GameExpansionPackDto> updateGameExpansionPack(
-                @PathVariable Long id,
-                @RequestBody GameExpansionPackDto gameexpansionpackDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<GameExpansionPackDto> updateGameExpansionPack(
+            @PathVariable Long id,
+            @Valid @RequestBody GameExpansionPackDto gameexpansionpackDto) {
 
-                // Transformer le DTO en entity pour le service
-                GameExpansionPack entityToUpdate = gameexpansionpackMapper.toEntity(gameexpansionpackDto);
 
-                // Appel du service update
-                GameExpansionPack updatedEntity = gameexpansionpackService.update(id, entityToUpdate);
+        GameExpansionPack entityToUpdate = gameexpansionpackMapper.toEntity(gameexpansionpackDto);
+        GameExpansionPack updatedEntity = gameexpansionpackService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                GameExpansionPackDto updatedDto = gameexpansionpackMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(gameexpansionpackMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteGameExpansionPack(@PathVariable Long id) {
-                    boolean deleted = gameexpansionpackService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGameExpansionPack(@PathVariable Long id) {
+        boolean deleted = gameexpansionpackService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

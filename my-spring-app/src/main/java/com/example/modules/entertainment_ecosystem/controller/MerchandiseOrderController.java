@@ -46,37 +46,35 @@ public class MerchandiseOrderController {
 
         MerchandiseOrder entity = merchandiseorderMapper.toEntity(merchandiseorderDto);
         MerchandiseOrder saved = merchandiseorderService.save(entity);
-        URI location = uriBuilder.path("/api/merchandiseorders/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/merchandiseorders/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(merchandiseorderMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MerchandiseOrderDto> updateMerchandiseOrder(
-                @PathVariable Long id,
-                @RequestBody MerchandiseOrderDto merchandiseorderDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MerchandiseOrderDto> updateMerchandiseOrder(
+            @PathVariable Long id,
+            @Valid @RequestBody MerchandiseOrderDto merchandiseorderDto) {
 
-                // Transformer le DTO en entity pour le service
-                MerchandiseOrder entityToUpdate = merchandiseorderMapper.toEntity(merchandiseorderDto);
 
-                // Appel du service update
-                MerchandiseOrder updatedEntity = merchandiseorderService.update(id, entityToUpdate);
+        MerchandiseOrder entityToUpdate = merchandiseorderMapper.toEntity(merchandiseorderDto);
+        MerchandiseOrder updatedEntity = merchandiseorderService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MerchandiseOrderDto updatedDto = merchandiseorderMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(merchandiseorderMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMerchandiseOrder(@PathVariable Long id) {
-                    boolean deleted = merchandiseorderService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMerchandiseOrder(@PathVariable Long id) {
+        boolean deleted = merchandiseorderService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

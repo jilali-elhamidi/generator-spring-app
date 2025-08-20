@@ -19,7 +19,7 @@ public class GameCurrencyService extends BaseService<GameCurrency> {
     protected final GameCurrencyRepository gamecurrencyRepository;
     private final GameTransactionRepository transactionsRepository;
 
-    public GameCurrencyService(GameCurrencyRepository repository,GameTransactionRepository transactionsRepository)
+    public GameCurrencyService(GameCurrencyRepository repository, GameTransactionRepository transactionsRepository)
     {
         super(repository);
         this.gamecurrencyRepository = repository;
@@ -28,37 +28,30 @@ public class GameCurrencyService extends BaseService<GameCurrency> {
 
     @Override
     public GameCurrency save(GameCurrency gamecurrency) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (gamecurrency.getTransactions() != null) {
+    // ---------- OneToMany ----------
+        if (gamecurrency.getTransactions() != null) {
             List<GameTransaction> managedTransactions = new ArrayList<>();
             for (GameTransaction item : gamecurrency.getTransactions()) {
-            if (item.getId() != null) {
-            GameTransaction existingItem = transactionsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("GameTransaction not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setCurrency(gamecurrency);
-            managedTransactions.add(existingItem);
-            } else {
-            item.setCurrency(gamecurrency);
-            managedTransactions.add(item);
-            }
+                if (item.getId() != null) {
+                    GameTransaction existingItem = transactionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameTransaction not found"));
+
+                     existingItem.setCurrency(gamecurrency);
+                     managedTransactions.add(existingItem);
+                } else {
+                    item.setCurrency(gamecurrency);
+                    managedTransactions.add(item);
+                }
             }
             gamecurrency.setTransactions(managedTransactions);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return gamecurrencyRepository.save(gamecurrency);
-    }
+    return gamecurrencyRepository.save(gamecurrency);
+}
 
 
     public GameCurrency update(Long id, GameCurrency gamecurrencyRequest) {
@@ -69,75 +62,50 @@ public class GameCurrencyService extends BaseService<GameCurrency> {
         existing.setName(gamecurrencyRequest.getName());
         existing.setSymbol(gamecurrencyRequest.getSymbol());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getTransactions().clear();
 
         if (gamecurrencyRequest.getTransactions() != null) {
-        for (var item : gamecurrencyRequest.getTransactions()) {
-        GameTransaction existingItem;
-        if (item.getId() != null) {
-        existingItem = transactionsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GameTransaction not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : gamecurrencyRequest.getTransactions()) {
+                GameTransaction existingItem;
+                if (item.getId() != null) {
+                    existingItem = transactionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameTransaction not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setCurrency(existing);
+                existing.getTransactions().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setCurrency(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getTransactions().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return gamecurrencyRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GameCurrency> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GameCurrency entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getTransactions() != null) {
-        for (var child : entity.getTransactions()) {
         
-            child.setCurrency(null); // retirer la référence inverse
-        
-        }
-        entity.getTransactions().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return gamecurrencyRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GameCurrency> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GameCurrency entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getTransactions() != null) {
+            for (var child : entity.getTransactions()) {
+                
+                child.setCurrency(null); // retirer la référence inverse
+                
+            }
+            entity.getTransactions().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -22,7 +22,7 @@ public class MessageThreadService extends BaseService<MessageThread> {
     private final UserProfileRepository participantsRepository;
     private final UserMessageRepository messagesRepository;
 
-    public MessageThreadService(MessageThreadRepository repository,UserProfileRepository participantsRepository,UserMessageRepository messagesRepository)
+    public MessageThreadService(MessageThreadRepository repository, UserProfileRepository participantsRepository, UserMessageRepository messagesRepository)
     {
         super(repository);
         this.messagethreadRepository = repository;
@@ -32,56 +32,44 @@ public class MessageThreadService extends BaseService<MessageThread> {
 
     @Override
     public MessageThread save(MessageThread messagethread) {
-
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (messagethread.getMessages() != null) {
+    // ---------- OneToMany ----------
+        if (messagethread.getMessages() != null) {
             List<UserMessage> managedMessages = new ArrayList<>();
             for (UserMessage item : messagethread.getMessages()) {
-            if (item.getId() != null) {
-            UserMessage existingItem = messagesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("UserMessage not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setThread(messagethread);
-            managedMessages.add(existingItem);
-            } else {
-            item.setThread(messagethread);
-            managedMessages.add(item);
-            }
+                if (item.getId() != null) {
+                    UserMessage existingItem = messagesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserMessage not found"));
+
+                     existingItem.setThread(messagethread);
+                     managedMessages.add(existingItem);
+                } else {
+                    item.setThread(messagethread);
+                    managedMessages.add(item);
+                }
             }
             messagethread.setMessages(managedMessages);
-            }
-        
-    
-
-
-    
-        if (messagethread.getParticipants() != null
-        && !messagethread.getParticipants().isEmpty()) {
-
-        List<UserProfile> attachedParticipants = messagethread.getParticipants().stream()
-        .map(item -> participantsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-        .toList();
-
-        messagethread.setParticipants(attachedParticipants);
-
-        // côté propriétaire (UserProfile → MessageThread)
-        attachedParticipants.forEach(it -> it.getMessageThreads().add(messagethread));
         }
     
+    // ---------- ManyToMany ----------
+        if (messagethread.getParticipants() != null &&
+            !messagethread.getParticipants().isEmpty()) {
 
-    
+            List<UserProfile> attachedParticipants = messagethread.getParticipants().stream()
+            .map(item -> participantsRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+            .toList();
 
-    
-    
+            messagethread.setParticipants(attachedParticipants);
 
-        return messagethreadRepository.save(messagethread);
-    }
+            // côté propriétaire (UserProfile → MessageThread)
+            attachedParticipants.forEach(it -> it.getMessageThreads().add(messagethread));
+        }
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
+
+    return messagethreadRepository.save(messagethread);
+}
 
 
     public MessageThread update(Long id, MessageThread messagethreadRequest) {
@@ -92,111 +80,77 @@ public class MessageThreadService extends BaseService<MessageThread> {
         existing.setSubject(messagethreadRequest.getSubject());
         existing.setLastUpdated(messagethreadRequest.getLastUpdated());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (messagethreadRequest.getParticipants() != null) {
-        existing.getParticipants().clear();
+            existing.getParticipants().clear();
 
-        List<UserProfile> participantsList = messagethreadRequest.getParticipants().stream()
-        .map(item -> participantsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-        .collect(Collectors.toList());
+            List<UserProfile> participantsList = messagethreadRequest.getParticipants().stream()
+                .map(item -> participantsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+                .collect(Collectors.toList());
 
-        existing.getParticipants().addAll(participantsList);
+            existing.getParticipants().addAll(participantsList);
 
-        // Mettre à jour le côté inverse
-        participantsList.forEach(it -> {
-        if (!it.getMessageThreads().contains(existing)) {
-        it.getMessageThreads().add(existing);
+            // Mettre à jour le côté inverse
+            participantsList.forEach(it -> {
+                if (!it.getMessageThreads().contains(existing)) {
+                    it.getMessageThreads().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations OneToMany ----------
         existing.getMessages().clear();
 
         if (messagethreadRequest.getMessages() != null) {
-        for (var item : messagethreadRequest.getMessages()) {
-        UserMessage existingItem;
-        if (item.getId() != null) {
-        existingItem = messagesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserMessage not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : messagethreadRequest.getMessages()) {
+                UserMessage existingItem;
+                if (item.getId() != null) {
+                    existingItem = messagesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserMessage not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setThread(existing);
+                existing.getMessages().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setThread(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getMessages().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-
-        return messagethreadRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MessageThread> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MessageThread entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-        if (entity.getMessages() != null) {
-        for (var child : entity.getMessages()) {
         
-            child.setThread(null); // retirer la référence inverse
-        
-        }
-        entity.getMessages().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getParticipants() != null) {
-        for (UserProfile item : new ArrayList<>(entity.getParticipants())) {
-        
-            item.getMessageThreads().remove(entity); // retire côté inverse
-        
-        }
-        entity.getParticipants().clear(); // puis vide côté courant
-        }
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return messagethreadRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MessageThread> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MessageThread entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getMessages() != null) {
+            for (var child : entity.getMessages()) {
+                
+                child.setThread(null); // retirer la référence inverse
+                
+            }
+            entity.getMessages().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+        if (entity.getParticipants() != null) {
+            for (UserProfile item : new ArrayList<>(entity.getParticipants())) {
+                
+                item.getMessageThreads().remove(entity); // retire côté inverse
+                
+            }
+            entity.getParticipants().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

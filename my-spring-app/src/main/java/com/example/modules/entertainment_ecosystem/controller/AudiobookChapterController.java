@@ -46,37 +46,35 @@ public class AudiobookChapterController {
 
         AudiobookChapter entity = audiobookchapterMapper.toEntity(audiobookchapterDto);
         AudiobookChapter saved = audiobookchapterService.save(entity);
-        URI location = uriBuilder.path("/api/audiobookchapters/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/audiobookchapters/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(audiobookchapterMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<AudiobookChapterDto> updateAudiobookChapter(
-                @PathVariable Long id,
-                @RequestBody AudiobookChapterDto audiobookchapterDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<AudiobookChapterDto> updateAudiobookChapter(
+            @PathVariable Long id,
+            @Valid @RequestBody AudiobookChapterDto audiobookchapterDto) {
 
-                // Transformer le DTO en entity pour le service
-                AudiobookChapter entityToUpdate = audiobookchapterMapper.toEntity(audiobookchapterDto);
 
-                // Appel du service update
-                AudiobookChapter updatedEntity = audiobookchapterService.update(id, entityToUpdate);
+        AudiobookChapter entityToUpdate = audiobookchapterMapper.toEntity(audiobookchapterDto);
+        AudiobookChapter updatedEntity = audiobookchapterService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                AudiobookChapterDto updatedDto = audiobookchapterMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(audiobookchapterMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteAudiobookChapter(@PathVariable Long id) {
-                    boolean deleted = audiobookchapterService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAudiobookChapter(@PathVariable Long id) {
+        boolean deleted = audiobookchapterService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

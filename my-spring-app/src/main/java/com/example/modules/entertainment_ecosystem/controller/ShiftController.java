@@ -46,37 +46,35 @@ public class ShiftController {
 
         Shift entity = shiftMapper.toEntity(shiftDto);
         Shift saved = shiftService.save(entity);
-        URI location = uriBuilder.path("/api/shifts/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/shifts/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(shiftMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ShiftDto> updateShift(
-                @PathVariable Long id,
-                @RequestBody ShiftDto shiftDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ShiftDto> updateShift(
+            @PathVariable Long id,
+            @Valid @RequestBody ShiftDto shiftDto) {
 
-                // Transformer le DTO en entity pour le service
-                Shift entityToUpdate = shiftMapper.toEntity(shiftDto);
 
-                // Appel du service update
-                Shift updatedEntity = shiftService.update(id, entityToUpdate);
+        Shift entityToUpdate = shiftMapper.toEntity(shiftDto);
+        Shift updatedEntity = shiftService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ShiftDto updatedDto = shiftMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(shiftMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteShift(@PathVariable Long id) {
-                    boolean deleted = shiftService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteShift(@PathVariable Long id) {
+        boolean deleted = shiftService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

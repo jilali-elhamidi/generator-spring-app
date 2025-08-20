@@ -46,37 +46,35 @@ public class ContentRatingBoardController {
 
         ContentRatingBoard entity = contentratingboardMapper.toEntity(contentratingboardDto);
         ContentRatingBoard saved = contentratingboardService.save(entity);
-        URI location = uriBuilder.path("/api/contentratingboards/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/contentratingboards/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(contentratingboardMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ContentRatingBoardDto> updateContentRatingBoard(
-                @PathVariable Long id,
-                @RequestBody ContentRatingBoardDto contentratingboardDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ContentRatingBoardDto> updateContentRatingBoard(
+            @PathVariable Long id,
+            @Valid @RequestBody ContentRatingBoardDto contentratingboardDto) {
 
-                // Transformer le DTO en entity pour le service
-                ContentRatingBoard entityToUpdate = contentratingboardMapper.toEntity(contentratingboardDto);
 
-                // Appel du service update
-                ContentRatingBoard updatedEntity = contentratingboardService.update(id, entityToUpdate);
+        ContentRatingBoard entityToUpdate = contentratingboardMapper.toEntity(contentratingboardDto);
+        ContentRatingBoard updatedEntity = contentratingboardService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ContentRatingBoardDto updatedDto = contentratingboardMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(contentratingboardMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteContentRatingBoard(@PathVariable Long id) {
-                    boolean deleted = contentratingboardService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteContentRatingBoard(@PathVariable Long id) {
+        boolean deleted = contentratingboardService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

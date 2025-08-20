@@ -25,7 +25,7 @@ public class LiveStreamService extends BaseService<LiveStream> {
     private final VideoGameRepository gameRepository;
     private final LiveStreamViewerRepository viewersRepository;
 
-    public LiveStreamService(LiveStreamRepository repository,UserProfileRepository hostRepository,VideoGameRepository gameRepository,LiveStreamViewerRepository viewersRepository)
+    public LiveStreamService(LiveStreamRepository repository, UserProfileRepository hostRepository, VideoGameRepository gameRepository, LiveStreamViewerRepository viewersRepository)
     {
         super(repository);
         this.livestreamRepository = repository;
@@ -36,61 +36,50 @@ public class LiveStreamService extends BaseService<LiveStream> {
 
     @Override
     public LiveStream save(LiveStream livestream) {
-
-
-    
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (livestream.getViewers() != null) {
+    // ---------- OneToMany ----------
+        if (livestream.getViewers() != null) {
             List<LiveStreamViewer> managedViewers = new ArrayList<>();
             for (LiveStreamViewer item : livestream.getViewers()) {
-            if (item.getId() != null) {
-            LiveStreamViewer existingItem = viewersRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("LiveStreamViewer not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setLiveStream(livestream);
-            managedViewers.add(existingItem);
-            } else {
-            item.setLiveStream(livestream);
-            managedViewers.add(item);
-            }
+                if (item.getId() != null) {
+                    LiveStreamViewer existingItem = viewersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("LiveStreamViewer not found"));
+
+                     existingItem.setLiveStream(livestream);
+                     managedViewers.add(existingItem);
+                } else {
+                    item.setLiveStream(livestream);
+                    managedViewers.add(item);
+                }
             }
             livestream.setViewers(managedViewers);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (livestream.getHost() != null &&
+            livestream.getHost().getId() != null) {
+
+            UserProfile existingHost = hostRepository.findById(
+                livestream.getHost().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            livestream.setHost(existingHost);
+        }
         
-    
+        if (livestream.getGame() != null &&
+            livestream.getGame().getId() != null) {
 
+            VideoGame existingGame = gameRepository.findById(
+                livestream.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-    
-
-    
-
-    
-
-    if (livestream.getHost() != null
-        && livestream.getHost().getId() != null) {
-        UserProfile existingHost = hostRepository.findById(
-        livestream.getHost().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        livestream.setHost(existingHost);
+            livestream.setGame(existingGame);
         }
-    
-    if (livestream.getGame() != null
-        && livestream.getGame().getId() != null) {
-        VideoGame existingGame = gameRepository.findById(
-        livestream.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        livestream.setGame(existingGame);
-        }
-    
-    
+        
+    // ---------- OneToOne ----------
 
-        return livestreamRepository.save(livestream);
-    }
+    return livestreamRepository.save(livestream);
+}
 
 
     public LiveStream update(Long id, LiveStream livestreamRequest) {
@@ -102,125 +91,82 @@ public class LiveStreamService extends BaseService<LiveStream> {
         existing.setStartDate(livestreamRequest.getStartDate());
         existing.setPlatformUrl(livestreamRequest.getPlatformUrl());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (livestreamRequest.getHost() != null &&
-        livestreamRequest.getHost().getId() != null) {
+            livestreamRequest.getHost().getId() != null) {
 
-        UserProfile existingHost = hostRepository.findById(
-        livestreamRequest.getHost().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingHost = hostRepository.findById(
+                livestreamRequest.getHost().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setHost(existingHost);
+            existing.setHost(existingHost);
         } else {
-        existing.setHost(null);
+            existing.setHost(null);
         }
+        
         if (livestreamRequest.getGame() != null &&
-        livestreamRequest.getGame().getId() != null) {
+            livestreamRequest.getGame().getId() != null) {
 
-        VideoGame existingGame = gameRepository.findById(
-        livestreamRequest.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            VideoGame existingGame = gameRepository.findById(
+                livestreamRequest.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-        existing.setGame(existingGame);
+            existing.setGame(existingGame);
         } else {
-        existing.setGame(null);
+            existing.setGame(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getViewers().clear();
 
         if (livestreamRequest.getViewers() != null) {
-        for (var item : livestreamRequest.getViewers()) {
-        LiveStreamViewer existingItem;
-        if (item.getId() != null) {
-        existingItem = viewersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("LiveStreamViewer not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : livestreamRequest.getViewers()) {
+                LiveStreamViewer existingItem;
+                if (item.getId() != null) {
+                    existingItem = viewersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("LiveStreamViewer not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setLiveStream(existing);
+                existing.getViewers().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setLiveStream(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getViewers().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-
-        return livestreamRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<LiveStream> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-LiveStream entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-        if (entity.getViewers() != null) {
-        for (var child : entity.getViewers()) {
         
-            child.setLiveStream(null); // retirer la référence inverse
-        
-        }
-        entity.getViewers().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getHost() != null) {
-        entity.setHost(null);
-        }
-    
-
-    
-        if (entity.getGame() != null) {
-        entity.setGame(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return livestreamRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<LiveStream> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        LiveStream entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getViewers() != null) {
+            for (var child : entity.getViewers()) {
+                
+                child.setLiveStream(null); // retirer la référence inverse
+                
+            }
+            entity.getViewers().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getHost() != null) {
+            entity.setHost(null);
+        }
+        
+        if (entity.getGame() != null) {
+            entity.setGame(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

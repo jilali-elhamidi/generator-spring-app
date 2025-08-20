@@ -46,37 +46,35 @@ public class GameReviewDownvoteController {
 
         GameReviewDownvote entity = gamereviewdownvoteMapper.toEntity(gamereviewdownvoteDto);
         GameReviewDownvote saved = gamereviewdownvoteService.save(entity);
-        URI location = uriBuilder.path("/api/gamereviewdownvotes/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/gamereviewdownvotes/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(gamereviewdownvoteMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<GameReviewDownvoteDto> updateGameReviewDownvote(
-                @PathVariable Long id,
-                @RequestBody GameReviewDownvoteDto gamereviewdownvoteDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<GameReviewDownvoteDto> updateGameReviewDownvote(
+            @PathVariable Long id,
+            @Valid @RequestBody GameReviewDownvoteDto gamereviewdownvoteDto) {
 
-                // Transformer le DTO en entity pour le service
-                GameReviewDownvote entityToUpdate = gamereviewdownvoteMapper.toEntity(gamereviewdownvoteDto);
 
-                // Appel du service update
-                GameReviewDownvote updatedEntity = gamereviewdownvoteService.update(id, entityToUpdate);
+        GameReviewDownvote entityToUpdate = gamereviewdownvoteMapper.toEntity(gamereviewdownvoteDto);
+        GameReviewDownvote updatedEntity = gamereviewdownvoteService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                GameReviewDownvoteDto updatedDto = gamereviewdownvoteMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(gamereviewdownvoteMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteGameReviewDownvote(@PathVariable Long id) {
-                    boolean deleted = gamereviewdownvoteService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGameReviewDownvote(@PathVariable Long id) {
+        boolean deleted = gamereviewdownvoteService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

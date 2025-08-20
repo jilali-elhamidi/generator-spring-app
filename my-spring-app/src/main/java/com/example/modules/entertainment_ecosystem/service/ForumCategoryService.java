@@ -28,7 +28,7 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
     private final ForumCategoryRepository childCategoriesRepository;
     private final ForumModeratorRepository moderatorsRepository;
 
-    public ForumCategoryService(ForumCategoryRepository repository,ForumThreadRepository threadsRepository,ForumCategoryRepository parentCategoryRepository,ForumCategoryRepository childCategoriesRepository,ForumModeratorRepository moderatorsRepository)
+    public ForumCategoryService(ForumCategoryRepository repository, ForumThreadRepository threadsRepository, ForumCategoryRepository parentCategoryRepository, ForumCategoryRepository childCategoriesRepository, ForumModeratorRepository moderatorsRepository)
     {
         super(repository);
         this.forumcategoryRepository = repository;
@@ -40,93 +40,71 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
 
     @Override
     public ForumCategory save(ForumCategory forumcategory) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (forumcategory.getThreads() != null) {
+    // ---------- OneToMany ----------
+        if (forumcategory.getThreads() != null) {
             List<ForumThread> managedThreads = new ArrayList<>();
             for (ForumThread item : forumcategory.getThreads()) {
-            if (item.getId() != null) {
-            ForumThread existingItem = threadsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("ForumThread not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setCategory(forumcategory);
-            managedThreads.add(existingItem);
-            } else {
-            item.setCategory(forumcategory);
-            managedThreads.add(item);
-            }
+                if (item.getId() != null) {
+                    ForumThread existingItem = threadsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumThread not found"));
+
+                     existingItem.setCategory(forumcategory);
+                     managedThreads.add(existingItem);
+                } else {
+                    item.setCategory(forumcategory);
+                    managedThreads.add(item);
+                }
             }
             forumcategory.setThreads(managedThreads);
-            }
-        
+        }
     
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (forumcategory.getChildCategories() != null) {
+        if (forumcategory.getChildCategories() != null) {
             List<ForumCategory> managedChildCategories = new ArrayList<>();
             for (ForumCategory item : forumcategory.getChildCategories()) {
-            if (item.getId() != null) {
-            ForumCategory existingItem = childCategoriesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setParentCategory(forumcategory);
-            managedChildCategories.add(existingItem);
-            } else {
-            item.setParentCategory(forumcategory);
-            managedChildCategories.add(item);
-            }
+                if (item.getId() != null) {
+                    ForumCategory existingItem = childCategoriesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+
+                     existingItem.setParentCategory(forumcategory);
+                     managedChildCategories.add(existingItem);
+                } else {
+                    item.setParentCategory(forumcategory);
+                    managedChildCategories.add(item);
+                }
             }
             forumcategory.setChildCategories(managedChildCategories);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+        if (forumcategory.getModerators() != null &&
+            !forumcategory.getModerators().isEmpty()) {
+
+            List<ForumModerator> attachedModerators = forumcategory.getModerators().stream()
+            .map(item -> moderatorsRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("ForumModerator not found with id " + item.getId())))
+            .toList();
+
+            forumcategory.setModerators(attachedModerators);
+
+            // côté propriétaire (ForumModerator → ForumCategory)
+            attachedModerators.forEach(it -> it.getModeratedCategories().add(forumcategory));
+        }
         
-    
+    // ---------- ManyToOne ----------
+        if (forumcategory.getParentCategory() != null &&
+            forumcategory.getParentCategory().getId() != null) {
 
-    
+            ForumCategory existingParentCategory = parentCategoryRepository.findById(
+                forumcategory.getParentCategory().getId()
+            ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
 
-
-    
-
-    
-
-    
-
-    
-        if (forumcategory.getModerators() != null
-        && !forumcategory.getModerators().isEmpty()) {
-
-        List<ForumModerator> attachedModerators = forumcategory.getModerators().stream()
-        .map(item -> moderatorsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ForumModerator not found with id " + item.getId())))
-        .toList();
-
-        forumcategory.setModerators(attachedModerators);
-
-        // côté propriétaire (ForumModerator → ForumCategory)
-        attachedModerators.forEach(it -> it.getModeratedCategories().add(forumcategory));
+            forumcategory.setParentCategory(existingParentCategory);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-    
-    if (forumcategory.getParentCategory() != null
-        && forumcategory.getParentCategory().getId() != null) {
-        ForumCategory existingParentCategory = parentCategoryRepository.findById(
-        forumcategory.getParentCategory().getId()
-        ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-        forumcategory.setParentCategory(existingParentCategory);
-        }
-    
-    
-    
-
-        return forumcategoryRepository.save(forumcategory);
-    }
+    return forumcategoryRepository.save(forumcategory);
+}
 
 
     public ForumCategory update(Long id, ForumCategory forumcategoryRequest) {
@@ -136,175 +114,119 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
     // Copier les champs simples
         existing.setName(forumcategoryRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (forumcategoryRequest.getParentCategory() != null &&
-        forumcategoryRequest.getParentCategory().getId() != null) {
+            forumcategoryRequest.getParentCategory().getId() != null) {
 
-        ForumCategory existingParentCategory = parentCategoryRepository.findById(
-        forumcategoryRequest.getParentCategory().getId()
-        ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+            ForumCategory existingParentCategory = parentCategoryRepository.findById(
+                forumcategoryRequest.getParentCategory().getId()
+            ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
 
-        existing.setParentCategory(existingParentCategory);
+            existing.setParentCategory(existingParentCategory);
         } else {
-        existing.setParentCategory(null);
+            existing.setParentCategory(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
+        
+    // ---------- Relations ManyToOne ----------
         if (forumcategoryRequest.getModerators() != null) {
-        existing.getModerators().clear();
+            existing.getModerators().clear();
 
-        List<ForumModerator> moderatorsList = forumcategoryRequest.getModerators().stream()
-        .map(item -> moderatorsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ForumModerator not found")))
-        .collect(Collectors.toList());
+            List<ForumModerator> moderatorsList = forumcategoryRequest.getModerators().stream()
+                .map(item -> moderatorsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("ForumModerator not found")))
+                .collect(Collectors.toList());
 
-        existing.getModerators().addAll(moderatorsList);
+            existing.getModerators().addAll(moderatorsList);
 
-        // Mettre à jour le côté inverse
-        moderatorsList.forEach(it -> {
-        if (!it.getModeratedCategories().contains(existing)) {
-        it.getModeratedCategories().add(existing);
+            // Mettre à jour le côté inverse
+            moderatorsList.forEach(it -> {
+                if (!it.getModeratedCategories().contains(existing)) {
+                    it.getModeratedCategories().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations OneToMany ----------
         existing.getThreads().clear();
 
         if (forumcategoryRequest.getThreads() != null) {
-        for (var item : forumcategoryRequest.getThreads()) {
-        ForumThread existingItem;
-        if (item.getId() != null) {
-        existingItem = threadsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ForumThread not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setCategory(existing);
+            for (var item : forumcategoryRequest.getThreads()) {
+                ForumThread existingItem;
+                if (item.getId() != null) {
+                    existingItem = threadsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumThread not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getThreads().add(existingItem);
+                existingItem.setCategory(existing);
+                existing.getThreads().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getChildCategories().clear();
 
         if (forumcategoryRequest.getChildCategories() != null) {
-        for (var item : forumcategoryRequest.getChildCategories()) {
-        ForumCategory existingItem;
-        if (item.getId() != null) {
-        existingItem = childCategoriesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : forumcategoryRequest.getChildCategories()) {
+                ForumCategory existingItem;
+                if (item.getId() != null) {
+                    existingItem = childCategoriesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumCategory not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setParentCategory(existing);
+                existing.getChildCategories().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setParentCategory(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getChildCategories().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-
-        return forumcategoryRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ForumCategory> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ForumCategory entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getThreads() != null) {
-        for (var child : entity.getThreads()) {
         
-            child.setCategory(null); // retirer la référence inverse
-        
-        }
-        entity.getThreads().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-    
-
-    
-        if (entity.getChildCategories() != null) {
-        for (var child : entity.getChildCategories()) {
-        
-            child.setParentCategory(null); // retirer la référence inverse
-        
-        }
-        entity.getChildCategories().clear();
-        }
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-        if (entity.getModerators() != null) {
-        for (ForumModerator item : new ArrayList<>(entity.getModerators())) {
-        
-            item.getModeratedCategories().remove(entity); // retire côté inverse
-        
-        }
-        entity.getModerators().clear(); // puis vide côté courant
-        }
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-        if (entity.getParentCategory() != null) {
-        entity.setParentCategory(null);
-        }
-    
-
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return forumcategoryRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ForumCategory> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ForumCategory entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getThreads() != null) {
+            for (var child : entity.getThreads()) {
+                
+                child.setCategory(null); // retirer la référence inverse
+                
+            }
+            entity.getThreads().clear();
+        }
+        
+        if (entity.getChildCategories() != null) {
+            for (var child : entity.getChildCategories()) {
+                
+                child.setParentCategory(null); // retirer la référence inverse
+                
+            }
+            entity.getChildCategories().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+        if (entity.getModerators() != null) {
+            for (ForumModerator item : new ArrayList<>(entity.getModerators())) {
+                
+                item.getModeratedCategories().remove(entity); // retire côté inverse
+                
+            }
+            entity.getModerators().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getParentCategory() != null) {
+            entity.setParentCategory(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

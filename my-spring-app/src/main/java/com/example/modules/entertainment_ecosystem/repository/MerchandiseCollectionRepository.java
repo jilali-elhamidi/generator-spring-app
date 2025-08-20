@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MerchandiseCollectionRepository extends BaseRepository<MerchandiseCollection, Long> {
+
 }

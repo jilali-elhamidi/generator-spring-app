@@ -22,7 +22,7 @@ public class UserRatingService extends BaseService<UserRating> {
     private final UserProfileRepository userRepository;
     private final UserProfileRepository ratedUserRepository;
 
-    public UserRatingService(UserRatingRepository repository,UserProfileRepository userRepository,UserProfileRepository ratedUserRepository)
+    public UserRatingService(UserRatingRepository repository, UserProfileRepository userRepository, UserProfileRepository ratedUserRepository)
     {
         super(repository);
         this.userratingRepository = repository;
@@ -32,36 +32,33 @@ public class UserRatingService extends BaseService<UserRating> {
 
     @Override
     public UserRating save(UserRating userrating) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (userrating.getUser() != null &&
+            userrating.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                userrating.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (userrating.getUser() != null
-        && userrating.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        userrating.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userrating.setUser(existingUser);
+            userrating.setUser(existingUser);
         }
-    
-    if (userrating.getRatedUser() != null
-        && userrating.getRatedUser().getId() != null) {
-        UserProfile existingRatedUser = ratedUserRepository.findById(
-        userrating.getRatedUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userrating.setRatedUser(existingRatedUser);
-        }
-    
+        
+        if (userrating.getRatedUser() != null &&
+            userrating.getRatedUser().getId() != null) {
 
-        return userratingRepository.save(userrating);
-    }
+            UserProfile existingRatedUser = ratedUserRepository.findById(
+                userrating.getRatedUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            userrating.setRatedUser(existingRatedUser);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return userratingRepository.save(userrating);
+}
 
 
     public UserRating update(Long id, UserRating userratingRequest) {
@@ -72,86 +69,56 @@ public class UserRatingService extends BaseService<UserRating> {
         existing.setRating(userratingRequest.getRating());
         existing.setRatingDate(userratingRequest.getRatingDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (userratingRequest.getUser() != null &&
-        userratingRequest.getUser().getId() != null) {
+            userratingRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        userratingRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                userratingRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (userratingRequest.getRatedUser() != null &&
-        userratingRequest.getRatedUser().getId() != null) {
+            userratingRequest.getRatedUser().getId() != null) {
 
-        UserProfile existingRatedUser = ratedUserRepository.findById(
-        userratingRequest.getRatedUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingRatedUser = ratedUserRepository.findById(
+                userratingRequest.getRatedUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setRatedUser(existingRatedUser);
+            existing.setRatedUser(existingRatedUser);
         } else {
-        existing.setRatedUser(null);
+            existing.setRatedUser(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return userratingRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserRating> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserRating entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getRatedUser() != null) {
-        entity.setRatedUser(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return userratingRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserRating> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserRating entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getRatedUser() != null) {
+            entity.setRatedUser(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

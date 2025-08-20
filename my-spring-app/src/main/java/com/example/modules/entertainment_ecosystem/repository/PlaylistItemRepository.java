@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PlaylistItemRepository extends BaseRepository<PlaylistItem, Long> {
+
 }

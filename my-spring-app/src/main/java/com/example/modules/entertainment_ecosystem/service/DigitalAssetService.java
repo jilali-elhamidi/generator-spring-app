@@ -25,7 +25,7 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
     private final ArtistRepository artistRepository;
     private final LicenseRepository licenseRepository;
 
-    public DigitalAssetService(DigitalAssetRepository repository,DigitalAssetTypeRepository assetTypeRepository,ArtistRepository artistRepository,LicenseRepository licenseRepository)
+    public DigitalAssetService(DigitalAssetRepository repository, DigitalAssetTypeRepository assetTypeRepository, ArtistRepository artistRepository, LicenseRepository licenseRepository)
     {
         super(repository);
         this.digitalassetRepository = repository;
@@ -36,52 +36,45 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
 
     @Override
     public DigitalAsset save(DigitalAsset digitalasset) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (digitalasset.getAssetType() != null &&
+            digitalasset.getAssetType().getId() != null) {
 
+            DigitalAssetType existingAssetType = assetTypeRepository.findById(
+                digitalasset.getAssetType().getId()
+            ).orElseThrow(() -> new RuntimeException("DigitalAssetType not found"));
 
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    if (digitalasset.getAssetType() != null
-        && digitalasset.getAssetType().getId() != null) {
-        DigitalAssetType existingAssetType = assetTypeRepository.findById(
-        digitalasset.getAssetType().getId()
-        ).orElseThrow(() -> new RuntimeException("DigitalAssetType not found"));
-        digitalasset.setAssetType(existingAssetType);
+            digitalasset.setAssetType(existingAssetType);
         }
-    
-    if (digitalasset.getArtist() != null
-        && digitalasset.getArtist().getId() != null) {
-        Artist existingArtist = artistRepository.findById(
-        digitalasset.getArtist().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
-        digitalasset.setArtist(existingArtist);
+        
+        if (digitalasset.getArtist() != null &&
+            digitalasset.getArtist().getId() != null) {
+
+            Artist existingArtist = artistRepository.findById(
+                digitalasset.getArtist().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+            digitalasset.setArtist(existingArtist);
         }
-    
-    
+        
+    // ---------- OneToOne ----------
         if (digitalasset.getLicense() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             digitalasset.setLicense(
-            licenseRepository.findById(digitalasset.getLicense().getId())
-            .orElseThrow(() -> new RuntimeException("license not found"))
+                licenseRepository.findById(digitalasset.getLicense().getId())
+                    .orElseThrow(() -> new RuntimeException("license not found"))
             );
-        
-        digitalasset.getLicense().setAsset(digitalasset);
+            
+            digitalasset.getLicense().setAsset(digitalasset);
         }
+        
 
-        return digitalassetRepository.save(digitalasset);
-    }
+    return digitalassetRepository.save(digitalasset);
+}
 
 
     public DigitalAsset update(Long id, DigitalAsset digitalassetRequest) {
@@ -92,121 +85,75 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
         existing.setName(digitalassetRequest.getName());
         existing.setUrl(digitalassetRequest.getUrl());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (digitalassetRequest.getAssetType() != null &&
-        digitalassetRequest.getAssetType().getId() != null) {
+            digitalassetRequest.getAssetType().getId() != null) {
 
-        DigitalAssetType existingAssetType = assetTypeRepository.findById(
-        digitalassetRequest.getAssetType().getId()
-        ).orElseThrow(() -> new RuntimeException("DigitalAssetType not found"));
+            DigitalAssetType existingAssetType = assetTypeRepository.findById(
+                digitalassetRequest.getAssetType().getId()
+            ).orElseThrow(() -> new RuntimeException("DigitalAssetType not found"));
 
-        existing.setAssetType(existingAssetType);
+            existing.setAssetType(existingAssetType);
         } else {
-        existing.setAssetType(null);
+            existing.setAssetType(null);
         }
+        
         if (digitalassetRequest.getArtist() != null &&
-        digitalassetRequest.getArtist().getId() != null) {
+            digitalassetRequest.getArtist().getId() != null) {
 
-        Artist existingArtist = artistRepository.findById(
-        digitalassetRequest.getArtist().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+            Artist existingArtist = artistRepository.findById(
+                digitalassetRequest.getArtist().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
 
-        existing.setArtist(existingArtist);
+            existing.setArtist(existingArtist);
         } else {
-        existing.setArtist(null);
+            existing.setArtist(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-        if (digitalassetRequest.getLicense() != null
-        && digitalassetRequest.getLicense().getId() != null) {
-
-        License license = licenseRepository.findById(
-        digitalassetRequest.getLicense().getId()
-        ).orElseThrow(() -> new RuntimeException("License not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setLicense(license);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (digitalassetRequest.getLicense() != null &&
+            digitalassetRequest.getLicense().getId() != null) {
+
+            License license = licenseRepository.findById(
+                digitalassetRequest.getLicense().getId()
+            ).orElseThrow(() -> new RuntimeException("License not found"));
+
+            existing.setLicense(license);
+
+            
             license.setAsset(existing);
+            
+        }
         
-        }
 
-    
-
-
-        return digitalassetRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<DigitalAsset> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-DigitalAsset entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-        if (entity.getLicense() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getLicense().setAsset(null);
-        // Dissocier côté direct
-        entity.setLicense(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getAssetType() != null) {
-        entity.setAssetType(null);
-        }
-    
-
-    
-        if (entity.getArtist() != null) {
-        entity.setArtist(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return digitalassetRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<DigitalAsset> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        DigitalAsset entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getLicense() != null) {
+            entity.getLicense().setAsset(null);
+            entity.setLicense(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getAssetType() != null) {
+            entity.setAssetType(null);
+        }
+        
+        if (entity.getArtist() != null) {
+            entity.setArtist(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

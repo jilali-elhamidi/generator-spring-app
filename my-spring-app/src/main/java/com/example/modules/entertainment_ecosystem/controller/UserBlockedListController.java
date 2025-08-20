@@ -46,37 +46,35 @@ public class UserBlockedListController {
 
         UserBlockedList entity = userblockedlistMapper.toEntity(userblockedlistDto);
         UserBlockedList saved = userblockedlistService.save(entity);
-        URI location = uriBuilder.path("/api/userblockedlists/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userblockedlists/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userblockedlistMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserBlockedListDto> updateUserBlockedList(
-                @PathVariable Long id,
-                @RequestBody UserBlockedListDto userblockedlistDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserBlockedListDto> updateUserBlockedList(
+            @PathVariable Long id,
+            @Valid @RequestBody UserBlockedListDto userblockedlistDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserBlockedList entityToUpdate = userblockedlistMapper.toEntity(userblockedlistDto);
 
-                // Appel du service update
-                UserBlockedList updatedEntity = userblockedlistService.update(id, entityToUpdate);
+        UserBlockedList entityToUpdate = userblockedlistMapper.toEntity(userblockedlistDto);
+        UserBlockedList updatedEntity = userblockedlistService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserBlockedListDto updatedDto = userblockedlistMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userblockedlistMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserBlockedList(@PathVariable Long id) {
-                    boolean deleted = userblockedlistService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserBlockedList(@PathVariable Long id) {
+        boolean deleted = userblockedlistService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

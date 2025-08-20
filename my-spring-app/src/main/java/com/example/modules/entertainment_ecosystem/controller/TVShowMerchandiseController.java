@@ -46,37 +46,35 @@ public class TVShowMerchandiseController {
 
         TVShowMerchandise entity = tvshowmerchandiseMapper.toEntity(tvshowmerchandiseDto);
         TVShowMerchandise saved = tvshowmerchandiseService.save(entity);
-        URI location = uriBuilder.path("/api/tvshowmerchandises/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/tvshowmerchandises/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(tvshowmerchandiseMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<TVShowMerchandiseDto> updateTVShowMerchandise(
-                @PathVariable Long id,
-                @RequestBody TVShowMerchandiseDto tvshowmerchandiseDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<TVShowMerchandiseDto> updateTVShowMerchandise(
+            @PathVariable Long id,
+            @Valid @RequestBody TVShowMerchandiseDto tvshowmerchandiseDto) {
 
-                // Transformer le DTO en entity pour le service
-                TVShowMerchandise entityToUpdate = tvshowmerchandiseMapper.toEntity(tvshowmerchandiseDto);
 
-                // Appel du service update
-                TVShowMerchandise updatedEntity = tvshowmerchandiseService.update(id, entityToUpdate);
+        TVShowMerchandise entityToUpdate = tvshowmerchandiseMapper.toEntity(tvshowmerchandiseDto);
+        TVShowMerchandise updatedEntity = tvshowmerchandiseService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                TVShowMerchandiseDto updatedDto = tvshowmerchandiseMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(tvshowmerchandiseMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteTVShowMerchandise(@PathVariable Long id) {
-                    boolean deleted = tvshowmerchandiseService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTVShowMerchandise(@PathVariable Long id) {
+        boolean deleted = tvshowmerchandiseService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

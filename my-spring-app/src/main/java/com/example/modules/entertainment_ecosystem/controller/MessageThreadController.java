@@ -46,37 +46,35 @@ public class MessageThreadController {
 
         MessageThread entity = messagethreadMapper.toEntity(messagethreadDto);
         MessageThread saved = messagethreadService.save(entity);
-        URI location = uriBuilder.path("/api/messagethreads/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/messagethreads/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(messagethreadMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MessageThreadDto> updateMessageThread(
-                @PathVariable Long id,
-                @RequestBody MessageThreadDto messagethreadDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MessageThreadDto> updateMessageThread(
+            @PathVariable Long id,
+            @Valid @RequestBody MessageThreadDto messagethreadDto) {
 
-                // Transformer le DTO en entity pour le service
-                MessageThread entityToUpdate = messagethreadMapper.toEntity(messagethreadDto);
 
-                // Appel du service update
-                MessageThread updatedEntity = messagethreadService.update(id, entityToUpdate);
+        MessageThread entityToUpdate = messagethreadMapper.toEntity(messagethreadDto);
+        MessageThread updatedEntity = messagethreadService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MessageThreadDto updatedDto = messagethreadMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(messagethreadMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMessageThread(@PathVariable Long id) {
-                    boolean deleted = messagethreadService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMessageThread(@PathVariable Long id) {
+        boolean deleted = messagethreadService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

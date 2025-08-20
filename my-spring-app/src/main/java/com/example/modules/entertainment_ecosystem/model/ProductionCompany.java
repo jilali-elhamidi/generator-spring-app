@@ -1,51 +1,59 @@
 package com.example.modules.entertainment_ecosystem.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Date;
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
-import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.Movie;import com.example.modules.entertainment_ecosystem.model.TVShow;import com.example.modules.entertainment_ecosystem.model.Employee;
+
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.ArrayList;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "productioncompany_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class ProductionCompany extends BaseEntity {
 
-// === Attributs simples ===
-
-        @NotNull@Size(min = 2, max = 100)
+    // === Attributs simples ===
+    @NotNull
+    @Size(min = 2, max = 100)
     private String name;
 
     private Date foundedDate;
 
-        @Size(max = 255)
+    @Size(max = 255)
     private String location;
 
 
-// === Relations ===
+    // === Relations ManyToOne ===
 
+    // === Relations OneToMany ===
     @OneToMany(mappedBy = "productionCompany", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("productionCompany")
-        private List<Movie> movies;
+    @JsonIgnoreProperties("productionCompany")
+    private List<Movie> movies = new ArrayList<>();
     
     @OneToMany(mappedBy = "productionCompany", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("productionCompany")
-        private List<TVShow> tvShows;
+    @JsonIgnoreProperties("productionCompany")
+    private List<TVShow> tvShows = new ArrayList<>();
     
     @OneToMany(mappedBy = "productionCompany", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("productionCompany")
-        private List<Employee> staff;
+    @JsonIgnoreProperties("productionCompany")
+    private List<Employee> staff = new ArrayList<>();
     
 
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

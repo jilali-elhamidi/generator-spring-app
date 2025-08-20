@@ -22,7 +22,7 @@ public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
     private final MerchandiseRepository merchandiseItemRepository;
     private final UserProfileRepository userRepository;
 
-    public MerchandiseSaleService(MerchandiseSaleRepository repository,MerchandiseRepository merchandiseItemRepository,UserProfileRepository userRepository)
+    public MerchandiseSaleService(MerchandiseSaleRepository repository, MerchandiseRepository merchandiseItemRepository, UserProfileRepository userRepository)
     {
         super(repository);
         this.merchandisesaleRepository = repository;
@@ -32,36 +32,33 @@ public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
 
     @Override
     public MerchandiseSale save(MerchandiseSale merchandisesale) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (merchandisesale.getMerchandiseItem() != null &&
+            merchandisesale.getMerchandiseItem().getId() != null) {
 
+            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                merchandisesale.getMerchandiseItem().getId()
+            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (merchandisesale.getMerchandiseItem() != null
-        && merchandisesale.getMerchandiseItem().getId() != null) {
-        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-        merchandisesale.getMerchandiseItem().getId()
-        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        merchandisesale.setMerchandiseItem(existingMerchandiseItem);
+            merchandisesale.setMerchandiseItem(existingMerchandiseItem);
         }
-    
-    if (merchandisesale.getUser() != null
-        && merchandisesale.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        merchandisesale.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        merchandisesale.setUser(existingUser);
-        }
-    
+        
+        if (merchandisesale.getUser() != null &&
+            merchandisesale.getUser().getId() != null) {
 
-        return merchandisesaleRepository.save(merchandisesale);
-    }
+            UserProfile existingUser = userRepository.findById(
+                merchandisesale.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            merchandisesale.setUser(existingUser);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return merchandisesaleRepository.save(merchandisesale);
+}
 
 
     public MerchandiseSale update(Long id, MerchandiseSale merchandisesaleRequest) {
@@ -72,86 +69,56 @@ public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
         existing.setSaleDate(merchandisesaleRequest.getSaleDate());
         existing.setQuantity(merchandisesaleRequest.getQuantity());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (merchandisesaleRequest.getMerchandiseItem() != null &&
-        merchandisesaleRequest.getMerchandiseItem().getId() != null) {
+            merchandisesaleRequest.getMerchandiseItem().getId() != null) {
 
-        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-        merchandisesaleRequest.getMerchandiseItem().getId()
-        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                merchandisesaleRequest.getMerchandiseItem().getId()
+            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
 
-        existing.setMerchandiseItem(existingMerchandiseItem);
+            existing.setMerchandiseItem(existingMerchandiseItem);
         } else {
-        existing.setMerchandiseItem(null);
+            existing.setMerchandiseItem(null);
         }
+        
         if (merchandisesaleRequest.getUser() != null &&
-        merchandisesaleRequest.getUser().getId() != null) {
+            merchandisesaleRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        merchandisesaleRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                merchandisesaleRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return merchandisesaleRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MerchandiseSale> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MerchandiseSale entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getMerchandiseItem() != null) {
-        entity.setMerchandiseItem(null);
-        }
-    
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return merchandisesaleRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MerchandiseSale> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MerchandiseSale entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getMerchandiseItem() != null) {
+            entity.setMerchandiseItem(null);
+        }
+        
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

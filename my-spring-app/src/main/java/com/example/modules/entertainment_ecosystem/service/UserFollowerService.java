@@ -22,7 +22,7 @@ public class UserFollowerService extends BaseService<UserFollower> {
     private final UserProfileRepository followerRepository;
     private final UserProfileRepository followedRepository;
 
-    public UserFollowerService(UserFollowerRepository repository,UserProfileRepository followerRepository,UserProfileRepository followedRepository)
+    public UserFollowerService(UserFollowerRepository repository, UserProfileRepository followerRepository, UserProfileRepository followedRepository)
     {
         super(repository);
         this.userfollowerRepository = repository;
@@ -32,36 +32,33 @@ public class UserFollowerService extends BaseService<UserFollower> {
 
     @Override
     public UserFollower save(UserFollower userfollower) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (userfollower.getFollower() != null &&
+            userfollower.getFollower().getId() != null) {
 
+            UserProfile existingFollower = followerRepository.findById(
+                userfollower.getFollower().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (userfollower.getFollower() != null
-        && userfollower.getFollower().getId() != null) {
-        UserProfile existingFollower = followerRepository.findById(
-        userfollower.getFollower().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userfollower.setFollower(existingFollower);
+            userfollower.setFollower(existingFollower);
         }
-    
-    if (userfollower.getFollowed() != null
-        && userfollower.getFollowed().getId() != null) {
-        UserProfile existingFollowed = followedRepository.findById(
-        userfollower.getFollowed().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userfollower.setFollowed(existingFollowed);
-        }
-    
+        
+        if (userfollower.getFollowed() != null &&
+            userfollower.getFollowed().getId() != null) {
 
-        return userfollowerRepository.save(userfollower);
-    }
+            UserProfile existingFollowed = followedRepository.findById(
+                userfollower.getFollowed().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            userfollower.setFollowed(existingFollowed);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return userfollowerRepository.save(userfollower);
+}
 
 
     public UserFollower update(Long id, UserFollower userfollowerRequest) {
@@ -71,86 +68,56 @@ public class UserFollowerService extends BaseService<UserFollower> {
     // Copier les champs simples
         existing.setFollowDate(userfollowerRequest.getFollowDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (userfollowerRequest.getFollower() != null &&
-        userfollowerRequest.getFollower().getId() != null) {
+            userfollowerRequest.getFollower().getId() != null) {
 
-        UserProfile existingFollower = followerRepository.findById(
-        userfollowerRequest.getFollower().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingFollower = followerRepository.findById(
+                userfollowerRequest.getFollower().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setFollower(existingFollower);
+            existing.setFollower(existingFollower);
         } else {
-        existing.setFollower(null);
+            existing.setFollower(null);
         }
+        
         if (userfollowerRequest.getFollowed() != null &&
-        userfollowerRequest.getFollowed().getId() != null) {
+            userfollowerRequest.getFollowed().getId() != null) {
 
-        UserProfile existingFollowed = followedRepository.findById(
-        userfollowerRequest.getFollowed().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingFollowed = followedRepository.findById(
+                userfollowerRequest.getFollowed().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setFollowed(existingFollowed);
+            existing.setFollowed(existingFollowed);
         } else {
-        existing.setFollowed(null);
+            existing.setFollowed(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return userfollowerRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserFollower> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserFollower entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getFollower() != null) {
-        entity.setFollower(null);
-        }
-    
-
-    
-        if (entity.getFollowed() != null) {
-        entity.setFollowed(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return userfollowerRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserFollower> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserFollower entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getFollower() != null) {
+            entity.setFollower(null);
+        }
+        
+        if (entity.getFollowed() != null) {
+            entity.setFollowed(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

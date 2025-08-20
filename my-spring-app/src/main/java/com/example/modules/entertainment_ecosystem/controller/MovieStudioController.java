@@ -46,37 +46,35 @@ public class MovieStudioController {
 
         MovieStudio entity = moviestudioMapper.toEntity(moviestudioDto);
         MovieStudio saved = moviestudioService.save(entity);
-        URI location = uriBuilder.path("/api/moviestudios/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/moviestudios/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(moviestudioMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MovieStudioDto> updateMovieStudio(
-                @PathVariable Long id,
-                @RequestBody MovieStudioDto moviestudioDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MovieStudioDto> updateMovieStudio(
+            @PathVariable Long id,
+            @Valid @RequestBody MovieStudioDto moviestudioDto) {
 
-                // Transformer le DTO en entity pour le service
-                MovieStudio entityToUpdate = moviestudioMapper.toEntity(moviestudioDto);
 
-                // Appel du service update
-                MovieStudio updatedEntity = moviestudioService.update(id, entityToUpdate);
+        MovieStudio entityToUpdate = moviestudioMapper.toEntity(moviestudioDto);
+        MovieStudio updatedEntity = moviestudioService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MovieStudioDto updatedDto = moviestudioMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(moviestudioMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMovieStudio(@PathVariable Long id) {
-                    boolean deleted = moviestudioService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMovieStudio(@PathVariable Long id) {
+        boolean deleted = moviestudioService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -46,37 +46,35 @@ public class MovieFormatController {
 
         MovieFormat entity = movieformatMapper.toEntity(movieformatDto);
         MovieFormat saved = movieformatService.save(entity);
-        URI location = uriBuilder.path("/api/movieformats/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/movieformats/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(movieformatMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MovieFormatDto> updateMovieFormat(
-                @PathVariable Long id,
-                @RequestBody MovieFormatDto movieformatDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MovieFormatDto> updateMovieFormat(
+            @PathVariable Long id,
+            @Valid @RequestBody MovieFormatDto movieformatDto) {
 
-                // Transformer le DTO en entity pour le service
-                MovieFormat entityToUpdate = movieformatMapper.toEntity(movieformatDto);
 
-                // Appel du service update
-                MovieFormat updatedEntity = movieformatService.update(id, entityToUpdate);
+        MovieFormat entityToUpdate = movieformatMapper.toEntity(movieformatDto);
+        MovieFormat updatedEntity = movieformatService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MovieFormatDto updatedDto = movieformatMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(movieformatMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMovieFormat(@PathVariable Long id) {
-                    boolean deleted = movieformatService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMovieFormat(@PathVariable Long id) {
+        boolean deleted = movieformatService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

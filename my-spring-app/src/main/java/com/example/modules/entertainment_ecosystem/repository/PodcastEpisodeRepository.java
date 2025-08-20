@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PodcastEpisodeRepository extends BaseRepository<PodcastEpisode, Long> {
+
 }

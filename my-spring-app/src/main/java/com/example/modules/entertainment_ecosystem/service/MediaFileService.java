@@ -19,7 +19,7 @@ public class MediaFileService extends BaseService<MediaFile> {
     protected final MediaFileRepository mediafileRepository;
     private final ReviewRepository reviewRepository;
 
-    public MediaFileService(MediaFileRepository repository,ReviewRepository reviewRepository)
+    public MediaFileService(MediaFileRepository repository, ReviewRepository reviewRepository)
     {
         super(repository);
         this.mediafileRepository = repository;
@@ -28,28 +28,25 @@ public class MediaFileService extends BaseService<MediaFile> {
 
     @Override
     public MediaFile save(MediaFile mediafile) {
-
-
-    
-
-
-    
-
-    
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (mediafile.getReview() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             mediafile.setReview(
-            reviewRepository.findById(mediafile.getReview().getId())
-            .orElseThrow(() -> new RuntimeException("review not found"))
+                reviewRepository.findById(mediafile.getReview().getId())
+                    .orElseThrow(() -> new RuntimeException("review not found"))
             );
-        
-        mediafile.getReview().setMediaFile(mediafile);
+            
+            mediafile.getReview().setMediaFile(mediafile);
         }
+        
 
-        return mediafileRepository.save(mediafile);
-    }
+    return mediafileRepository.save(mediafile);
+}
 
 
     public MediaFile update(Long id, MediaFile mediafileRequest) {
@@ -60,71 +57,43 @@ public class MediaFileService extends BaseService<MediaFile> {
         existing.setUrl(mediafileRequest.getUrl());
         existing.setType(mediafileRequest.getType());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (mediafileRequest.getReview() != null &&
+            mediafileRequest.getReview().getId() != null) {
 
-// Relations ManyToMany : synchronisation sécurisée
+            Review review = reviewRepository.findById(
+                mediafileRequest.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("Review not found"));
 
-// Relations OneToMany : synchronisation sécurisée
+            existing.setReview(review);
 
-    
-
-        if (mediafileRequest.getReview() != null
-        && mediafileRequest.getReview().getId() != null) {
-
-        Review review = reviewRepository.findById(
-        mediafileRequest.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("Review not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setReview(review);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
+            
             review.setMediaFile(existing);
+            
+        }
         
-        }
 
-    
-
-
-        return mediafileRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MediaFile> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MediaFile entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getReview() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getReview().setMediaFile(null);
-        // Dissocier côté direct
-        entity.setReview(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return mediafileRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MediaFile> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MediaFile entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getReview() != null) {
+            entity.getReview().setMediaFile(null);
+            entity.setReview(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

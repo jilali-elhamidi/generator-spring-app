@@ -19,7 +19,7 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
     protected final OnlineEventTypeRepository onlineeventtypeRepository;
     private final OnlineEventRepository eventsRepository;
 
-    public OnlineEventTypeService(OnlineEventTypeRepository repository,OnlineEventRepository eventsRepository)
+    public OnlineEventTypeService(OnlineEventTypeRepository repository, OnlineEventRepository eventsRepository)
     {
         super(repository);
         this.onlineeventtypeRepository = repository;
@@ -28,37 +28,30 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
 
     @Override
     public OnlineEventType save(OnlineEventType onlineeventtype) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (onlineeventtype.getEvents() != null) {
+    // ---------- OneToMany ----------
+        if (onlineeventtype.getEvents() != null) {
             List<OnlineEvent> managedEvents = new ArrayList<>();
             for (OnlineEvent item : onlineeventtype.getEvents()) {
-            if (item.getId() != null) {
-            OnlineEvent existingItem = eventsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setType(onlineeventtype);
-            managedEvents.add(existingItem);
-            } else {
-            item.setType(onlineeventtype);
-            managedEvents.add(item);
-            }
+                if (item.getId() != null) {
+                    OnlineEvent existingItem = eventsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
+
+                     existingItem.setType(onlineeventtype);
+                     managedEvents.add(existingItem);
+                } else {
+                    item.setType(onlineeventtype);
+                    managedEvents.add(item);
+                }
             }
             onlineeventtype.setEvents(managedEvents);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return onlineeventtypeRepository.save(onlineeventtype);
-    }
+    return onlineeventtypeRepository.save(onlineeventtype);
+}
 
 
     public OnlineEventType update(Long id, OnlineEventType onlineeventtypeRequest) {
@@ -68,75 +61,50 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
     // Copier les champs simples
         existing.setName(onlineeventtypeRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getEvents().clear();
 
         if (onlineeventtypeRequest.getEvents() != null) {
-        for (var item : onlineeventtypeRequest.getEvents()) {
-        OnlineEvent existingItem;
-        if (item.getId() != null) {
-        existingItem = eventsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : onlineeventtypeRequest.getEvents()) {
+                OnlineEvent existingItem;
+                if (item.getId() != null) {
+                    existingItem = eventsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("OnlineEvent not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setType(existing);
+                existing.getEvents().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setType(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getEvents().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return onlineeventtypeRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<OnlineEventType> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-OnlineEventType entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getEvents() != null) {
-        for (var child : entity.getEvents()) {
         
-            child.setType(null); // retirer la référence inverse
-        
-        }
-        entity.getEvents().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return onlineeventtypeRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<OnlineEventType> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        OnlineEventType entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getEvents() != null) {
+            for (var child : entity.getEvents()) {
+                
+                child.setType(null); // retirer la référence inverse
+                
+            }
+            entity.getEvents().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

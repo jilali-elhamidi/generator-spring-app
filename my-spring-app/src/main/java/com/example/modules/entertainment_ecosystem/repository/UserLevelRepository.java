@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserLevelRepository extends BaseRepository<UserLevel, Long> {
+
 }

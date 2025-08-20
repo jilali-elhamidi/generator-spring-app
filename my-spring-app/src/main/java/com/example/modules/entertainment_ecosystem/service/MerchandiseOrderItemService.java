@@ -22,7 +22,7 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
     private final MerchandiseRepository merchandiseItemRepository;
     private final MerchandiseOrderRepository orderRepository;
 
-    public MerchandiseOrderItemService(MerchandiseOrderItemRepository repository,MerchandiseRepository merchandiseItemRepository,MerchandiseOrderRepository orderRepository)
+    public MerchandiseOrderItemService(MerchandiseOrderItemRepository repository, MerchandiseRepository merchandiseItemRepository, MerchandiseOrderRepository orderRepository)
     {
         super(repository);
         this.merchandiseorderitemRepository = repository;
@@ -32,36 +32,33 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
 
     @Override
     public MerchandiseOrderItem save(MerchandiseOrderItem merchandiseorderitem) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (merchandiseorderitem.getMerchandiseItem() != null &&
+            merchandiseorderitem.getMerchandiseItem().getId() != null) {
 
+            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                merchandiseorderitem.getMerchandiseItem().getId()
+            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (merchandiseorderitem.getMerchandiseItem() != null
-        && merchandiseorderitem.getMerchandiseItem().getId() != null) {
-        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-        merchandiseorderitem.getMerchandiseItem().getId()
-        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        merchandiseorderitem.setMerchandiseItem(existingMerchandiseItem);
+            merchandiseorderitem.setMerchandiseItem(existingMerchandiseItem);
         }
-    
-    if (merchandiseorderitem.getOrder() != null
-        && merchandiseorderitem.getOrder().getId() != null) {
-        MerchandiseOrder existingOrder = orderRepository.findById(
-        merchandiseorderitem.getOrder().getId()
-        ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
-        merchandiseorderitem.setOrder(existingOrder);
-        }
-    
+        
+        if (merchandiseorderitem.getOrder() != null &&
+            merchandiseorderitem.getOrder().getId() != null) {
 
-        return merchandiseorderitemRepository.save(merchandiseorderitem);
-    }
+            MerchandiseOrder existingOrder = orderRepository.findById(
+                merchandiseorderitem.getOrder().getId()
+            ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
+
+            merchandiseorderitem.setOrder(existingOrder);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return merchandiseorderitemRepository.save(merchandiseorderitem);
+}
 
 
     public MerchandiseOrderItem update(Long id, MerchandiseOrderItem merchandiseorderitemRequest) {
@@ -72,86 +69,56 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
         existing.setQuantity(merchandiseorderitemRequest.getQuantity());
         existing.setPriceAtPurchase(merchandiseorderitemRequest.getPriceAtPurchase());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (merchandiseorderitemRequest.getMerchandiseItem() != null &&
-        merchandiseorderitemRequest.getMerchandiseItem().getId() != null) {
+            merchandiseorderitemRequest.getMerchandiseItem().getId() != null) {
 
-        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-        merchandiseorderitemRequest.getMerchandiseItem().getId()
-        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                merchandiseorderitemRequest.getMerchandiseItem().getId()
+            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
 
-        existing.setMerchandiseItem(existingMerchandiseItem);
+            existing.setMerchandiseItem(existingMerchandiseItem);
         } else {
-        existing.setMerchandiseItem(null);
+            existing.setMerchandiseItem(null);
         }
+        
         if (merchandiseorderitemRequest.getOrder() != null &&
-        merchandiseorderitemRequest.getOrder().getId() != null) {
+            merchandiseorderitemRequest.getOrder().getId() != null) {
 
-        MerchandiseOrder existingOrder = orderRepository.findById(
-        merchandiseorderitemRequest.getOrder().getId()
-        ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
+            MerchandiseOrder existingOrder = orderRepository.findById(
+                merchandiseorderitemRequest.getOrder().getId()
+            ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
 
-        existing.setOrder(existingOrder);
+            existing.setOrder(existingOrder);
         } else {
-        existing.setOrder(null);
+            existing.setOrder(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return merchandiseorderitemRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MerchandiseOrderItem> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MerchandiseOrderItem entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getMerchandiseItem() != null) {
-        entity.setMerchandiseItem(null);
-        }
-    
-
-    
-        if (entity.getOrder() != null) {
-        entity.setOrder(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return merchandiseorderitemRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MerchandiseOrderItem> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MerchandiseOrderItem entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getMerchandiseItem() != null) {
+            entity.setMerchandiseItem(null);
+        }
+        
+        if (entity.getOrder() != null) {
+            entity.setOrder(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

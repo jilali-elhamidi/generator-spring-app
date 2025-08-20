@@ -1,47 +1,56 @@
 package com.example.modules.entertainment_ecosystem.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Date;
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
-import java.util.Date;
-import com.example.modules.entertainment_ecosystem.model.UserProfile;import com.example.modules.entertainment_ecosystem.model.UserProfile;
+
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.ArrayList;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "userrating_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class UserRating extends BaseEntity {
 
-// === Attributs simples ===
-
-        @NotNull@Min(1)@Max(5)
+    // === Attributs simples ===
+    @NotNull
+    @Min(1)
+    @Max(5)
     private Integer rating;
 
-        @NotNull
+    @NotNull
     private Date ratingDate;
 
 
-// === Relations ===
-
+    // === Relations ManyToOne ===
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "user_id")
-        @JsonIgnoreProperties("givenUserRatings")
-        private UserProfile user;
+    @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties("givenUserRatings")
+    private UserProfile user;
     
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "rated_user_id")
-        @JsonIgnoreProperties("receivedUserRatings")
-        private UserProfile ratedUser;
+    @JoinColumn(name = "rated_user_id")
+    @JsonIgnoreProperties("receivedUserRatings")
+    private UserProfile ratedUser;
     
 
+    // === Relations OneToMany ===
+
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
 }

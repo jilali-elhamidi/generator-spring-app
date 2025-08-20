@@ -46,37 +46,35 @@ public class StreamingPlatformController {
 
         StreamingPlatform entity = streamingplatformMapper.toEntity(streamingplatformDto);
         StreamingPlatform saved = streamingplatformService.save(entity);
-        URI location = uriBuilder.path("/api/streamingplatforms/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/streamingplatforms/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(streamingplatformMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<StreamingPlatformDto> updateStreamingPlatform(
-                @PathVariable Long id,
-                @RequestBody StreamingPlatformDto streamingplatformDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<StreamingPlatformDto> updateStreamingPlatform(
+            @PathVariable Long id,
+            @Valid @RequestBody StreamingPlatformDto streamingplatformDto) {
 
-                // Transformer le DTO en entity pour le service
-                StreamingPlatform entityToUpdate = streamingplatformMapper.toEntity(streamingplatformDto);
 
-                // Appel du service update
-                StreamingPlatform updatedEntity = streamingplatformService.update(id, entityToUpdate);
+        StreamingPlatform entityToUpdate = streamingplatformMapper.toEntity(streamingplatformDto);
+        StreamingPlatform updatedEntity = streamingplatformService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                StreamingPlatformDto updatedDto = streamingplatformMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(streamingplatformMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteStreamingPlatform(@PathVariable Long id) {
-                    boolean deleted = streamingplatformService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteStreamingPlatform(@PathVariable Long id) {
+        boolean deleted = streamingplatformService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

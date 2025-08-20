@@ -22,7 +22,7 @@ public class EpisodeCreditService extends BaseService<EpisodeCredit> {
     private final EpisodeRepository episodeRepository;
     private final ArtistRepository artistRepository;
 
-    public EpisodeCreditService(EpisodeCreditRepository repository,EpisodeRepository episodeRepository,ArtistRepository artistRepository)
+    public EpisodeCreditService(EpisodeCreditRepository repository, EpisodeRepository episodeRepository, ArtistRepository artistRepository)
     {
         super(repository);
         this.episodecreditRepository = repository;
@@ -32,36 +32,33 @@ public class EpisodeCreditService extends BaseService<EpisodeCredit> {
 
     @Override
     public EpisodeCredit save(EpisodeCredit episodecredit) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (episodecredit.getEpisode() != null &&
+            episodecredit.getEpisode().getId() != null) {
 
+            Episode existingEpisode = episodeRepository.findById(
+                episodecredit.getEpisode().getId()
+            ).orElseThrow(() -> new RuntimeException("Episode not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (episodecredit.getEpisode() != null
-        && episodecredit.getEpisode().getId() != null) {
-        Episode existingEpisode = episodeRepository.findById(
-        episodecredit.getEpisode().getId()
-        ).orElseThrow(() -> new RuntimeException("Episode not found"));
-        episodecredit.setEpisode(existingEpisode);
+            episodecredit.setEpisode(existingEpisode);
         }
-    
-    if (episodecredit.getArtist() != null
-        && episodecredit.getArtist().getId() != null) {
-        Artist existingArtist = artistRepository.findById(
-        episodecredit.getArtist().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
-        episodecredit.setArtist(existingArtist);
-        }
-    
+        
+        if (episodecredit.getArtist() != null &&
+            episodecredit.getArtist().getId() != null) {
 
-        return episodecreditRepository.save(episodecredit);
-    }
+            Artist existingArtist = artistRepository.findById(
+                episodecredit.getArtist().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+            episodecredit.setArtist(existingArtist);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return episodecreditRepository.save(episodecredit);
+}
 
 
     public EpisodeCredit update(Long id, EpisodeCredit episodecreditRequest) {
@@ -71,86 +68,56 @@ public class EpisodeCreditService extends BaseService<EpisodeCredit> {
     // Copier les champs simples
         existing.setRole(episodecreditRequest.getRole());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (episodecreditRequest.getEpisode() != null &&
-        episodecreditRequest.getEpisode().getId() != null) {
+            episodecreditRequest.getEpisode().getId() != null) {
 
-        Episode existingEpisode = episodeRepository.findById(
-        episodecreditRequest.getEpisode().getId()
-        ).orElseThrow(() -> new RuntimeException("Episode not found"));
+            Episode existingEpisode = episodeRepository.findById(
+                episodecreditRequest.getEpisode().getId()
+            ).orElseThrow(() -> new RuntimeException("Episode not found"));
 
-        existing.setEpisode(existingEpisode);
+            existing.setEpisode(existingEpisode);
         } else {
-        existing.setEpisode(null);
+            existing.setEpisode(null);
         }
+        
         if (episodecreditRequest.getArtist() != null &&
-        episodecreditRequest.getArtist().getId() != null) {
+            episodecreditRequest.getArtist().getId() != null) {
 
-        Artist existingArtist = artistRepository.findById(
-        episodecreditRequest.getArtist().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+            Artist existingArtist = artistRepository.findById(
+                episodecreditRequest.getArtist().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
 
-        existing.setArtist(existingArtist);
+            existing.setArtist(existingArtist);
         } else {
-        existing.setArtist(null);
+            existing.setArtist(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return episodecreditRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<EpisodeCredit> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-EpisodeCredit entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getEpisode() != null) {
-        entity.setEpisode(null);
-        }
-    
-
-    
-        if (entity.getArtist() != null) {
-        entity.setArtist(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return episodecreditRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<EpisodeCredit> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        EpisodeCredit entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getEpisode() != null) {
+            entity.setEpisode(null);
+        }
+        
+        if (entity.getArtist() != null) {
+            entity.setArtist(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

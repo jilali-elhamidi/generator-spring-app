@@ -22,7 +22,7 @@ public class GameSessionService extends BaseService<GameSession> {
     private final UserProfileRepository userRepository;
     private final VideoGameRepository gameRepository;
 
-    public GameSessionService(GameSessionRepository repository,UserProfileRepository userRepository,VideoGameRepository gameRepository)
+    public GameSessionService(GameSessionRepository repository, UserProfileRepository userRepository, VideoGameRepository gameRepository)
     {
         super(repository);
         this.gamesessionRepository = repository;
@@ -32,36 +32,33 @@ public class GameSessionService extends BaseService<GameSession> {
 
     @Override
     public GameSession save(GameSession gamesession) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (gamesession.getUser() != null &&
+            gamesession.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                gamesession.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (gamesession.getUser() != null
-        && gamesession.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        gamesession.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        gamesession.setUser(existingUser);
+            gamesession.setUser(existingUser);
         }
-    
-    if (gamesession.getGame() != null
-        && gamesession.getGame().getId() != null) {
-        VideoGame existingGame = gameRepository.findById(
-        gamesession.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        gamesession.setGame(existingGame);
-        }
-    
+        
+        if (gamesession.getGame() != null &&
+            gamesession.getGame().getId() != null) {
 
-        return gamesessionRepository.save(gamesession);
-    }
+            VideoGame existingGame = gameRepository.findById(
+                gamesession.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+            gamesession.setGame(existingGame);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return gamesessionRepository.save(gamesession);
+}
 
 
     public GameSession update(Long id, GameSession gamesessionRequest) {
@@ -73,86 +70,56 @@ public class GameSessionService extends BaseService<GameSession> {
         existing.setDurationMinutes(gamesessionRequest.getDurationMinutes());
         existing.setSessionDate(gamesessionRequest.getSessionDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (gamesessionRequest.getUser() != null &&
-        gamesessionRequest.getUser().getId() != null) {
+            gamesessionRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        gamesessionRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                gamesessionRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (gamesessionRequest.getGame() != null &&
-        gamesessionRequest.getGame().getId() != null) {
+            gamesessionRequest.getGame().getId() != null) {
 
-        VideoGame existingGame = gameRepository.findById(
-        gamesessionRequest.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            VideoGame existingGame = gameRepository.findById(
+                gamesessionRequest.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-        existing.setGame(existingGame);
+            existing.setGame(existingGame);
         } else {
-        existing.setGame(null);
+            existing.setGame(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return gamesessionRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GameSession> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GameSession entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getGame() != null) {
-        entity.setGame(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return gamesessionRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GameSession> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GameSession entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getGame() != null) {
+            entity.setGame(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

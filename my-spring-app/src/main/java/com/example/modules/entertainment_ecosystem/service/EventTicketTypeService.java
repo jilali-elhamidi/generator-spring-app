@@ -22,7 +22,7 @@ public class EventTicketTypeService extends BaseService<EventTicketType> {
     private final TicketRepository ticketsRepository;
     private final SocialMediaPlatformRepository platformRepository;
 
-    public EventTicketTypeService(EventTicketTypeRepository repository,TicketRepository ticketsRepository,SocialMediaPlatformRepository platformRepository)
+    public EventTicketTypeService(EventTicketTypeRepository repository, TicketRepository ticketsRepository, SocialMediaPlatformRepository platformRepository)
     {
         super(repository);
         this.eventtickettypeRepository = repository;
@@ -32,49 +32,40 @@ public class EventTicketTypeService extends BaseService<EventTicketType> {
 
     @Override
     public EventTicketType save(EventTicketType eventtickettype) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (eventtickettype.getTickets() != null) {
+    // ---------- OneToMany ----------
+        if (eventtickettype.getTickets() != null) {
             List<Ticket> managedTickets = new ArrayList<>();
             for (Ticket item : eventtickettype.getTickets()) {
-            if (item.getId() != null) {
-            Ticket existingItem = ticketsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Ticket not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setType(eventtickettype);
-            managedTickets.add(existingItem);
-            } else {
-            item.setType(eventtickettype);
-            managedTickets.add(item);
-            }
+                if (item.getId() != null) {
+                    Ticket existingItem = ticketsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+                     existingItem.setType(eventtickettype);
+                     managedTickets.add(existingItem);
+                } else {
+                    item.setType(eventtickettype);
+                    managedTickets.add(item);
+                }
             }
             eventtickettype.setTickets(managedTickets);
-            }
-        
-    
-
-    
-
-
-    
-
-    
-
-    
-    if (eventtickettype.getPlatform() != null
-        && eventtickettype.getPlatform().getId() != null) {
-        SocialMediaPlatform existingPlatform = platformRepository.findById(
-        eventtickettype.getPlatform().getId()
-        ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
-        eventtickettype.setPlatform(existingPlatform);
         }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (eventtickettype.getPlatform() != null &&
+            eventtickettype.getPlatform().getId() != null) {
 
-        return eventtickettypeRepository.save(eventtickettype);
-    }
+            SocialMediaPlatform existingPlatform = platformRepository.findById(
+                eventtickettype.getPlatform().getId()
+            ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
+
+            eventtickettype.setPlatform(existingPlatform);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return eventtickettypeRepository.save(eventtickettype);
+}
 
 
     public EventTicketType update(Long id, EventTicketType eventtickettypeRequest) {
@@ -85,100 +76,66 @@ public class EventTicketTypeService extends BaseService<EventTicketType> {
         existing.setName(eventtickettypeRequest.getName());
         existing.setPrice(eventtickettypeRequest.getPrice());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (eventtickettypeRequest.getPlatform() != null &&
-        eventtickettypeRequest.getPlatform().getId() != null) {
+            eventtickettypeRequest.getPlatform().getId() != null) {
 
-        SocialMediaPlatform existingPlatform = platformRepository.findById(
-        eventtickettypeRequest.getPlatform().getId()
-        ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
+            SocialMediaPlatform existingPlatform = platformRepository.findById(
+                eventtickettypeRequest.getPlatform().getId()
+            ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
 
-        existing.setPlatform(existingPlatform);
+            existing.setPlatform(existingPlatform);
         } else {
-        existing.setPlatform(null);
+            existing.setPlatform(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getTickets().clear();
 
         if (eventtickettypeRequest.getTickets() != null) {
-        for (var item : eventtickettypeRequest.getTickets()) {
-        Ticket existingItem;
-        if (item.getId() != null) {
-        existingItem = ticketsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Ticket not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : eventtickettypeRequest.getTickets()) {
+                Ticket existingItem;
+                if (item.getId() != null) {
+                    existingItem = ticketsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setType(existing);
+                existing.getTickets().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setType(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getTickets().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-
-        return eventtickettypeRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<EventTicketType> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-EventTicketType entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getTickets() != null) {
-        for (var child : entity.getTickets()) {
         
-            child.setType(null); // retirer la référence inverse
-        
-        }
-        entity.getTickets().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-        if (entity.getPlatform() != null) {
-        entity.setPlatform(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return eventtickettypeRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<EventTicketType> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        EventTicketType entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getTickets() != null) {
+            for (var child : entity.getTickets()) {
+                
+                child.setType(null); // retirer la référence inverse
+                
+            }
+            entity.getTickets().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getPlatform() != null) {
+            entity.setPlatform(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -46,37 +46,35 @@ public class ContentLanguageController {
 
         ContentLanguage entity = contentlanguageMapper.toEntity(contentlanguageDto);
         ContentLanguage saved = contentlanguageService.save(entity);
-        URI location = uriBuilder.path("/api/contentlanguages/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/contentlanguages/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(contentlanguageMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ContentLanguageDto> updateContentLanguage(
-                @PathVariable Long id,
-                @RequestBody ContentLanguageDto contentlanguageDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ContentLanguageDto> updateContentLanguage(
+            @PathVariable Long id,
+            @Valid @RequestBody ContentLanguageDto contentlanguageDto) {
 
-                // Transformer le DTO en entity pour le service
-                ContentLanguage entityToUpdate = contentlanguageMapper.toEntity(contentlanguageDto);
 
-                // Appel du service update
-                ContentLanguage updatedEntity = contentlanguageService.update(id, entityToUpdate);
+        ContentLanguage entityToUpdate = contentlanguageMapper.toEntity(contentlanguageDto);
+        ContentLanguage updatedEntity = contentlanguageService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ContentLanguageDto updatedDto = contentlanguageMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(contentlanguageMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteContentLanguage(@PathVariable Long id) {
-                    boolean deleted = contentlanguageService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteContentLanguage(@PathVariable Long id) {
+        boolean deleted = contentlanguageService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

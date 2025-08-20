@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OnlineEventTypeRepository extends BaseRepository<OnlineEventType, Long> {
+
 }

@@ -46,37 +46,35 @@ public class UserConnectionController {
 
         UserConnection entity = userconnectionMapper.toEntity(userconnectionDto);
         UserConnection saved = userconnectionService.save(entity);
-        URI location = uriBuilder.path("/api/userconnections/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userconnections/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userconnectionMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserConnectionDto> updateUserConnection(
-                @PathVariable Long id,
-                @RequestBody UserConnectionDto userconnectionDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserConnectionDto> updateUserConnection(
+            @PathVariable Long id,
+            @Valid @RequestBody UserConnectionDto userconnectionDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserConnection entityToUpdate = userconnectionMapper.toEntity(userconnectionDto);
 
-                // Appel du service update
-                UserConnection updatedEntity = userconnectionService.update(id, entityToUpdate);
+        UserConnection entityToUpdate = userconnectionMapper.toEntity(userconnectionDto);
+        UserConnection updatedEntity = userconnectionService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserConnectionDto updatedDto = userconnectionMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userconnectionMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserConnection(@PathVariable Long id) {
-                    boolean deleted = userconnectionService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserConnection(@PathVariable Long id) {
+        boolean deleted = userconnectionService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

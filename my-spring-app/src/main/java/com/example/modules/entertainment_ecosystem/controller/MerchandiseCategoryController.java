@@ -46,37 +46,35 @@ public class MerchandiseCategoryController {
 
         MerchandiseCategory entity = merchandisecategoryMapper.toEntity(merchandisecategoryDto);
         MerchandiseCategory saved = merchandisecategoryService.save(entity);
-        URI location = uriBuilder.path("/api/merchandisecategorys/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/merchandisecategorys/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(merchandisecategoryMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MerchandiseCategoryDto> updateMerchandiseCategory(
-                @PathVariable Long id,
-                @RequestBody MerchandiseCategoryDto merchandisecategoryDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MerchandiseCategoryDto> updateMerchandiseCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody MerchandiseCategoryDto merchandisecategoryDto) {
 
-                // Transformer le DTO en entity pour le service
-                MerchandiseCategory entityToUpdate = merchandisecategoryMapper.toEntity(merchandisecategoryDto);
 
-                // Appel du service update
-                MerchandiseCategory updatedEntity = merchandisecategoryService.update(id, entityToUpdate);
+        MerchandiseCategory entityToUpdate = merchandisecategoryMapper.toEntity(merchandisecategoryDto);
+        MerchandiseCategory updatedEntity = merchandisecategoryService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MerchandiseCategoryDto updatedDto = merchandisecategoryMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(merchandisecategoryMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMerchandiseCategory(@PathVariable Long id) {
-                    boolean deleted = merchandisecategoryService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMerchandiseCategory(@PathVariable Long id) {
+        boolean deleted = merchandisecategoryService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

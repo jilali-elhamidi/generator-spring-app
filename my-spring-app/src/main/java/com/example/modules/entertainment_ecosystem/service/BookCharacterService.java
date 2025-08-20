@@ -19,7 +19,7 @@ public class BookCharacterService extends BaseService<BookCharacter> {
     protected final BookCharacterRepository bookcharacterRepository;
     private final BookRepository booksRepository;
 
-    public BookCharacterService(BookCharacterRepository repository,BookRepository booksRepository)
+    public BookCharacterService(BookCharacterRepository repository, BookRepository booksRepository)
     {
         super(repository);
         this.bookcharacterRepository = repository;
@@ -28,31 +28,27 @@ public class BookCharacterService extends BaseService<BookCharacter> {
 
     @Override
     public BookCharacter save(BookCharacter bookcharacter) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (bookcharacter.getBooks() != null &&
+            !bookcharacter.getBooks().isEmpty()) {
 
+            List<Book> attachedBooks = bookcharacter.getBooks().stream()
+            .map(item -> booksRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("Book not found with id " + item.getId())))
+            .toList();
 
-    
+            bookcharacter.setBooks(attachedBooks);
 
-
-    
-        if (bookcharacter.getBooks() != null
-        && !bookcharacter.getBooks().isEmpty()) {
-
-        List<Book> attachedBooks = bookcharacter.getBooks().stream()
-        .map(item -> booksRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Book not found with id " + item.getId())))
-        .toList();
-
-        bookcharacter.setBooks(attachedBooks);
-
-        // côté propriétaire (Book → BookCharacter)
-        attachedBooks.forEach(it -> it.getCharacters().add(bookcharacter));
+            // côté propriétaire (Book → BookCharacter)
+            attachedBooks.forEach(it -> it.getCharacters().add(bookcharacter));
         }
-    
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-    
-
-        return bookcharacterRepository.save(bookcharacter);
-    }
+    return bookcharacterRepository.save(bookcharacter);
+}
 
 
     public BookCharacter update(Long id, BookCharacter bookcharacterRequest) {
@@ -63,72 +59,51 @@ public class BookCharacterService extends BaseService<BookCharacter> {
         existing.setName(bookcharacterRequest.getName());
         existing.setDescription(bookcharacterRequest.getDescription());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (bookcharacterRequest.getBooks() != null) {
-        existing.getBooks().clear();
+            existing.getBooks().clear();
 
-        List<Book> booksList = bookcharacterRequest.getBooks().stream()
-        .map(item -> booksRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Book not found")))
-        .collect(Collectors.toList());
+            List<Book> booksList = bookcharacterRequest.getBooks().stream()
+                .map(item -> booksRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("Book not found")))
+                .collect(Collectors.toList());
 
-        existing.getBooks().addAll(booksList);
+            existing.getBooks().addAll(booksList);
 
-        // Mettre à jour le côté inverse
-        booksList.forEach(it -> {
-        if (!it.getCharacters().contains(existing)) {
-        it.getCharacters().add(existing);
+            // Mettre à jour le côté inverse
+            booksList.forEach(it -> {
+                if (!it.getCharacters().contains(existing)) {
+                    it.getCharacters().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return bookcharacterRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<BookCharacter> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-BookCharacter entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getBooks() != null) {
-        for (Book item : new ArrayList<>(entity.getBooks())) {
         
-            item.getCharacters().remove(entity); // retire côté inverse
-        
-        }
-        entity.getBooks().clear(); // puis vide côté courant
-        }
-    
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return bookcharacterRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<BookCharacter> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        BookCharacter entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getBooks() != null) {
+            for (Book item : new ArrayList<>(entity.getBooks())) {
+                
+                item.getCharacters().remove(entity); // retire côté inverse
+                
+            }
+            entity.getBooks().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GameSessionRepository extends BaseRepository<GameSession, Long> {
+
 }

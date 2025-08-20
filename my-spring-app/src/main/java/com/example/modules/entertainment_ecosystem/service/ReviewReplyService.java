@@ -22,7 +22,7 @@ public class ReviewReplyService extends BaseService<ReviewReply> {
     private final UserProfileRepository userRepository;
     private final ReviewCommentRepository reviewCommentRepository;
 
-    public ReviewReplyService(ReviewReplyRepository repository,UserProfileRepository userRepository,ReviewCommentRepository reviewCommentRepository)
+    public ReviewReplyService(ReviewReplyRepository repository, UserProfileRepository userRepository, ReviewCommentRepository reviewCommentRepository)
     {
         super(repository);
         this.reviewreplyRepository = repository;
@@ -32,36 +32,33 @@ public class ReviewReplyService extends BaseService<ReviewReply> {
 
     @Override
     public ReviewReply save(ReviewReply reviewreply) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (reviewreply.getUser() != null &&
+            reviewreply.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                reviewreply.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (reviewreply.getUser() != null
-        && reviewreply.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        reviewreply.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        reviewreply.setUser(existingUser);
+            reviewreply.setUser(existingUser);
         }
-    
-    if (reviewreply.getReviewComment() != null
-        && reviewreply.getReviewComment().getId() != null) {
-        ReviewComment existingReviewComment = reviewCommentRepository.findById(
-        reviewreply.getReviewComment().getId()
-        ).orElseThrow(() -> new RuntimeException("ReviewComment not found"));
-        reviewreply.setReviewComment(existingReviewComment);
-        }
-    
+        
+        if (reviewreply.getReviewComment() != null &&
+            reviewreply.getReviewComment().getId() != null) {
 
-        return reviewreplyRepository.save(reviewreply);
-    }
+            ReviewComment existingReviewComment = reviewCommentRepository.findById(
+                reviewreply.getReviewComment().getId()
+            ).orElseThrow(() -> new RuntimeException("ReviewComment not found"));
+
+            reviewreply.setReviewComment(existingReviewComment);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return reviewreplyRepository.save(reviewreply);
+}
 
 
     public ReviewReply update(Long id, ReviewReply reviewreplyRequest) {
@@ -72,86 +69,56 @@ public class ReviewReplyService extends BaseService<ReviewReply> {
         existing.setCommentText(reviewreplyRequest.getCommentText());
         existing.setReplyDate(reviewreplyRequest.getReplyDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (reviewreplyRequest.getUser() != null &&
-        reviewreplyRequest.getUser().getId() != null) {
+            reviewreplyRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        reviewreplyRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                reviewreplyRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (reviewreplyRequest.getReviewComment() != null &&
-        reviewreplyRequest.getReviewComment().getId() != null) {
+            reviewreplyRequest.getReviewComment().getId() != null) {
 
-        ReviewComment existingReviewComment = reviewCommentRepository.findById(
-        reviewreplyRequest.getReviewComment().getId()
-        ).orElseThrow(() -> new RuntimeException("ReviewComment not found"));
+            ReviewComment existingReviewComment = reviewCommentRepository.findById(
+                reviewreplyRequest.getReviewComment().getId()
+            ).orElseThrow(() -> new RuntimeException("ReviewComment not found"));
 
-        existing.setReviewComment(existingReviewComment);
+            existing.setReviewComment(existingReviewComment);
         } else {
-        existing.setReviewComment(null);
+            existing.setReviewComment(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return reviewreplyRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ReviewReply> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ReviewReply entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getReviewComment() != null) {
-        entity.setReviewComment(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return reviewreplyRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ReviewReply> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ReviewReply entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getReviewComment() != null) {
+            entity.setReviewComment(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

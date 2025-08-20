@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OnlinePlatformRepository extends BaseRepository<OnlinePlatform, Long> {
+
 }

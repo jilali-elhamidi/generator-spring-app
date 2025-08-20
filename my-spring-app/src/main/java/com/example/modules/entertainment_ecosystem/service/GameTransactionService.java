@@ -22,7 +22,7 @@ public class GameTransactionService extends BaseService<GameTransaction> {
     private final UserProfileRepository userRepository;
     private final GameCurrencyRepository currencyRepository;
 
-    public GameTransactionService(GameTransactionRepository repository,UserProfileRepository userRepository,GameCurrencyRepository currencyRepository)
+    public GameTransactionService(GameTransactionRepository repository, UserProfileRepository userRepository, GameCurrencyRepository currencyRepository)
     {
         super(repository);
         this.gametransactionRepository = repository;
@@ -32,36 +32,33 @@ public class GameTransactionService extends BaseService<GameTransaction> {
 
     @Override
     public GameTransaction save(GameTransaction gametransaction) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (gametransaction.getUser() != null &&
+            gametransaction.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                gametransaction.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (gametransaction.getUser() != null
-        && gametransaction.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        gametransaction.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        gametransaction.setUser(existingUser);
+            gametransaction.setUser(existingUser);
         }
-    
-    if (gametransaction.getCurrency() != null
-        && gametransaction.getCurrency().getId() != null) {
-        GameCurrency existingCurrency = currencyRepository.findById(
-        gametransaction.getCurrency().getId()
-        ).orElseThrow(() -> new RuntimeException("GameCurrency not found"));
-        gametransaction.setCurrency(existingCurrency);
-        }
-    
+        
+        if (gametransaction.getCurrency() != null &&
+            gametransaction.getCurrency().getId() != null) {
 
-        return gametransactionRepository.save(gametransaction);
-    }
+            GameCurrency existingCurrency = currencyRepository.findById(
+                gametransaction.getCurrency().getId()
+            ).orElseThrow(() -> new RuntimeException("GameCurrency not found"));
+
+            gametransaction.setCurrency(existingCurrency);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return gametransactionRepository.save(gametransaction);
+}
 
 
     public GameTransaction update(Long id, GameTransaction gametransactionRequest) {
@@ -73,86 +70,56 @@ public class GameTransactionService extends BaseService<GameTransaction> {
         existing.setTransactionDate(gametransactionRequest.getTransactionDate());
         existing.setDescription(gametransactionRequest.getDescription());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (gametransactionRequest.getUser() != null &&
-        gametransactionRequest.getUser().getId() != null) {
+            gametransactionRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        gametransactionRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                gametransactionRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (gametransactionRequest.getCurrency() != null &&
-        gametransactionRequest.getCurrency().getId() != null) {
+            gametransactionRequest.getCurrency().getId() != null) {
 
-        GameCurrency existingCurrency = currencyRepository.findById(
-        gametransactionRequest.getCurrency().getId()
-        ).orElseThrow(() -> new RuntimeException("GameCurrency not found"));
+            GameCurrency existingCurrency = currencyRepository.findById(
+                gametransactionRequest.getCurrency().getId()
+            ).orElseThrow(() -> new RuntimeException("GameCurrency not found"));
 
-        existing.setCurrency(existingCurrency);
+            existing.setCurrency(existingCurrency);
         } else {
-        existing.setCurrency(null);
+            existing.setCurrency(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return gametransactionRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GameTransaction> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GameTransaction entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getCurrency() != null) {
-        entity.setCurrency(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return gametransactionRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GameTransaction> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GameTransaction entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getCurrency() != null) {
+            entity.setCurrency(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

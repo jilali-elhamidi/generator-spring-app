@@ -22,7 +22,7 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
     private final ArtistRepository artistRepository;
     private final SocialMediaPlatformRepository platformRepository;
 
-    public ArtistSocialMediaService(ArtistSocialMediaRepository repository,ArtistRepository artistRepository,SocialMediaPlatformRepository platformRepository)
+    public ArtistSocialMediaService(ArtistSocialMediaRepository repository, ArtistRepository artistRepository, SocialMediaPlatformRepository platformRepository)
     {
         super(repository);
         this.artistsocialmediaRepository = repository;
@@ -32,36 +32,33 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
 
     @Override
     public ArtistSocialMedia save(ArtistSocialMedia artistsocialmedia) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (artistsocialmedia.getArtist() != null &&
+            artistsocialmedia.getArtist().getId() != null) {
 
+            Artist existingArtist = artistRepository.findById(
+                artistsocialmedia.getArtist().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (artistsocialmedia.getArtist() != null
-        && artistsocialmedia.getArtist().getId() != null) {
-        Artist existingArtist = artistRepository.findById(
-        artistsocialmedia.getArtist().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
-        artistsocialmedia.setArtist(existingArtist);
+            artistsocialmedia.setArtist(existingArtist);
         }
-    
-    if (artistsocialmedia.getPlatform() != null
-        && artistsocialmedia.getPlatform().getId() != null) {
-        SocialMediaPlatform existingPlatform = platformRepository.findById(
-        artistsocialmedia.getPlatform().getId()
-        ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
-        artistsocialmedia.setPlatform(existingPlatform);
-        }
-    
+        
+        if (artistsocialmedia.getPlatform() != null &&
+            artistsocialmedia.getPlatform().getId() != null) {
 
-        return artistsocialmediaRepository.save(artistsocialmedia);
-    }
+            SocialMediaPlatform existingPlatform = platformRepository.findById(
+                artistsocialmedia.getPlatform().getId()
+            ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
+
+            artistsocialmedia.setPlatform(existingPlatform);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return artistsocialmediaRepository.save(artistsocialmedia);
+}
 
 
     public ArtistSocialMedia update(Long id, ArtistSocialMedia artistsocialmediaRequest) {
@@ -71,86 +68,56 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
     // Copier les champs simples
         existing.setUrl(artistsocialmediaRequest.getUrl());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (artistsocialmediaRequest.getArtist() != null &&
-        artistsocialmediaRequest.getArtist().getId() != null) {
+            artistsocialmediaRequest.getArtist().getId() != null) {
 
-        Artist existingArtist = artistRepository.findById(
-        artistsocialmediaRequest.getArtist().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+            Artist existingArtist = artistRepository.findById(
+                artistsocialmediaRequest.getArtist().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
 
-        existing.setArtist(existingArtist);
+            existing.setArtist(existingArtist);
         } else {
-        existing.setArtist(null);
+            existing.setArtist(null);
         }
+        
         if (artistsocialmediaRequest.getPlatform() != null &&
-        artistsocialmediaRequest.getPlatform().getId() != null) {
+            artistsocialmediaRequest.getPlatform().getId() != null) {
 
-        SocialMediaPlatform existingPlatform = platformRepository.findById(
-        artistsocialmediaRequest.getPlatform().getId()
-        ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
+            SocialMediaPlatform existingPlatform = platformRepository.findById(
+                artistsocialmediaRequest.getPlatform().getId()
+            ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
 
-        existing.setPlatform(existingPlatform);
+            existing.setPlatform(existingPlatform);
         } else {
-        existing.setPlatform(null);
+            existing.setPlatform(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return artistsocialmediaRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ArtistSocialMedia> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ArtistSocialMedia entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getArtist() != null) {
-        entity.setArtist(null);
-        }
-    
-
-    
-        if (entity.getPlatform() != null) {
-        entity.setPlatform(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return artistsocialmediaRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ArtistSocialMedia> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ArtistSocialMedia entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getArtist() != null) {
+            entity.setArtist(null);
+        }
+        
+        if (entity.getPlatform() != null) {
+            entity.setPlatform(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

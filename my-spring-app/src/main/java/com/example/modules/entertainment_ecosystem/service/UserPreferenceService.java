@@ -19,7 +19,7 @@ public class UserPreferenceService extends BaseService<UserPreference> {
     protected final UserPreferenceRepository userpreferenceRepository;
     private final UserProfileRepository userRepository;
 
-    public UserPreferenceService(UserPreferenceRepository repository,UserProfileRepository userRepository)
+    public UserPreferenceService(UserPreferenceRepository repository, UserProfileRepository userRepository)
     {
         super(repository);
         this.userpreferenceRepository = repository;
@@ -28,24 +28,23 @@ public class UserPreferenceService extends BaseService<UserPreference> {
 
     @Override
     public UserPreference save(UserPreference userpreference) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (userpreference.getUser() != null &&
+            userpreference.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                userpreference.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-
-    
-
-    if (userpreference.getUser() != null
-        && userpreference.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        userpreference.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userpreference.setUser(existingUser);
+            userpreference.setUser(existingUser);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return userpreferenceRepository.save(userpreference);
-    }
+    return userpreferenceRepository.save(userpreference);
+}
 
 
     public UserPreference update(Long id, UserPreference userpreferenceRequest) {
@@ -56,61 +55,40 @@ public class UserPreferenceService extends BaseService<UserPreference> {
         existing.setPreferenceName(userpreferenceRequest.getPreferenceName());
         existing.setPreferenceValue(userpreferenceRequest.getPreferenceValue());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (userpreferenceRequest.getUser() != null &&
-        userpreferenceRequest.getUser().getId() != null) {
+            userpreferenceRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        userpreferenceRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                userpreferenceRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return userpreferenceRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserPreference> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserPreference entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return userpreferenceRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserPreference> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserPreference entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

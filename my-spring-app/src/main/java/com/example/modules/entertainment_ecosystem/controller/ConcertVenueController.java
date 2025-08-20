@@ -46,37 +46,35 @@ public class ConcertVenueController {
 
         ConcertVenue entity = concertvenueMapper.toEntity(concertvenueDto);
         ConcertVenue saved = concertvenueService.save(entity);
-        URI location = uriBuilder.path("/api/concertvenues/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/concertvenues/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(concertvenueMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ConcertVenueDto> updateConcertVenue(
-                @PathVariable Long id,
-                @RequestBody ConcertVenueDto concertvenueDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ConcertVenueDto> updateConcertVenue(
+            @PathVariable Long id,
+            @Valid @RequestBody ConcertVenueDto concertvenueDto) {
 
-                // Transformer le DTO en entity pour le service
-                ConcertVenue entityToUpdate = concertvenueMapper.toEntity(concertvenueDto);
 
-                // Appel du service update
-                ConcertVenue updatedEntity = concertvenueService.update(id, entityToUpdate);
+        ConcertVenue entityToUpdate = concertvenueMapper.toEntity(concertvenueDto);
+        ConcertVenue updatedEntity = concertvenueService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ConcertVenueDto updatedDto = concertvenueMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(concertvenueMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteConcertVenue(@PathVariable Long id) {
-                    boolean deleted = concertvenueService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteConcertVenue(@PathVariable Long id) {
+        boolean deleted = concertvenueService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

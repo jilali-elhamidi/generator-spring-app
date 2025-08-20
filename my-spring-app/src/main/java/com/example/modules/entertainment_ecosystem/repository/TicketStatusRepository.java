@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TicketStatusRepository extends BaseRepository<TicketStatus, Long> {
+
 }

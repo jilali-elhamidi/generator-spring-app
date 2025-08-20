@@ -46,37 +46,35 @@ public class DigitalPurchaseController {
 
         DigitalPurchase entity = digitalpurchaseMapper.toEntity(digitalpurchaseDto);
         DigitalPurchase saved = digitalpurchaseService.save(entity);
-        URI location = uriBuilder.path("/api/digitalpurchases/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/digitalpurchases/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(digitalpurchaseMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<DigitalPurchaseDto> updateDigitalPurchase(
-                @PathVariable Long id,
-                @RequestBody DigitalPurchaseDto digitalpurchaseDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<DigitalPurchaseDto> updateDigitalPurchase(
+            @PathVariable Long id,
+            @Valid @RequestBody DigitalPurchaseDto digitalpurchaseDto) {
 
-                // Transformer le DTO en entity pour le service
-                DigitalPurchase entityToUpdate = digitalpurchaseMapper.toEntity(digitalpurchaseDto);
 
-                // Appel du service update
-                DigitalPurchase updatedEntity = digitalpurchaseService.update(id, entityToUpdate);
+        DigitalPurchase entityToUpdate = digitalpurchaseMapper.toEntity(digitalpurchaseDto);
+        DigitalPurchase updatedEntity = digitalpurchaseService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                DigitalPurchaseDto updatedDto = digitalpurchaseMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(digitalpurchaseMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteDigitalPurchase(@PathVariable Long id) {
-                    boolean deleted = digitalpurchaseService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDigitalPurchase(@PathVariable Long id) {
+        boolean deleted = digitalpurchaseService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

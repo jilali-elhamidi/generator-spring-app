@@ -25,7 +25,7 @@ public class GameReviewUpvoteService extends BaseService<GameReviewUpvote> {
     private final GameReviewRepository reviewRepository;
     private final VideoGameRepository gameRepository;
 
-    public GameReviewUpvoteService(GameReviewUpvoteRepository repository,UserProfileRepository userRepository,GameReviewRepository reviewRepository,VideoGameRepository gameRepository)
+    public GameReviewUpvoteService(GameReviewUpvoteRepository repository, UserProfileRepository userRepository, GameReviewRepository reviewRepository, VideoGameRepository gameRepository)
     {
         super(repository);
         this.gamereviewupvoteRepository = repository;
@@ -36,48 +36,43 @@ public class GameReviewUpvoteService extends BaseService<GameReviewUpvote> {
 
     @Override
     public GameReviewUpvote save(GameReviewUpvote gamereviewupvote) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (gamereviewupvote.getUser() != null &&
+            gamereviewupvote.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                gamereviewupvote.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    if (gamereviewupvote.getUser() != null
-        && gamereviewupvote.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        gamereviewupvote.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        gamereviewupvote.setUser(existingUser);
+            gamereviewupvote.setUser(existingUser);
         }
-    
-    if (gamereviewupvote.getReview() != null
-        && gamereviewupvote.getReview().getId() != null) {
-        GameReview existingReview = reviewRepository.findById(
-        gamereviewupvote.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("GameReview not found"));
-        gamereviewupvote.setReview(existingReview);
-        }
-    
-    if (gamereviewupvote.getGame() != null
-        && gamereviewupvote.getGame().getId() != null) {
-        VideoGame existingGame = gameRepository.findById(
-        gamereviewupvote.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        gamereviewupvote.setGame(existingGame);
-        }
-    
+        
+        if (gamereviewupvote.getReview() != null &&
+            gamereviewupvote.getReview().getId() != null) {
 
-        return gamereviewupvoteRepository.save(gamereviewupvote);
-    }
+            GameReview existingReview = reviewRepository.findById(
+                gamereviewupvote.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("GameReview not found"));
+
+            gamereviewupvote.setReview(existingReview);
+        }
+        
+        if (gamereviewupvote.getGame() != null &&
+            gamereviewupvote.getGame().getId() != null) {
+
+            VideoGame existingGame = gameRepository.findById(
+                gamereviewupvote.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+            gamereviewupvote.setGame(existingGame);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return gamereviewupvoteRepository.save(gamereviewupvote);
+}
 
 
     public GameReviewUpvote update(Long id, GameReviewUpvote gamereviewupvoteRequest) {
@@ -87,111 +82,72 @@ public class GameReviewUpvoteService extends BaseService<GameReviewUpvote> {
     // Copier les champs simples
         existing.setUpvoteDate(gamereviewupvoteRequest.getUpvoteDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (gamereviewupvoteRequest.getUser() != null &&
-        gamereviewupvoteRequest.getUser().getId() != null) {
+            gamereviewupvoteRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        gamereviewupvoteRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                gamereviewupvoteRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (gamereviewupvoteRequest.getReview() != null &&
-        gamereviewupvoteRequest.getReview().getId() != null) {
+            gamereviewupvoteRequest.getReview().getId() != null) {
 
-        GameReview existingReview = reviewRepository.findById(
-        gamereviewupvoteRequest.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("GameReview not found"));
+            GameReview existingReview = reviewRepository.findById(
+                gamereviewupvoteRequest.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("GameReview not found"));
 
-        existing.setReview(existingReview);
+            existing.setReview(existingReview);
         } else {
-        existing.setReview(null);
+            existing.setReview(null);
         }
+        
         if (gamereviewupvoteRequest.getGame() != null &&
-        gamereviewupvoteRequest.getGame().getId() != null) {
+            gamereviewupvoteRequest.getGame().getId() != null) {
 
-        VideoGame existingGame = gameRepository.findById(
-        gamereviewupvoteRequest.getGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            VideoGame existingGame = gameRepository.findById(
+                gamereviewupvoteRequest.getGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-        existing.setGame(existingGame);
+            existing.setGame(existingGame);
         } else {
-        existing.setGame(null);
+            existing.setGame(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-
-        return gamereviewupvoteRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GameReviewUpvote> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GameReviewUpvote entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getReview() != null) {
-        entity.setReview(null);
-        }
-    
-
-    
-        if (entity.getGame() != null) {
-        entity.setGame(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return gamereviewupvoteRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GameReviewUpvote> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GameReviewUpvote entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getReview() != null) {
+            entity.setReview(null);
+        }
+        
+        if (entity.getGame() != null) {
+            entity.setGame(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -46,37 +46,35 @@ public class {{entityName}}Controller {
 
         {{entityName}} entity = {{entityNameLowercase}}Mapper.toEntity({{entityNameLowercase}}Dto);
         {{entityName}} saved = {{entityNameLowercase}}Service.save(entity);
-        URI location = uriBuilder.path("/api/{{entityNameLowercase}}s/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/{{entityNameLowercase}}s/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body({{entityNameLowercase}}Mapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<{{entityName}}Dto> update{{entityName}}(
-                @PathVariable Long id,
-                @RequestBody {{entityName}}Dto {{entityNameLowercase}}Dto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<{{entityName}}Dto> update{{entityName}}(
+            @PathVariable Long id,
+            @Valid @RequestBody {{entityName}}Dto {{entityNameLowercase}}Dto) {
 
-                // Transformer le DTO en entity pour le service
-                {{entityName}} entityToUpdate = {{entityNameLowercase}}Mapper.toEntity({{entityNameLowercase}}Dto);
 
-                // Appel du service update
-                {{entityName}} updatedEntity = {{entityNameLowercase}}Service.update(id, entityToUpdate);
+        {{entityName}} entityToUpdate = {{entityNameLowercase}}Mapper.toEntity({{entityNameLowercase}}Dto);
+        {{entityName}} updatedEntity = {{entityNameLowercase}}Service.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                {{entityName}}Dto updatedDto = {{entityNameLowercase}}Mapper.toDto(updatedEntity);
+        return ResponseEntity.ok({{entityNameLowercase}}Mapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> delete{{entityName}}(@PathVariable Long id) {
-                    boolean deleted = {{entityNameLowercase}}Service.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete{{entityName}}(@PathVariable Long id) {
+        boolean deleted = {{entityNameLowercase}}Service.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -19,7 +19,7 @@ public class SubscriptionTierService extends BaseService<SubscriptionTier> {
     protected final SubscriptionTierRepository subscriptiontierRepository;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
 
-    public SubscriptionTierService(SubscriptionTierRepository repository,SubscriptionPlanRepository subscriptionPlanRepository)
+    public SubscriptionTierService(SubscriptionTierRepository repository, SubscriptionPlanRepository subscriptionPlanRepository)
     {
         super(repository);
         this.subscriptiontierRepository = repository;
@@ -28,28 +28,25 @@ public class SubscriptionTierService extends BaseService<SubscriptionTier> {
 
     @Override
     public SubscriptionTier save(SubscriptionTier subscriptiontier) {
-
-
-    
-
-
-    
-
-    
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (subscriptiontier.getSubscriptionPlan() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             subscriptiontier.setSubscriptionPlan(
-            subscriptionPlanRepository.findById(subscriptiontier.getSubscriptionPlan().getId())
-            .orElseThrow(() -> new RuntimeException("subscriptionPlan not found"))
+                subscriptionPlanRepository.findById(subscriptiontier.getSubscriptionPlan().getId())
+                    .orElseThrow(() -> new RuntimeException("subscriptionPlan not found"))
             );
-        
-        subscriptiontier.getSubscriptionPlan().setTier(subscriptiontier);
+            
+            subscriptiontier.getSubscriptionPlan().setTier(subscriptiontier);
         }
+        
 
-        return subscriptiontierRepository.save(subscriptiontier);
-    }
+    return subscriptiontierRepository.save(subscriptiontier);
+}
 
 
     public SubscriptionTier update(Long id, SubscriptionTier subscriptiontierRequest) {
@@ -62,71 +59,43 @@ public class SubscriptionTierService extends BaseService<SubscriptionTier> {
         existing.setPrice(subscriptiontierRequest.getPrice());
         existing.setBillingPeriod(subscriptiontierRequest.getBillingPeriod());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (subscriptiontierRequest.getSubscriptionPlan() != null &&
+            subscriptiontierRequest.getSubscriptionPlan().getId() != null) {
 
-// Relations ManyToMany : synchronisation sécurisée
+            SubscriptionPlan subscriptionPlan = subscriptionPlanRepository.findById(
+                subscriptiontierRequest.getSubscriptionPlan().getId()
+            ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
 
-// Relations OneToMany : synchronisation sécurisée
+            existing.setSubscriptionPlan(subscriptionPlan);
 
-    
-
-        if (subscriptiontierRequest.getSubscriptionPlan() != null
-        && subscriptiontierRequest.getSubscriptionPlan().getId() != null) {
-
-        SubscriptionPlan subscriptionPlan = subscriptionPlanRepository.findById(
-        subscriptiontierRequest.getSubscriptionPlan().getId()
-        ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setSubscriptionPlan(subscriptionPlan);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
+            
             subscriptionPlan.setTier(existing);
+            
+        }
         
-        }
 
-    
-
-
-        return subscriptiontierRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<SubscriptionTier> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-SubscriptionTier entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getSubscriptionPlan() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getSubscriptionPlan().setTier(null);
-        // Dissocier côté direct
-        entity.setSubscriptionPlan(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return subscriptiontierRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<SubscriptionTier> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        SubscriptionTier entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getSubscriptionPlan() != null) {
+            entity.getSubscriptionPlan().setTier(null);
+            entity.setSubscriptionPlan(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -46,37 +46,35 @@ public class ArtistSocialMediaController {
 
         ArtistSocialMedia entity = artistsocialmediaMapper.toEntity(artistsocialmediaDto);
         ArtistSocialMedia saved = artistsocialmediaService.save(entity);
-        URI location = uriBuilder.path("/api/artistsocialmedias/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/artistsocialmedias/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(artistsocialmediaMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ArtistSocialMediaDto> updateArtistSocialMedia(
-                @PathVariable Long id,
-                @RequestBody ArtistSocialMediaDto artistsocialmediaDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ArtistSocialMediaDto> updateArtistSocialMedia(
+            @PathVariable Long id,
+            @Valid @RequestBody ArtistSocialMediaDto artistsocialmediaDto) {
 
-                // Transformer le DTO en entity pour le service
-                ArtistSocialMedia entityToUpdate = artistsocialmediaMapper.toEntity(artistsocialmediaDto);
 
-                // Appel du service update
-                ArtistSocialMedia updatedEntity = artistsocialmediaService.update(id, entityToUpdate);
+        ArtistSocialMedia entityToUpdate = artistsocialmediaMapper.toEntity(artistsocialmediaDto);
+        ArtistSocialMedia updatedEntity = artistsocialmediaService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ArtistSocialMediaDto updatedDto = artistsocialmediaMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(artistsocialmediaMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteArtistSocialMedia(@PathVariable Long id) {
-                    boolean deleted = artistsocialmediaService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteArtistSocialMedia(@PathVariable Long id) {
+        boolean deleted = artistsocialmediaService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

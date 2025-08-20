@@ -28,7 +28,7 @@ public class EmployeeService extends BaseService<Employee> {
     private final EventLocationRepository managedLocationsRepository;
     private final EmployeeRoleRepository roleRepository;
 
-    public EmployeeService(EmployeeRepository repository,ProductionCompanyRepository productionCompanyRepository,ShiftRepository shiftsRepository,EventLocationRepository managedLocationsRepository,EmployeeRoleRepository roleRepository)
+    public EmployeeService(EmployeeRepository repository, ProductionCompanyRepository productionCompanyRepository, ShiftRepository shiftsRepository, EventLocationRepository managedLocationsRepository, EmployeeRoleRepository roleRepository)
     {
         super(repository);
         this.employeeRepository = repository;
@@ -40,86 +40,67 @@ public class EmployeeService extends BaseService<Employee> {
 
     @Override
     public Employee save(Employee employee) {
-
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (employee.getShifts() != null) {
+    // ---------- OneToMany ----------
+        if (employee.getShifts() != null) {
             List<Shift> managedShifts = new ArrayList<>();
             for (Shift item : employee.getShifts()) {
-            if (item.getId() != null) {
-            Shift existingItem = shiftsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Shift not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setEmployee(employee);
-            managedShifts.add(existingItem);
-            } else {
-            item.setEmployee(employee);
-            managedShifts.add(item);
-            }
+                if (item.getId() != null) {
+                    Shift existingItem = shiftsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Shift not found"));
+
+                     existingItem.setEmployee(employee);
+                     managedShifts.add(existingItem);
+                } else {
+                    item.setEmployee(employee);
+                    managedShifts.add(item);
+                }
             }
             employee.setShifts(managedShifts);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (employee.getManagedLocations() != null) {
+        if (employee.getManagedLocations() != null) {
             List<EventLocation> managedManagedLocations = new ArrayList<>();
             for (EventLocation item : employee.getManagedLocations()) {
-            if (item.getId() != null) {
-            EventLocation existingItem = managedLocationsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("EventLocation not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setContactPerson(employee);
-            managedManagedLocations.add(existingItem);
-            } else {
-            item.setContactPerson(employee);
-            managedManagedLocations.add(item);
-            }
+                if (item.getId() != null) {
+                    EventLocation existingItem = managedLocationsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("EventLocation not found"));
+
+                     existingItem.setContactPerson(employee);
+                     managedManagedLocations.add(existingItem);
+                } else {
+                    item.setContactPerson(employee);
+                    managedManagedLocations.add(item);
+                }
             }
             employee.setManagedLocations(managedManagedLocations);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (employee.getProductionCompany() != null &&
+            employee.getProductionCompany().getId() != null) {
+
+            ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+                employee.getProductionCompany().getId()
+            ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
+
+            employee.setProductionCompany(existingProductionCompany);
+        }
         
-    
+        if (employee.getRole() != null &&
+            employee.getRole().getId() != null) {
 
-    
+            EmployeeRole existingRole = roleRepository.findById(
+                employee.getRole().getId()
+            ).orElseThrow(() -> new RuntimeException("EmployeeRole not found"));
 
-
-    
-
-    
-
-    
-
-    
-
-    if (employee.getProductionCompany() != null
-        && employee.getProductionCompany().getId() != null) {
-        ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
-        employee.getProductionCompany().getId()
-        ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-        employee.setProductionCompany(existingProductionCompany);
+            employee.setRole(existingRole);
         }
-    
-    
-    
-    if (employee.getRole() != null
-        && employee.getRole().getId() != null) {
-        EmployeeRole existingRole = roleRepository.findById(
-        employee.getRole().getId()
-        ).orElseThrow(() -> new RuntimeException("EmployeeRole not found"));
-        employee.setRole(existingRole);
-        }
-    
+        
+    // ---------- OneToOne ----------
 
-        return employeeRepository.save(employee);
-    }
+    return employeeRepository.save(employee);
+}
 
 
     public Employee update(Long id, Employee employeeRequest) {
@@ -132,164 +113,108 @@ public class EmployeeService extends BaseService<Employee> {
         existing.setEmail(employeeRequest.getEmail());
         existing.setPosition(employeeRequest.getPosition());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (employeeRequest.getProductionCompany() != null &&
-        employeeRequest.getProductionCompany().getId() != null) {
+            employeeRequest.getProductionCompany().getId() != null) {
 
-        ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
-        employeeRequest.getProductionCompany().getId()
-        ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
+            ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+                employeeRequest.getProductionCompany().getId()
+            ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
 
-        existing.setProductionCompany(existingProductionCompany);
+            existing.setProductionCompany(existingProductionCompany);
         } else {
-        existing.setProductionCompany(null);
+            existing.setProductionCompany(null);
         }
+        
         if (employeeRequest.getRole() != null &&
-        employeeRequest.getRole().getId() != null) {
+            employeeRequest.getRole().getId() != null) {
 
-        EmployeeRole existingRole = roleRepository.findById(
-        employeeRequest.getRole().getId()
-        ).orElseThrow(() -> new RuntimeException("EmployeeRole not found"));
+            EmployeeRole existingRole = roleRepository.findById(
+                employeeRequest.getRole().getId()
+            ).orElseThrow(() -> new RuntimeException("EmployeeRole not found"));
 
-        existing.setRole(existingRole);
+            existing.setRole(existingRole);
         } else {
-        existing.setRole(null);
+            existing.setRole(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getShifts().clear();
 
         if (employeeRequest.getShifts() != null) {
-        for (var item : employeeRequest.getShifts()) {
-        Shift existingItem;
-        if (item.getId() != null) {
-        existingItem = shiftsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Shift not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setEmployee(existing);
+            for (var item : employeeRequest.getShifts()) {
+                Shift existingItem;
+                if (item.getId() != null) {
+                    existingItem = shiftsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Shift not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getShifts().add(existingItem);
+                existingItem.setEmployee(existing);
+                existing.getShifts().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getManagedLocations().clear();
 
         if (employeeRequest.getManagedLocations() != null) {
-        for (var item : employeeRequest.getManagedLocations()) {
-        EventLocation existingItem;
-        if (item.getId() != null) {
-        existingItem = managedLocationsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("EventLocation not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : employeeRequest.getManagedLocations()) {
+                EventLocation existingItem;
+                if (item.getId() != null) {
+                    existingItem = managedLocationsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("EventLocation not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setContactPerson(existing);
+                existing.getManagedLocations().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setContactPerson(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getManagedLocations().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-
-        return employeeRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Employee> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Employee entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-        if (entity.getShifts() != null) {
-        for (var child : entity.getShifts()) {
         
-            child.setEmployee(null); // retirer la référence inverse
-        
-        }
-        entity.getShifts().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-    
-        if (entity.getManagedLocations() != null) {
-        for (var child : entity.getManagedLocations()) {
-        
-            child.setContactPerson(null); // retirer la référence inverse
-        
-        }
-        entity.getManagedLocations().clear();
-        }
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getProductionCompany() != null) {
-        entity.setProductionCompany(null);
-        }
-    
-
-    
-
-    
-
-    
-        if (entity.getRole() != null) {
-        entity.setRole(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return employeeRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Employee> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Employee entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getShifts() != null) {
+            for (var child : entity.getShifts()) {
+                
+                child.setEmployee(null); // retirer la référence inverse
+                
+            }
+            entity.getShifts().clear();
+        }
+        
+        if (entity.getManagedLocations() != null) {
+            for (var child : entity.getManagedLocations()) {
+                
+                child.setContactPerson(null); // retirer la référence inverse
+                
+            }
+            entity.getManagedLocations().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getProductionCompany() != null) {
+            entity.setProductionCompany(null);
+        }
+        
+        if (entity.getRole() != null) {
+            entity.setRole(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

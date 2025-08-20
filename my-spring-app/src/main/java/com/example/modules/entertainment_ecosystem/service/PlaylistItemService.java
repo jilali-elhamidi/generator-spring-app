@@ -25,7 +25,7 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
     private final MusicTrackRepository trackRepository;
     private final UserProfileRepository addedByRepository;
 
-    public PlaylistItemService(PlaylistItemRepository repository,PlaylistRepository playlistRepository,MusicTrackRepository trackRepository,UserProfileRepository addedByRepository)
+    public PlaylistItemService(PlaylistItemRepository repository, PlaylistRepository playlistRepository, MusicTrackRepository trackRepository, UserProfileRepository addedByRepository)
     {
         super(repository);
         this.playlistitemRepository = repository;
@@ -36,48 +36,43 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
 
     @Override
     public PlaylistItem save(PlaylistItem playlistitem) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (playlistitem.getPlaylist() != null &&
+            playlistitem.getPlaylist().getId() != null) {
 
+            Playlist existingPlaylist = playlistRepository.findById(
+                playlistitem.getPlaylist().getId()
+            ).orElseThrow(() -> new RuntimeException("Playlist not found"));
 
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    if (playlistitem.getPlaylist() != null
-        && playlistitem.getPlaylist().getId() != null) {
-        Playlist existingPlaylist = playlistRepository.findById(
-        playlistitem.getPlaylist().getId()
-        ).orElseThrow(() -> new RuntimeException("Playlist not found"));
-        playlistitem.setPlaylist(existingPlaylist);
+            playlistitem.setPlaylist(existingPlaylist);
         }
-    
-    if (playlistitem.getTrack() != null
-        && playlistitem.getTrack().getId() != null) {
-        MusicTrack existingTrack = trackRepository.findById(
-        playlistitem.getTrack().getId()
-        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        playlistitem.setTrack(existingTrack);
-        }
-    
-    if (playlistitem.getAddedBy() != null
-        && playlistitem.getAddedBy().getId() != null) {
-        UserProfile existingAddedBy = addedByRepository.findById(
-        playlistitem.getAddedBy().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        playlistitem.setAddedBy(existingAddedBy);
-        }
-    
+        
+        if (playlistitem.getTrack() != null &&
+            playlistitem.getTrack().getId() != null) {
 
-        return playlistitemRepository.save(playlistitem);
-    }
+            MusicTrack existingTrack = trackRepository.findById(
+                playlistitem.getTrack().getId()
+            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+
+            playlistitem.setTrack(existingTrack);
+        }
+        
+        if (playlistitem.getAddedBy() != null &&
+            playlistitem.getAddedBy().getId() != null) {
+
+            UserProfile existingAddedBy = addedByRepository.findById(
+                playlistitem.getAddedBy().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            playlistitem.setAddedBy(existingAddedBy);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return playlistitemRepository.save(playlistitem);
+}
 
 
     public PlaylistItem update(Long id, PlaylistItem playlistitemRequest) {
@@ -87,111 +82,72 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
     // Copier les champs simples
         existing.setPosition(playlistitemRequest.getPosition());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (playlistitemRequest.getPlaylist() != null &&
-        playlistitemRequest.getPlaylist().getId() != null) {
+            playlistitemRequest.getPlaylist().getId() != null) {
 
-        Playlist existingPlaylist = playlistRepository.findById(
-        playlistitemRequest.getPlaylist().getId()
-        ).orElseThrow(() -> new RuntimeException("Playlist not found"));
+            Playlist existingPlaylist = playlistRepository.findById(
+                playlistitemRequest.getPlaylist().getId()
+            ).orElseThrow(() -> new RuntimeException("Playlist not found"));
 
-        existing.setPlaylist(existingPlaylist);
+            existing.setPlaylist(existingPlaylist);
         } else {
-        existing.setPlaylist(null);
+            existing.setPlaylist(null);
         }
+        
         if (playlistitemRequest.getTrack() != null &&
-        playlistitemRequest.getTrack().getId() != null) {
+            playlistitemRequest.getTrack().getId() != null) {
 
-        MusicTrack existingTrack = trackRepository.findById(
-        playlistitemRequest.getTrack().getId()
-        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+            MusicTrack existingTrack = trackRepository.findById(
+                playlistitemRequest.getTrack().getId()
+            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
 
-        existing.setTrack(existingTrack);
+            existing.setTrack(existingTrack);
         } else {
-        existing.setTrack(null);
+            existing.setTrack(null);
         }
+        
         if (playlistitemRequest.getAddedBy() != null &&
-        playlistitemRequest.getAddedBy().getId() != null) {
+            playlistitemRequest.getAddedBy().getId() != null) {
 
-        UserProfile existingAddedBy = addedByRepository.findById(
-        playlistitemRequest.getAddedBy().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingAddedBy = addedByRepository.findById(
+                playlistitemRequest.getAddedBy().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setAddedBy(existingAddedBy);
+            existing.setAddedBy(existingAddedBy);
         } else {
-        existing.setAddedBy(null);
+            existing.setAddedBy(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-
-        return playlistitemRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<PlaylistItem> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-PlaylistItem entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getPlaylist() != null) {
-        entity.setPlaylist(null);
-        }
-    
-
-    
-        if (entity.getTrack() != null) {
-        entity.setTrack(null);
-        }
-    
-
-    
-        if (entity.getAddedBy() != null) {
-        entity.setAddedBy(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return playlistitemRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<PlaylistItem> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        PlaylistItem entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getPlaylist() != null) {
+            entity.setPlaylist(null);
+        }
+        
+        if (entity.getTrack() != null) {
+            entity.setTrack(null);
+        }
+        
+        if (entity.getAddedBy() != null) {
+            entity.setAddedBy(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

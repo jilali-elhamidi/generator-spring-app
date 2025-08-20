@@ -19,7 +19,7 @@ public class ForumThreadTagService extends BaseService<ForumThreadTag> {
     protected final ForumThreadTagRepository forumthreadtagRepository;
     private final ForumThreadRepository threadsRepository;
 
-    public ForumThreadTagService(ForumThreadTagRepository repository,ForumThreadRepository threadsRepository)
+    public ForumThreadTagService(ForumThreadTagRepository repository, ForumThreadRepository threadsRepository)
     {
         super(repository);
         this.forumthreadtagRepository = repository;
@@ -28,31 +28,27 @@ public class ForumThreadTagService extends BaseService<ForumThreadTag> {
 
     @Override
     public ForumThreadTag save(ForumThreadTag forumthreadtag) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (forumthreadtag.getThreads() != null &&
+            !forumthreadtag.getThreads().isEmpty()) {
 
+            List<ForumThread> attachedThreads = forumthreadtag.getThreads().stream()
+            .map(item -> threadsRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("ForumThread not found with id " + item.getId())))
+            .toList();
 
-    
+            forumthreadtag.setThreads(attachedThreads);
 
-
-    
-        if (forumthreadtag.getThreads() != null
-        && !forumthreadtag.getThreads().isEmpty()) {
-
-        List<ForumThread> attachedThreads = forumthreadtag.getThreads().stream()
-        .map(item -> threadsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ForumThread not found with id " + item.getId())))
-        .toList();
-
-        forumthreadtag.setThreads(attachedThreads);
-
-        // côté propriétaire (ForumThread → ForumThreadTag)
-        attachedThreads.forEach(it -> it.getTags().add(forumthreadtag));
+            // côté propriétaire (ForumThread → ForumThreadTag)
+            attachedThreads.forEach(it -> it.getTags().add(forumthreadtag));
         }
-    
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-    
-
-        return forumthreadtagRepository.save(forumthreadtag);
-    }
+    return forumthreadtagRepository.save(forumthreadtag);
+}
 
 
     public ForumThreadTag update(Long id, ForumThreadTag forumthreadtagRequest) {
@@ -62,72 +58,51 @@ public class ForumThreadTagService extends BaseService<ForumThreadTag> {
     // Copier les champs simples
         existing.setName(forumthreadtagRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (forumthreadtagRequest.getThreads() != null) {
-        existing.getThreads().clear();
+            existing.getThreads().clear();
 
-        List<ForumThread> threadsList = forumthreadtagRequest.getThreads().stream()
-        .map(item -> threadsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ForumThread not found")))
-        .collect(Collectors.toList());
+            List<ForumThread> threadsList = forumthreadtagRequest.getThreads().stream()
+                .map(item -> threadsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("ForumThread not found")))
+                .collect(Collectors.toList());
 
-        existing.getThreads().addAll(threadsList);
+            existing.getThreads().addAll(threadsList);
 
-        // Mettre à jour le côté inverse
-        threadsList.forEach(it -> {
-        if (!it.getTags().contains(existing)) {
-        it.getTags().add(existing);
+            // Mettre à jour le côté inverse
+            threadsList.forEach(it -> {
+                if (!it.getTags().contains(existing)) {
+                    it.getTags().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return forumthreadtagRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ForumThreadTag> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ForumThreadTag entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getThreads() != null) {
-        for (ForumThread item : new ArrayList<>(entity.getThreads())) {
         
-            item.getTags().remove(entity); // retire côté inverse
-        
-        }
-        entity.getThreads().clear(); // puis vide côté courant
-        }
-    
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return forumthreadtagRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ForumThreadTag> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ForumThreadTag entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getThreads() != null) {
+            for (ForumThread item : new ArrayList<>(entity.getThreads())) {
+                
+                item.getTags().remove(entity); // retire côté inverse
+                
+            }
+            entity.getThreads().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -46,37 +46,35 @@ public class TransactionController {
 
         Transaction entity = transactionMapper.toEntity(transactionDto);
         Transaction saved = transactionService.save(entity);
-        URI location = uriBuilder.path("/api/transactions/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/transactions/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(transactionMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<TransactionDto> updateTransaction(
-                @PathVariable Long id,
-                @RequestBody TransactionDto transactionDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<TransactionDto> updateTransaction(
+            @PathVariable Long id,
+            @Valid @RequestBody TransactionDto transactionDto) {
 
-                // Transformer le DTO en entity pour le service
-                Transaction entityToUpdate = transactionMapper.toEntity(transactionDto);
 
-                // Appel du service update
-                Transaction updatedEntity = transactionService.update(id, entityToUpdate);
+        Transaction entityToUpdate = transactionMapper.toEntity(transactionDto);
+        Transaction updatedEntity = transactionService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                TransactionDto updatedDto = transactionMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(transactionMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
-                    boolean deleted = transactionService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
+        boolean deleted = transactionService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

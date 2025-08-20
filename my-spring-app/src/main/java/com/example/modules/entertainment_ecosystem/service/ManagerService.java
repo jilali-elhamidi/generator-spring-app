@@ -19,7 +19,7 @@ public class ManagerService extends BaseService<Manager> {
     protected final ManagerRepository managerRepository;
     private final ArtistRepository artistsRepository;
 
-    public ManagerService(ManagerRepository repository,ArtistRepository artistsRepository)
+    public ManagerService(ManagerRepository repository, ArtistRepository artistsRepository)
     {
         super(repository);
         this.managerRepository = repository;
@@ -28,37 +28,30 @@ public class ManagerService extends BaseService<Manager> {
 
     @Override
     public Manager save(Manager manager) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (manager.getArtists() != null) {
+    // ---------- OneToMany ----------
+        if (manager.getArtists() != null) {
             List<Artist> managedArtists = new ArrayList<>();
             for (Artist item : manager.getArtists()) {
-            if (item.getId() != null) {
-            Artist existingItem = artistsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Artist not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setManager(manager);
-            managedArtists.add(existingItem);
-            } else {
-            item.setManager(manager);
-            managedArtists.add(item);
-            }
+                if (item.getId() != null) {
+                    Artist existingItem = artistsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Artist not found"));
+
+                     existingItem.setManager(manager);
+                     managedArtists.add(existingItem);
+                } else {
+                    item.setManager(manager);
+                    managedArtists.add(item);
+                }
             }
             manager.setArtists(managedArtists);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return managerRepository.save(manager);
-    }
+    return managerRepository.save(manager);
+}
 
 
     public Manager update(Long id, Manager managerRequest) {
@@ -69,75 +62,50 @@ public class ManagerService extends BaseService<Manager> {
         existing.setName(managerRequest.getName());
         existing.setEmail(managerRequest.getEmail());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getArtists().clear();
 
         if (managerRequest.getArtists() != null) {
-        for (var item : managerRequest.getArtists()) {
-        Artist existingItem;
-        if (item.getId() != null) {
-        existingItem = artistsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Artist not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : managerRequest.getArtists()) {
+                Artist existingItem;
+                if (item.getId() != null) {
+                    existingItem = artistsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Artist not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setManager(existing);
+                existing.getArtists().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setManager(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getArtists().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return managerRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Manager> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Manager entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getArtists() != null) {
-        for (var child : entity.getArtists()) {
         
-            child.setManager(null); // retirer la référence inverse
-        
-        }
-        entity.getArtists().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return managerRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Manager> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Manager entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getArtists() != null) {
+            for (var child : entity.getArtists()) {
+                
+                child.setManager(null); // retirer la référence inverse
+                
+            }
+            entity.getArtists().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

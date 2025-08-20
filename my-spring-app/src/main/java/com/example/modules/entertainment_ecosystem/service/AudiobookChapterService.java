@@ -19,7 +19,7 @@ public class AudiobookChapterService extends BaseService<AudiobookChapter> {
     protected final AudiobookChapterRepository audiobookchapterRepository;
     private final AudiobookRepository audiobookRepository;
 
-    public AudiobookChapterService(AudiobookChapterRepository repository,AudiobookRepository audiobookRepository)
+    public AudiobookChapterService(AudiobookChapterRepository repository, AudiobookRepository audiobookRepository)
     {
         super(repository);
         this.audiobookchapterRepository = repository;
@@ -28,24 +28,23 @@ public class AudiobookChapterService extends BaseService<AudiobookChapter> {
 
     @Override
     public AudiobookChapter save(AudiobookChapter audiobookchapter) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (audiobookchapter.getAudiobook() != null &&
+            audiobookchapter.getAudiobook().getId() != null) {
 
+            Audiobook existingAudiobook = audiobookRepository.findById(
+                audiobookchapter.getAudiobook().getId()
+            ).orElseThrow(() -> new RuntimeException("Audiobook not found"));
 
-    
-
-
-    
-
-    if (audiobookchapter.getAudiobook() != null
-        && audiobookchapter.getAudiobook().getId() != null) {
-        Audiobook existingAudiobook = audiobookRepository.findById(
-        audiobookchapter.getAudiobook().getId()
-        ).orElseThrow(() -> new RuntimeException("Audiobook not found"));
-        audiobookchapter.setAudiobook(existingAudiobook);
+            audiobookchapter.setAudiobook(existingAudiobook);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return audiobookchapterRepository.save(audiobookchapter);
-    }
+    return audiobookchapterRepository.save(audiobookchapter);
+}
 
 
     public AudiobookChapter update(Long id, AudiobookChapter audiobookchapterRequest) {
@@ -57,61 +56,40 @@ public class AudiobookChapterService extends BaseService<AudiobookChapter> {
         existing.setChapterNumber(audiobookchapterRequest.getChapterNumber());
         existing.setDurationMinutes(audiobookchapterRequest.getDurationMinutes());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (audiobookchapterRequest.getAudiobook() != null &&
-        audiobookchapterRequest.getAudiobook().getId() != null) {
+            audiobookchapterRequest.getAudiobook().getId() != null) {
 
-        Audiobook existingAudiobook = audiobookRepository.findById(
-        audiobookchapterRequest.getAudiobook().getId()
-        ).orElseThrow(() -> new RuntimeException("Audiobook not found"));
+            Audiobook existingAudiobook = audiobookRepository.findById(
+                audiobookchapterRequest.getAudiobook().getId()
+            ).orElseThrow(() -> new RuntimeException("Audiobook not found"));
 
-        existing.setAudiobook(existingAudiobook);
+            existing.setAudiobook(existingAudiobook);
         } else {
-        existing.setAudiobook(null);
+            existing.setAudiobook(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return audiobookchapterRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<AudiobookChapter> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-AudiobookChapter entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getAudiobook() != null) {
-        entity.setAudiobook(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return audiobookchapterRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<AudiobookChapter> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        AudiobookChapter entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getAudiobook() != null) {
+            entity.setAudiobook(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -25,7 +25,7 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
     private final SponsorRepository sponsorRepository;
     private final ContractRepository contractRepository;
 
-    public EventSponsorshipService(EventSponsorshipRepository repository,LiveEventRepository eventRepository,SponsorRepository sponsorRepository,ContractRepository contractRepository)
+    public EventSponsorshipService(EventSponsorshipRepository repository, LiveEventRepository eventRepository, SponsorRepository sponsorRepository, ContractRepository contractRepository)
     {
         super(repository);
         this.eventsponsorshipRepository = repository;
@@ -36,52 +36,45 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
 
     @Override
     public EventSponsorship save(EventSponsorship eventsponsorship) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (eventsponsorship.getEvent() != null &&
+            eventsponsorship.getEvent().getId() != null) {
 
+            LiveEvent existingEvent = eventRepository.findById(
+                eventsponsorship.getEvent().getId()
+            ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
 
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    if (eventsponsorship.getEvent() != null
-        && eventsponsorship.getEvent().getId() != null) {
-        LiveEvent existingEvent = eventRepository.findById(
-        eventsponsorship.getEvent().getId()
-        ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-        eventsponsorship.setEvent(existingEvent);
+            eventsponsorship.setEvent(existingEvent);
         }
-    
-    if (eventsponsorship.getSponsor() != null
-        && eventsponsorship.getSponsor().getId() != null) {
-        Sponsor existingSponsor = sponsorRepository.findById(
-        eventsponsorship.getSponsor().getId()
-        ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
-        eventsponsorship.setSponsor(existingSponsor);
+        
+        if (eventsponsorship.getSponsor() != null &&
+            eventsponsorship.getSponsor().getId() != null) {
+
+            Sponsor existingSponsor = sponsorRepository.findById(
+                eventsponsorship.getSponsor().getId()
+            ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
+
+            eventsponsorship.setSponsor(existingSponsor);
         }
-    
-    
+        
+    // ---------- OneToOne ----------
         if (eventsponsorship.getContract() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             eventsponsorship.setContract(
-            contractRepository.findById(eventsponsorship.getContract().getId())
-            .orElseThrow(() -> new RuntimeException("contract not found"))
+                contractRepository.findById(eventsponsorship.getContract().getId())
+                    .orElseThrow(() -> new RuntimeException("contract not found"))
             );
-        
-        eventsponsorship.getContract().setSponsorship(eventsponsorship);
+            
+            eventsponsorship.getContract().setSponsorship(eventsponsorship);
         }
+        
 
-        return eventsponsorshipRepository.save(eventsponsorship);
-    }
+    return eventsponsorshipRepository.save(eventsponsorship);
+}
 
 
     public EventSponsorship update(Long id, EventSponsorship eventsponsorshipRequest) {
@@ -93,121 +86,75 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
         existing.setStartDate(eventsponsorshipRequest.getStartDate());
         existing.setEndDate(eventsponsorshipRequest.getEndDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (eventsponsorshipRequest.getEvent() != null &&
-        eventsponsorshipRequest.getEvent().getId() != null) {
+            eventsponsorshipRequest.getEvent().getId() != null) {
 
-        LiveEvent existingEvent = eventRepository.findById(
-        eventsponsorshipRequest.getEvent().getId()
-        ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+            LiveEvent existingEvent = eventRepository.findById(
+                eventsponsorshipRequest.getEvent().getId()
+            ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
 
-        existing.setEvent(existingEvent);
+            existing.setEvent(existingEvent);
         } else {
-        existing.setEvent(null);
+            existing.setEvent(null);
         }
+        
         if (eventsponsorshipRequest.getSponsor() != null &&
-        eventsponsorshipRequest.getSponsor().getId() != null) {
+            eventsponsorshipRequest.getSponsor().getId() != null) {
 
-        Sponsor existingSponsor = sponsorRepository.findById(
-        eventsponsorshipRequest.getSponsor().getId()
-        ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
+            Sponsor existingSponsor = sponsorRepository.findById(
+                eventsponsorshipRequest.getSponsor().getId()
+            ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
 
-        existing.setSponsor(existingSponsor);
+            existing.setSponsor(existingSponsor);
         } else {
-        existing.setSponsor(null);
+            existing.setSponsor(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-        if (eventsponsorshipRequest.getContract() != null
-        && eventsponsorshipRequest.getContract().getId() != null) {
-
-        Contract contract = contractRepository.findById(
-        eventsponsorshipRequest.getContract().getId()
-        ).orElseThrow(() -> new RuntimeException("Contract not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setContract(contract);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (eventsponsorshipRequest.getContract() != null &&
+            eventsponsorshipRequest.getContract().getId() != null) {
+
+            Contract contract = contractRepository.findById(
+                eventsponsorshipRequest.getContract().getId()
+            ).orElseThrow(() -> new RuntimeException("Contract not found"));
+
+            existing.setContract(contract);
+
+            
             contract.setSponsorship(existing);
+            
+        }
         
-        }
 
-    
-
-
-        return eventsponsorshipRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<EventSponsorship> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-EventSponsorship entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-        if (entity.getContract() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getContract().setSponsorship(null);
-        // Dissocier côté direct
-        entity.setContract(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getEvent() != null) {
-        entity.setEvent(null);
-        }
-    
-
-    
-        if (entity.getSponsor() != null) {
-        entity.setSponsor(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return eventsponsorshipRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<EventSponsorship> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        EventSponsorship entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getContract() != null) {
+            entity.getContract().setSponsorship(null);
+            entity.setContract(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getEvent() != null) {
+            entity.setEvent(null);
+        }
+        
+        if (entity.getSponsor() != null) {
+            entity.setSponsor(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

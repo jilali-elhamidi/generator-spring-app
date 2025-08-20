@@ -46,37 +46,35 @@ public class EventAudienceController {
 
         EventAudience entity = eventaudienceMapper.toEntity(eventaudienceDto);
         EventAudience saved = eventaudienceService.save(entity);
-        URI location = uriBuilder.path("/api/eventaudiences/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/eventaudiences/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(eventaudienceMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<EventAudienceDto> updateEventAudience(
-                @PathVariable Long id,
-                @RequestBody EventAudienceDto eventaudienceDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<EventAudienceDto> updateEventAudience(
+            @PathVariable Long id,
+            @Valid @RequestBody EventAudienceDto eventaudienceDto) {
 
-                // Transformer le DTO en entity pour le service
-                EventAudience entityToUpdate = eventaudienceMapper.toEntity(eventaudienceDto);
 
-                // Appel du service update
-                EventAudience updatedEntity = eventaudienceService.update(id, entityToUpdate);
+        EventAudience entityToUpdate = eventaudienceMapper.toEntity(eventaudienceDto);
+        EventAudience updatedEntity = eventaudienceService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                EventAudienceDto updatedDto = eventaudienceMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(eventaudienceMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteEventAudience(@PathVariable Long id) {
-                    boolean deleted = eventaudienceService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEventAudience(@PathVariable Long id) {
+        boolean deleted = eventaudienceService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

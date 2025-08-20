@@ -46,37 +46,35 @@ public class MovieFestivalController {
 
         MovieFestival entity = moviefestivalMapper.toEntity(moviefestivalDto);
         MovieFestival saved = moviefestivalService.save(entity);
-        URI location = uriBuilder.path("/api/moviefestivals/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/moviefestivals/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(moviefestivalMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MovieFestivalDto> updateMovieFestival(
-                @PathVariable Long id,
-                @RequestBody MovieFestivalDto moviefestivalDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MovieFestivalDto> updateMovieFestival(
+            @PathVariable Long id,
+            @Valid @RequestBody MovieFestivalDto moviefestivalDto) {
 
-                // Transformer le DTO en entity pour le service
-                MovieFestival entityToUpdate = moviefestivalMapper.toEntity(moviefestivalDto);
 
-                // Appel du service update
-                MovieFestival updatedEntity = moviefestivalService.update(id, entityToUpdate);
+        MovieFestival entityToUpdate = moviefestivalMapper.toEntity(moviefestivalDto);
+        MovieFestival updatedEntity = moviefestivalService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MovieFestivalDto updatedDto = moviefestivalMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(moviefestivalMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMovieFestival(@PathVariable Long id) {
-                    boolean deleted = moviefestivalService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMovieFestival(@PathVariable Long id) {
+        boolean deleted = moviefestivalService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -19,7 +19,7 @@ public class SubscriptionFeatureService extends BaseService<SubscriptionFeature>
     protected final SubscriptionFeatureRepository subscriptionfeatureRepository;
     private final SubscriptionPlanRepository subscriptionPlansRepository;
 
-    public SubscriptionFeatureService(SubscriptionFeatureRepository repository,SubscriptionPlanRepository subscriptionPlansRepository)
+    public SubscriptionFeatureService(SubscriptionFeatureRepository repository, SubscriptionPlanRepository subscriptionPlansRepository)
     {
         super(repository);
         this.subscriptionfeatureRepository = repository;
@@ -28,31 +28,27 @@ public class SubscriptionFeatureService extends BaseService<SubscriptionFeature>
 
     @Override
     public SubscriptionFeature save(SubscriptionFeature subscriptionfeature) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (subscriptionfeature.getSubscriptionPlans() != null &&
+            !subscriptionfeature.getSubscriptionPlans().isEmpty()) {
 
+            List<SubscriptionPlan> attachedSubscriptionPlans = subscriptionfeature.getSubscriptionPlans().stream()
+            .map(item -> subscriptionPlansRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found with id " + item.getId())))
+            .toList();
 
-    
+            subscriptionfeature.setSubscriptionPlans(attachedSubscriptionPlans);
 
-
-    
-        if (subscriptionfeature.getSubscriptionPlans() != null
-        && !subscriptionfeature.getSubscriptionPlans().isEmpty()) {
-
-        List<SubscriptionPlan> attachedSubscriptionPlans = subscriptionfeature.getSubscriptionPlans().stream()
-        .map(item -> subscriptionPlansRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found with id " + item.getId())))
-        .toList();
-
-        subscriptionfeature.setSubscriptionPlans(attachedSubscriptionPlans);
-
-        // côté propriétaire (SubscriptionPlan → SubscriptionFeature)
-        attachedSubscriptionPlans.forEach(it -> it.getFeatures().add(subscriptionfeature));
+            // côté propriétaire (SubscriptionPlan → SubscriptionFeature)
+            attachedSubscriptionPlans.forEach(it -> it.getFeatures().add(subscriptionfeature));
         }
-    
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-    
-
-        return subscriptionfeatureRepository.save(subscriptionfeature);
-    }
+    return subscriptionfeatureRepository.save(subscriptionfeature);
+}
 
 
     public SubscriptionFeature update(Long id, SubscriptionFeature subscriptionfeatureRequest) {
@@ -63,72 +59,51 @@ public class SubscriptionFeatureService extends BaseService<SubscriptionFeature>
         existing.setName(subscriptionfeatureRequest.getName());
         existing.setDescription(subscriptionfeatureRequest.getDescription());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (subscriptionfeatureRequest.getSubscriptionPlans() != null) {
-        existing.getSubscriptionPlans().clear();
+            existing.getSubscriptionPlans().clear();
 
-        List<SubscriptionPlan> subscriptionPlansList = subscriptionfeatureRequest.getSubscriptionPlans().stream()
-        .map(item -> subscriptionPlansRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found")))
-        .collect(Collectors.toList());
+            List<SubscriptionPlan> subscriptionPlansList = subscriptionfeatureRequest.getSubscriptionPlans().stream()
+                .map(item -> subscriptionPlansRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found")))
+                .collect(Collectors.toList());
 
-        existing.getSubscriptionPlans().addAll(subscriptionPlansList);
+            existing.getSubscriptionPlans().addAll(subscriptionPlansList);
 
-        // Mettre à jour le côté inverse
-        subscriptionPlansList.forEach(it -> {
-        if (!it.getFeatures().contains(existing)) {
-        it.getFeatures().add(existing);
+            // Mettre à jour le côté inverse
+            subscriptionPlansList.forEach(it -> {
+                if (!it.getFeatures().contains(existing)) {
+                    it.getFeatures().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return subscriptionfeatureRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<SubscriptionFeature> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-SubscriptionFeature entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getSubscriptionPlans() != null) {
-        for (SubscriptionPlan item : new ArrayList<>(entity.getSubscriptionPlans())) {
         
-            item.getFeatures().remove(entity); // retire côté inverse
-        
-        }
-        entity.getSubscriptionPlans().clear(); // puis vide côté courant
-        }
-    
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return subscriptionfeatureRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<SubscriptionFeature> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        SubscriptionFeature entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getSubscriptionPlans() != null) {
+            for (SubscriptionPlan item : new ArrayList<>(entity.getSubscriptionPlans())) {
+                
+                item.getFeatures().remove(entity); // retire côté inverse
+                
+            }
+            entity.getSubscriptionPlans().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -31,7 +31,7 @@ public class ContentRatingService extends BaseService<ContentRating> {
     private final ContentRatingBoardRepository boardRepository;
     private final ContentRatingAgeGroupRepository ageGroupRepository;
 
-    public ContentRatingService(ContentRatingRepository repository,MovieRepository ratedMoviesRepository,TVShowRepository ratedTvShowsRepository,VideoGameRepository ratedVideoGamesRepository,ContentRatingBoardRepository boardRepository,ContentRatingAgeGroupRepository ageGroupRepository)
+    public ContentRatingService(ContentRatingRepository repository, MovieRepository ratedMoviesRepository, TVShowRepository ratedTvShowsRepository, VideoGameRepository ratedVideoGamesRepository, ContentRatingBoardRepository boardRepository, ContentRatingAgeGroupRepository ageGroupRepository)
     {
         super(repository);
         this.contentratingRepository = repository;
@@ -44,111 +44,84 @@ public class ContentRatingService extends BaseService<ContentRating> {
 
     @Override
     public ContentRating save(ContentRating contentrating) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (contentrating.getRatedMovies() != null) {
+    // ---------- OneToMany ----------
+        if (contentrating.getRatedMovies() != null) {
             List<Movie> managedRatedMovies = new ArrayList<>();
             for (Movie item : contentrating.getRatedMovies()) {
-            if (item.getId() != null) {
-            Movie existingItem = ratedMoviesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Movie not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setContentRating(contentrating);
-            managedRatedMovies.add(existingItem);
-            } else {
-            item.setContentRating(contentrating);
-            managedRatedMovies.add(item);
-            }
+                if (item.getId() != null) {
+                    Movie existingItem = ratedMoviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found"));
+
+                     existingItem.setContentRating(contentrating);
+                     managedRatedMovies.add(existingItem);
+                } else {
+                    item.setContentRating(contentrating);
+                    managedRatedMovies.add(item);
+                }
             }
             contentrating.setRatedMovies(managedRatedMovies);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (contentrating.getRatedTvShows() != null) {
+        if (contentrating.getRatedTvShows() != null) {
             List<TVShow> managedRatedTvShows = new ArrayList<>();
             for (TVShow item : contentrating.getRatedTvShows()) {
-            if (item.getId() != null) {
-            TVShow existingItem = ratedTvShowsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("TVShow not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setContentRating(contentrating);
-            managedRatedTvShows.add(existingItem);
-            } else {
-            item.setContentRating(contentrating);
-            managedRatedTvShows.add(item);
-            }
+                if (item.getId() != null) {
+                    TVShow existingItem = ratedTvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+
+                     existingItem.setContentRating(contentrating);
+                     managedRatedTvShows.add(existingItem);
+                } else {
+                    item.setContentRating(contentrating);
+                    managedRatedTvShows.add(item);
+                }
             }
             contentrating.setRatedTvShows(managedRatedTvShows);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (contentrating.getRatedVideoGames() != null) {
+        if (contentrating.getRatedVideoGames() != null) {
             List<VideoGame> managedRatedVideoGames = new ArrayList<>();
             for (VideoGame item : contentrating.getRatedVideoGames()) {
-            if (item.getId() != null) {
-            VideoGame existingItem = ratedVideoGamesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setContentRating(contentrating);
-            managedRatedVideoGames.add(existingItem);
-            } else {
-            item.setContentRating(contentrating);
-            managedRatedVideoGames.add(item);
-            }
+                if (item.getId() != null) {
+                    VideoGame existingItem = ratedVideoGamesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+                     existingItem.setContentRating(contentrating);
+                     managedRatedVideoGames.add(existingItem);
+                } else {
+                    item.setContentRating(contentrating);
+                    managedRatedVideoGames.add(item);
+                }
             }
             contentrating.setRatedVideoGames(managedRatedVideoGames);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (contentrating.getBoard() != null &&
+            contentrating.getBoard().getId() != null) {
+
+            ContentRatingBoard existingBoard = boardRepository.findById(
+                contentrating.getBoard().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
+
+            contentrating.setBoard(existingBoard);
+        }
         
-    
+        if (contentrating.getAgeGroup() != null &&
+            contentrating.getAgeGroup().getId() != null) {
 
-    
+            ContentRatingAgeGroup existingAgeGroup = ageGroupRepository.findById(
+                contentrating.getAgeGroup().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentRatingAgeGroup not found"));
 
-    
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    
-    if (contentrating.getBoard() != null
-        && contentrating.getBoard().getId() != null) {
-        ContentRatingBoard existingBoard = boardRepository.findById(
-        contentrating.getBoard().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
-        contentrating.setBoard(existingBoard);
+            contentrating.setAgeGroup(existingAgeGroup);
         }
-    
-    if (contentrating.getAgeGroup() != null
-        && contentrating.getAgeGroup().getId() != null) {
-        ContentRatingAgeGroup existingAgeGroup = ageGroupRepository.findById(
-        contentrating.getAgeGroup().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentRatingAgeGroup not found"));
-        contentrating.setAgeGroup(existingAgeGroup);
-        }
-    
+        
+    // ---------- OneToOne ----------
 
-        return contentratingRepository.save(contentrating);
-    }
+    return contentratingRepository.save(contentrating);
+}
 
 
     public ContentRating update(Long id, ContentRating contentratingRequest) {
@@ -159,203 +132,134 @@ public class ContentRatingService extends BaseService<ContentRating> {
         existing.setName(contentratingRequest.getName());
         existing.setDescription(contentratingRequest.getDescription());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (contentratingRequest.getBoard() != null &&
-        contentratingRequest.getBoard().getId() != null) {
+            contentratingRequest.getBoard().getId() != null) {
 
-        ContentRatingBoard existingBoard = boardRepository.findById(
-        contentratingRequest.getBoard().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
+            ContentRatingBoard existingBoard = boardRepository.findById(
+                contentratingRequest.getBoard().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
 
-        existing.setBoard(existingBoard);
+            existing.setBoard(existingBoard);
         } else {
-        existing.setBoard(null);
+            existing.setBoard(null);
         }
+        
         if (contentratingRequest.getAgeGroup() != null &&
-        contentratingRequest.getAgeGroup().getId() != null) {
+            contentratingRequest.getAgeGroup().getId() != null) {
 
-        ContentRatingAgeGroup existingAgeGroup = ageGroupRepository.findById(
-        contentratingRequest.getAgeGroup().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentRatingAgeGroup not found"));
+            ContentRatingAgeGroup existingAgeGroup = ageGroupRepository.findById(
+                contentratingRequest.getAgeGroup().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentRatingAgeGroup not found"));
 
-        existing.setAgeGroup(existingAgeGroup);
+            existing.setAgeGroup(existingAgeGroup);
         } else {
-        existing.setAgeGroup(null);
+            existing.setAgeGroup(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getRatedMovies().clear();
 
         if (contentratingRequest.getRatedMovies() != null) {
-        for (var item : contentratingRequest.getRatedMovies()) {
-        Movie existingItem;
-        if (item.getId() != null) {
-        existingItem = ratedMoviesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Movie not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setContentRating(existing);
+            for (var item : contentratingRequest.getRatedMovies()) {
+                Movie existingItem;
+                if (item.getId() != null) {
+                    existingItem = ratedMoviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getRatedMovies().add(existingItem);
+                existingItem.setContentRating(existing);
+                existing.getRatedMovies().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getRatedTvShows().clear();
 
         if (contentratingRequest.getRatedTvShows() != null) {
-        for (var item : contentratingRequest.getRatedTvShows()) {
-        TVShow existingItem;
-        if (item.getId() != null) {
-        existingItem = ratedTvShowsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setContentRating(existing);
+            for (var item : contentratingRequest.getRatedTvShows()) {
+                TVShow existingItem;
+                if (item.getId() != null) {
+                    existingItem = ratedTvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getRatedTvShows().add(existingItem);
+                existingItem.setContentRating(existing);
+                existing.getRatedTvShows().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getRatedVideoGames().clear();
 
         if (contentratingRequest.getRatedVideoGames() != null) {
-        for (var item : contentratingRequest.getRatedVideoGames()) {
-        VideoGame existingItem;
-        if (item.getId() != null) {
-        existingItem = ratedVideoGamesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : contentratingRequest.getRatedVideoGames()) {
+                VideoGame existingItem;
+                if (item.getId() != null) {
+                    existingItem = ratedVideoGamesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("VideoGame not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setContentRating(existing);
+                existing.getRatedVideoGames().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setContentRating(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getRatedVideoGames().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-        return contentratingRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ContentRating> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ContentRating entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getRatedMovies() != null) {
-        for (var child : entity.getRatedMovies()) {
         
-            child.setContentRating(null); // retirer la référence inverse
-        
-        }
-        entity.getRatedMovies().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-    
-        if (entity.getRatedTvShows() != null) {
-        for (var child : entity.getRatedTvShows()) {
-        
-            child.setContentRating(null); // retirer la référence inverse
-        
-        }
-        entity.getRatedTvShows().clear();
-        }
-    
-
-    
-        if (entity.getRatedVideoGames() != null) {
-        for (var child : entity.getRatedVideoGames()) {
-        
-            child.setContentRating(null); // retirer la référence inverse
-        
-        }
-        entity.getRatedVideoGames().clear();
-        }
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-
-    
-
-    
-        if (entity.getBoard() != null) {
-        entity.setBoard(null);
-        }
-    
-
-    
-        if (entity.getAgeGroup() != null) {
-        entity.setAgeGroup(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return contentratingRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ContentRating> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ContentRating entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getRatedMovies() != null) {
+            for (var child : entity.getRatedMovies()) {
+                
+                child.setContentRating(null); // retirer la référence inverse
+                
+            }
+            entity.getRatedMovies().clear();
+        }
+        
+        if (entity.getRatedTvShows() != null) {
+            for (var child : entity.getRatedTvShows()) {
+                
+                child.setContentRating(null); // retirer la référence inverse
+                
+            }
+            entity.getRatedTvShows().clear();
+        }
+        
+        if (entity.getRatedVideoGames() != null) {
+            for (var child : entity.getRatedVideoGames()) {
+                
+                child.setContentRating(null); // retirer la référence inverse
+                
+            }
+            entity.getRatedVideoGames().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getBoard() != null) {
+            entity.setBoard(null);
+        }
+        
+        if (entity.getAgeGroup() != null) {
+            entity.setAgeGroup(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

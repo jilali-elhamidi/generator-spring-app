@@ -19,7 +19,7 @@ public class UserSettingService extends BaseService<UserSetting> {
     protected final UserSettingRepository usersettingRepository;
     private final UserProfileRepository userRepository;
 
-    public UserSettingService(UserSettingRepository repository,UserProfileRepository userRepository)
+    public UserSettingService(UserSettingRepository repository, UserProfileRepository userRepository)
     {
         super(repository);
         this.usersettingRepository = repository;
@@ -28,24 +28,23 @@ public class UserSettingService extends BaseService<UserSetting> {
 
     @Override
     public UserSetting save(UserSetting usersetting) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (usersetting.getUser() != null &&
+            usersetting.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                usersetting.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-
-    
-
-    if (usersetting.getUser() != null
-        && usersetting.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        usersetting.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        usersetting.setUser(existingUser);
+            usersetting.setUser(existingUser);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return usersettingRepository.save(usersetting);
-    }
+    return usersettingRepository.save(usersetting);
+}
 
 
     public UserSetting update(Long id, UserSetting usersettingRequest) {
@@ -56,61 +55,40 @@ public class UserSettingService extends BaseService<UserSetting> {
         existing.setSettingName(usersettingRequest.getSettingName());
         existing.setSettingValue(usersettingRequest.getSettingValue());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (usersettingRequest.getUser() != null &&
-        usersettingRequest.getUser().getId() != null) {
+            usersettingRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        usersettingRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                usersettingRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return usersettingRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserSetting> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserSetting entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return usersettingRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserSetting> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserSetting entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

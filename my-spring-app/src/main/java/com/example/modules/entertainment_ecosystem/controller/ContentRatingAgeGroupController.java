@@ -46,37 +46,35 @@ public class ContentRatingAgeGroupController {
 
         ContentRatingAgeGroup entity = contentratingagegroupMapper.toEntity(contentratingagegroupDto);
         ContentRatingAgeGroup saved = contentratingagegroupService.save(entity);
-        URI location = uriBuilder.path("/api/contentratingagegroups/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/contentratingagegroups/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(contentratingagegroupMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ContentRatingAgeGroupDto> updateContentRatingAgeGroup(
-                @PathVariable Long id,
-                @RequestBody ContentRatingAgeGroupDto contentratingagegroupDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ContentRatingAgeGroupDto> updateContentRatingAgeGroup(
+            @PathVariable Long id,
+            @Valid @RequestBody ContentRatingAgeGroupDto contentratingagegroupDto) {
 
-                // Transformer le DTO en entity pour le service
-                ContentRatingAgeGroup entityToUpdate = contentratingagegroupMapper.toEntity(contentratingagegroupDto);
 
-                // Appel du service update
-                ContentRatingAgeGroup updatedEntity = contentratingagegroupService.update(id, entityToUpdate);
+        ContentRatingAgeGroup entityToUpdate = contentratingagegroupMapper.toEntity(contentratingagegroupDto);
+        ContentRatingAgeGroup updatedEntity = contentratingagegroupService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ContentRatingAgeGroupDto updatedDto = contentratingagegroupMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(contentratingagegroupMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteContentRatingAgeGroup(@PathVariable Long id) {
-                    boolean deleted = contentratingagegroupService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteContentRatingAgeGroup(@PathVariable Long id) {
+        boolean deleted = contentratingagegroupService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

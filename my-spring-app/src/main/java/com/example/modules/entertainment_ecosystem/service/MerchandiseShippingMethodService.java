@@ -19,7 +19,7 @@ public class MerchandiseShippingMethodService extends BaseService<MerchandiseShi
     protected final MerchandiseShippingMethodRepository merchandiseshippingmethodRepository;
     private final MerchandiseShippingRepository shipmentsRepository;
 
-    public MerchandiseShippingMethodService(MerchandiseShippingMethodRepository repository,MerchandiseShippingRepository shipmentsRepository)
+    public MerchandiseShippingMethodService(MerchandiseShippingMethodRepository repository, MerchandiseShippingRepository shipmentsRepository)
     {
         super(repository);
         this.merchandiseshippingmethodRepository = repository;
@@ -28,37 +28,30 @@ public class MerchandiseShippingMethodService extends BaseService<MerchandiseShi
 
     @Override
     public MerchandiseShippingMethod save(MerchandiseShippingMethod merchandiseshippingmethod) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (merchandiseshippingmethod.getShipments() != null) {
+    // ---------- OneToMany ----------
+        if (merchandiseshippingmethod.getShipments() != null) {
             List<MerchandiseShipping> managedShipments = new ArrayList<>();
             for (MerchandiseShipping item : merchandiseshippingmethod.getShipments()) {
-            if (item.getId() != null) {
-            MerchandiseShipping existingItem = shipmentsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setShippingMethod(merchandiseshippingmethod);
-            managedShipments.add(existingItem);
-            } else {
-            item.setShippingMethod(merchandiseshippingmethod);
-            managedShipments.add(item);
-            }
+                if (item.getId() != null) {
+                    MerchandiseShipping existingItem = shipmentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
+
+                     existingItem.setShippingMethod(merchandiseshippingmethod);
+                     managedShipments.add(existingItem);
+                } else {
+                    item.setShippingMethod(merchandiseshippingmethod);
+                    managedShipments.add(item);
+                }
             }
             merchandiseshippingmethod.setShipments(managedShipments);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return merchandiseshippingmethodRepository.save(merchandiseshippingmethod);
-    }
+    return merchandiseshippingmethodRepository.save(merchandiseshippingmethod);
+}
 
 
     public MerchandiseShippingMethod update(Long id, MerchandiseShippingMethod merchandiseshippingmethodRequest) {
@@ -70,75 +63,50 @@ public class MerchandiseShippingMethodService extends BaseService<MerchandiseShi
         existing.setCost(merchandiseshippingmethodRequest.getCost());
         existing.setEstimatedDeliveryTime(merchandiseshippingmethodRequest.getEstimatedDeliveryTime());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getShipments().clear();
 
         if (merchandiseshippingmethodRequest.getShipments() != null) {
-        for (var item : merchandiseshippingmethodRequest.getShipments()) {
-        MerchandiseShipping existingItem;
-        if (item.getId() != null) {
-        existingItem = shipmentsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : merchandiseshippingmethodRequest.getShipments()) {
+                MerchandiseShipping existingItem;
+                if (item.getId() != null) {
+                    existingItem = shipmentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setShippingMethod(existing);
+                existing.getShipments().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setShippingMethod(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getShipments().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return merchandiseshippingmethodRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MerchandiseShippingMethod> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MerchandiseShippingMethod entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getShipments() != null) {
-        for (var child : entity.getShipments()) {
         
-            child.setShippingMethod(null); // retirer la référence inverse
-        
-        }
-        entity.getShipments().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return merchandiseshippingmethodRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MerchandiseShippingMethod> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MerchandiseShippingMethod entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getShipments() != null) {
+            for (var child : entity.getShipments()) {
+                
+                child.setShippingMethod(null); // retirer la référence inverse
+                
+            }
+            entity.getShipments().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

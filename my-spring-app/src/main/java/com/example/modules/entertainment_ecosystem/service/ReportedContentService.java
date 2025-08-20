@@ -25,7 +25,7 @@ public class ReportedContentService extends BaseService<ReportedContent> {
     private final ReviewRepository reviewRepository;
     private final ForumPostRepository forumPostRepository;
 
-    public ReportedContentService(ReportedContentRepository repository,UserProfileRepository userRepository,ReviewRepository reviewRepository,ForumPostRepository forumPostRepository)
+    public ReportedContentService(ReportedContentRepository repository, UserProfileRepository userRepository, ReviewRepository reviewRepository, ForumPostRepository forumPostRepository)
     {
         super(repository);
         this.reportedcontentRepository = repository;
@@ -36,48 +36,43 @@ public class ReportedContentService extends BaseService<ReportedContent> {
 
     @Override
     public ReportedContent save(ReportedContent reportedcontent) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (reportedcontent.getUser() != null &&
+            reportedcontent.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                reportedcontent.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    if (reportedcontent.getUser() != null
-        && reportedcontent.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        reportedcontent.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        reportedcontent.setUser(existingUser);
+            reportedcontent.setUser(existingUser);
         }
-    
-    if (reportedcontent.getReview() != null
-        && reportedcontent.getReview().getId() != null) {
-        Review existingReview = reviewRepository.findById(
-        reportedcontent.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("Review not found"));
-        reportedcontent.setReview(existingReview);
-        }
-    
-    if (reportedcontent.getForumPost() != null
-        && reportedcontent.getForumPost().getId() != null) {
-        ForumPost existingForumPost = forumPostRepository.findById(
-        reportedcontent.getForumPost().getId()
-        ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
-        reportedcontent.setForumPost(existingForumPost);
-        }
-    
+        
+        if (reportedcontent.getReview() != null &&
+            reportedcontent.getReview().getId() != null) {
 
-        return reportedcontentRepository.save(reportedcontent);
-    }
+            Review existingReview = reviewRepository.findById(
+                reportedcontent.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("Review not found"));
+
+            reportedcontent.setReview(existingReview);
+        }
+        
+        if (reportedcontent.getForumPost() != null &&
+            reportedcontent.getForumPost().getId() != null) {
+
+            ForumPost existingForumPost = forumPostRepository.findById(
+                reportedcontent.getForumPost().getId()
+            ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
+
+            reportedcontent.setForumPost(existingForumPost);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return reportedcontentRepository.save(reportedcontent);
+}
 
 
     public ReportedContent update(Long id, ReportedContent reportedcontentRequest) {
@@ -89,111 +84,72 @@ public class ReportedContentService extends BaseService<ReportedContent> {
         existing.setReportDate(reportedcontentRequest.getReportDate());
         existing.setStatus(reportedcontentRequest.getStatus());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (reportedcontentRequest.getUser() != null &&
-        reportedcontentRequest.getUser().getId() != null) {
+            reportedcontentRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        reportedcontentRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                reportedcontentRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (reportedcontentRequest.getReview() != null &&
-        reportedcontentRequest.getReview().getId() != null) {
+            reportedcontentRequest.getReview().getId() != null) {
 
-        Review existingReview = reviewRepository.findById(
-        reportedcontentRequest.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("Review not found"));
+            Review existingReview = reviewRepository.findById(
+                reportedcontentRequest.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("Review not found"));
 
-        existing.setReview(existingReview);
+            existing.setReview(existingReview);
         } else {
-        existing.setReview(null);
+            existing.setReview(null);
         }
+        
         if (reportedcontentRequest.getForumPost() != null &&
-        reportedcontentRequest.getForumPost().getId() != null) {
+            reportedcontentRequest.getForumPost().getId() != null) {
 
-        ForumPost existingForumPost = forumPostRepository.findById(
-        reportedcontentRequest.getForumPost().getId()
-        ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
+            ForumPost existingForumPost = forumPostRepository.findById(
+                reportedcontentRequest.getForumPost().getId()
+            ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
 
-        existing.setForumPost(existingForumPost);
+            existing.setForumPost(existingForumPost);
         } else {
-        existing.setForumPost(null);
+            existing.setForumPost(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-
-        return reportedcontentRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ReportedContent> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ReportedContent entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getReview() != null) {
-        entity.setReview(null);
-        }
-    
-
-    
-        if (entity.getForumPost() != null) {
-        entity.setForumPost(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return reportedcontentRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ReportedContent> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ReportedContent entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getReview() != null) {
+            entity.setReview(null);
+        }
+        
+        if (entity.getForumPost() != null) {
+            entity.setForumPost(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

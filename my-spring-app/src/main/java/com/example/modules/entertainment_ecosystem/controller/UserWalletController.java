@@ -46,37 +46,35 @@ public class UserWalletController {
 
         UserWallet entity = userwalletMapper.toEntity(userwalletDto);
         UserWallet saved = userwalletService.save(entity);
-        URI location = uriBuilder.path("/api/userwallets/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userwallets/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userwalletMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserWalletDto> updateUserWallet(
-                @PathVariable Long id,
-                @RequestBody UserWalletDto userwalletDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserWalletDto> updateUserWallet(
+            @PathVariable Long id,
+            @Valid @RequestBody UserWalletDto userwalletDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserWallet entityToUpdate = userwalletMapper.toEntity(userwalletDto);
 
-                // Appel du service update
-                UserWallet updatedEntity = userwalletService.update(id, entityToUpdate);
+        UserWallet entityToUpdate = userwalletMapper.toEntity(userwalletDto);
+        UserWallet updatedEntity = userwalletService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserWalletDto updatedDto = userwalletMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userwalletMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserWallet(@PathVariable Long id) {
-                    boolean deleted = userwalletService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserWallet(@PathVariable Long id) {
+        boolean deleted = userwalletService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

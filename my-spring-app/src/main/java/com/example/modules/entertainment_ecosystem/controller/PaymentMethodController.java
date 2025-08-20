@@ -46,37 +46,35 @@ public class PaymentMethodController {
 
         PaymentMethod entity = paymentmethodMapper.toEntity(paymentmethodDto);
         PaymentMethod saved = paymentmethodService.save(entity);
-        URI location = uriBuilder.path("/api/paymentmethods/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/paymentmethods/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(paymentmethodMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<PaymentMethodDto> updatePaymentMethod(
-                @PathVariable Long id,
-                @RequestBody PaymentMethodDto paymentmethodDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<PaymentMethodDto> updatePaymentMethod(
+            @PathVariable Long id,
+            @Valid @RequestBody PaymentMethodDto paymentmethodDto) {
 
-                // Transformer le DTO en entity pour le service
-                PaymentMethod entityToUpdate = paymentmethodMapper.toEntity(paymentmethodDto);
 
-                // Appel du service update
-                PaymentMethod updatedEntity = paymentmethodService.update(id, entityToUpdate);
+        PaymentMethod entityToUpdate = paymentmethodMapper.toEntity(paymentmethodDto);
+        PaymentMethod updatedEntity = paymentmethodService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                PaymentMethodDto updatedDto = paymentmethodMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(paymentmethodMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deletePaymentMethod(@PathVariable Long id) {
-                    boolean deleted = paymentmethodService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePaymentMethod(@PathVariable Long id) {
+        boolean deleted = paymentmethodService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

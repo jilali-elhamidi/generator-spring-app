@@ -28,7 +28,7 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
     private final GameReviewCommentRepository repliesRepository;
     private final GameReviewCommentRepository parentCommentRepository;
 
-    public GameReviewCommentService(GameReviewCommentRepository repository,UserProfileRepository userRepository,GameReviewRepository reviewRepository,GameReviewCommentRepository repliesRepository,GameReviewCommentRepository parentCommentRepository)
+    public GameReviewCommentService(GameReviewCommentRepository repository, UserProfileRepository userRepository, GameReviewRepository reviewRepository, GameReviewCommentRepository repliesRepository, GameReviewCommentRepository parentCommentRepository)
     {
         super(repository);
         this.gamereviewcommentRepository = repository;
@@ -40,73 +40,60 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
 
     @Override
     public GameReviewComment save(GameReviewComment gamereviewcomment) {
-
-
-    
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (gamereviewcomment.getReplies() != null) {
+    // ---------- OneToMany ----------
+        if (gamereviewcomment.getReplies() != null) {
             List<GameReviewComment> managedReplies = new ArrayList<>();
             for (GameReviewComment item : gamereviewcomment.getReplies()) {
-            if (item.getId() != null) {
-            GameReviewComment existingItem = repliesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setParentComment(gamereviewcomment);
-            managedReplies.add(existingItem);
-            } else {
-            item.setParentComment(gamereviewcomment);
-            managedReplies.add(item);
-            }
+                if (item.getId() != null) {
+                    GameReviewComment existingItem = repliesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
+
+                     existingItem.setParentComment(gamereviewcomment);
+                     managedReplies.add(existingItem);
+                } else {
+                    item.setParentComment(gamereviewcomment);
+                    managedReplies.add(item);
+                }
             }
             gamereviewcomment.setReplies(managedReplies);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (gamereviewcomment.getUser() != null &&
+            gamereviewcomment.getUser().getId() != null) {
+
+            UserProfile existingUser = userRepository.findById(
+                gamereviewcomment.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            gamereviewcomment.setUser(existingUser);
+        }
         
-    
+        if (gamereviewcomment.getReview() != null &&
+            gamereviewcomment.getReview().getId() != null) {
 
-    
+            GameReview existingReview = reviewRepository.findById(
+                gamereviewcomment.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("GameReview not found"));
 
-
-    
-
-    
-
-    
-
-    
-
-    if (gamereviewcomment.getUser() != null
-        && gamereviewcomment.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        gamereviewcomment.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        gamereviewcomment.setUser(existingUser);
+            gamereviewcomment.setReview(existingReview);
         }
-    
-    if (gamereviewcomment.getReview() != null
-        && gamereviewcomment.getReview().getId() != null) {
-        GameReview existingReview = reviewRepository.findById(
-        gamereviewcomment.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("GameReview not found"));
-        gamereviewcomment.setReview(existingReview);
-        }
-    
-    
-    if (gamereviewcomment.getParentComment() != null
-        && gamereviewcomment.getParentComment().getId() != null) {
-        GameReviewComment existingParentComment = parentCommentRepository.findById(
-        gamereviewcomment.getParentComment().getId()
-        ).orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
-        gamereviewcomment.setParentComment(existingParentComment);
-        }
-    
+        
+        if (gamereviewcomment.getParentComment() != null &&
+            gamereviewcomment.getParentComment().getId() != null) {
 
-        return gamereviewcommentRepository.save(gamereviewcomment);
-    }
+            GameReviewComment existingParentComment = parentCommentRepository.findById(
+                gamereviewcomment.getParentComment().getId()
+            ).orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
+
+            gamereviewcomment.setParentComment(existingParentComment);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return gamereviewcommentRepository.save(gamereviewcomment);
+}
 
 
     public GameReviewComment update(Long id, GameReviewComment gamereviewcommentRequest) {
@@ -117,150 +104,98 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
         existing.setCommentText(gamereviewcommentRequest.getCommentText());
         existing.setCommentDate(gamereviewcommentRequest.getCommentDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (gamereviewcommentRequest.getUser() != null &&
-        gamereviewcommentRequest.getUser().getId() != null) {
+            gamereviewcommentRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        gamereviewcommentRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                gamereviewcommentRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (gamereviewcommentRequest.getReview() != null &&
-        gamereviewcommentRequest.getReview().getId() != null) {
+            gamereviewcommentRequest.getReview().getId() != null) {
 
-        GameReview existingReview = reviewRepository.findById(
-        gamereviewcommentRequest.getReview().getId()
-        ).orElseThrow(() -> new RuntimeException("GameReview not found"));
+            GameReview existingReview = reviewRepository.findById(
+                gamereviewcommentRequest.getReview().getId()
+            ).orElseThrow(() -> new RuntimeException("GameReview not found"));
 
-        existing.setReview(existingReview);
+            existing.setReview(existingReview);
         } else {
-        existing.setReview(null);
+            existing.setReview(null);
         }
+        
         if (gamereviewcommentRequest.getParentComment() != null &&
-        gamereviewcommentRequest.getParentComment().getId() != null) {
+            gamereviewcommentRequest.getParentComment().getId() != null) {
 
-        GameReviewComment existingParentComment = parentCommentRepository.findById(
-        gamereviewcommentRequest.getParentComment().getId()
-        ).orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
+            GameReviewComment existingParentComment = parentCommentRepository.findById(
+                gamereviewcommentRequest.getParentComment().getId()
+            ).orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
 
-        existing.setParentComment(existingParentComment);
+            existing.setParentComment(existingParentComment);
         } else {
-        existing.setParentComment(null);
+            existing.setParentComment(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getReplies().clear();
 
         if (gamereviewcommentRequest.getReplies() != null) {
-        for (var item : gamereviewcommentRequest.getReplies()) {
-        GameReviewComment existingItem;
-        if (item.getId() != null) {
-        existingItem = repliesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : gamereviewcommentRequest.getReplies()) {
+                GameReviewComment existingItem;
+                if (item.getId() != null) {
+                    existingItem = repliesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setParentComment(existing);
+                existing.getReplies().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setParentComment(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getReplies().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-
-        return gamereviewcommentRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GameReviewComment> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GameReviewComment entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-        if (entity.getReplies() != null) {
-        for (var child : entity.getReplies()) {
         
-            child.setParentComment(null); // retirer la référence inverse
-        
-        }
-        entity.getReplies().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getReview() != null) {
-        entity.setReview(null);
-        }
-    
-
-    
-
-    
-        if (entity.getParentComment() != null) {
-        entity.setParentComment(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return gamereviewcommentRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GameReviewComment> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GameReviewComment entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getReplies() != null) {
+            for (var child : entity.getReplies()) {
+                
+                child.setParentComment(null); // retirer la référence inverse
+                
+            }
+            entity.getReplies().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getReview() != null) {
+            entity.setReview(null);
+        }
+        
+        if (entity.getParentComment() != null) {
+            entity.setParentComment(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

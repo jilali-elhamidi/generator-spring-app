@@ -46,37 +46,35 @@ public class MusicGenreCategoryController {
 
         MusicGenreCategory entity = musicgenrecategoryMapper.toEntity(musicgenrecategoryDto);
         MusicGenreCategory saved = musicgenrecategoryService.save(entity);
-        URI location = uriBuilder.path("/api/musicgenrecategorys/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/musicgenrecategorys/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(musicgenrecategoryMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MusicGenreCategoryDto> updateMusicGenreCategory(
-                @PathVariable Long id,
-                @RequestBody MusicGenreCategoryDto musicgenrecategoryDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MusicGenreCategoryDto> updateMusicGenreCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody MusicGenreCategoryDto musicgenrecategoryDto) {
 
-                // Transformer le DTO en entity pour le service
-                MusicGenreCategory entityToUpdate = musicgenrecategoryMapper.toEntity(musicgenrecategoryDto);
 
-                // Appel du service update
-                MusicGenreCategory updatedEntity = musicgenrecategoryService.update(id, entityToUpdate);
+        MusicGenreCategory entityToUpdate = musicgenrecategoryMapper.toEntity(musicgenrecategoryDto);
+        MusicGenreCategory updatedEntity = musicgenrecategoryService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MusicGenreCategoryDto updatedDto = musicgenrecategoryMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(musicgenrecategoryMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMusicGenreCategory(@PathVariable Long id) {
-                    boolean deleted = musicgenrecategoryService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMusicGenreCategory(@PathVariable Long id) {
+        boolean deleted = musicgenrecategoryService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AchievementRepository extends BaseRepository<Achievement, Long> {
+
 }

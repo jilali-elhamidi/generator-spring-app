@@ -19,7 +19,7 @@ public class ContractService extends BaseService<Contract> {
     protected final ContractRepository contractRepository;
     private final EventSponsorshipRepository sponsorshipRepository;
 
-    public ContractService(ContractRepository repository,EventSponsorshipRepository sponsorshipRepository)
+    public ContractService(ContractRepository repository, EventSponsorshipRepository sponsorshipRepository)
     {
         super(repository);
         this.contractRepository = repository;
@@ -28,28 +28,25 @@ public class ContractService extends BaseService<Contract> {
 
     @Override
     public Contract save(Contract contract) {
-
-
-    
-
-
-    
-
-    
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (contract.getSponsorship() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             contract.setSponsorship(
-            sponsorshipRepository.findById(contract.getSponsorship().getId())
-            .orElseThrow(() -> new RuntimeException("sponsorship not found"))
+                sponsorshipRepository.findById(contract.getSponsorship().getId())
+                    .orElseThrow(() -> new RuntimeException("sponsorship not found"))
             );
-        
-        contract.getSponsorship().setContract(contract);
+            
+            contract.getSponsorship().setContract(contract);
         }
+        
 
-        return contractRepository.save(contract);
-    }
+    return contractRepository.save(contract);
+}
 
 
     public Contract update(Long id, Contract contractRequest) {
@@ -60,71 +57,43 @@ public class ContractService extends BaseService<Contract> {
         existing.setContractNumber(contractRequest.getContractNumber());
         existing.setTerms(contractRequest.getTerms());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (contractRequest.getSponsorship() != null &&
+            contractRequest.getSponsorship().getId() != null) {
 
-// Relations ManyToMany : synchronisation sécurisée
+            EventSponsorship sponsorship = sponsorshipRepository.findById(
+                contractRequest.getSponsorship().getId()
+            ).orElseThrow(() -> new RuntimeException("EventSponsorship not found"));
 
-// Relations OneToMany : synchronisation sécurisée
+            existing.setSponsorship(sponsorship);
 
-    
-
-        if (contractRequest.getSponsorship() != null
-        && contractRequest.getSponsorship().getId() != null) {
-
-        EventSponsorship sponsorship = sponsorshipRepository.findById(
-        contractRequest.getSponsorship().getId()
-        ).orElseThrow(() -> new RuntimeException("EventSponsorship not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setSponsorship(sponsorship);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
+            
             sponsorship.setContract(existing);
+            
+        }
         
-        }
 
-    
-
-
-        return contractRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Contract> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Contract entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getSponsorship() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getSponsorship().setContract(null);
-        // Dissocier côté direct
-        entity.setSponsorship(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return contractRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Contract> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Contract entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getSponsorship() != null) {
+            entity.getSponsorship().setContract(null);
+            entity.setSponsorship(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

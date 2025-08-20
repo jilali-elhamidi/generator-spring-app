@@ -22,7 +22,7 @@ public class PaymentService extends BaseService<Payment> {
     private final BookingRepository bookingRepository;
     private final PaymentMethodRepository methodRepository;
 
-    public PaymentService(PaymentRepository repository,BookingRepository bookingRepository,PaymentMethodRepository methodRepository)
+    public PaymentService(PaymentRepository repository, BookingRepository bookingRepository, PaymentMethodRepository methodRepository)
     {
         super(repository);
         this.paymentRepository = repository;
@@ -32,40 +32,35 @@ public class PaymentService extends BaseService<Payment> {
 
     @Override
     public Payment save(Payment payment) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (payment.getMethod() != null &&
+            payment.getMethod().getId() != null) {
 
+            PaymentMethod existingMethod = methodRepository.findById(
+                payment.getMethod().getId()
+            ).orElseThrow(() -> new RuntimeException("PaymentMethod not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    
-    if (payment.getMethod() != null
-        && payment.getMethod().getId() != null) {
-        PaymentMethod existingMethod = methodRepository.findById(
-        payment.getMethod().getId()
-        ).orElseThrow(() -> new RuntimeException("PaymentMethod not found"));
-        payment.setMethod(existingMethod);
+            payment.setMethod(existingMethod);
         }
-    
+        
+    // ---------- OneToOne ----------
         if (payment.getBooking() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             payment.setBooking(
-            bookingRepository.findById(payment.getBooking().getId())
-            .orElseThrow(() -> new RuntimeException("booking not found"))
+                bookingRepository.findById(payment.getBooking().getId())
+                    .orElseThrow(() -> new RuntimeException("booking not found"))
             );
-        
-        payment.getBooking().setPayment(payment);
+            
+            payment.getBooking().setPayment(payment);
         }
+        
 
-        return paymentRepository.save(payment);
-    }
+    return paymentRepository.save(payment);
+}
 
 
     public Payment update(Long id, Payment paymentRequest) {
@@ -76,96 +71,59 @@ public class PaymentService extends BaseService<Payment> {
         existing.setAmount(paymentRequest.getAmount());
         existing.setPaymentDate(paymentRequest.getPaymentDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (paymentRequest.getMethod() != null &&
-        paymentRequest.getMethod().getId() != null) {
+            paymentRequest.getMethod().getId() != null) {
 
-        PaymentMethod existingMethod = methodRepository.findById(
-        paymentRequest.getMethod().getId()
-        ).orElseThrow(() -> new RuntimeException("PaymentMethod not found"));
+            PaymentMethod existingMethod = methodRepository.findById(
+                paymentRequest.getMethod().getId()
+            ).orElseThrow(() -> new RuntimeException("PaymentMethod not found"));
 
-        existing.setMethod(existingMethod);
+            existing.setMethod(existingMethod);
         } else {
-        existing.setMethod(null);
+            existing.setMethod(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-        if (paymentRequest.getBooking() != null
-        && paymentRequest.getBooking().getId() != null) {
-
-        Booking booking = bookingRepository.findById(
-        paymentRequest.getBooking().getId()
-        ).orElseThrow(() -> new RuntimeException("Booking not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setBooking(booking);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (paymentRequest.getBooking() != null &&
+            paymentRequest.getBooking().getId() != null) {
+
+            Booking booking = bookingRepository.findById(
+                paymentRequest.getBooking().getId()
+            ).orElseThrow(() -> new RuntimeException("Booking not found"));
+
+            existing.setBooking(booking);
+
+            
             booking.setPayment(existing);
+            
+        }
         
-        }
 
-    
-
-    
-
-
-        return paymentRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Payment> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Payment entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getBooking() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getBooking().setPayment(null);
-        // Dissocier côté direct
-        entity.setBooking(null);
-        }
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-        if (entity.getMethod() != null) {
-        entity.setMethod(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return paymentRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Payment> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Payment entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getBooking() != null) {
+            entity.getBooking().setPayment(null);
+            entity.setBooking(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getMethod() != null) {
+            entity.setMethod(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

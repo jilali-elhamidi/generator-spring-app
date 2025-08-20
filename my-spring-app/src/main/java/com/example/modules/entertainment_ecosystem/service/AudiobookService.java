@@ -25,7 +25,7 @@ public class AudiobookService extends BaseService<Audiobook> {
     private final PublisherRepository publisherRepository;
     private final AudiobookChapterRepository chaptersRepository;
 
-    public AudiobookService(AudiobookRepository repository,ArtistRepository authorRepository,PublisherRepository publisherRepository,AudiobookChapterRepository chaptersRepository)
+    public AudiobookService(AudiobookRepository repository, ArtistRepository authorRepository, PublisherRepository publisherRepository, AudiobookChapterRepository chaptersRepository)
     {
         super(repository);
         this.audiobookRepository = repository;
@@ -36,61 +36,50 @@ public class AudiobookService extends BaseService<Audiobook> {
 
     @Override
     public Audiobook save(Audiobook audiobook) {
-
-
-    
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (audiobook.getChapters() != null) {
+    // ---------- OneToMany ----------
+        if (audiobook.getChapters() != null) {
             List<AudiobookChapter> managedChapters = new ArrayList<>();
             for (AudiobookChapter item : audiobook.getChapters()) {
-            if (item.getId() != null) {
-            AudiobookChapter existingItem = chaptersRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("AudiobookChapter not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setAudiobook(audiobook);
-            managedChapters.add(existingItem);
-            } else {
-            item.setAudiobook(audiobook);
-            managedChapters.add(item);
-            }
+                if (item.getId() != null) {
+                    AudiobookChapter existingItem = chaptersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("AudiobookChapter not found"));
+
+                     existingItem.setAudiobook(audiobook);
+                     managedChapters.add(existingItem);
+                } else {
+                    item.setAudiobook(audiobook);
+                    managedChapters.add(item);
+                }
             }
             audiobook.setChapters(managedChapters);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (audiobook.getAuthor() != null &&
+            audiobook.getAuthor().getId() != null) {
+
+            Artist existingAuthor = authorRepository.findById(
+                audiobook.getAuthor().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
+
+            audiobook.setAuthor(existingAuthor);
+        }
         
-    
+        if (audiobook.getPublisher() != null &&
+            audiobook.getPublisher().getId() != null) {
 
+            Publisher existingPublisher = publisherRepository.findById(
+                audiobook.getPublisher().getId()
+            ).orElseThrow(() -> new RuntimeException("Publisher not found"));
 
-    
-
-    
-
-    
-
-    if (audiobook.getAuthor() != null
-        && audiobook.getAuthor().getId() != null) {
-        Artist existingAuthor = authorRepository.findById(
-        audiobook.getAuthor().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
-        audiobook.setAuthor(existingAuthor);
+            audiobook.setPublisher(existingPublisher);
         }
-    
-    if (audiobook.getPublisher() != null
-        && audiobook.getPublisher().getId() != null) {
-        Publisher existingPublisher = publisherRepository.findById(
-        audiobook.getPublisher().getId()
-        ).orElseThrow(() -> new RuntimeException("Publisher not found"));
-        audiobook.setPublisher(existingPublisher);
-        }
-    
-    
+        
+    // ---------- OneToOne ----------
 
-        return audiobookRepository.save(audiobook);
-    }
+    return audiobookRepository.save(audiobook);
+}
 
 
     public Audiobook update(Long id, Audiobook audiobookRequest) {
@@ -103,125 +92,82 @@ public class AudiobookService extends BaseService<Audiobook> {
         existing.setDurationHours(audiobookRequest.getDurationHours());
         existing.setNarrator(audiobookRequest.getNarrator());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (audiobookRequest.getAuthor() != null &&
-        audiobookRequest.getAuthor().getId() != null) {
+            audiobookRequest.getAuthor().getId() != null) {
 
-        Artist existingAuthor = authorRepository.findById(
-        audiobookRequest.getAuthor().getId()
-        ).orElseThrow(() -> new RuntimeException("Artist not found"));
+            Artist existingAuthor = authorRepository.findById(
+                audiobookRequest.getAuthor().getId()
+            ).orElseThrow(() -> new RuntimeException("Artist not found"));
 
-        existing.setAuthor(existingAuthor);
+            existing.setAuthor(existingAuthor);
         } else {
-        existing.setAuthor(null);
+            existing.setAuthor(null);
         }
+        
         if (audiobookRequest.getPublisher() != null &&
-        audiobookRequest.getPublisher().getId() != null) {
+            audiobookRequest.getPublisher().getId() != null) {
 
-        Publisher existingPublisher = publisherRepository.findById(
-        audiobookRequest.getPublisher().getId()
-        ).orElseThrow(() -> new RuntimeException("Publisher not found"));
+            Publisher existingPublisher = publisherRepository.findById(
+                audiobookRequest.getPublisher().getId()
+            ).orElseThrow(() -> new RuntimeException("Publisher not found"));
 
-        existing.setPublisher(existingPublisher);
+            existing.setPublisher(existingPublisher);
         } else {
-        existing.setPublisher(null);
+            existing.setPublisher(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getChapters().clear();
 
         if (audiobookRequest.getChapters() != null) {
-        for (var item : audiobookRequest.getChapters()) {
-        AudiobookChapter existingItem;
-        if (item.getId() != null) {
-        existingItem = chaptersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("AudiobookChapter not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : audiobookRequest.getChapters()) {
+                AudiobookChapter existingItem;
+                if (item.getId() != null) {
+                    existingItem = chaptersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("AudiobookChapter not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setAudiobook(existing);
+                existing.getChapters().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setAudiobook(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getChapters().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-
-        return audiobookRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Audiobook> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Audiobook entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-        if (entity.getChapters() != null) {
-        for (var child : entity.getChapters()) {
         
-            child.setAudiobook(null); // retirer la référence inverse
-        
-        }
-        entity.getChapters().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getAuthor() != null) {
-        entity.setAuthor(null);
-        }
-    
-
-    
-        if (entity.getPublisher() != null) {
-        entity.setPublisher(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return audiobookRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Audiobook> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Audiobook entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getChapters() != null) {
+            for (var child : entity.getChapters()) {
+                
+                child.setAudiobook(null); // retirer la référence inverse
+                
+            }
+            entity.getChapters().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getAuthor() != null) {
+            entity.setAuthor(null);
+        }
+        
+        if (entity.getPublisher() != null) {
+            entity.setPublisher(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -46,37 +46,35 @@ public class ForumThreadController {
 
         ForumThread entity = forumthreadMapper.toEntity(forumthreadDto);
         ForumThread saved = forumthreadService.save(entity);
-        URI location = uriBuilder.path("/api/forumthreads/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/forumthreads/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(forumthreadMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ForumThreadDto> updateForumThread(
-                @PathVariable Long id,
-                @RequestBody ForumThreadDto forumthreadDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ForumThreadDto> updateForumThread(
+            @PathVariable Long id,
+            @Valid @RequestBody ForumThreadDto forumthreadDto) {
 
-                // Transformer le DTO en entity pour le service
-                ForumThread entityToUpdate = forumthreadMapper.toEntity(forumthreadDto);
 
-                // Appel du service update
-                ForumThread updatedEntity = forumthreadService.update(id, entityToUpdate);
+        ForumThread entityToUpdate = forumthreadMapper.toEntity(forumthreadDto);
+        ForumThread updatedEntity = forumthreadService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ForumThreadDto updatedDto = forumthreadMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(forumthreadMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteForumThread(@PathVariable Long id) {
-                    boolean deleted = forumthreadService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteForumThread(@PathVariable Long id) {
+        boolean deleted = forumthreadService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

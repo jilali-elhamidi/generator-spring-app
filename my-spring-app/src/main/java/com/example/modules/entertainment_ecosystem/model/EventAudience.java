@@ -1,42 +1,47 @@
 package com.example.modules.entertainment_ecosystem.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.LiveEvent;
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.ArrayList;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "eventaudience_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class EventAudience extends BaseEntity {
 
-// === Attributs simples ===
-
-        
+    // === Attributs simples ===
     private Integer count;
 
-        
     private String audienceType;
 
 
-// === Relations ===
+    // === Relations ManyToOne ===
 
+    // === Relations OneToMany ===
+
+    // === Relations OneToOne ===
     @OneToOne
-            @JoinColumn(name = "event_id")
-            @JsonIgnoreProperties("audience")
-            private LiveEvent event;
-            
+    @JoinColumn(name = "event_id")
+    @JsonIgnoreProperties("audience")
+    private LiveEvent event;
+    
 
+    // === Relations ManyToMany ===
 }

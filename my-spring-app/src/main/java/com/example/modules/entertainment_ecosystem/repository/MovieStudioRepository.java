@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MovieStudioRepository extends BaseRepository<MovieStudio, Long> {
+
 }

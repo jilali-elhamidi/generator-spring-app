@@ -19,7 +19,7 @@ public class LicenseService extends BaseService<License> {
     protected final LicenseRepository licenseRepository;
     private final DigitalAssetRepository assetRepository;
 
-    public LicenseService(LicenseRepository repository,DigitalAssetRepository assetRepository)
+    public LicenseService(LicenseRepository repository, DigitalAssetRepository assetRepository)
     {
         super(repository);
         this.licenseRepository = repository;
@@ -28,28 +28,25 @@ public class LicenseService extends BaseService<License> {
 
     @Override
     public License save(License license) {
-
-
-    
-
-
-    
-
-    
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (license.getAsset() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             license.setAsset(
-            assetRepository.findById(license.getAsset().getId())
-            .orElseThrow(() -> new RuntimeException("asset not found"))
+                assetRepository.findById(license.getAsset().getId())
+                    .orElseThrow(() -> new RuntimeException("asset not found"))
             );
-        
-        license.getAsset().setLicense(license);
+            
+            license.getAsset().setLicense(license);
         }
+        
 
-        return licenseRepository.save(license);
-    }
+    return licenseRepository.save(license);
+}
 
 
     public License update(Long id, License licenseRequest) {
@@ -61,71 +58,43 @@ public class LicenseService extends BaseService<License> {
         existing.setStartDate(licenseRequest.getStartDate());
         existing.setEndDate(licenseRequest.getEndDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (licenseRequest.getAsset() != null &&
+            licenseRequest.getAsset().getId() != null) {
 
-// Relations ManyToMany : synchronisation sécurisée
+            DigitalAsset asset = assetRepository.findById(
+                licenseRequest.getAsset().getId()
+            ).orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
 
-// Relations OneToMany : synchronisation sécurisée
+            existing.setAsset(asset);
 
-    
-
-        if (licenseRequest.getAsset() != null
-        && licenseRequest.getAsset().getId() != null) {
-
-        DigitalAsset asset = assetRepository.findById(
-        licenseRequest.getAsset().getId()
-        ).orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setAsset(asset);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
+            
             asset.setLicense(existing);
+            
+        }
         
-        }
 
-    
-
-
-        return licenseRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<License> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-License entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getAsset() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getAsset().setLicense(null);
-        // Dissocier côté direct
-        entity.setAsset(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return licenseRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<License> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        License entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getAsset() != null) {
+            entity.getAsset().setLicense(null);
+            entity.setAsset(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

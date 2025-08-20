@@ -46,37 +46,35 @@ public class ReviewReplyController {
 
         ReviewReply entity = reviewreplyMapper.toEntity(reviewreplyDto);
         ReviewReply saved = reviewreplyService.save(entity);
-        URI location = uriBuilder.path("/api/reviewreplys/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/reviewreplys/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(reviewreplyMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ReviewReplyDto> updateReviewReply(
-                @PathVariable Long id,
-                @RequestBody ReviewReplyDto reviewreplyDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ReviewReplyDto> updateReviewReply(
+            @PathVariable Long id,
+            @Valid @RequestBody ReviewReplyDto reviewreplyDto) {
 
-                // Transformer le DTO en entity pour le service
-                ReviewReply entityToUpdate = reviewreplyMapper.toEntity(reviewreplyDto);
 
-                // Appel du service update
-                ReviewReply updatedEntity = reviewreplyService.update(id, entityToUpdate);
+        ReviewReply entityToUpdate = reviewreplyMapper.toEntity(reviewreplyDto);
+        ReviewReply updatedEntity = reviewreplyService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ReviewReplyDto updatedDto = reviewreplyMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(reviewreplyMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteReviewReply(@PathVariable Long id) {
-                    boolean deleted = reviewreplyService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReviewReply(@PathVariable Long id) {
+        boolean deleted = reviewreplyService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

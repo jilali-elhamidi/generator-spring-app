@@ -46,37 +46,35 @@ public class MusicLabelController {
 
         MusicLabel entity = musiclabelMapper.toEntity(musiclabelDto);
         MusicLabel saved = musiclabelService.save(entity);
-        URI location = uriBuilder.path("/api/musiclabels/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/musiclabels/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(musiclabelMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MusicLabelDto> updateMusicLabel(
-                @PathVariable Long id,
-                @RequestBody MusicLabelDto musiclabelDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MusicLabelDto> updateMusicLabel(
+            @PathVariable Long id,
+            @Valid @RequestBody MusicLabelDto musiclabelDto) {
 
-                // Transformer le DTO en entity pour le service
-                MusicLabel entityToUpdate = musiclabelMapper.toEntity(musiclabelDto);
 
-                // Appel du service update
-                MusicLabel updatedEntity = musiclabelService.update(id, entityToUpdate);
+        MusicLabel entityToUpdate = musiclabelMapper.toEntity(musiclabelDto);
+        MusicLabel updatedEntity = musiclabelService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MusicLabelDto updatedDto = musiclabelMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(musiclabelMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMusicLabel(@PathVariable Long id) {
-                    boolean deleted = musiclabelService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMusicLabel(@PathVariable Long id) {
+        boolean deleted = musiclabelService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -22,7 +22,7 @@ public class LiveStreamViewerService extends BaseService<LiveStreamViewer> {
     private final UserProfileRepository userRepository;
     private final LiveStreamRepository liveStreamRepository;
 
-    public LiveStreamViewerService(LiveStreamViewerRepository repository,UserProfileRepository userRepository,LiveStreamRepository liveStreamRepository)
+    public LiveStreamViewerService(LiveStreamViewerRepository repository, UserProfileRepository userRepository, LiveStreamRepository liveStreamRepository)
     {
         super(repository);
         this.livestreamviewerRepository = repository;
@@ -32,36 +32,33 @@ public class LiveStreamViewerService extends BaseService<LiveStreamViewer> {
 
     @Override
     public LiveStreamViewer save(LiveStreamViewer livestreamviewer) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (livestreamviewer.getUser() != null &&
+            livestreamviewer.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                livestreamviewer.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (livestreamviewer.getUser() != null
-        && livestreamviewer.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        livestreamviewer.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        livestreamviewer.setUser(existingUser);
+            livestreamviewer.setUser(existingUser);
         }
-    
-    if (livestreamviewer.getLiveStream() != null
-        && livestreamviewer.getLiveStream().getId() != null) {
-        LiveStream existingLiveStream = liveStreamRepository.findById(
-        livestreamviewer.getLiveStream().getId()
-        ).orElseThrow(() -> new RuntimeException("LiveStream not found"));
-        livestreamviewer.setLiveStream(existingLiveStream);
-        }
-    
+        
+        if (livestreamviewer.getLiveStream() != null &&
+            livestreamviewer.getLiveStream().getId() != null) {
 
-        return livestreamviewerRepository.save(livestreamviewer);
-    }
+            LiveStream existingLiveStream = liveStreamRepository.findById(
+                livestreamviewer.getLiveStream().getId()
+            ).orElseThrow(() -> new RuntimeException("LiveStream not found"));
+
+            livestreamviewer.setLiveStream(existingLiveStream);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return livestreamviewerRepository.save(livestreamviewer);
+}
 
 
     public LiveStreamViewer update(Long id, LiveStreamViewer livestreamviewerRequest) {
@@ -72,86 +69,56 @@ public class LiveStreamViewerService extends BaseService<LiveStreamViewer> {
         existing.setJoinTime(livestreamviewerRequest.getJoinTime());
         existing.setLeaveTime(livestreamviewerRequest.getLeaveTime());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (livestreamviewerRequest.getUser() != null &&
-        livestreamviewerRequest.getUser().getId() != null) {
+            livestreamviewerRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        livestreamviewerRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                livestreamviewerRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (livestreamviewerRequest.getLiveStream() != null &&
-        livestreamviewerRequest.getLiveStream().getId() != null) {
+            livestreamviewerRequest.getLiveStream().getId() != null) {
 
-        LiveStream existingLiveStream = liveStreamRepository.findById(
-        livestreamviewerRequest.getLiveStream().getId()
-        ).orElseThrow(() -> new RuntimeException("LiveStream not found"));
+            LiveStream existingLiveStream = liveStreamRepository.findById(
+                livestreamviewerRequest.getLiveStream().getId()
+            ).orElseThrow(() -> new RuntimeException("LiveStream not found"));
 
-        existing.setLiveStream(existingLiveStream);
+            existing.setLiveStream(existingLiveStream);
         } else {
-        existing.setLiveStream(null);
+            existing.setLiveStream(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return livestreamviewerRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<LiveStreamViewer> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-LiveStreamViewer entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getLiveStream() != null) {
-        entity.setLiveStream(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return livestreamviewerRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<LiveStreamViewer> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        LiveStreamViewer entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getLiveStream() != null) {
+            entity.setLiveStream(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

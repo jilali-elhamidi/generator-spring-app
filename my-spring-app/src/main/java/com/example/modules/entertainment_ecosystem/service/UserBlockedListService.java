@@ -22,7 +22,7 @@ public class UserBlockedListService extends BaseService<UserBlockedList> {
     private final UserProfileRepository blockerRepository;
     private final UserProfileRepository blockedRepository;
 
-    public UserBlockedListService(UserBlockedListRepository repository,UserProfileRepository blockerRepository,UserProfileRepository blockedRepository)
+    public UserBlockedListService(UserBlockedListRepository repository, UserProfileRepository blockerRepository, UserProfileRepository blockedRepository)
     {
         super(repository);
         this.userblockedlistRepository = repository;
@@ -32,36 +32,33 @@ public class UserBlockedListService extends BaseService<UserBlockedList> {
 
     @Override
     public UserBlockedList save(UserBlockedList userblockedlist) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (userblockedlist.getBlocker() != null &&
+            userblockedlist.getBlocker().getId() != null) {
 
+            UserProfile existingBlocker = blockerRepository.findById(
+                userblockedlist.getBlocker().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (userblockedlist.getBlocker() != null
-        && userblockedlist.getBlocker().getId() != null) {
-        UserProfile existingBlocker = blockerRepository.findById(
-        userblockedlist.getBlocker().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userblockedlist.setBlocker(existingBlocker);
+            userblockedlist.setBlocker(existingBlocker);
         }
-    
-    if (userblockedlist.getBlocked() != null
-        && userblockedlist.getBlocked().getId() != null) {
-        UserProfile existingBlocked = blockedRepository.findById(
-        userblockedlist.getBlocked().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userblockedlist.setBlocked(existingBlocked);
-        }
-    
+        
+        if (userblockedlist.getBlocked() != null &&
+            userblockedlist.getBlocked().getId() != null) {
 
-        return userblockedlistRepository.save(userblockedlist);
-    }
+            UserProfile existingBlocked = blockedRepository.findById(
+                userblockedlist.getBlocked().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            userblockedlist.setBlocked(existingBlocked);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return userblockedlistRepository.save(userblockedlist);
+}
 
 
     public UserBlockedList update(Long id, UserBlockedList userblockedlistRequest) {
@@ -71,86 +68,56 @@ public class UserBlockedListService extends BaseService<UserBlockedList> {
     // Copier les champs simples
         existing.setBlockedDate(userblockedlistRequest.getBlockedDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (userblockedlistRequest.getBlocker() != null &&
-        userblockedlistRequest.getBlocker().getId() != null) {
+            userblockedlistRequest.getBlocker().getId() != null) {
 
-        UserProfile existingBlocker = blockerRepository.findById(
-        userblockedlistRequest.getBlocker().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingBlocker = blockerRepository.findById(
+                userblockedlistRequest.getBlocker().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setBlocker(existingBlocker);
+            existing.setBlocker(existingBlocker);
         } else {
-        existing.setBlocker(null);
+            existing.setBlocker(null);
         }
+        
         if (userblockedlistRequest.getBlocked() != null &&
-        userblockedlistRequest.getBlocked().getId() != null) {
+            userblockedlistRequest.getBlocked().getId() != null) {
 
-        UserProfile existingBlocked = blockedRepository.findById(
-        userblockedlistRequest.getBlocked().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingBlocked = blockedRepository.findById(
+                userblockedlistRequest.getBlocked().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setBlocked(existingBlocked);
+            existing.setBlocked(existingBlocked);
         } else {
-        existing.setBlocked(null);
+            existing.setBlocked(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return userblockedlistRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserBlockedList> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserBlockedList entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getBlocker() != null) {
-        entity.setBlocker(null);
-        }
-    
-
-    
-        if (entity.getBlocked() != null) {
-        entity.setBlocked(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return userblockedlistRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserBlockedList> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserBlockedList entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getBlocker() != null) {
+            entity.setBlocker(null);
+        }
+        
+        if (entity.getBlocked() != null) {
+            entity.setBlocked(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

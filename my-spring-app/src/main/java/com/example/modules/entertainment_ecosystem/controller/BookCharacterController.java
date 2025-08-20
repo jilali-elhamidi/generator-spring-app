@@ -46,37 +46,35 @@ public class BookCharacterController {
 
         BookCharacter entity = bookcharacterMapper.toEntity(bookcharacterDto);
         BookCharacter saved = bookcharacterService.save(entity);
-        URI location = uriBuilder.path("/api/bookcharacters/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/bookcharacters/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(bookcharacterMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<BookCharacterDto> updateBookCharacter(
-                @PathVariable Long id,
-                @RequestBody BookCharacterDto bookcharacterDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<BookCharacterDto> updateBookCharacter(
+            @PathVariable Long id,
+            @Valid @RequestBody BookCharacterDto bookcharacterDto) {
 
-                // Transformer le DTO en entity pour le service
-                BookCharacter entityToUpdate = bookcharacterMapper.toEntity(bookcharacterDto);
 
-                // Appel du service update
-                BookCharacter updatedEntity = bookcharacterService.update(id, entityToUpdate);
+        BookCharacter entityToUpdate = bookcharacterMapper.toEntity(bookcharacterDto);
+        BookCharacter updatedEntity = bookcharacterService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                BookCharacterDto updatedDto = bookcharacterMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(bookcharacterMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteBookCharacter(@PathVariable Long id) {
-                    boolean deleted = bookcharacterService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBookCharacter(@PathVariable Long id) {
+        boolean deleted = bookcharacterService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

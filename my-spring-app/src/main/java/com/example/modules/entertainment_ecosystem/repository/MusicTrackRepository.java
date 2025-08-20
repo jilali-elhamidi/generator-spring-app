@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MusicTrackRepository extends BaseRepository<MusicTrack, Long> {
+
 }

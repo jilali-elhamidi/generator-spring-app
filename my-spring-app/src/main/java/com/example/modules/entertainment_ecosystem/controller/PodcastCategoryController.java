@@ -46,37 +46,35 @@ public class PodcastCategoryController {
 
         PodcastCategory entity = podcastcategoryMapper.toEntity(podcastcategoryDto);
         PodcastCategory saved = podcastcategoryService.save(entity);
-        URI location = uriBuilder.path("/api/podcastcategorys/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/podcastcategorys/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(podcastcategoryMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<PodcastCategoryDto> updatePodcastCategory(
-                @PathVariable Long id,
-                @RequestBody PodcastCategoryDto podcastcategoryDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<PodcastCategoryDto> updatePodcastCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody PodcastCategoryDto podcastcategoryDto) {
 
-                // Transformer le DTO en entity pour le service
-                PodcastCategory entityToUpdate = podcastcategoryMapper.toEntity(podcastcategoryDto);
 
-                // Appel du service update
-                PodcastCategory updatedEntity = podcastcategoryService.update(id, entityToUpdate);
+        PodcastCategory entityToUpdate = podcastcategoryMapper.toEntity(podcastcategoryDto);
+        PodcastCategory updatedEntity = podcastcategoryService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                PodcastCategoryDto updatedDto = podcastcategoryMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(podcastcategoryMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deletePodcastCategory(@PathVariable Long id) {
-                    boolean deleted = podcastcategoryService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePodcastCategory(@PathVariable Long id) {
+        boolean deleted = podcastcategoryService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

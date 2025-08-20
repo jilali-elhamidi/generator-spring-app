@@ -46,37 +46,35 @@ public class LiveStreamController {
 
         LiveStream entity = livestreamMapper.toEntity(livestreamDto);
         LiveStream saved = livestreamService.save(entity);
-        URI location = uriBuilder.path("/api/livestreams/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/livestreams/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(livestreamMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<LiveStreamDto> updateLiveStream(
-                @PathVariable Long id,
-                @RequestBody LiveStreamDto livestreamDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<LiveStreamDto> updateLiveStream(
+            @PathVariable Long id,
+            @Valid @RequestBody LiveStreamDto livestreamDto) {
 
-                // Transformer le DTO en entity pour le service
-                LiveStream entityToUpdate = livestreamMapper.toEntity(livestreamDto);
 
-                // Appel du service update
-                LiveStream updatedEntity = livestreamService.update(id, entityToUpdate);
+        LiveStream entityToUpdate = livestreamMapper.toEntity(livestreamDto);
+        LiveStream updatedEntity = livestreamService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                LiveStreamDto updatedDto = livestreamMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(livestreamMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteLiveStream(@PathVariable Long id) {
-                    boolean deleted = livestreamService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLiveStream(@PathVariable Long id) {
+        boolean deleted = livestreamService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

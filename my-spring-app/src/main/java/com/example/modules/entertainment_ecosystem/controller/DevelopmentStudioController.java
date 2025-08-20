@@ -46,37 +46,35 @@ public class DevelopmentStudioController {
 
         DevelopmentStudio entity = developmentstudioMapper.toEntity(developmentstudioDto);
         DevelopmentStudio saved = developmentstudioService.save(entity);
-        URI location = uriBuilder.path("/api/developmentstudios/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/developmentstudios/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(developmentstudioMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<DevelopmentStudioDto> updateDevelopmentStudio(
-                @PathVariable Long id,
-                @RequestBody DevelopmentStudioDto developmentstudioDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<DevelopmentStudioDto> updateDevelopmentStudio(
+            @PathVariable Long id,
+            @Valid @RequestBody DevelopmentStudioDto developmentstudioDto) {
 
-                // Transformer le DTO en entity pour le service
-                DevelopmentStudio entityToUpdate = developmentstudioMapper.toEntity(developmentstudioDto);
 
-                // Appel du service update
-                DevelopmentStudio updatedEntity = developmentstudioService.update(id, entityToUpdate);
+        DevelopmentStudio entityToUpdate = developmentstudioMapper.toEntity(developmentstudioDto);
+        DevelopmentStudio updatedEntity = developmentstudioService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                DevelopmentStudioDto updatedDto = developmentstudioMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(developmentstudioMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteDevelopmentStudio(@PathVariable Long id) {
-                    boolean deleted = developmentstudioService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDevelopmentStudio(@PathVariable Long id) {
+        boolean deleted = developmentstudioService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -1,51 +1,59 @@
 package com.example.modules.entertainment_ecosystem.model;
 
+// === Java / Jakarta ===
 import com.example.core.module.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+
+
+// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.validation.constraints.*;
-import java.util.List;
-import java.time.LocalDateTime;
 
-import com.example.modules.entertainment_ecosystem.model.ForumThread;import com.example.modules.entertainment_ecosystem.model.ForumCategory;import com.example.modules.entertainment_ecosystem.model.ForumCategory;import com.example.modules.entertainment_ecosystem.model.ForumModerator;
+// === Lombok ===
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.ArrayList;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "forumcategory_tbl")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Data
-@EqualsAndHashCode(callSuper = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class ForumCategory extends BaseEntity {
 
-// === Attributs simples ===
-
-        @NotNull@Size(min = 2, max = 50)
+    // === Attributs simples ===
+    @NotNull
+    @Size(min = 2, max = 50)
     private String name;
 
 
-// === Relations ===
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("category")
-        private List<ForumThread> threads;
-    
+    // === Relations ManyToOne ===
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        @JoinColumn(name = "parent_category_id")
-        @JsonIgnoreProperties("childCategories")
-        private ForumCategory parentCategory;
+    @JoinColumn(name = "parent_category_id")
+    @JsonIgnoreProperties("childCategories")
+    private ForumCategory parentCategory;
+    
+
+    // === Relations OneToMany ===
+    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("category")
+    private List<ForumThread> threads = new ArrayList<>();
     
     @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.PERSIST, orphanRemoval = false, fetch = FetchType.LAZY)
-        @JsonIgnoreProperties("parentCategory")
-        private List<ForumCategory> childCategories;
+    @JsonIgnoreProperties("parentCategory")
+    private List<ForumCategory> childCategories = new ArrayList<>();
     
-    @ManyToMany(mappedBy = "moderatedCategories", fetch = FetchType.LAZY)
-            @JsonIgnoreProperties("moderatedCategories")
-            private List<ForumModerator> moderators = new ArrayList<>();
-        
 
+    // === Relations OneToOne ===
+
+    // === Relations ManyToMany ===
+    @ManyToMany(mappedBy = "moderatedCategories", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("moderatedCategories")
+    private List<ForumModerator> moderators = new ArrayList<>();
+    
 }

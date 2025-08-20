@@ -22,7 +22,7 @@ public class UserAchievementService extends BaseService<UserAchievement> {
     private final UserProfileRepository userRepository;
     private final GameAchievementRepository achievementRepository;
 
-    public UserAchievementService(UserAchievementRepository repository,UserProfileRepository userRepository,GameAchievementRepository achievementRepository)
+    public UserAchievementService(UserAchievementRepository repository, UserProfileRepository userRepository, GameAchievementRepository achievementRepository)
     {
         super(repository);
         this.userachievementRepository = repository;
@@ -32,36 +32,33 @@ public class UserAchievementService extends BaseService<UserAchievement> {
 
     @Override
     public UserAchievement save(UserAchievement userachievement) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (userachievement.getUser() != null &&
+            userachievement.getUser().getId() != null) {
 
+            UserProfile existingUser = userRepository.findById(
+                userachievement.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (userachievement.getUser() != null
-        && userachievement.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        userachievement.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userachievement.setUser(existingUser);
+            userachievement.setUser(existingUser);
         }
-    
-    if (userachievement.getAchievement() != null
-        && userachievement.getAchievement().getId() != null) {
-        GameAchievement existingAchievement = achievementRepository.findById(
-        userachievement.getAchievement().getId()
-        ).orElseThrow(() -> new RuntimeException("GameAchievement not found"));
-        userachievement.setAchievement(existingAchievement);
-        }
-    
+        
+        if (userachievement.getAchievement() != null &&
+            userachievement.getAchievement().getId() != null) {
 
-        return userachievementRepository.save(userachievement);
-    }
+            GameAchievement existingAchievement = achievementRepository.findById(
+                userachievement.getAchievement().getId()
+            ).orElseThrow(() -> new RuntimeException("GameAchievement not found"));
+
+            userachievement.setAchievement(existingAchievement);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return userachievementRepository.save(userachievement);
+}
 
 
     public UserAchievement update(Long id, UserAchievement userachievementRequest) {
@@ -71,86 +68,56 @@ public class UserAchievementService extends BaseService<UserAchievement> {
     // Copier les champs simples
         existing.setCompletionDate(userachievementRequest.getCompletionDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (userachievementRequest.getUser() != null &&
-        userachievementRequest.getUser().getId() != null) {
+            userachievementRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        userachievementRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                userachievementRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (userachievementRequest.getAchievement() != null &&
-        userachievementRequest.getAchievement().getId() != null) {
+            userachievementRequest.getAchievement().getId() != null) {
 
-        GameAchievement existingAchievement = achievementRepository.findById(
-        userachievementRequest.getAchievement().getId()
-        ).orElseThrow(() -> new RuntimeException("GameAchievement not found"));
+            GameAchievement existingAchievement = achievementRepository.findById(
+                userachievementRequest.getAchievement().getId()
+            ).orElseThrow(() -> new RuntimeException("GameAchievement not found"));
 
-        existing.setAchievement(existingAchievement);
+            existing.setAchievement(existingAchievement);
         } else {
-        existing.setAchievement(null);
+            existing.setAchievement(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return userachievementRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserAchievement> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserAchievement entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getAchievement() != null) {
-        entity.setAchievement(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return userachievementRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserAchievement> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserAchievement entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getAchievement() != null) {
+            entity.setAchievement(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

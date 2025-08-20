@@ -19,7 +19,7 @@ public class MovieStudioService extends BaseService<MovieStudio> {
     protected final MovieStudioRepository moviestudioRepository;
     private final MovieRepository moviesRepository;
 
-    public MovieStudioService(MovieStudioRepository repository,MovieRepository moviesRepository)
+    public MovieStudioService(MovieStudioRepository repository, MovieRepository moviesRepository)
     {
         super(repository);
         this.moviestudioRepository = repository;
@@ -28,37 +28,30 @@ public class MovieStudioService extends BaseService<MovieStudio> {
 
     @Override
     public MovieStudio save(MovieStudio moviestudio) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (moviestudio.getMovies() != null) {
+    // ---------- OneToMany ----------
+        if (moviestudio.getMovies() != null) {
             List<Movie> managedMovies = new ArrayList<>();
             for (Movie item : moviestudio.getMovies()) {
-            if (item.getId() != null) {
-            Movie existingItem = moviesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Movie not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setMovieStudio(moviestudio);
-            managedMovies.add(existingItem);
-            } else {
-            item.setMovieStudio(moviestudio);
-            managedMovies.add(item);
-            }
+                if (item.getId() != null) {
+                    Movie existingItem = moviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found"));
+
+                     existingItem.setMovieStudio(moviestudio);
+                     managedMovies.add(existingItem);
+                } else {
+                    item.setMovieStudio(moviestudio);
+                    managedMovies.add(item);
+                }
             }
             moviestudio.setMovies(managedMovies);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return moviestudioRepository.save(moviestudio);
-    }
+    return moviestudioRepository.save(moviestudio);
+}
 
 
     public MovieStudio update(Long id, MovieStudio moviestudioRequest) {
@@ -69,75 +62,50 @@ public class MovieStudioService extends BaseService<MovieStudio> {
         existing.setName(moviestudioRequest.getName());
         existing.setLocation(moviestudioRequest.getLocation());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getMovies().clear();
 
         if (moviestudioRequest.getMovies() != null) {
-        for (var item : moviestudioRequest.getMovies()) {
-        Movie existingItem;
-        if (item.getId() != null) {
-        existingItem = moviesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Movie not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : moviestudioRequest.getMovies()) {
+                Movie existingItem;
+                if (item.getId() != null) {
+                    existingItem = moviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setMovieStudio(existing);
+                existing.getMovies().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setMovieStudio(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getMovies().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return moviestudioRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MovieStudio> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MovieStudio entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getMovies() != null) {
-        for (var child : entity.getMovies()) {
         
-            child.setMovieStudio(null); // retirer la référence inverse
-        
-        }
-        entity.getMovies().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return moviestudioRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MovieStudio> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MovieStudio entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getMovies() != null) {
+            for (var child : entity.getMovies()) {
+                
+                child.setMovieStudio(null); // retirer la référence inverse
+                
+            }
+            entity.getMovies().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

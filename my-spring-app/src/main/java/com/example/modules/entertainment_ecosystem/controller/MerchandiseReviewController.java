@@ -46,37 +46,35 @@ public class MerchandiseReviewController {
 
         MerchandiseReview entity = merchandisereviewMapper.toEntity(merchandisereviewDto);
         MerchandiseReview saved = merchandisereviewService.save(entity);
-        URI location = uriBuilder.path("/api/merchandisereviews/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/merchandisereviews/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(merchandisereviewMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MerchandiseReviewDto> updateMerchandiseReview(
-                @PathVariable Long id,
-                @RequestBody MerchandiseReviewDto merchandisereviewDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MerchandiseReviewDto> updateMerchandiseReview(
+            @PathVariable Long id,
+            @Valid @RequestBody MerchandiseReviewDto merchandisereviewDto) {
 
-                // Transformer le DTO en entity pour le service
-                MerchandiseReview entityToUpdate = merchandisereviewMapper.toEntity(merchandisereviewDto);
 
-                // Appel du service update
-                MerchandiseReview updatedEntity = merchandisereviewService.update(id, entityToUpdate);
+        MerchandiseReview entityToUpdate = merchandisereviewMapper.toEntity(merchandisereviewDto);
+        MerchandiseReview updatedEntity = merchandisereviewService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MerchandiseReviewDto updatedDto = merchandisereviewMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(merchandisereviewMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMerchandiseReview(@PathVariable Long id) {
-                    boolean deleted = merchandisereviewService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMerchandiseReview(@PathVariable Long id) {
+        boolean deleted = merchandisereviewService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

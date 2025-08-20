@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GameReviewUpvoteRepository extends BaseRepository<GameReviewUpvote, Long> {
+
 }

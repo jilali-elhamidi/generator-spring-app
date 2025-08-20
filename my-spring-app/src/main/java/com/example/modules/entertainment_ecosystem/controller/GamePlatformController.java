@@ -46,37 +46,35 @@ public class GamePlatformController {
 
         GamePlatform entity = gameplatformMapper.toEntity(gameplatformDto);
         GamePlatform saved = gameplatformService.save(entity);
-        URI location = uriBuilder.path("/api/gameplatforms/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/gameplatforms/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(gameplatformMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<GamePlatformDto> updateGamePlatform(
-                @PathVariable Long id,
-                @RequestBody GamePlatformDto gameplatformDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<GamePlatformDto> updateGamePlatform(
+            @PathVariable Long id,
+            @Valid @RequestBody GamePlatformDto gameplatformDto) {
 
-                // Transformer le DTO en entity pour le service
-                GamePlatform entityToUpdate = gameplatformMapper.toEntity(gameplatformDto);
 
-                // Appel du service update
-                GamePlatform updatedEntity = gameplatformService.update(id, entityToUpdate);
+        GamePlatform entityToUpdate = gameplatformMapper.toEntity(gameplatformDto);
+        GamePlatform updatedEntity = gameplatformService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                GamePlatformDto updatedDto = gameplatformMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(gameplatformMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteGamePlatform(@PathVariable Long id) {
-                    boolean deleted = gameplatformService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGamePlatform(@PathVariable Long id) {
+        boolean deleted = gameplatformService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

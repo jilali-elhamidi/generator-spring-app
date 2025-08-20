@@ -22,7 +22,7 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
     private final MerchandiseRepository merchandiseItemRepository;
     private final WarehouseRepository warehouseRepository;
 
-    public MerchandiseInventoryService(MerchandiseInventoryRepository repository,MerchandiseRepository merchandiseItemRepository,WarehouseRepository warehouseRepository)
+    public MerchandiseInventoryService(MerchandiseInventoryRepository repository, MerchandiseRepository merchandiseItemRepository, WarehouseRepository warehouseRepository)
     {
         super(repository);
         this.merchandiseinventoryRepository = repository;
@@ -32,40 +32,35 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
 
     @Override
     public MerchandiseInventory save(MerchandiseInventory merchandiseinventory) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (merchandiseinventory.getWarehouse() != null &&
+            merchandiseinventory.getWarehouse().getId() != null) {
 
+            Warehouse existingWarehouse = warehouseRepository.findById(
+                merchandiseinventory.getWarehouse().getId()
+            ).orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    
-    if (merchandiseinventory.getWarehouse() != null
-        && merchandiseinventory.getWarehouse().getId() != null) {
-        Warehouse existingWarehouse = warehouseRepository.findById(
-        merchandiseinventory.getWarehouse().getId()
-        ).orElseThrow(() -> new RuntimeException("Warehouse not found"));
-        merchandiseinventory.setWarehouse(existingWarehouse);
+            merchandiseinventory.setWarehouse(existingWarehouse);
         }
-    
+        
+    // ---------- OneToOne ----------
         if (merchandiseinventory.getMerchandiseItem() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             merchandiseinventory.setMerchandiseItem(
-            merchandiseItemRepository.findById(merchandiseinventory.getMerchandiseItem().getId())
-            .orElseThrow(() -> new RuntimeException("merchandiseItem not found"))
+                merchandiseItemRepository.findById(merchandiseinventory.getMerchandiseItem().getId())
+                    .orElseThrow(() -> new RuntimeException("merchandiseItem not found"))
             );
-        
-        merchandiseinventory.getMerchandiseItem().setInventory(merchandiseinventory);
+            
+            merchandiseinventory.getMerchandiseItem().setInventory(merchandiseinventory);
         }
+        
 
-        return merchandiseinventoryRepository.save(merchandiseinventory);
-    }
+    return merchandiseinventoryRepository.save(merchandiseinventory);
+}
 
 
     public MerchandiseInventory update(Long id, MerchandiseInventory merchandiseinventoryRequest) {
@@ -76,96 +71,59 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
         existing.setStockQuantity(merchandiseinventoryRequest.getStockQuantity());
         existing.setLastUpdated(merchandiseinventoryRequest.getLastUpdated());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (merchandiseinventoryRequest.getWarehouse() != null &&
-        merchandiseinventoryRequest.getWarehouse().getId() != null) {
+            merchandiseinventoryRequest.getWarehouse().getId() != null) {
 
-        Warehouse existingWarehouse = warehouseRepository.findById(
-        merchandiseinventoryRequest.getWarehouse().getId()
-        ).orElseThrow(() -> new RuntimeException("Warehouse not found"));
+            Warehouse existingWarehouse = warehouseRepository.findById(
+                merchandiseinventoryRequest.getWarehouse().getId()
+            ).orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
-        existing.setWarehouse(existingWarehouse);
+            existing.setWarehouse(existingWarehouse);
         } else {
-        existing.setWarehouse(null);
+            existing.setWarehouse(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-        if (merchandiseinventoryRequest.getMerchandiseItem() != null
-        && merchandiseinventoryRequest.getMerchandiseItem().getId() != null) {
-
-        Merchandise merchandiseItem = merchandiseItemRepository.findById(
-        merchandiseinventoryRequest.getMerchandiseItem().getId()
-        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setMerchandiseItem(merchandiseItem);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (merchandiseinventoryRequest.getMerchandiseItem() != null &&
+            merchandiseinventoryRequest.getMerchandiseItem().getId() != null) {
+
+            Merchandise merchandiseItem = merchandiseItemRepository.findById(
+                merchandiseinventoryRequest.getMerchandiseItem().getId()
+            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+
+            existing.setMerchandiseItem(merchandiseItem);
+
+            
             merchandiseItem.setInventory(existing);
+            
+        }
         
-        }
 
-    
-
-    
-
-
-        return merchandiseinventoryRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MerchandiseInventory> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MerchandiseInventory entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getMerchandiseItem() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getMerchandiseItem().setInventory(null);
-        // Dissocier côté direct
-        entity.setMerchandiseItem(null);
-        }
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-        if (entity.getWarehouse() != null) {
-        entity.setWarehouse(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return merchandiseinventoryRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MerchandiseInventory> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MerchandiseInventory entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getMerchandiseItem() != null) {
+            entity.getMerchandiseItem().setInventory(null);
+            entity.setMerchandiseItem(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getWarehouse() != null) {
+            entity.setWarehouse(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

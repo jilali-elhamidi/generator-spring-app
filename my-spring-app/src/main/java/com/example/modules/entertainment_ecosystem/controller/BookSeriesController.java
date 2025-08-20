@@ -46,37 +46,35 @@ public class BookSeriesController {
 
         BookSeries entity = bookseriesMapper.toEntity(bookseriesDto);
         BookSeries saved = bookseriesService.save(entity);
-        URI location = uriBuilder.path("/api/bookseriess/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/bookseriess/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(bookseriesMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<BookSeriesDto> updateBookSeries(
-                @PathVariable Long id,
-                @RequestBody BookSeriesDto bookseriesDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<BookSeriesDto> updateBookSeries(
+            @PathVariable Long id,
+            @Valid @RequestBody BookSeriesDto bookseriesDto) {
 
-                // Transformer le DTO en entity pour le service
-                BookSeries entityToUpdate = bookseriesMapper.toEntity(bookseriesDto);
 
-                // Appel du service update
-                BookSeries updatedEntity = bookseriesService.update(id, entityToUpdate);
+        BookSeries entityToUpdate = bookseriesMapper.toEntity(bookseriesDto);
+        BookSeries updatedEntity = bookseriesService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                BookSeriesDto updatedDto = bookseriesMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(bookseriesMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteBookSeries(@PathVariable Long id) {
-                    boolean deleted = bookseriesService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBookSeries(@PathVariable Long id) {
+        boolean deleted = bookseriesService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

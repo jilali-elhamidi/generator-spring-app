@@ -19,7 +19,7 @@ public class MusicLabelService extends BaseService<MusicLabel> {
     protected final MusicLabelRepository musiclabelRepository;
     private final AlbumRepository albumsRepository;
 
-    public MusicLabelService(MusicLabelRepository repository,AlbumRepository albumsRepository)
+    public MusicLabelService(MusicLabelRepository repository, AlbumRepository albumsRepository)
     {
         super(repository);
         this.musiclabelRepository = repository;
@@ -28,37 +28,30 @@ public class MusicLabelService extends BaseService<MusicLabel> {
 
     @Override
     public MusicLabel save(MusicLabel musiclabel) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (musiclabel.getAlbums() != null) {
+    // ---------- OneToMany ----------
+        if (musiclabel.getAlbums() != null) {
             List<Album> managedAlbums = new ArrayList<>();
             for (Album item : musiclabel.getAlbums()) {
-            if (item.getId() != null) {
-            Album existingItem = albumsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Album not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setMusicLabel(musiclabel);
-            managedAlbums.add(existingItem);
-            } else {
-            item.setMusicLabel(musiclabel);
-            managedAlbums.add(item);
-            }
+                if (item.getId() != null) {
+                    Album existingItem = albumsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Album not found"));
+
+                     existingItem.setMusicLabel(musiclabel);
+                     managedAlbums.add(existingItem);
+                } else {
+                    item.setMusicLabel(musiclabel);
+                    managedAlbums.add(item);
+                }
             }
             musiclabel.setAlbums(managedAlbums);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return musiclabelRepository.save(musiclabel);
-    }
+    return musiclabelRepository.save(musiclabel);
+}
 
 
     public MusicLabel update(Long id, MusicLabel musiclabelRequest) {
@@ -68,75 +61,50 @@ public class MusicLabelService extends BaseService<MusicLabel> {
     // Copier les champs simples
         existing.setName(musiclabelRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getAlbums().clear();
 
         if (musiclabelRequest.getAlbums() != null) {
-        for (var item : musiclabelRequest.getAlbums()) {
-        Album existingItem;
-        if (item.getId() != null) {
-        existingItem = albumsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Album not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : musiclabelRequest.getAlbums()) {
+                Album existingItem;
+                if (item.getId() != null) {
+                    existingItem = albumsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Album not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setMusicLabel(existing);
+                existing.getAlbums().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setMusicLabel(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getAlbums().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return musiclabelRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MusicLabel> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MusicLabel entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getAlbums() != null) {
-        for (var child : entity.getAlbums()) {
         
-            child.setMusicLabel(null); // retirer la référence inverse
-        
-        }
-        entity.getAlbums().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return musiclabelRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MusicLabel> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MusicLabel entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getAlbums() != null) {
+            for (var child : entity.getAlbums()) {
+                
+                child.setMusicLabel(null); // retirer la référence inverse
+                
+            }
+            entity.getAlbums().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

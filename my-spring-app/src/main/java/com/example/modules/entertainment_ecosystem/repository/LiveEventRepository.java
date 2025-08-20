@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LiveEventRepository extends BaseRepository<LiveEvent, Long> {
+
 }

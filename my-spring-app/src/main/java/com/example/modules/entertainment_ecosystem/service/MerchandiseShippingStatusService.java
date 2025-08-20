@@ -19,7 +19,7 @@ public class MerchandiseShippingStatusService extends BaseService<MerchandiseShi
     protected final MerchandiseShippingStatusRepository merchandiseshippingstatusRepository;
     private final MerchandiseShippingRepository shipmentRepository;
 
-    public MerchandiseShippingStatusService(MerchandiseShippingStatusRepository repository,MerchandiseShippingRepository shipmentRepository)
+    public MerchandiseShippingStatusService(MerchandiseShippingStatusRepository repository, MerchandiseShippingRepository shipmentRepository)
     {
         super(repository);
         this.merchandiseshippingstatusRepository = repository;
@@ -28,24 +28,23 @@ public class MerchandiseShippingStatusService extends BaseService<MerchandiseShi
 
     @Override
     public MerchandiseShippingStatus save(MerchandiseShippingStatus merchandiseshippingstatus) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (merchandiseshippingstatus.getShipment() != null &&
+            merchandiseshippingstatus.getShipment().getId() != null) {
 
+            MerchandiseShipping existingShipment = shipmentRepository.findById(
+                merchandiseshippingstatus.getShipment().getId()
+            ).orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
 
-    
-
-
-    
-
-    if (merchandiseshippingstatus.getShipment() != null
-        && merchandiseshippingstatus.getShipment().getId() != null) {
-        MerchandiseShipping existingShipment = shipmentRepository.findById(
-        merchandiseshippingstatus.getShipment().getId()
-        ).orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
-        merchandiseshippingstatus.setShipment(existingShipment);
+            merchandiseshippingstatus.setShipment(existingShipment);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return merchandiseshippingstatusRepository.save(merchandiseshippingstatus);
-    }
+    return merchandiseshippingstatusRepository.save(merchandiseshippingstatus);
+}
 
 
     public MerchandiseShippingStatus update(Long id, MerchandiseShippingStatus merchandiseshippingstatusRequest) {
@@ -56,61 +55,40 @@ public class MerchandiseShippingStatusService extends BaseService<MerchandiseShi
         existing.setStatus(merchandiseshippingstatusRequest.getStatus());
         existing.setDate(merchandiseshippingstatusRequest.getDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (merchandiseshippingstatusRequest.getShipment() != null &&
-        merchandiseshippingstatusRequest.getShipment().getId() != null) {
+            merchandiseshippingstatusRequest.getShipment().getId() != null) {
 
-        MerchandiseShipping existingShipment = shipmentRepository.findById(
-        merchandiseshippingstatusRequest.getShipment().getId()
-        ).orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
+            MerchandiseShipping existingShipment = shipmentRepository.findById(
+                merchandiseshippingstatusRequest.getShipment().getId()
+            ).orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
 
-        existing.setShipment(existingShipment);
+            existing.setShipment(existingShipment);
         } else {
-        existing.setShipment(null);
+            existing.setShipment(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return merchandiseshippingstatusRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MerchandiseShippingStatus> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MerchandiseShippingStatus entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getShipment() != null) {
-        entity.setShipment(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return merchandiseshippingstatusRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MerchandiseShippingStatus> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MerchandiseShippingStatus entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getShipment() != null) {
+            entity.setShipment(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -22,7 +22,7 @@ public class UserFollowService extends BaseService<UserFollow> {
     private final UserProfileRepository followerRepository;
     private final UserProfileRepository followedRepository;
 
-    public UserFollowService(UserFollowRepository repository,UserProfileRepository followerRepository,UserProfileRepository followedRepository)
+    public UserFollowService(UserFollowRepository repository, UserProfileRepository followerRepository, UserProfileRepository followedRepository)
     {
         super(repository);
         this.userfollowRepository = repository;
@@ -32,36 +32,33 @@ public class UserFollowService extends BaseService<UserFollow> {
 
     @Override
     public UserFollow save(UserFollow userfollow) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (userfollow.getFollower() != null &&
+            userfollow.getFollower().getId() != null) {
 
+            UserProfile existingFollower = followerRepository.findById(
+                userfollow.getFollower().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    
-
-    
-
-
-    
-
-    
-
-    if (userfollow.getFollower() != null
-        && userfollow.getFollower().getId() != null) {
-        UserProfile existingFollower = followerRepository.findById(
-        userfollow.getFollower().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userfollow.setFollower(existingFollower);
+            userfollow.setFollower(existingFollower);
         }
-    
-    if (userfollow.getFollowed() != null
-        && userfollow.getFollowed().getId() != null) {
-        UserProfile existingFollowed = followedRepository.findById(
-        userfollow.getFollowed().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userfollow.setFollowed(existingFollowed);
-        }
-    
+        
+        if (userfollow.getFollowed() != null &&
+            userfollow.getFollowed().getId() != null) {
 
-        return userfollowRepository.save(userfollow);
-    }
+            UserProfile existingFollowed = followedRepository.findById(
+                userfollow.getFollowed().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            userfollow.setFollowed(existingFollowed);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return userfollowRepository.save(userfollow);
+}
 
 
     public UserFollow update(Long id, UserFollow userfollowRequest) {
@@ -71,86 +68,56 @@ public class UserFollowService extends BaseService<UserFollow> {
     // Copier les champs simples
         existing.setFollowDate(userfollowRequest.getFollowDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (userfollowRequest.getFollower() != null &&
-        userfollowRequest.getFollower().getId() != null) {
+            userfollowRequest.getFollower().getId() != null) {
 
-        UserProfile existingFollower = followerRepository.findById(
-        userfollowRequest.getFollower().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingFollower = followerRepository.findById(
+                userfollowRequest.getFollower().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setFollower(existingFollower);
+            existing.setFollower(existingFollower);
         } else {
-        existing.setFollower(null);
+            existing.setFollower(null);
         }
+        
         if (userfollowRequest.getFollowed() != null &&
-        userfollowRequest.getFollowed().getId() != null) {
+            userfollowRequest.getFollowed().getId() != null) {
 
-        UserProfile existingFollowed = followedRepository.findById(
-        userfollowRequest.getFollowed().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingFollowed = followedRepository.findById(
+                userfollowRequest.getFollowed().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setFollowed(existingFollowed);
+            existing.setFollowed(existingFollowed);
         } else {
-        existing.setFollowed(null);
+            existing.setFollowed(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-
-        return userfollowRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserFollow> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserFollow entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getFollower() != null) {
-        entity.setFollower(null);
-        }
-    
-
-    
-        if (entity.getFollowed() != null) {
-        entity.setFollowed(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return userfollowRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserFollow> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserFollow entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getFollower() != null) {
+            entity.setFollower(null);
+        }
+        
+        if (entity.getFollowed() != null) {
+            entity.setFollowed(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

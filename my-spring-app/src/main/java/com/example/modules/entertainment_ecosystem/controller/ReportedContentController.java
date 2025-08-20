@@ -46,37 +46,35 @@ public class ReportedContentController {
 
         ReportedContent entity = reportedcontentMapper.toEntity(reportedcontentDto);
         ReportedContent saved = reportedcontentService.save(entity);
-        URI location = uriBuilder.path("/api/reportedcontents/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/reportedcontents/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(reportedcontentMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ReportedContentDto> updateReportedContent(
-                @PathVariable Long id,
-                @RequestBody ReportedContentDto reportedcontentDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ReportedContentDto> updateReportedContent(
+            @PathVariable Long id,
+            @Valid @RequestBody ReportedContentDto reportedcontentDto) {
 
-                // Transformer le DTO en entity pour le service
-                ReportedContent entityToUpdate = reportedcontentMapper.toEntity(reportedcontentDto);
 
-                // Appel du service update
-                ReportedContent updatedEntity = reportedcontentService.update(id, entityToUpdate);
+        ReportedContent entityToUpdate = reportedcontentMapper.toEntity(reportedcontentDto);
+        ReportedContent updatedEntity = reportedcontentService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ReportedContentDto updatedDto = reportedcontentMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(reportedcontentMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteReportedContent(@PathVariable Long id) {
-                    boolean deleted = reportedcontentService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReportedContent(@PathVariable Long id) {
+        boolean deleted = reportedcontentService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

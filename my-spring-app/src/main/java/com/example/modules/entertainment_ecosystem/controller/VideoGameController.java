@@ -46,37 +46,35 @@ public class VideoGameController {
 
         VideoGame entity = videogameMapper.toEntity(videogameDto);
         VideoGame saved = videogameService.save(entity);
-        URI location = uriBuilder.path("/api/videogames/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/videogames/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(videogameMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<VideoGameDto> updateVideoGame(
-                @PathVariable Long id,
-                @RequestBody VideoGameDto videogameDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<VideoGameDto> updateVideoGame(
+            @PathVariable Long id,
+            @Valid @RequestBody VideoGameDto videogameDto) {
 
-                // Transformer le DTO en entity pour le service
-                VideoGame entityToUpdate = videogameMapper.toEntity(videogameDto);
 
-                // Appel du service update
-                VideoGame updatedEntity = videogameService.update(id, entityToUpdate);
+        VideoGame entityToUpdate = videogameMapper.toEntity(videogameDto);
+        VideoGame updatedEntity = videogameService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                VideoGameDto updatedDto = videogameMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(videogameMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteVideoGame(@PathVariable Long id) {
-                    boolean deleted = videogameService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteVideoGame(@PathVariable Long id) {
+        boolean deleted = videogameService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

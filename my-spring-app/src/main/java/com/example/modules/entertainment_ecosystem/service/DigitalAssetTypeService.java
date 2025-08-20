@@ -19,7 +19,7 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
     protected final DigitalAssetTypeRepository digitalassettypeRepository;
     private final DigitalAssetRepository assetsRepository;
 
-    public DigitalAssetTypeService(DigitalAssetTypeRepository repository,DigitalAssetRepository assetsRepository)
+    public DigitalAssetTypeService(DigitalAssetTypeRepository repository, DigitalAssetRepository assetsRepository)
     {
         super(repository);
         this.digitalassettypeRepository = repository;
@@ -28,37 +28,30 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
 
     @Override
     public DigitalAssetType save(DigitalAssetType digitalassettype) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (digitalassettype.getAssets() != null) {
+    // ---------- OneToMany ----------
+        if (digitalassettype.getAssets() != null) {
             List<DigitalAsset> managedAssets = new ArrayList<>();
             for (DigitalAsset item : digitalassettype.getAssets()) {
-            if (item.getId() != null) {
-            DigitalAsset existingItem = assetsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setAssetType(digitalassettype);
-            managedAssets.add(existingItem);
-            } else {
-            item.setAssetType(digitalassettype);
-            managedAssets.add(item);
-            }
+                if (item.getId() != null) {
+                    DigitalAsset existingItem = assetsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
+
+                     existingItem.setAssetType(digitalassettype);
+                     managedAssets.add(existingItem);
+                } else {
+                    item.setAssetType(digitalassettype);
+                    managedAssets.add(item);
+                }
             }
             digitalassettype.setAssets(managedAssets);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return digitalassettypeRepository.save(digitalassettype);
-    }
+    return digitalassettypeRepository.save(digitalassettype);
+}
 
 
     public DigitalAssetType update(Long id, DigitalAssetType digitalassettypeRequest) {
@@ -68,75 +61,50 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
     // Copier les champs simples
         existing.setName(digitalassettypeRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getAssets().clear();
 
         if (digitalassettypeRequest.getAssets() != null) {
-        for (var item : digitalassettypeRequest.getAssets()) {
-        DigitalAsset existingItem;
-        if (item.getId() != null) {
-        existingItem = assetsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : digitalassettypeRequest.getAssets()) {
+                DigitalAsset existingItem;
+                if (item.getId() != null) {
+                    existingItem = assetsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setAssetType(existing);
+                existing.getAssets().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setAssetType(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getAssets().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return digitalassettypeRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<DigitalAssetType> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-DigitalAssetType entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getAssets() != null) {
-        for (var child : entity.getAssets()) {
         
-            child.setAssetType(null); // retirer la référence inverse
-        
-        }
-        entity.getAssets().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return digitalassettypeRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<DigitalAssetType> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        DigitalAssetType entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getAssets() != null) {
+            for (var child : entity.getAssets()) {
+                
+                child.setAssetType(null); // retirer la référence inverse
+                
+            }
+            entity.getAssets().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

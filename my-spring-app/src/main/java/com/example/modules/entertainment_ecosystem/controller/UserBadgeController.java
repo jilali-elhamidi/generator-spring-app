@@ -46,37 +46,35 @@ public class UserBadgeController {
 
         UserBadge entity = userbadgeMapper.toEntity(userbadgeDto);
         UserBadge saved = userbadgeService.save(entity);
-        URI location = uriBuilder.path("/api/userbadges/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userbadges/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userbadgeMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserBadgeDto> updateUserBadge(
-                @PathVariable Long id,
-                @RequestBody UserBadgeDto userbadgeDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserBadgeDto> updateUserBadge(
+            @PathVariable Long id,
+            @Valid @RequestBody UserBadgeDto userbadgeDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserBadge entityToUpdate = userbadgeMapper.toEntity(userbadgeDto);
 
-                // Appel du service update
-                UserBadge updatedEntity = userbadgeService.update(id, entityToUpdate);
+        UserBadge entityToUpdate = userbadgeMapper.toEntity(userbadgeDto);
+        UserBadge updatedEntity = userbadgeService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserBadgeDto updatedDto = userbadgeMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userbadgeMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserBadge(@PathVariable Long id) {
-                    boolean deleted = userbadgeService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserBadge(@PathVariable Long id) {
+        boolean deleted = userbadgeService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

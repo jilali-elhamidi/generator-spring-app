@@ -46,37 +46,35 @@ public class MovieMerchandiseController {
 
         MovieMerchandise entity = moviemerchandiseMapper.toEntity(moviemerchandiseDto);
         MovieMerchandise saved = moviemerchandiseService.save(entity);
-        URI location = uriBuilder.path("/api/moviemerchandises/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/moviemerchandises/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(moviemerchandiseMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<MovieMerchandiseDto> updateMovieMerchandise(
-                @PathVariable Long id,
-                @RequestBody MovieMerchandiseDto moviemerchandiseDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<MovieMerchandiseDto> updateMovieMerchandise(
+            @PathVariable Long id,
+            @Valid @RequestBody MovieMerchandiseDto moviemerchandiseDto) {
 
-                // Transformer le DTO en entity pour le service
-                MovieMerchandise entityToUpdate = moviemerchandiseMapper.toEntity(moviemerchandiseDto);
 
-                // Appel du service update
-                MovieMerchandise updatedEntity = moviemerchandiseService.update(id, entityToUpdate);
+        MovieMerchandise entityToUpdate = moviemerchandiseMapper.toEntity(moviemerchandiseDto);
+        MovieMerchandise updatedEntity = moviemerchandiseService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                MovieMerchandiseDto updatedDto = moviemerchandiseMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(moviemerchandiseMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteMovieMerchandise(@PathVariable Long id) {
-                    boolean deleted = moviemerchandiseService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMovieMerchandise(@PathVariable Long id) {
+        boolean deleted = moviemerchandiseService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

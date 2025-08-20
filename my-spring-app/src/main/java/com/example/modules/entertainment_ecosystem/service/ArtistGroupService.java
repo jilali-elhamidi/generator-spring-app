@@ -19,7 +19,7 @@ public class ArtistGroupService extends BaseService<ArtistGroup> {
     protected final ArtistGroupRepository artistgroupRepository;
     private final ArtistRepository membersRepository;
 
-    public ArtistGroupService(ArtistGroupRepository repository,ArtistRepository membersRepository)
+    public ArtistGroupService(ArtistGroupRepository repository, ArtistRepository membersRepository)
     {
         super(repository);
         this.artistgroupRepository = repository;
@@ -28,31 +28,27 @@ public class ArtistGroupService extends BaseService<ArtistGroup> {
 
     @Override
     public ArtistGroup save(ArtistGroup artistgroup) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (artistgroup.getMembers() != null &&
+            !artistgroup.getMembers().isEmpty()) {
 
+            List<Artist> attachedMembers = artistgroup.getMembers().stream()
+            .map(item -> membersRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
+            .toList();
 
-    
+            artistgroup.setMembers(attachedMembers);
 
-
-    
-        if (artistgroup.getMembers() != null
-        && !artistgroup.getMembers().isEmpty()) {
-
-        List<Artist> attachedMembers = artistgroup.getMembers().stream()
-        .map(item -> membersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
-        .toList();
-
-        artistgroup.setMembers(attachedMembers);
-
-        // côté propriétaire (Artist → ArtistGroup)
-        attachedMembers.forEach(it -> it.getGroups().add(artistgroup));
+            // côté propriétaire (Artist → ArtistGroup)
+            attachedMembers.forEach(it -> it.getGroups().add(artistgroup));
         }
-    
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-    
-
-        return artistgroupRepository.save(artistgroup);
-    }
+    return artistgroupRepository.save(artistgroup);
+}
 
 
     public ArtistGroup update(Long id, ArtistGroup artistgroupRequest) {
@@ -63,72 +59,51 @@ public class ArtistGroupService extends BaseService<ArtistGroup> {
         existing.setName(artistgroupRequest.getName());
         existing.setFormationDate(artistgroupRequest.getFormationDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (artistgroupRequest.getMembers() != null) {
-        existing.getMembers().clear();
+            existing.getMembers().clear();
 
-        List<Artist> membersList = artistgroupRequest.getMembers().stream()
-        .map(item -> membersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Artist not found")))
-        .collect(Collectors.toList());
+            List<Artist> membersList = artistgroupRequest.getMembers().stream()
+                .map(item -> membersRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("Artist not found")))
+                .collect(Collectors.toList());
 
-        existing.getMembers().addAll(membersList);
+            existing.getMembers().addAll(membersList);
 
-        // Mettre à jour le côté inverse
-        membersList.forEach(it -> {
-        if (!it.getGroups().contains(existing)) {
-        it.getGroups().add(existing);
+            // Mettre à jour le côté inverse
+            membersList.forEach(it -> {
+                if (!it.getGroups().contains(existing)) {
+                    it.getGroups().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return artistgroupRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ArtistGroup> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ArtistGroup entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getMembers() != null) {
-        for (Artist item : new ArrayList<>(entity.getMembers())) {
         
-            item.getGroups().remove(entity); // retire côté inverse
-        
-        }
-        entity.getMembers().clear(); // puis vide côté courant
-        }
-    
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return artistgroupRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ArtistGroup> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ArtistGroup entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getMembers() != null) {
+            for (Artist item : new ArrayList<>(entity.getMembers())) {
+                
+                item.getGroups().remove(entity); // retire côté inverse
+                
+            }
+            entity.getMembers().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

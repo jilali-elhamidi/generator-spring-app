@@ -46,37 +46,35 @@ public class UserSettingController {
 
         UserSetting entity = usersettingMapper.toEntity(usersettingDto);
         UserSetting saved = usersettingService.save(entity);
-        URI location = uriBuilder.path("/api/usersettings/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/usersettings/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(usersettingMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserSettingDto> updateUserSetting(
-                @PathVariable Long id,
-                @RequestBody UserSettingDto usersettingDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserSettingDto> updateUserSetting(
+            @PathVariable Long id,
+            @Valid @RequestBody UserSettingDto usersettingDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserSetting entityToUpdate = usersettingMapper.toEntity(usersettingDto);
 
-                // Appel du service update
-                UserSetting updatedEntity = usersettingService.update(id, entityToUpdate);
+        UserSetting entityToUpdate = usersettingMapper.toEntity(usersettingDto);
+        UserSetting updatedEntity = usersettingService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserSettingDto updatedDto = usersettingMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(usersettingMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserSetting(@PathVariable Long id) {
-                    boolean deleted = usersettingService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserSetting(@PathVariable Long id) {
+        boolean deleted = usersettingService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

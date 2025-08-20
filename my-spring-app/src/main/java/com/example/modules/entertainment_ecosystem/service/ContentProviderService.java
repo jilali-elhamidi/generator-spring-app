@@ -28,7 +28,7 @@ public class ContentProviderService extends BaseService<ContentProvider> {
     private final MusicTrackRepository providedMusicTracksRepository;
     private final PodcastRepository providedPodcastsRepository;
 
-    public ContentProviderService(ContentProviderRepository repository,MovieRepository providedMoviesRepository,TVShowRepository providedTvShowsRepository,MusicTrackRepository providedMusicTracksRepository,PodcastRepository providedPodcastsRepository)
+    public ContentProviderService(ContentProviderRepository repository, MovieRepository providedMoviesRepository, TVShowRepository providedTvShowsRepository, MusicTrackRepository providedMusicTracksRepository, PodcastRepository providedPodcastsRepository)
     {
         super(repository);
         this.contentproviderRepository = repository;
@@ -40,112 +40,81 @@ public class ContentProviderService extends BaseService<ContentProvider> {
 
     @Override
     public ContentProvider save(ContentProvider contentprovider) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (contentprovider.getProvidedMovies() != null) {
+    // ---------- OneToMany ----------
+        if (contentprovider.getProvidedMovies() != null) {
             List<Movie> managedProvidedMovies = new ArrayList<>();
             for (Movie item : contentprovider.getProvidedMovies()) {
-            if (item.getId() != null) {
-            Movie existingItem = providedMoviesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Movie not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setProvider(contentprovider);
-            managedProvidedMovies.add(existingItem);
-            } else {
-            item.setProvider(contentprovider);
-            managedProvidedMovies.add(item);
-            }
+                if (item.getId() != null) {
+                    Movie existingItem = providedMoviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found"));
+
+                     existingItem.setProvider(contentprovider);
+                     managedProvidedMovies.add(existingItem);
+                } else {
+                    item.setProvider(contentprovider);
+                    managedProvidedMovies.add(item);
+                }
             }
             contentprovider.setProvidedMovies(managedProvidedMovies);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (contentprovider.getProvidedTvShows() != null) {
+        if (contentprovider.getProvidedTvShows() != null) {
             List<TVShow> managedProvidedTvShows = new ArrayList<>();
             for (TVShow item : contentprovider.getProvidedTvShows()) {
-            if (item.getId() != null) {
-            TVShow existingItem = providedTvShowsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("TVShow not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setProvider(contentprovider);
-            managedProvidedTvShows.add(existingItem);
-            } else {
-            item.setProvider(contentprovider);
-            managedProvidedTvShows.add(item);
-            }
+                if (item.getId() != null) {
+                    TVShow existingItem = providedTvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+
+                     existingItem.setProvider(contentprovider);
+                     managedProvidedTvShows.add(existingItem);
+                } else {
+                    item.setProvider(contentprovider);
+                    managedProvidedTvShows.add(item);
+                }
             }
             contentprovider.setProvidedTvShows(managedProvidedTvShows);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (contentprovider.getProvidedMusicTracks() != null) {
+        if (contentprovider.getProvidedMusicTracks() != null) {
             List<MusicTrack> managedProvidedMusicTracks = new ArrayList<>();
             for (MusicTrack item : contentprovider.getProvidedMusicTracks()) {
-            if (item.getId() != null) {
-            MusicTrack existingItem = providedMusicTracksRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setProvider(contentprovider);
-            managedProvidedMusicTracks.add(existingItem);
-            } else {
-            item.setProvider(contentprovider);
-            managedProvidedMusicTracks.add(item);
-            }
+                if (item.getId() != null) {
+                    MusicTrack existingItem = providedMusicTracksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+
+                     existingItem.setProvider(contentprovider);
+                     managedProvidedMusicTracks.add(existingItem);
+                } else {
+                    item.setProvider(contentprovider);
+                    managedProvidedMusicTracks.add(item);
+                }
             }
             contentprovider.setProvidedMusicTracks(managedProvidedMusicTracks);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (contentprovider.getProvidedPodcasts() != null) {
+        if (contentprovider.getProvidedPodcasts() != null) {
             List<Podcast> managedProvidedPodcasts = new ArrayList<>();
             for (Podcast item : contentprovider.getProvidedPodcasts()) {
-            if (item.getId() != null) {
-            Podcast existingItem = providedPodcastsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Podcast not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setProvider(contentprovider);
-            managedProvidedPodcasts.add(existingItem);
-            } else {
-            item.setProvider(contentprovider);
-            managedProvidedPodcasts.add(item);
-            }
+                if (item.getId() != null) {
+                    Podcast existingItem = providedPodcastsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Podcast not found"));
+
+                     existingItem.setProvider(contentprovider);
+                     managedProvidedPodcasts.add(existingItem);
+                } else {
+                    item.setProvider(contentprovider);
+                    managedProvidedPodcasts.add(item);
+                }
             }
             contentprovider.setProvidedPodcasts(managedProvidedPodcasts);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    
-    
-
-        return contentproviderRepository.save(contentprovider);
-    }
+    return contentproviderRepository.save(contentprovider);
+}
 
 
     public ContentProvider update(Long id, ContentProvider contentproviderRequest) {
@@ -156,192 +125,128 @@ public class ContentProviderService extends BaseService<ContentProvider> {
         existing.setName(contentproviderRequest.getName());
         existing.setContactEmail(contentproviderRequest.getContactEmail());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getProvidedMovies().clear();
 
         if (contentproviderRequest.getProvidedMovies() != null) {
-        for (var item : contentproviderRequest.getProvidedMovies()) {
-        Movie existingItem;
-        if (item.getId() != null) {
-        existingItem = providedMoviesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Movie not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setProvider(existing);
+            for (var item : contentproviderRequest.getProvidedMovies()) {
+                Movie existingItem;
+                if (item.getId() != null) {
+                    existingItem = providedMoviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getProvidedMovies().add(existingItem);
+                existingItem.setProvider(existing);
+                existing.getProvidedMovies().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getProvidedTvShows().clear();
 
         if (contentproviderRequest.getProvidedTvShows() != null) {
-        for (var item : contentproviderRequest.getProvidedTvShows()) {
-        TVShow existingItem;
-        if (item.getId() != null) {
-        existingItem = providedTvShowsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("TVShow not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setProvider(existing);
+            for (var item : contentproviderRequest.getProvidedTvShows()) {
+                TVShow existingItem;
+                if (item.getId() != null) {
+                    existingItem = providedTvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getProvidedTvShows().add(existingItem);
+                existingItem.setProvider(existing);
+                existing.getProvidedTvShows().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getProvidedMusicTracks().clear();
 
         if (contentproviderRequest.getProvidedMusicTracks() != null) {
-        for (var item : contentproviderRequest.getProvidedMusicTracks()) {
-        MusicTrack existingItem;
-        if (item.getId() != null) {
-        existingItem = providedMusicTracksRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setProvider(existing);
+            for (var item : contentproviderRequest.getProvidedMusicTracks()) {
+                MusicTrack existingItem;
+                if (item.getId() != null) {
+                    existingItem = providedMusicTracksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getProvidedMusicTracks().add(existingItem);
+                existingItem.setProvider(existing);
+                existing.getProvidedMusicTracks().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getProvidedPodcasts().clear();
 
         if (contentproviderRequest.getProvidedPodcasts() != null) {
-        for (var item : contentproviderRequest.getProvidedPodcasts()) {
-        Podcast existingItem;
-        if (item.getId() != null) {
-        existingItem = providedPodcastsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Podcast not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : contentproviderRequest.getProvidedPodcasts()) {
+                Podcast existingItem;
+                if (item.getId() != null) {
+                    existingItem = providedPodcastsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Podcast not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setProvider(existing);
+                existing.getProvidedPodcasts().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setProvider(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getProvidedPodcasts().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-
-        return contentproviderRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ContentProvider> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ContentProvider entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getProvidedMovies() != null) {
-        for (var child : entity.getProvidedMovies()) {
         
-            child.setProvider(null); // retirer la référence inverse
-        
-        }
-        entity.getProvidedMovies().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-    
-        if (entity.getProvidedTvShows() != null) {
-        for (var child : entity.getProvidedTvShows()) {
-        
-            child.setProvider(null); // retirer la référence inverse
-        
-        }
-        entity.getProvidedTvShows().clear();
-        }
-    
-
-    
-        if (entity.getProvidedMusicTracks() != null) {
-        for (var child : entity.getProvidedMusicTracks()) {
-        
-            child.setProvider(null); // retirer la référence inverse
-        
-        }
-        entity.getProvidedMusicTracks().clear();
-        }
-    
-
-    
-        if (entity.getProvidedPodcasts() != null) {
-        for (var child : entity.getProvidedPodcasts()) {
-        
-            child.setProvider(null); // retirer la référence inverse
-        
-        }
-        entity.getProvidedPodcasts().clear();
-        }
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return contentproviderRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ContentProvider> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ContentProvider entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getProvidedMovies() != null) {
+            for (var child : entity.getProvidedMovies()) {
+                
+                child.setProvider(null); // retirer la référence inverse
+                
+            }
+            entity.getProvidedMovies().clear();
+        }
+        
+        if (entity.getProvidedTvShows() != null) {
+            for (var child : entity.getProvidedTvShows()) {
+                
+                child.setProvider(null); // retirer la référence inverse
+                
+            }
+            entity.getProvidedTvShows().clear();
+        }
+        
+        if (entity.getProvidedMusicTracks() != null) {
+            for (var child : entity.getProvidedMusicTracks()) {
+                
+                child.setProvider(null); // retirer la référence inverse
+                
+            }
+            entity.getProvidedMusicTracks().clear();
+        }
+        
+        if (entity.getProvidedPodcasts() != null) {
+            for (var child : entity.getProvidedPodcasts()) {
+                
+                child.setProvider(null); // retirer la référence inverse
+                
+            }
+            entity.getProvidedPodcasts().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

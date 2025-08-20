@@ -19,7 +19,7 @@ public class ConnectionTypeService extends BaseService<ConnectionType> {
     protected final ConnectionTypeRepository connectiontypeRepository;
     private final UserConnectionRepository userConnectionsRepository;
 
-    public ConnectionTypeService(ConnectionTypeRepository repository,UserConnectionRepository userConnectionsRepository)
+    public ConnectionTypeService(ConnectionTypeRepository repository, UserConnectionRepository userConnectionsRepository)
     {
         super(repository);
         this.connectiontypeRepository = repository;
@@ -28,37 +28,30 @@ public class ConnectionTypeService extends BaseService<ConnectionType> {
 
     @Override
     public ConnectionType save(ConnectionType connectiontype) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (connectiontype.getUserConnections() != null) {
+    // ---------- OneToMany ----------
+        if (connectiontype.getUserConnections() != null) {
             List<UserConnection> managedUserConnections = new ArrayList<>();
             for (UserConnection item : connectiontype.getUserConnections()) {
-            if (item.getId() != null) {
-            UserConnection existingItem = userConnectionsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("UserConnection not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setType(connectiontype);
-            managedUserConnections.add(existingItem);
-            } else {
-            item.setType(connectiontype);
-            managedUserConnections.add(item);
-            }
+                if (item.getId() != null) {
+                    UserConnection existingItem = userConnectionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserConnection not found"));
+
+                     existingItem.setType(connectiontype);
+                     managedUserConnections.add(existingItem);
+                } else {
+                    item.setType(connectiontype);
+                    managedUserConnections.add(item);
+                }
             }
             connectiontype.setUserConnections(managedUserConnections);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return connectiontypeRepository.save(connectiontype);
-    }
+    return connectiontypeRepository.save(connectiontype);
+}
 
 
     public ConnectionType update(Long id, ConnectionType connectiontypeRequest) {
@@ -68,75 +61,50 @@ public class ConnectionTypeService extends BaseService<ConnectionType> {
     // Copier les champs simples
         existing.setName(connectiontypeRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getUserConnections().clear();
 
         if (connectiontypeRequest.getUserConnections() != null) {
-        for (var item : connectiontypeRequest.getUserConnections()) {
-        UserConnection existingItem;
-        if (item.getId() != null) {
-        existingItem = userConnectionsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserConnection not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : connectiontypeRequest.getUserConnections()) {
+                UserConnection existingItem;
+                if (item.getId() != null) {
+                    existingItem = userConnectionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserConnection not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setType(existing);
+                existing.getUserConnections().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setType(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getUserConnections().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return connectiontypeRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<ConnectionType> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-ConnectionType entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getUserConnections() != null) {
-        for (var child : entity.getUserConnections()) {
         
-            child.setType(null); // retirer la référence inverse
-        
-        }
-        entity.getUserConnections().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return connectiontypeRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<ConnectionType> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        ConnectionType entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getUserConnections() != null) {
+            for (var child : entity.getUserConnections()) {
+                
+                child.setType(null); // retirer la référence inverse
+                
+            }
+            entity.getUserConnections().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

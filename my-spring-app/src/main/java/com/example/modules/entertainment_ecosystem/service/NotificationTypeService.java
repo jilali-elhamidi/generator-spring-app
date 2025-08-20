@@ -19,7 +19,7 @@ public class NotificationTypeService extends BaseService<NotificationType> {
     protected final NotificationTypeRepository notificationtypeRepository;
     private final NotificationRepository notificationsRepository;
 
-    public NotificationTypeService(NotificationTypeRepository repository,NotificationRepository notificationsRepository)
+    public NotificationTypeService(NotificationTypeRepository repository, NotificationRepository notificationsRepository)
     {
         super(repository);
         this.notificationtypeRepository = repository;
@@ -28,37 +28,30 @@ public class NotificationTypeService extends BaseService<NotificationType> {
 
     @Override
     public NotificationType save(NotificationType notificationtype) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (notificationtype.getNotifications() != null) {
+    // ---------- OneToMany ----------
+        if (notificationtype.getNotifications() != null) {
             List<Notification> managedNotifications = new ArrayList<>();
             for (Notification item : notificationtype.getNotifications()) {
-            if (item.getId() != null) {
-            Notification existingItem = notificationsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Notification not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setType(notificationtype);
-            managedNotifications.add(existingItem);
-            } else {
-            item.setType(notificationtype);
-            managedNotifications.add(item);
-            }
+                if (item.getId() != null) {
+                    Notification existingItem = notificationsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+                     existingItem.setType(notificationtype);
+                     managedNotifications.add(existingItem);
+                } else {
+                    item.setType(notificationtype);
+                    managedNotifications.add(item);
+                }
             }
             notificationtype.setNotifications(managedNotifications);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return notificationtypeRepository.save(notificationtype);
-    }
+    return notificationtypeRepository.save(notificationtype);
+}
 
 
     public NotificationType update(Long id, NotificationType notificationtypeRequest) {
@@ -69,75 +62,50 @@ public class NotificationTypeService extends BaseService<NotificationType> {
         existing.setName(notificationtypeRequest.getName());
         existing.setTemplate(notificationtypeRequest.getTemplate());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getNotifications().clear();
 
         if (notificationtypeRequest.getNotifications() != null) {
-        for (var item : notificationtypeRequest.getNotifications()) {
-        Notification existingItem;
-        if (item.getId() != null) {
-        existingItem = notificationsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Notification not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : notificationtypeRequest.getNotifications()) {
+                Notification existingItem;
+                if (item.getId() != null) {
+                    existingItem = notificationsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Notification not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setType(existing);
+                existing.getNotifications().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setType(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getNotifications().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return notificationtypeRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<NotificationType> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-NotificationType entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getNotifications() != null) {
-        for (var child : entity.getNotifications()) {
         
-            child.setType(null); // retirer la référence inverse
-        
-        }
-        entity.getNotifications().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return notificationtypeRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<NotificationType> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        NotificationType entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getNotifications() != null) {
+            for (var child : entity.getNotifications()) {
+                
+                child.setType(null); // retirer la référence inverse
+                
+            }
+            entity.getNotifications().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

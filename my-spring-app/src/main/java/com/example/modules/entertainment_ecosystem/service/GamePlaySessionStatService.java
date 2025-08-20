@@ -19,7 +19,7 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
     protected final GamePlaySessionStatRepository gameplaysessionstatRepository;
     private final GamePlaySessionRepository gamePlaySessionRepository;
 
-    public GamePlaySessionStatService(GamePlaySessionStatRepository repository,GamePlaySessionRepository gamePlaySessionRepository)
+    public GamePlaySessionStatService(GamePlaySessionStatRepository repository, GamePlaySessionRepository gamePlaySessionRepository)
     {
         super(repository);
         this.gameplaysessionstatRepository = repository;
@@ -28,24 +28,23 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
 
     @Override
     public GamePlaySessionStat save(GamePlaySessionStat gameplaysessionstat) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (gameplaysessionstat.getGamePlaySession() != null &&
+            gameplaysessionstat.getGamePlaySession().getId() != null) {
 
+            GamePlaySession existingGamePlaySession = gamePlaySessionRepository.findById(
+                gameplaysessionstat.getGamePlaySession().getId()
+            ).orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
 
-    
-
-
-    
-
-    if (gameplaysessionstat.getGamePlaySession() != null
-        && gameplaysessionstat.getGamePlaySession().getId() != null) {
-        GamePlaySession existingGamePlaySession = gamePlaySessionRepository.findById(
-        gameplaysessionstat.getGamePlaySession().getId()
-        ).orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
-        gameplaysessionstat.setGamePlaySession(existingGamePlaySession);
+            gameplaysessionstat.setGamePlaySession(existingGamePlaySession);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return gameplaysessionstatRepository.save(gameplaysessionstat);
-    }
+    return gameplaysessionstatRepository.save(gameplaysessionstat);
+}
 
 
     public GamePlaySessionStat update(Long id, GamePlaySessionStat gameplaysessionstatRequest) {
@@ -56,61 +55,40 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
         existing.setStatName(gameplaysessionstatRequest.getStatName());
         existing.setStatValue(gameplaysessionstatRequest.getStatValue());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (gameplaysessionstatRequest.getGamePlaySession() != null &&
-        gameplaysessionstatRequest.getGamePlaySession().getId() != null) {
+            gameplaysessionstatRequest.getGamePlaySession().getId() != null) {
 
-        GamePlaySession existingGamePlaySession = gamePlaySessionRepository.findById(
-        gameplaysessionstatRequest.getGamePlaySession().getId()
-        ).orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
+            GamePlaySession existingGamePlaySession = gamePlaySessionRepository.findById(
+                gameplaysessionstatRequest.getGamePlaySession().getId()
+            ).orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
 
-        existing.setGamePlaySession(existingGamePlaySession);
+            existing.setGamePlaySession(existingGamePlaySession);
         } else {
-        existing.setGamePlaySession(null);
+            existing.setGamePlaySession(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return gameplaysessionstatRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<GamePlaySessionStat> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-GamePlaySessionStat entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getGamePlaySession() != null) {
-        entity.setGamePlaySession(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return gameplaysessionstatRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<GamePlaySessionStat> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        GamePlaySessionStat entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getGamePlaySession() != null) {
+            entity.setGamePlaySession(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

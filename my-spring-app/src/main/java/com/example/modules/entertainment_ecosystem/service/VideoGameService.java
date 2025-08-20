@@ -70,7 +70,7 @@ public class VideoGameService extends BaseService<VideoGame> {
     private final GameExpansionPackRepository expansionPacksRepository;
     private final LiveStreamRepository liveStreamsRepository;
 
-    public VideoGameService(VideoGameRepository repository,GenreRepository genresRepository,ReviewRepository generalReviewsRepository,GameReviewRepository gameReviewsRepository,UserProfileRepository playedByRepository,GameAchievementRepository achievementsRepository,GameSessionRepository sessionsRepository,DevelopmentStudioRepository developerStudioRepository,DigitalPurchaseRepository purchasesRepository,GamePlatformRepository platformsRepository,ContentRatingRepository contentRatingRepository,ContentTagRepository tagsRepository,VideoGameRatingRepository ratingsRepository,GamePlaySessionRepository gamePlaySessionsRepository,GameReviewUpvoteRepository gameReviewUpvotesRepository,GameReviewDownvoteRepository gameReviewDownvotesRepository,ContentRatingBoardRepository contentRatingBoardRepository,GameExpansionPackRepository expansionPacksRepository,LiveStreamRepository liveStreamsRepository)
+    public VideoGameService(VideoGameRepository repository, GenreRepository genresRepository, ReviewRepository generalReviewsRepository, GameReviewRepository gameReviewsRepository, UserProfileRepository playedByRepository, GameAchievementRepository achievementsRepository, GameSessionRepository sessionsRepository, DevelopmentStudioRepository developerStudioRepository, DigitalPurchaseRepository purchasesRepository, GamePlatformRepository platformsRepository, ContentRatingRepository contentRatingRepository, ContentTagRepository tagsRepository, VideoGameRatingRepository ratingsRepository, GamePlaySessionRepository gamePlaySessionsRepository, GameReviewUpvoteRepository gameReviewUpvotesRepository, GameReviewDownvoteRepository gameReviewDownvotesRepository, ContentRatingBoardRepository contentRatingBoardRepository, GameExpansionPackRepository expansionPacksRepository, LiveStreamRepository liveStreamsRepository)
     {
         super(repository);
         this.videogameRepository = repository;
@@ -96,399 +96,286 @@ public class VideoGameService extends BaseService<VideoGame> {
 
     @Override
     public VideoGame save(VideoGame videogame) {
-
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getGeneralReviews() != null) {
+    // ---------- OneToMany ----------
+        if (videogame.getGeneralReviews() != null) {
             List<Review> managedGeneralReviews = new ArrayList<>();
             for (Review item : videogame.getGeneralReviews()) {
-            if (item.getId() != null) {
-            Review existingItem = generalReviewsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Review not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setVideoGame(videogame);
-            managedGeneralReviews.add(existingItem);
-            } else {
-            item.setVideoGame(videogame);
-            managedGeneralReviews.add(item);
-            }
+                if (item.getId() != null) {
+                    Review existingItem = generalReviewsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Review not found"));
+
+                     existingItem.setVideoGame(videogame);
+                     managedGeneralReviews.add(existingItem);
+                } else {
+                    item.setVideoGame(videogame);
+                    managedGeneralReviews.add(item);
+                }
             }
             videogame.setGeneralReviews(managedGeneralReviews);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getGameReviews() != null) {
+        if (videogame.getGameReviews() != null) {
             List<GameReview> managedGameReviews = new ArrayList<>();
             for (GameReview item : videogame.getGameReviews()) {
-            if (item.getId() != null) {
-            GameReview existingItem = gameReviewsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("GameReview not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setGame(videogame);
-            managedGameReviews.add(existingItem);
-            } else {
-            item.setGame(videogame);
-            managedGameReviews.add(item);
-            }
+                if (item.getId() != null) {
+                    GameReview existingItem = gameReviewsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameReview not found"));
+
+                     existingItem.setGame(videogame);
+                     managedGameReviews.add(existingItem);
+                } else {
+                    item.setGame(videogame);
+                    managedGameReviews.add(item);
+                }
             }
             videogame.setGameReviews(managedGameReviews);
-            }
-        
+        }
     
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getAchievements() != null) {
+        if (videogame.getAchievements() != null) {
             List<GameAchievement> managedAchievements = new ArrayList<>();
             for (GameAchievement item : videogame.getAchievements()) {
-            if (item.getId() != null) {
-            GameAchievement existingItem = achievementsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("GameAchievement not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setGame(videogame);
-            managedAchievements.add(existingItem);
-            } else {
-            item.setGame(videogame);
-            managedAchievements.add(item);
-            }
+                if (item.getId() != null) {
+                    GameAchievement existingItem = achievementsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameAchievement not found"));
+
+                     existingItem.setGame(videogame);
+                     managedAchievements.add(existingItem);
+                } else {
+                    item.setGame(videogame);
+                    managedAchievements.add(item);
+                }
             }
             videogame.setAchievements(managedAchievements);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getSessions() != null) {
+        if (videogame.getSessions() != null) {
             List<GameSession> managedSessions = new ArrayList<>();
             for (GameSession item : videogame.getSessions()) {
-            if (item.getId() != null) {
-            GameSession existingItem = sessionsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("GameSession not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setGame(videogame);
-            managedSessions.add(existingItem);
-            } else {
-            item.setGame(videogame);
-            managedSessions.add(item);
-            }
+                if (item.getId() != null) {
+                    GameSession existingItem = sessionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameSession not found"));
+
+                     existingItem.setGame(videogame);
+                     managedSessions.add(existingItem);
+                } else {
+                    item.setGame(videogame);
+                    managedSessions.add(item);
+                }
             }
             videogame.setSessions(managedSessions);
-            }
-        
+        }
     
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getPurchases() != null) {
+        if (videogame.getPurchases() != null) {
             List<DigitalPurchase> managedPurchases = new ArrayList<>();
             for (DigitalPurchase item : videogame.getPurchases()) {
-            if (item.getId() != null) {
-            DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setVideoGame(videogame);
-            managedPurchases.add(existingItem);
-            } else {
-            item.setVideoGame(videogame);
-            managedPurchases.add(item);
-            }
+                if (item.getId() != null) {
+                    DigitalPurchase existingItem = purchasesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+
+                     existingItem.setVideoGame(videogame);
+                     managedPurchases.add(existingItem);
+                } else {
+                    item.setVideoGame(videogame);
+                    managedPurchases.add(item);
+                }
             }
             videogame.setPurchases(managedPurchases);
-            }
-        
+        }
     
-
-    
-
-    
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getRatings() != null) {
+        if (videogame.getRatings() != null) {
             List<VideoGameRating> managedRatings = new ArrayList<>();
             for (VideoGameRating item : videogame.getRatings()) {
-            if (item.getId() != null) {
-            VideoGameRating existingItem = ratingsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("VideoGameRating not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setGame(videogame);
-            managedRatings.add(existingItem);
-            } else {
-            item.setGame(videogame);
-            managedRatings.add(item);
-            }
+                if (item.getId() != null) {
+                    VideoGameRating existingItem = ratingsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("VideoGameRating not found"));
+
+                     existingItem.setGame(videogame);
+                     managedRatings.add(existingItem);
+                } else {
+                    item.setGame(videogame);
+                    managedRatings.add(item);
+                }
             }
             videogame.setRatings(managedRatings);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getGamePlaySessions() != null) {
+        if (videogame.getGamePlaySessions() != null) {
             List<GamePlaySession> managedGamePlaySessions = new ArrayList<>();
             for (GamePlaySession item : videogame.getGamePlaySessions()) {
-            if (item.getId() != null) {
-            GamePlaySession existingItem = gamePlaySessionsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setGame(videogame);
-            managedGamePlaySessions.add(existingItem);
-            } else {
-            item.setGame(videogame);
-            managedGamePlaySessions.add(item);
-            }
+                if (item.getId() != null) {
+                    GamePlaySession existingItem = gamePlaySessionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
+
+                     existingItem.setGame(videogame);
+                     managedGamePlaySessions.add(existingItem);
+                } else {
+                    item.setGame(videogame);
+                    managedGamePlaySessions.add(item);
+                }
             }
             videogame.setGamePlaySessions(managedGamePlaySessions);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getGameReviewUpvotes() != null) {
+        if (videogame.getGameReviewUpvotes() != null) {
             List<GameReviewUpvote> managedGameReviewUpvotes = new ArrayList<>();
             for (GameReviewUpvote item : videogame.getGameReviewUpvotes()) {
-            if (item.getId() != null) {
-            GameReviewUpvote existingItem = gameReviewUpvotesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("GameReviewUpvote not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setGame(videogame);
-            managedGameReviewUpvotes.add(existingItem);
-            } else {
-            item.setGame(videogame);
-            managedGameReviewUpvotes.add(item);
-            }
+                if (item.getId() != null) {
+                    GameReviewUpvote existingItem = gameReviewUpvotesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameReviewUpvote not found"));
+
+                     existingItem.setGame(videogame);
+                     managedGameReviewUpvotes.add(existingItem);
+                } else {
+                    item.setGame(videogame);
+                    managedGameReviewUpvotes.add(item);
+                }
             }
             videogame.setGameReviewUpvotes(managedGameReviewUpvotes);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getGameReviewDownvotes() != null) {
+        if (videogame.getGameReviewDownvotes() != null) {
             List<GameReviewDownvote> managedGameReviewDownvotes = new ArrayList<>();
             for (GameReviewDownvote item : videogame.getGameReviewDownvotes()) {
-            if (item.getId() != null) {
-            GameReviewDownvote existingItem = gameReviewDownvotesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("GameReviewDownvote not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setGame(videogame);
-            managedGameReviewDownvotes.add(existingItem);
-            } else {
-            item.setGame(videogame);
-            managedGameReviewDownvotes.add(item);
-            }
+                if (item.getId() != null) {
+                    GameReviewDownvote existingItem = gameReviewDownvotesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameReviewDownvote not found"));
+
+                     existingItem.setGame(videogame);
+                     managedGameReviewDownvotes.add(existingItem);
+                } else {
+                    item.setGame(videogame);
+                    managedGameReviewDownvotes.add(item);
+                }
             }
             videogame.setGameReviewDownvotes(managedGameReviewDownvotes);
-            }
-        
+        }
     
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getExpansionPacks() != null) {
+        if (videogame.getExpansionPacks() != null) {
             List<GameExpansionPack> managedExpansionPacks = new ArrayList<>();
             for (GameExpansionPack item : videogame.getExpansionPacks()) {
-            if (item.getId() != null) {
-            GameExpansionPack existingItem = expansionPacksRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("GameExpansionPack not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setBaseGame(videogame);
-            managedExpansionPacks.add(existingItem);
-            } else {
-            item.setBaseGame(videogame);
-            managedExpansionPacks.add(item);
-            }
+                if (item.getId() != null) {
+                    GameExpansionPack existingItem = expansionPacksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameExpansionPack not found"));
+
+                     existingItem.setBaseGame(videogame);
+                     managedExpansionPacks.add(existingItem);
+                } else {
+                    item.setBaseGame(videogame);
+                    managedExpansionPacks.add(item);
+                }
             }
             videogame.setExpansionPacks(managedExpansionPacks);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (videogame.getLiveStreams() != null) {
+        if (videogame.getLiveStreams() != null) {
             List<LiveStream> managedLiveStreams = new ArrayList<>();
             for (LiveStream item : videogame.getLiveStreams()) {
-            if (item.getId() != null) {
-            LiveStream existingItem = liveStreamsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("LiveStream not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setGame(videogame);
-            managedLiveStreams.add(existingItem);
-            } else {
-            item.setGame(videogame);
-            managedLiveStreams.add(item);
-            }
+                if (item.getId() != null) {
+                    LiveStream existingItem = liveStreamsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("LiveStream not found"));
+
+                     existingItem.setGame(videogame);
+                     managedLiveStreams.add(existingItem);
+                } else {
+                    item.setGame(videogame);
+                    managedLiveStreams.add(item);
+                }
             }
             videogame.setLiveStreams(managedLiveStreams);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+        if (videogame.getGenres() != null &&
+            !videogame.getGenres().isEmpty()) {
+
+            List<Genre> attachedGenres = videogame.getGenres().stream()
+            .map(item -> genresRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
+            .toList();
+
+            videogame.setGenres(attachedGenres);
+
+            // côté propriétaire (Genre → VideoGame)
+            attachedGenres.forEach(it -> it.getVideoGames().add(videogame));
+        }
         
-    
+        if (videogame.getPlayedBy() != null &&
+            !videogame.getPlayedBy().isEmpty()) {
 
+            List<UserProfile> attachedPlayedBy = videogame.getPlayedBy().stream()
+            .map(item -> playedByRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+            .toList();
 
-    
-        if (videogame.getGenres() != null
-        && !videogame.getGenres().isEmpty()) {
+            videogame.setPlayedBy(attachedPlayedBy);
 
-        List<Genre> attachedGenres = videogame.getGenres().stream()
-        .map(item -> genresRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
-        .toList();
-
-        videogame.setGenres(attachedGenres);
-
-        // côté propriétaire (Genre → VideoGame)
-        attachedGenres.forEach(it -> it.getVideoGames().add(videogame));
+            // côté propriétaire (UserProfile → VideoGame)
+            attachedPlayedBy.forEach(it -> it.getPlayedGames().add(videogame));
         }
-    
+        
+        if (videogame.getPlatforms() != null &&
+            !videogame.getPlatforms().isEmpty()) {
 
-    
+            List<GamePlatform> attachedPlatforms = videogame.getPlatforms().stream()
+            .map(item -> platformsRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("GamePlatform not found with id " + item.getId())))
+            .toList();
 
-    
+            videogame.setPlatforms(attachedPlatforms);
 
-    
-        if (videogame.getPlayedBy() != null
-        && !videogame.getPlayedBy().isEmpty()) {
-
-        List<UserProfile> attachedPlayedBy = videogame.getPlayedBy().stream()
-        .map(item -> playedByRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-        .toList();
-
-        videogame.setPlayedBy(attachedPlayedBy);
-
-        // côté propriétaire (UserProfile → VideoGame)
-        attachedPlayedBy.forEach(it -> it.getPlayedGames().add(videogame));
+            // côté propriétaire (GamePlatform → VideoGame)
+            attachedPlatforms.forEach(it -> it.getVideoGames().add(videogame));
         }
-    
+        
+        if (videogame.getTags() != null &&
+            !videogame.getTags().isEmpty()) {
 
-    
+            List<ContentTag> attachedTags = videogame.getTags().stream()
+            .map(item -> tagsRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
+            .toList();
 
-    
+            videogame.setTags(attachedTags);
 
-    
-
-    
-
-    
-        if (videogame.getPlatforms() != null
-        && !videogame.getPlatforms().isEmpty()) {
-
-        List<GamePlatform> attachedPlatforms = videogame.getPlatforms().stream()
-        .map(item -> platformsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GamePlatform not found with id " + item.getId())))
-        .toList();
-
-        videogame.setPlatforms(attachedPlatforms);
-
-        // côté propriétaire (GamePlatform → VideoGame)
-        attachedPlatforms.forEach(it -> it.getVideoGames().add(videogame));
+            // côté propriétaire (ContentTag → VideoGame)
+            attachedTags.forEach(it -> it.getVideoGames().add(videogame));
         }
-    
+        
+    // ---------- ManyToOne ----------
+        if (videogame.getDeveloperStudio() != null &&
+            videogame.getDeveloperStudio().getId() != null) {
 
-    
+            DevelopmentStudio existingDeveloperStudio = developerStudioRepository.findById(
+                videogame.getDeveloperStudio().getId()
+            ).orElseThrow(() -> new RuntimeException("DevelopmentStudio not found"));
 
-    
-        if (videogame.getTags() != null
-        && !videogame.getTags().isEmpty()) {
-
-        List<ContentTag> attachedTags = videogame.getTags().stream()
-        .map(item -> tagsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
-        .toList();
-
-        videogame.setTags(attachedTags);
-
-        // côté propriétaire (ContentTag → VideoGame)
-        attachedTags.forEach(it -> it.getVideoGames().add(videogame));
+            videogame.setDeveloperStudio(existingDeveloperStudio);
         }
-    
+        
+        if (videogame.getContentRating() != null &&
+            videogame.getContentRating().getId() != null) {
 
-    
+            ContentRating existingContentRating = contentRatingRepository.findById(
+                videogame.getContentRating().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    if (videogame.getDeveloperStudio() != null
-        && videogame.getDeveloperStudio().getId() != null) {
-        DevelopmentStudio existingDeveloperStudio = developerStudioRepository.findById(
-        videogame.getDeveloperStudio().getId()
-        ).orElseThrow(() -> new RuntimeException("DevelopmentStudio not found"));
-        videogame.setDeveloperStudio(existingDeveloperStudio);
+            videogame.setContentRating(existingContentRating);
         }
-    
-    
-    
-    if (videogame.getContentRating() != null
-        && videogame.getContentRating().getId() != null) {
-        ContentRating existingContentRating = contentRatingRepository.findById(
-        videogame.getContentRating().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
-        videogame.setContentRating(existingContentRating);
-        }
-    
-    
-    
-    
-    
-    
-    if (videogame.getContentRatingBoard() != null
-        && videogame.getContentRatingBoard().getId() != null) {
-        ContentRatingBoard existingContentRatingBoard = contentRatingBoardRepository.findById(
-        videogame.getContentRatingBoard().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
-        videogame.setContentRatingBoard(existingContentRatingBoard);
-        }
-    
-    
-    
+        
+        if (videogame.getContentRatingBoard() != null &&
+            videogame.getContentRatingBoard().getId() != null) {
 
-        return videogameRepository.save(videogame);
-    }
+            ContentRatingBoard existingContentRatingBoard = contentRatingBoardRepository.findById(
+                videogame.getContentRatingBoard().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
+
+            videogame.setContentRatingBoard(existingContentRatingBoard);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return videogameRepository.save(videogame);
+}
 
 
     public VideoGame update(Long id, VideoGame videogameRequest) {
@@ -502,684 +389,466 @@ public class VideoGameService extends BaseService<VideoGame> {
         existing.setPublisher(videogameRequest.getPublisher());
         existing.setPlatform(videogameRequest.getPlatform());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (videogameRequest.getDeveloperStudio() != null &&
-        videogameRequest.getDeveloperStudio().getId() != null) {
+            videogameRequest.getDeveloperStudio().getId() != null) {
 
-        DevelopmentStudio existingDeveloperStudio = developerStudioRepository.findById(
-        videogameRequest.getDeveloperStudio().getId()
-        ).orElseThrow(() -> new RuntimeException("DevelopmentStudio not found"));
+            DevelopmentStudio existingDeveloperStudio = developerStudioRepository.findById(
+                videogameRequest.getDeveloperStudio().getId()
+            ).orElseThrow(() -> new RuntimeException("DevelopmentStudio not found"));
 
-        existing.setDeveloperStudio(existingDeveloperStudio);
+            existing.setDeveloperStudio(existingDeveloperStudio);
         } else {
-        existing.setDeveloperStudio(null);
+            existing.setDeveloperStudio(null);
         }
+        
         if (videogameRequest.getContentRating() != null &&
-        videogameRequest.getContentRating().getId() != null) {
+            videogameRequest.getContentRating().getId() != null) {
 
-        ContentRating existingContentRating = contentRatingRepository.findById(
-        videogameRequest.getContentRating().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
+            ContentRating existingContentRating = contentRatingRepository.findById(
+                videogameRequest.getContentRating().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
 
-        existing.setContentRating(existingContentRating);
+            existing.setContentRating(existingContentRating);
         } else {
-        existing.setContentRating(null);
+            existing.setContentRating(null);
         }
+        
         if (videogameRequest.getContentRatingBoard() != null &&
-        videogameRequest.getContentRatingBoard().getId() != null) {
+            videogameRequest.getContentRatingBoard().getId() != null) {
 
-        ContentRatingBoard existingContentRatingBoard = contentRatingBoardRepository.findById(
-        videogameRequest.getContentRatingBoard().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
+            ContentRatingBoard existingContentRatingBoard = contentRatingBoardRepository.findById(
+                videogameRequest.getContentRatingBoard().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
 
-        existing.setContentRatingBoard(existingContentRatingBoard);
+            existing.setContentRatingBoard(existingContentRatingBoard);
         } else {
-        existing.setContentRatingBoard(null);
+            existing.setContentRatingBoard(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
+        
+    // ---------- Relations ManyToOne ----------
         if (videogameRequest.getGenres() != null) {
-        existing.getGenres().clear();
+            existing.getGenres().clear();
 
-        List<Genre> genresList = videogameRequest.getGenres().stream()
-        .map(item -> genresRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Genre not found")))
-        .collect(Collectors.toList());
+            List<Genre> genresList = videogameRequest.getGenres().stream()
+                .map(item -> genresRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("Genre not found")))
+                .collect(Collectors.toList());
 
-        existing.getGenres().addAll(genresList);
+            existing.getGenres().addAll(genresList);
 
-        // Mettre à jour le côté inverse
-        genresList.forEach(it -> {
-        if (!it.getVideoGames().contains(existing)) {
-        it.getVideoGames().add(existing);
+            // Mettre à jour le côté inverse
+            genresList.forEach(it -> {
+                if (!it.getVideoGames().contains(existing)) {
+                    it.getVideoGames().add(existing);
+                }
+            });
         }
-        });
-        }
+        
         if (videogameRequest.getPlayedBy() != null) {
-        existing.getPlayedBy().clear();
+            existing.getPlayedBy().clear();
 
-        List<UserProfile> playedByList = videogameRequest.getPlayedBy().stream()
-        .map(item -> playedByRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-        .collect(Collectors.toList());
+            List<UserProfile> playedByList = videogameRequest.getPlayedBy().stream()
+                .map(item -> playedByRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+                .collect(Collectors.toList());
 
-        existing.getPlayedBy().addAll(playedByList);
+            existing.getPlayedBy().addAll(playedByList);
 
-        // Mettre à jour le côté inverse
-        playedByList.forEach(it -> {
-        if (!it.getPlayedGames().contains(existing)) {
-        it.getPlayedGames().add(existing);
+            // Mettre à jour le côté inverse
+            playedByList.forEach(it -> {
+                if (!it.getPlayedGames().contains(existing)) {
+                    it.getPlayedGames().add(existing);
+                }
+            });
         }
-        });
-        }
+        
         if (videogameRequest.getPlatforms() != null) {
-        existing.getPlatforms().clear();
+            existing.getPlatforms().clear();
 
-        List<GamePlatform> platformsList = videogameRequest.getPlatforms().stream()
-        .map(item -> platformsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GamePlatform not found")))
-        .collect(Collectors.toList());
+            List<GamePlatform> platformsList = videogameRequest.getPlatforms().stream()
+                .map(item -> platformsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("GamePlatform not found")))
+                .collect(Collectors.toList());
 
-        existing.getPlatforms().addAll(platformsList);
+            existing.getPlatforms().addAll(platformsList);
 
-        // Mettre à jour le côté inverse
-        platformsList.forEach(it -> {
-        if (!it.getVideoGames().contains(existing)) {
-        it.getVideoGames().add(existing);
+            // Mettre à jour le côté inverse
+            platformsList.forEach(it -> {
+                if (!it.getVideoGames().contains(existing)) {
+                    it.getVideoGames().add(existing);
+                }
+            });
         }
-        });
-        }
+        
         if (videogameRequest.getTags() != null) {
-        existing.getTags().clear();
+            existing.getTags().clear();
 
-        List<ContentTag> tagsList = videogameRequest.getTags().stream()
-        .map(item -> tagsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ContentTag not found")))
-        .collect(Collectors.toList());
+            List<ContentTag> tagsList = videogameRequest.getTags().stream()
+                .map(item -> tagsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("ContentTag not found")))
+                .collect(Collectors.toList());
 
-        existing.getTags().addAll(tagsList);
+            existing.getTags().addAll(tagsList);
 
-        // Mettre à jour le côté inverse
-        tagsList.forEach(it -> {
-        if (!it.getVideoGames().contains(existing)) {
-        it.getVideoGames().add(existing);
+            // Mettre à jour le côté inverse
+            tagsList.forEach(it -> {
+                if (!it.getVideoGames().contains(existing)) {
+                    it.getVideoGames().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations OneToMany ----------
         existing.getGeneralReviews().clear();
 
         if (videogameRequest.getGeneralReviews() != null) {
-        for (var item : videogameRequest.getGeneralReviews()) {
-        Review existingItem;
-        if (item.getId() != null) {
-        existingItem = generalReviewsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Review not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setVideoGame(existing);
+            for (var item : videogameRequest.getGeneralReviews()) {
+                Review existingItem;
+                if (item.getId() != null) {
+                    existingItem = generalReviewsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Review not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getGeneralReviews().add(existingItem);
+                existingItem.setVideoGame(existing);
+                existing.getGeneralReviews().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getGameReviews().clear();
 
         if (videogameRequest.getGameReviews() != null) {
-        for (var item : videogameRequest.getGameReviews()) {
-        GameReview existingItem;
-        if (item.getId() != null) {
-        existingItem = gameReviewsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GameReview not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setGame(existing);
+            for (var item : videogameRequest.getGameReviews()) {
+                GameReview existingItem;
+                if (item.getId() != null) {
+                    existingItem = gameReviewsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameReview not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getGameReviews().add(existingItem);
+                existingItem.setGame(existing);
+                existing.getGameReviews().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getAchievements().clear();
 
         if (videogameRequest.getAchievements() != null) {
-        for (var item : videogameRequest.getAchievements()) {
-        GameAchievement existingItem;
-        if (item.getId() != null) {
-        existingItem = achievementsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GameAchievement not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setGame(existing);
+            for (var item : videogameRequest.getAchievements()) {
+                GameAchievement existingItem;
+                if (item.getId() != null) {
+                    existingItem = achievementsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameAchievement not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getAchievements().add(existingItem);
+                existingItem.setGame(existing);
+                existing.getAchievements().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getSessions().clear();
 
         if (videogameRequest.getSessions() != null) {
-        for (var item : videogameRequest.getSessions()) {
-        GameSession existingItem;
-        if (item.getId() != null) {
-        existingItem = sessionsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GameSession not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setGame(existing);
+            for (var item : videogameRequest.getSessions()) {
+                GameSession existingItem;
+                if (item.getId() != null) {
+                    existingItem = sessionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameSession not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getSessions().add(existingItem);
+                existingItem.setGame(existing);
+                existing.getSessions().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getPurchases().clear();
 
         if (videogameRequest.getPurchases() != null) {
-        for (var item : videogameRequest.getPurchases()) {
-        DigitalPurchase existingItem;
-        if (item.getId() != null) {
-        existingItem = purchasesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setVideoGame(existing);
+            for (var item : videogameRequest.getPurchases()) {
+                DigitalPurchase existingItem;
+                if (item.getId() != null) {
+                    existingItem = purchasesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getPurchases().add(existingItem);
+                existingItem.setVideoGame(existing);
+                existing.getPurchases().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getRatings().clear();
 
         if (videogameRequest.getRatings() != null) {
-        for (var item : videogameRequest.getRatings()) {
-        VideoGameRating existingItem;
-        if (item.getId() != null) {
-        existingItem = ratingsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("VideoGameRating not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setGame(existing);
+            for (var item : videogameRequest.getRatings()) {
+                VideoGameRating existingItem;
+                if (item.getId() != null) {
+                    existingItem = ratingsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("VideoGameRating not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getRatings().add(existingItem);
+                existingItem.setGame(existing);
+                existing.getRatings().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getGamePlaySessions().clear();
 
         if (videogameRequest.getGamePlaySessions() != null) {
-        for (var item : videogameRequest.getGamePlaySessions()) {
-        GamePlaySession existingItem;
-        if (item.getId() != null) {
-        existingItem = gamePlaySessionsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setGame(existing);
+            for (var item : videogameRequest.getGamePlaySessions()) {
+                GamePlaySession existingItem;
+                if (item.getId() != null) {
+                    existingItem = gamePlaySessionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getGamePlaySessions().add(existingItem);
+                existingItem.setGame(existing);
+                existing.getGamePlaySessions().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getGameReviewUpvotes().clear();
 
         if (videogameRequest.getGameReviewUpvotes() != null) {
-        for (var item : videogameRequest.getGameReviewUpvotes()) {
-        GameReviewUpvote existingItem;
-        if (item.getId() != null) {
-        existingItem = gameReviewUpvotesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GameReviewUpvote not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setGame(existing);
+            for (var item : videogameRequest.getGameReviewUpvotes()) {
+                GameReviewUpvote existingItem;
+                if (item.getId() != null) {
+                    existingItem = gameReviewUpvotesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameReviewUpvote not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getGameReviewUpvotes().add(existingItem);
+                existingItem.setGame(existing);
+                existing.getGameReviewUpvotes().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getGameReviewDownvotes().clear();
 
         if (videogameRequest.getGameReviewDownvotes() != null) {
-        for (var item : videogameRequest.getGameReviewDownvotes()) {
-        GameReviewDownvote existingItem;
-        if (item.getId() != null) {
-        existingItem = gameReviewDownvotesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GameReviewDownvote not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setGame(existing);
+            for (var item : videogameRequest.getGameReviewDownvotes()) {
+                GameReviewDownvote existingItem;
+                if (item.getId() != null) {
+                    existingItem = gameReviewDownvotesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameReviewDownvote not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getGameReviewDownvotes().add(existingItem);
+                existingItem.setGame(existing);
+                existing.getGameReviewDownvotes().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getExpansionPacks().clear();
 
         if (videogameRequest.getExpansionPacks() != null) {
-        for (var item : videogameRequest.getExpansionPacks()) {
-        GameExpansionPack existingItem;
-        if (item.getId() != null) {
-        existingItem = expansionPacksRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("GameExpansionPack not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setBaseGame(existing);
+            for (var item : videogameRequest.getExpansionPacks()) {
+                GameExpansionPack existingItem;
+                if (item.getId() != null) {
+                    existingItem = expansionPacksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GameExpansionPack not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getExpansionPacks().add(existingItem);
+                existingItem.setBaseGame(existing);
+                existing.getExpansionPacks().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getLiveStreams().clear();
 
         if (videogameRequest.getLiveStreams() != null) {
-        for (var item : videogameRequest.getLiveStreams()) {
-        LiveStream existingItem;
-        if (item.getId() != null) {
-        existingItem = liveStreamsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("LiveStream not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : videogameRequest.getLiveStreams()) {
+                LiveStream existingItem;
+                if (item.getId() != null) {
+                    existingItem = liveStreamsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("LiveStream not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setGame(existing);
+                existing.getLiveStreams().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setGame(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getLiveStreams().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-        return videogameRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<VideoGame> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-VideoGame entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-        if (entity.getGeneralReviews() != null) {
-        for (var child : entity.getGeneralReviews()) {
         
-            child.setVideoGame(null); // retirer la référence inverse
-        
-        }
-        entity.getGeneralReviews().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-    
-        if (entity.getGameReviews() != null) {
-        for (var child : entity.getGameReviews()) {
-        
-            child.setGame(null); // retirer la référence inverse
-        
-        }
-        entity.getGameReviews().clear();
-        }
-    
-
-    
-
-    
-        if (entity.getAchievements() != null) {
-        for (var child : entity.getAchievements()) {
-        
-            child.setGame(null); // retirer la référence inverse
-        
-        }
-        entity.getAchievements().clear();
-        }
-    
-
-    
-        if (entity.getSessions() != null) {
-        for (var child : entity.getSessions()) {
-        
-            child.setGame(null); // retirer la référence inverse
-        
-        }
-        entity.getSessions().clear();
-        }
-    
-
-    
-
-    
-        if (entity.getPurchases() != null) {
-        for (var child : entity.getPurchases()) {
-        
-            child.setVideoGame(null); // retirer la référence inverse
-        
-        }
-        entity.getPurchases().clear();
-        }
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getRatings() != null) {
-        for (var child : entity.getRatings()) {
-        
-            child.setGame(null); // retirer la référence inverse
-        
-        }
-        entity.getRatings().clear();
-        }
-    
-
-    
-        if (entity.getGamePlaySessions() != null) {
-        for (var child : entity.getGamePlaySessions()) {
-        
-            child.setGame(null); // retirer la référence inverse
-        
-        }
-        entity.getGamePlaySessions().clear();
-        }
-    
-
-    
-        if (entity.getGameReviewUpvotes() != null) {
-        for (var child : entity.getGameReviewUpvotes()) {
-        
-            child.setGame(null); // retirer la référence inverse
-        
-        }
-        entity.getGameReviewUpvotes().clear();
-        }
-    
-
-    
-        if (entity.getGameReviewDownvotes() != null) {
-        for (var child : entity.getGameReviewDownvotes()) {
-        
-            child.setGame(null); // retirer la référence inverse
-        
-        }
-        entity.getGameReviewDownvotes().clear();
-        }
-    
-
-    
-
-    
-        if (entity.getExpansionPacks() != null) {
-        for (var child : entity.getExpansionPacks()) {
-        
-            child.setBaseGame(null); // retirer la référence inverse
-        
-        }
-        entity.getExpansionPacks().clear();
-        }
-    
-
-    
-        if (entity.getLiveStreams() != null) {
-        for (var child : entity.getLiveStreams()) {
-        
-            child.setGame(null); // retirer la référence inverse
-        
-        }
-        entity.getLiveStreams().clear();
-        }
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getGenres() != null) {
-        for (Genre item : new ArrayList<>(entity.getGenres())) {
-        
-            item.getVideoGames().remove(entity); // retire côté inverse
-        
-        }
-        entity.getGenres().clear(); // puis vide côté courant
-        }
-    
-
-    
-
-    
-
-    
-        if (entity.getPlayedBy() != null) {
-        for (UserProfile item : new ArrayList<>(entity.getPlayedBy())) {
-        
-            item.getPlayedGames().remove(entity); // retire côté inverse
-        
-        }
-        entity.getPlayedBy().clear(); // puis vide côté courant
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getPlatforms() != null) {
-        for (GamePlatform item : new ArrayList<>(entity.getPlatforms())) {
-        
-            item.getVideoGames().remove(entity); // retire côté inverse
-        
-        }
-        entity.getPlatforms().clear(); // puis vide côté courant
-        }
-    
-
-    
-
-    
-        if (entity.getTags() != null) {
-        for (ContentTag item : new ArrayList<>(entity.getTags())) {
-        
-            item.getVideoGames().remove(entity); // retire côté inverse
-        
-        }
-        entity.getTags().clear(); // puis vide côté courant
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getDeveloperStudio() != null) {
-        entity.setDeveloperStudio(null);
-        }
-    
-
-    
-
-    
-
-    
-        if (entity.getContentRating() != null) {
-        entity.setContentRating(null);
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getContentRatingBoard() != null) {
-        entity.setContentRatingBoard(null);
-        }
-    
-
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return videogameRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<VideoGame> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        VideoGame entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getGeneralReviews() != null) {
+            for (var child : entity.getGeneralReviews()) {
+                
+                child.setVideoGame(null); // retirer la référence inverse
+                
+            }
+            entity.getGeneralReviews().clear();
+        }
+        
+        if (entity.getGameReviews() != null) {
+            for (var child : entity.getGameReviews()) {
+                
+                child.setGame(null); // retirer la référence inverse
+                
+            }
+            entity.getGameReviews().clear();
+        }
+        
+        if (entity.getAchievements() != null) {
+            for (var child : entity.getAchievements()) {
+                
+                child.setGame(null); // retirer la référence inverse
+                
+            }
+            entity.getAchievements().clear();
+        }
+        
+        if (entity.getSessions() != null) {
+            for (var child : entity.getSessions()) {
+                
+                child.setGame(null); // retirer la référence inverse
+                
+            }
+            entity.getSessions().clear();
+        }
+        
+        if (entity.getPurchases() != null) {
+            for (var child : entity.getPurchases()) {
+                
+                child.setVideoGame(null); // retirer la référence inverse
+                
+            }
+            entity.getPurchases().clear();
+        }
+        
+        if (entity.getRatings() != null) {
+            for (var child : entity.getRatings()) {
+                
+                child.setGame(null); // retirer la référence inverse
+                
+            }
+            entity.getRatings().clear();
+        }
+        
+        if (entity.getGamePlaySessions() != null) {
+            for (var child : entity.getGamePlaySessions()) {
+                
+                child.setGame(null); // retirer la référence inverse
+                
+            }
+            entity.getGamePlaySessions().clear();
+        }
+        
+        if (entity.getGameReviewUpvotes() != null) {
+            for (var child : entity.getGameReviewUpvotes()) {
+                
+                child.setGame(null); // retirer la référence inverse
+                
+            }
+            entity.getGameReviewUpvotes().clear();
+        }
+        
+        if (entity.getGameReviewDownvotes() != null) {
+            for (var child : entity.getGameReviewDownvotes()) {
+                
+                child.setGame(null); // retirer la référence inverse
+                
+            }
+            entity.getGameReviewDownvotes().clear();
+        }
+        
+        if (entity.getExpansionPacks() != null) {
+            for (var child : entity.getExpansionPacks()) {
+                
+                child.setBaseGame(null); // retirer la référence inverse
+                
+            }
+            entity.getExpansionPacks().clear();
+        }
+        
+        if (entity.getLiveStreams() != null) {
+            for (var child : entity.getLiveStreams()) {
+                
+                child.setGame(null); // retirer la référence inverse
+                
+            }
+            entity.getLiveStreams().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+        if (entity.getGenres() != null) {
+            for (Genre item : new ArrayList<>(entity.getGenres())) {
+                
+                item.getVideoGames().remove(entity); // retire côté inverse
+                
+            }
+            entity.getGenres().clear(); // puis vide côté courant
+        }
+        
+        if (entity.getPlayedBy() != null) {
+            for (UserProfile item : new ArrayList<>(entity.getPlayedBy())) {
+                
+                item.getPlayedGames().remove(entity); // retire côté inverse
+                
+            }
+            entity.getPlayedBy().clear(); // puis vide côté courant
+        }
+        
+        if (entity.getPlatforms() != null) {
+            for (GamePlatform item : new ArrayList<>(entity.getPlatforms())) {
+                
+                item.getVideoGames().remove(entity); // retire côté inverse
+                
+            }
+            entity.getPlatforms().clear(); // puis vide côté courant
+        }
+        
+        if (entity.getTags() != null) {
+            for (ContentTag item : new ArrayList<>(entity.getTags())) {
+                
+                item.getVideoGames().remove(entity); // retire côté inverse
+                
+            }
+            entity.getTags().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getDeveloperStudio() != null) {
+            entity.setDeveloperStudio(null);
+        }
+        
+        if (entity.getContentRating() != null) {
+            entity.setContentRating(null);
+        }
+        
+        if (entity.getContentRatingBoard() != null) {
+            entity.setContentRatingBoard(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

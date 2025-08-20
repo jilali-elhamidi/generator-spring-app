@@ -46,37 +46,35 @@ public class GamePlaySessionStatController {
 
         GamePlaySessionStat entity = gameplaysessionstatMapper.toEntity(gameplaysessionstatDto);
         GamePlaySessionStat saved = gameplaysessionstatService.save(entity);
-        URI location = uriBuilder.path("/api/gameplaysessionstats/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/gameplaysessionstats/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(gameplaysessionstatMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<GamePlaySessionStatDto> updateGamePlaySessionStat(
-                @PathVariable Long id,
-                @RequestBody GamePlaySessionStatDto gameplaysessionstatDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<GamePlaySessionStatDto> updateGamePlaySessionStat(
+            @PathVariable Long id,
+            @Valid @RequestBody GamePlaySessionStatDto gameplaysessionstatDto) {
 
-                // Transformer le DTO en entity pour le service
-                GamePlaySessionStat entityToUpdate = gameplaysessionstatMapper.toEntity(gameplaysessionstatDto);
 
-                // Appel du service update
-                GamePlaySessionStat updatedEntity = gameplaysessionstatService.update(id, entityToUpdate);
+        GamePlaySessionStat entityToUpdate = gameplaysessionstatMapper.toEntity(gameplaysessionstatDto);
+        GamePlaySessionStat updatedEntity = gameplaysessionstatService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                GamePlaySessionStatDto updatedDto = gameplaysessionstatMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(gameplaysessionstatMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteGamePlaySessionStat(@PathVariable Long id) {
-                    boolean deleted = gameplaysessionstatService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGamePlaySessionStat(@PathVariable Long id) {
+        boolean deleted = gameplaysessionstatService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

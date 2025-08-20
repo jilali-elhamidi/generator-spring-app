@@ -46,37 +46,35 @@ public class ReviewRatingController {
 
         ReviewRating entity = reviewratingMapper.toEntity(reviewratingDto);
         ReviewRating saved = reviewratingService.save(entity);
-        URI location = uriBuilder.path("/api/reviewratings/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/reviewratings/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(reviewratingMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ReviewRatingDto> updateReviewRating(
-                @PathVariable Long id,
-                @RequestBody ReviewRatingDto reviewratingDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ReviewRatingDto> updateReviewRating(
+            @PathVariable Long id,
+            @Valid @RequestBody ReviewRatingDto reviewratingDto) {
 
-                // Transformer le DTO en entity pour le service
-                ReviewRating entityToUpdate = reviewratingMapper.toEntity(reviewratingDto);
 
-                // Appel du service update
-                ReviewRating updatedEntity = reviewratingService.update(id, entityToUpdate);
+        ReviewRating entityToUpdate = reviewratingMapper.toEntity(reviewratingDto);
+        ReviewRating updatedEntity = reviewratingService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ReviewRatingDto updatedDto = reviewratingMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(reviewratingMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteReviewRating(@PathVariable Long id) {
-                    boolean deleted = reviewratingService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReviewRating(@PathVariable Long id) {
+        boolean deleted = reviewratingService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

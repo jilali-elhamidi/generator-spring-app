@@ -19,7 +19,7 @@ public class MerchandiseCategoryService extends BaseService<MerchandiseCategory>
     protected final MerchandiseCategoryRepository merchandisecategoryRepository;
     private final MerchandiseRepository merchandiseRepository;
 
-    public MerchandiseCategoryService(MerchandiseCategoryRepository repository,MerchandiseRepository merchandiseRepository)
+    public MerchandiseCategoryService(MerchandiseCategoryRepository repository, MerchandiseRepository merchandiseRepository)
     {
         super(repository);
         this.merchandisecategoryRepository = repository;
@@ -28,37 +28,30 @@ public class MerchandiseCategoryService extends BaseService<MerchandiseCategory>
 
     @Override
     public MerchandiseCategory save(MerchandiseCategory merchandisecategory) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (merchandisecategory.getMerchandise() != null) {
+    // ---------- OneToMany ----------
+        if (merchandisecategory.getMerchandise() != null) {
             List<Merchandise> managedMerchandise = new ArrayList<>();
             for (Merchandise item : merchandisecategory.getMerchandise()) {
-            if (item.getId() != null) {
-            Merchandise existingItem = merchandiseRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setCategory(merchandisecategory);
-            managedMerchandise.add(existingItem);
-            } else {
-            item.setCategory(merchandisecategory);
-            managedMerchandise.add(item);
-            }
+                if (item.getId() != null) {
+                    Merchandise existingItem = merchandiseRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Merchandise not found"));
+
+                     existingItem.setCategory(merchandisecategory);
+                     managedMerchandise.add(existingItem);
+                } else {
+                    item.setCategory(merchandisecategory);
+                    managedMerchandise.add(item);
+                }
             }
             merchandisecategory.setMerchandise(managedMerchandise);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return merchandisecategoryRepository.save(merchandisecategory);
-    }
+    return merchandisecategoryRepository.save(merchandisecategory);
+}
 
 
     public MerchandiseCategory update(Long id, MerchandiseCategory merchandisecategoryRequest) {
@@ -68,75 +61,50 @@ public class MerchandiseCategoryService extends BaseService<MerchandiseCategory>
     // Copier les champs simples
         existing.setName(merchandisecategoryRequest.getName());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getMerchandise().clear();
 
         if (merchandisecategoryRequest.getMerchandise() != null) {
-        for (var item : merchandisecategoryRequest.getMerchandise()) {
-        Merchandise existingItem;
-        if (item.getId() != null) {
-        existingItem = merchandiseRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : merchandisecategoryRequest.getMerchandise()) {
+                Merchandise existingItem;
+                if (item.getId() != null) {
+                    existingItem = merchandiseRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Merchandise not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setCategory(existing);
+                existing.getMerchandise().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setCategory(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getMerchandise().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return merchandisecategoryRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MerchandiseCategory> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MerchandiseCategory entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getMerchandise() != null) {
-        for (var child : entity.getMerchandise()) {
         
-            child.setCategory(null); // retirer la référence inverse
-        
-        }
-        entity.getMerchandise().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return merchandisecategoryRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MerchandiseCategory> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MerchandiseCategory entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getMerchandise() != null) {
+            for (var child : entity.getMerchandise()) {
+                
+                child.setCategory(null); // retirer la référence inverse
+                
+            }
+            entity.getMerchandise().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

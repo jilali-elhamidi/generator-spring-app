@@ -43,7 +43,7 @@ public class ReviewService extends BaseService<Review> {
     private final ReviewLikeRepository likesRepository;
     private final ReportedContentRepository reportedContentRepository;
 
-    public ReviewService(ReviewRepository repository,UserProfileRepository userRepository,MovieRepository movieRepository,BookRepository bookRepository,VideoGameRepository videoGameRepository,ReviewCommentRepository reviewCommentsRepository,MediaFileRepository mediaFileRepository,ReviewRatingRepository ratingsRepository,ReviewLikeRepository likesRepository,ReportedContentRepository reportedContentRepository)
+    public ReviewService(ReviewRepository repository, UserProfileRepository userRepository, MovieRepository movieRepository, BookRepository bookRepository, VideoGameRepository videoGameRepository, ReviewCommentRepository reviewCommentsRepository, MediaFileRepository mediaFileRepository, ReviewRatingRepository ratingsRepository, ReviewLikeRepository likesRepository, ReportedContentRepository reportedContentRepository)
     {
         super(repository);
         this.reviewRepository = repository;
@@ -60,176 +60,133 @@ public class ReviewService extends BaseService<Review> {
 
     @Override
     public Review save(Review review) {
-
-
-    
-
-    
-
-    
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (review.getReviewComments() != null) {
+    // ---------- OneToMany ----------
+        if (review.getReviewComments() != null) {
             List<ReviewComment> managedReviewComments = new ArrayList<>();
             for (ReviewComment item : review.getReviewComments()) {
-            if (item.getId() != null) {
-            ReviewComment existingItem = reviewCommentsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("ReviewComment not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setReview(review);
-            managedReviewComments.add(existingItem);
-            } else {
-            item.setReview(review);
-            managedReviewComments.add(item);
-            }
+                if (item.getId() != null) {
+                    ReviewComment existingItem = reviewCommentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReviewComment not found"));
+
+                     existingItem.setReview(review);
+                     managedReviewComments.add(existingItem);
+                } else {
+                    item.setReview(review);
+                    managedReviewComments.add(item);
+                }
             }
             review.setReviewComments(managedReviewComments);
-            }
-        
+        }
     
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (review.getRatings() != null) {
+        if (review.getRatings() != null) {
             List<ReviewRating> managedRatings = new ArrayList<>();
             for (ReviewRating item : review.getRatings()) {
-            if (item.getId() != null) {
-            ReviewRating existingItem = ratingsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("ReviewRating not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setReview(review);
-            managedRatings.add(existingItem);
-            } else {
-            item.setReview(review);
-            managedRatings.add(item);
-            }
+                if (item.getId() != null) {
+                    ReviewRating existingItem = ratingsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReviewRating not found"));
+
+                     existingItem.setReview(review);
+                     managedRatings.add(existingItem);
+                } else {
+                    item.setReview(review);
+                    managedRatings.add(item);
+                }
             }
             review.setRatings(managedRatings);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (review.getLikes() != null) {
+        if (review.getLikes() != null) {
             List<ReviewLike> managedLikes = new ArrayList<>();
             for (ReviewLike item : review.getLikes()) {
-            if (item.getId() != null) {
-            ReviewLike existingItem = likesRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("ReviewLike not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setReview(review);
-            managedLikes.add(existingItem);
-            } else {
-            item.setReview(review);
-            managedLikes.add(item);
-            }
+                if (item.getId() != null) {
+                    ReviewLike existingItem = likesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReviewLike not found"));
+
+                     existingItem.setReview(review);
+                     managedLikes.add(existingItem);
+                } else {
+                    item.setReview(review);
+                    managedLikes.add(item);
+                }
             }
             review.setLikes(managedLikes);
-            }
-        
+        }
     
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (review.getReportedContent() != null) {
+        if (review.getReportedContent() != null) {
             List<ReportedContent> managedReportedContent = new ArrayList<>();
             for (ReportedContent item : review.getReportedContent()) {
-            if (item.getId() != null) {
-            ReportedContent existingItem = reportedContentRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("ReportedContent not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setReview(review);
-            managedReportedContent.add(existingItem);
-            } else {
-            item.setReview(review);
-            managedReportedContent.add(item);
-            }
+                if (item.getId() != null) {
+                    ReportedContent existingItem = reportedContentRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReportedContent not found"));
+
+                     existingItem.setReview(review);
+                     managedReportedContent.add(existingItem);
+                } else {
+                    item.setReview(review);
+                    managedReportedContent.add(item);
+                }
             }
             review.setReportedContent(managedReportedContent);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (review.getUser() != null &&
+            review.getUser().getId() != null) {
+
+            UserProfile existingUser = userRepository.findById(
+                review.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            review.setUser(existingUser);
+        }
         
-    
+        if (review.getMovie() != null &&
+            review.getMovie().getId() != null) {
 
+            Movie existingMovie = movieRepository.findById(
+                review.getMovie().getId()
+            ).orElseThrow(() -> new RuntimeException("Movie not found"));
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    if (review.getUser() != null
-        && review.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        review.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        review.setUser(existingUser);
+            review.setMovie(existingMovie);
         }
-    
-    if (review.getMovie() != null
-        && review.getMovie().getId() != null) {
-        Movie existingMovie = movieRepository.findById(
-        review.getMovie().getId()
-        ).orElseThrow(() -> new RuntimeException("Movie not found"));
-        review.setMovie(existingMovie);
+        
+        if (review.getBook() != null &&
+            review.getBook().getId() != null) {
+
+            Book existingBook = bookRepository.findById(
+                review.getBook().getId()
+            ).orElseThrow(() -> new RuntimeException("Book not found"));
+
+            review.setBook(existingBook);
         }
-    
-    if (review.getBook() != null
-        && review.getBook().getId() != null) {
-        Book existingBook = bookRepository.findById(
-        review.getBook().getId()
-        ).orElseThrow(() -> new RuntimeException("Book not found"));
-        review.setBook(existingBook);
+        
+        if (review.getVideoGame() != null &&
+            review.getVideoGame().getId() != null) {
+
+            VideoGame existingVideoGame = videoGameRepository.findById(
+                review.getVideoGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+
+            review.setVideoGame(existingVideoGame);
         }
-    
-    if (review.getVideoGame() != null
-        && review.getVideoGame().getId() != null) {
-        VideoGame existingVideoGame = videoGameRepository.findById(
-        review.getVideoGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-        review.setVideoGame(existingVideoGame);
-        }
-    
-    
-    
-    
-    
-    
+        
+    // ---------- OneToOne ----------
         if (review.getMediaFile() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             review.setMediaFile(
-            mediaFileRepository.findById(review.getMediaFile().getId())
-            .orElseThrow(() -> new RuntimeException("mediaFile not found"))
+                mediaFileRepository.findById(review.getMediaFile().getId())
+                    .orElseThrow(() -> new RuntimeException("mediaFile not found"))
             );
-        
-        review.getMediaFile().setReview(review);
+            
+            review.getMediaFile().setReview(review);
         }
+        
 
-        return reviewRepository.save(review);
-    }
+    return reviewRepository.save(review);
+}
 
 
     public Review update(Long id, Review reviewRequest) {
@@ -241,327 +198,211 @@ public class ReviewService extends BaseService<Review> {
         existing.setComment(reviewRequest.getComment());
         existing.setReviewDate(reviewRequest.getReviewDate());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (reviewRequest.getUser() != null &&
-        reviewRequest.getUser().getId() != null) {
+            reviewRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        reviewRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                reviewRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
+        
         if (reviewRequest.getMovie() != null &&
-        reviewRequest.getMovie().getId() != null) {
+            reviewRequest.getMovie().getId() != null) {
 
-        Movie existingMovie = movieRepository.findById(
-        reviewRequest.getMovie().getId()
-        ).orElseThrow(() -> new RuntimeException("Movie not found"));
+            Movie existingMovie = movieRepository.findById(
+                reviewRequest.getMovie().getId()
+            ).orElseThrow(() -> new RuntimeException("Movie not found"));
 
-        existing.setMovie(existingMovie);
+            existing.setMovie(existingMovie);
         } else {
-        existing.setMovie(null);
+            existing.setMovie(null);
         }
+        
         if (reviewRequest.getBook() != null &&
-        reviewRequest.getBook().getId() != null) {
+            reviewRequest.getBook().getId() != null) {
 
-        Book existingBook = bookRepository.findById(
-        reviewRequest.getBook().getId()
-        ).orElseThrow(() -> new RuntimeException("Book not found"));
+            Book existingBook = bookRepository.findById(
+                reviewRequest.getBook().getId()
+            ).orElseThrow(() -> new RuntimeException("Book not found"));
 
-        existing.setBook(existingBook);
+            existing.setBook(existingBook);
         } else {
-        existing.setBook(null);
+            existing.setBook(null);
         }
+        
         if (reviewRequest.getVideoGame() != null &&
-        reviewRequest.getVideoGame().getId() != null) {
+            reviewRequest.getVideoGame().getId() != null) {
 
-        VideoGame existingVideoGame = videoGameRepository.findById(
-        reviewRequest.getVideoGame().getId()
-        ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
+            VideoGame existingVideoGame = videoGameRepository.findById(
+                reviewRequest.getVideoGame().getId()
+            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
 
-        existing.setVideoGame(existingVideoGame);
+            existing.setVideoGame(existingVideoGame);
         } else {
-        existing.setVideoGame(null);
+            existing.setVideoGame(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getReviewComments().clear();
 
         if (reviewRequest.getReviewComments() != null) {
-        for (var item : reviewRequest.getReviewComments()) {
-        ReviewComment existingItem;
-        if (item.getId() != null) {
-        existingItem = reviewCommentsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ReviewComment not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setReview(existing);
+            for (var item : reviewRequest.getReviewComments()) {
+                ReviewComment existingItem;
+                if (item.getId() != null) {
+                    existingItem = reviewCommentsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReviewComment not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getReviewComments().add(existingItem);
+                existingItem.setReview(existing);
+                existing.getReviewComments().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getRatings().clear();
 
         if (reviewRequest.getRatings() != null) {
-        for (var item : reviewRequest.getRatings()) {
-        ReviewRating existingItem;
-        if (item.getId() != null) {
-        existingItem = ratingsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ReviewRating not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setReview(existing);
+            for (var item : reviewRequest.getRatings()) {
+                ReviewRating existingItem;
+                if (item.getId() != null) {
+                    existingItem = ratingsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReviewRating not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getRatings().add(existingItem);
+                existingItem.setReview(existing);
+                existing.getRatings().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getLikes().clear();
 
         if (reviewRequest.getLikes() != null) {
-        for (var item : reviewRequest.getLikes()) {
-        ReviewLike existingItem;
-        if (item.getId() != null) {
-        existingItem = likesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ReviewLike not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setReview(existing);
+            for (var item : reviewRequest.getLikes()) {
+                ReviewLike existingItem;
+                if (item.getId() != null) {
+                    existingItem = likesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReviewLike not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getLikes().add(existingItem);
+                existingItem.setReview(existing);
+                existing.getLikes().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getReportedContent().clear();
 
         if (reviewRequest.getReportedContent() != null) {
-        for (var item : reviewRequest.getReportedContent()) {
-        ReportedContent existingItem;
-        if (item.getId() != null) {
-        existingItem = reportedContentRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ReportedContent not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : reviewRequest.getReportedContent()) {
+                ReportedContent existingItem;
+                if (item.getId() != null) {
+                    existingItem = reportedContentRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ReportedContent not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setReview(existing);
+                existing.getReportedContent().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setReview(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getReportedContent().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-        if (reviewRequest.getMediaFile() != null
-        && reviewRequest.getMediaFile().getId() != null) {
-
-        MediaFile mediaFile = mediaFileRepository.findById(
-        reviewRequest.getMediaFile().getId()
-        ).orElseThrow(() -> new RuntimeException("MediaFile not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setMediaFile(mediaFile);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations OneToOne ----------
+            if (reviewRequest.getMediaFile() != null &&
+            reviewRequest.getMediaFile().getId() != null) {
+
+            MediaFile mediaFile = mediaFileRepository.findById(
+                reviewRequest.getMediaFile().getId()
+            ).orElseThrow(() -> new RuntimeException("MediaFile not found"));
+
+            existing.setMediaFile(mediaFile);
+
+            
             mediaFile.setReview(existing);
+            
+        }
         
-        }
 
-    
-
-    
-
-    
-
-    
-
-
-        return reviewRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<Review> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-Review entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getReviewComments() != null) {
-        for (var child : entity.getReviewComments()) {
-        
-            child.setReview(null); // retirer la référence inverse
-        
-        }
-        entity.getReviewComments().clear();
-        }
-    
-
-    
-
-    
-        if (entity.getRatings() != null) {
-        for (var child : entity.getRatings()) {
-        
-            child.setReview(null); // retirer la référence inverse
-        
-        }
-        entity.getRatings().clear();
-        }
-    
-
-    
-        if (entity.getLikes() != null) {
-        for (var child : entity.getLikes()) {
-        
-            child.setReview(null); // retirer la référence inverse
-        
-        }
-        entity.getLikes().clear();
-        }
-    
-
-    
-        if (entity.getReportedContent() != null) {
-        for (var child : entity.getReportedContent()) {
-        
-            child.setReview(null); // retirer la référence inverse
-        
-        }
-        entity.getReportedContent().clear();
-        }
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getMediaFile() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getMediaFile().setReview(null);
-        // Dissocier côté direct
-        entity.setMediaFile(null);
-        }
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-        if (entity.getMovie() != null) {
-        entity.setMovie(null);
-        }
-    
-
-    
-        if (entity.getBook() != null) {
-        entity.setBook(null);
-        }
-    
-
-    
-        if (entity.getVideoGame() != null) {
-        entity.setVideoGame(null);
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return reviewRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<Review> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        Review entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getReviewComments() != null) {
+            for (var child : entity.getReviewComments()) {
+                
+                child.setReview(null); // retirer la référence inverse
+                
+            }
+            entity.getReviewComments().clear();
+        }
+        
+        if (entity.getRatings() != null) {
+            for (var child : entity.getRatings()) {
+                
+                child.setReview(null); // retirer la référence inverse
+                
+            }
+            entity.getRatings().clear();
+        }
+        
+        if (entity.getLikes() != null) {
+            for (var child : entity.getLikes()) {
+                
+                child.setReview(null); // retirer la référence inverse
+                
+            }
+            entity.getLikes().clear();
+        }
+        
+        if (entity.getReportedContent() != null) {
+            for (var child : entity.getReportedContent()) {
+                
+                child.setReview(null); // retirer la référence inverse
+                
+            }
+            entity.getReportedContent().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getMediaFile() != null) {
+            entity.getMediaFile().setReview(null);
+            entity.setMediaFile(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        if (entity.getMovie() != null) {
+            entity.setMovie(null);
+        }
+        
+        if (entity.getBook() != null) {
+            entity.setBook(null);
+        }
+        
+        if (entity.getVideoGame() != null) {
+            entity.setVideoGame(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

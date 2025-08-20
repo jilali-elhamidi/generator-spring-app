@@ -19,7 +19,7 @@ public class UserBadgeService extends BaseService<UserBadge> {
     protected final UserBadgeRepository userbadgeRepository;
     private final UserProfileRepository usersRepository;
 
-    public UserBadgeService(UserBadgeRepository repository,UserProfileRepository usersRepository)
+    public UserBadgeService(UserBadgeRepository repository, UserProfileRepository usersRepository)
     {
         super(repository);
         this.userbadgeRepository = repository;
@@ -28,31 +28,27 @@ public class UserBadgeService extends BaseService<UserBadge> {
 
     @Override
     public UserBadge save(UserBadge userbadge) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (userbadge.getUsers() != null &&
+            !userbadge.getUsers().isEmpty()) {
 
+            List<UserProfile> attachedUsers = userbadge.getUsers().stream()
+            .map(item -> usersRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+            .toList();
 
-    
+            userbadge.setUsers(attachedUsers);
 
-
-    
-        if (userbadge.getUsers() != null
-        && !userbadge.getUsers().isEmpty()) {
-
-        List<UserProfile> attachedUsers = userbadge.getUsers().stream()
-        .map(item -> usersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-        .toList();
-
-        userbadge.setUsers(attachedUsers);
-
-        // côté propriétaire (UserProfile → UserBadge)
-        attachedUsers.forEach(it -> it.getBadges().add(userbadge));
+            // côté propriétaire (UserProfile → UserBadge)
+            attachedUsers.forEach(it -> it.getBadges().add(userbadge));
         }
-    
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-    
-
-        return userbadgeRepository.save(userbadge);
-    }
+    return userbadgeRepository.save(userbadge);
+}
 
 
     public UserBadge update(Long id, UserBadge userbadgeRequest) {
@@ -64,72 +60,51 @@ public class UserBadgeService extends BaseService<UserBadge> {
         existing.setDescription(userbadgeRequest.getDescription());
         existing.setImageUrl(userbadgeRequest.getImageUrl());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
         if (userbadgeRequest.getUsers() != null) {
-        existing.getUsers().clear();
+            existing.getUsers().clear();
 
-        List<UserProfile> usersList = userbadgeRequest.getUsers().stream()
-        .map(item -> usersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-        .collect(Collectors.toList());
+            List<UserProfile> usersList = userbadgeRequest.getUsers().stream()
+                .map(item -> usersRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+                .collect(Collectors.toList());
 
-        existing.getUsers().addAll(usersList);
+            existing.getUsers().addAll(usersList);
 
-        // Mettre à jour le côté inverse
-        usersList.forEach(it -> {
-        if (!it.getBadges().contains(existing)) {
-        it.getBadges().add(existing);
+            // Mettre à jour le côté inverse
+            usersList.forEach(it -> {
+                if (!it.getBadges().contains(existing)) {
+                    it.getBadges().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return userbadgeRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserBadge> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserBadge entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getUsers() != null) {
-        for (UserProfile item : new ArrayList<>(entity.getUsers())) {
         
-            item.getBadges().remove(entity); // retire côté inverse
-        
-        }
-        entity.getUsers().clear(); // puis vide côté courant
-        }
-    
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return userbadgeRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserBadge> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserBadge entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getUsers() != null) {
+            for (UserProfile item : new ArrayList<>(entity.getUsers())) {
+                
+                item.getBadges().remove(entity); // retire côté inverse
+                
+            }
+            entity.getUsers().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

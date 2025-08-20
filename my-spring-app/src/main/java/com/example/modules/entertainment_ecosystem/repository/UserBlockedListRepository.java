@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserBlockedListRepository extends BaseRepository<UserBlockedList, Long> {
+
 }

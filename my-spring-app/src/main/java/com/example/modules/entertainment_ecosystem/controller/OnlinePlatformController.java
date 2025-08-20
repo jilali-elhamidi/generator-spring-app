@@ -46,37 +46,35 @@ public class OnlinePlatformController {
 
         OnlinePlatform entity = onlineplatformMapper.toEntity(onlineplatformDto);
         OnlinePlatform saved = onlineplatformService.save(entity);
-        URI location = uriBuilder.path("/api/onlineplatforms/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/onlineplatforms/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(onlineplatformMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<OnlinePlatformDto> updateOnlinePlatform(
-                @PathVariable Long id,
-                @RequestBody OnlinePlatformDto onlineplatformDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<OnlinePlatformDto> updateOnlinePlatform(
+            @PathVariable Long id,
+            @Valid @RequestBody OnlinePlatformDto onlineplatformDto) {
 
-                // Transformer le DTO en entity pour le service
-                OnlinePlatform entityToUpdate = onlineplatformMapper.toEntity(onlineplatformDto);
 
-                // Appel du service update
-                OnlinePlatform updatedEntity = onlineplatformService.update(id, entityToUpdate);
+        OnlinePlatform entityToUpdate = onlineplatformMapper.toEntity(onlineplatformDto);
+        OnlinePlatform updatedEntity = onlineplatformService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                OnlinePlatformDto updatedDto = onlineplatformMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(onlineplatformMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteOnlinePlatform(@PathVariable Long id) {
-                    boolean deleted = onlineplatformService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOnlinePlatform(@PathVariable Long id) {
+        boolean deleted = onlineplatformService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

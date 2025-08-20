@@ -25,7 +25,7 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
     private final UserProfileRepository attendeesRepository;
     private final OnlineEventTypeRepository typeRepository;
 
-    public OnlineEventService(OnlineEventRepository repository,UserProfileRepository hostRepository,UserProfileRepository attendeesRepository,OnlineEventTypeRepository typeRepository)
+    public OnlineEventService(OnlineEventRepository repository, UserProfileRepository hostRepository, UserProfileRepository attendeesRepository, OnlineEventTypeRepository typeRepository)
     {
         super(repository);
         this.onlineeventRepository = repository;
@@ -36,55 +36,47 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
 
     @Override
     public OnlineEvent save(OnlineEvent onlineevent) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (onlineevent.getAttendees() != null &&
+            !onlineevent.getAttendees().isEmpty()) {
 
+            List<UserProfile> attachedAttendees = onlineevent.getAttendees().stream()
+            .map(item -> attendeesRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
+            .toList();
 
-    
+            onlineevent.setAttendees(attachedAttendees);
 
-    
-
-    
-
-
-    
-
-    
-        if (onlineevent.getAttendees() != null
-        && !onlineevent.getAttendees().isEmpty()) {
-
-        List<UserProfile> attachedAttendees = onlineevent.getAttendees().stream()
-        .map(item -> attendeesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-        .toList();
-
-        onlineevent.setAttendees(attachedAttendees);
-
-        // côté propriétaire (UserProfile → OnlineEvent)
-        attachedAttendees.forEach(it -> it.getAttendedOnlineEvents().add(onlineevent));
+            // côté propriétaire (UserProfile → OnlineEvent)
+            attachedAttendees.forEach(it -> it.getAttendedOnlineEvents().add(onlineevent));
         }
-    
+        
+    // ---------- ManyToOne ----------
+        if (onlineevent.getHost() != null &&
+            onlineevent.getHost().getId() != null) {
 
-    
+            UserProfile existingHost = hostRepository.findById(
+                onlineevent.getHost().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-    if (onlineevent.getHost() != null
-        && onlineevent.getHost().getId() != null) {
-        UserProfile existingHost = hostRepository.findById(
-        onlineevent.getHost().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        onlineevent.setHost(existingHost);
+            onlineevent.setHost(existingHost);
         }
-    
-    
-    if (onlineevent.getType() != null
-        && onlineevent.getType().getId() != null) {
-        OnlineEventType existingType = typeRepository.findById(
-        onlineevent.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("OnlineEventType not found"));
-        onlineevent.setType(existingType);
-        }
-    
+        
+        if (onlineevent.getType() != null &&
+            onlineevent.getType().getId() != null) {
 
-        return onlineeventRepository.save(onlineevent);
-    }
+            OnlineEventType existingType = typeRepository.findById(
+                onlineevent.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("OnlineEventType not found"));
+
+            onlineevent.setType(existingType);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return onlineeventRepository.save(onlineevent);
+}
 
 
     public OnlineEvent update(Long id, OnlineEvent onlineeventRequest) {
@@ -97,122 +89,83 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
         existing.setPlatformUrl(onlineeventRequest.getPlatformUrl());
         existing.setDescription(onlineeventRequest.getDescription());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (onlineeventRequest.getHost() != null &&
-        onlineeventRequest.getHost().getId() != null) {
+            onlineeventRequest.getHost().getId() != null) {
 
-        UserProfile existingHost = hostRepository.findById(
-        onlineeventRequest.getHost().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingHost = hostRepository.findById(
+                onlineeventRequest.getHost().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setHost(existingHost);
+            existing.setHost(existingHost);
         } else {
-        existing.setHost(null);
+            existing.setHost(null);
         }
+        
         if (onlineeventRequest.getType() != null &&
-        onlineeventRequest.getType().getId() != null) {
+            onlineeventRequest.getType().getId() != null) {
 
-        OnlineEventType existingType = typeRepository.findById(
-        onlineeventRequest.getType().getId()
-        ).orElseThrow(() -> new RuntimeException("OnlineEventType not found"));
+            OnlineEventType existingType = typeRepository.findById(
+                onlineeventRequest.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("OnlineEventType not found"));
 
-        existing.setType(existingType);
+            existing.setType(existingType);
         } else {
-        existing.setType(null);
+            existing.setType(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
+        
+    // ---------- Relations ManyToOne ----------
         if (onlineeventRequest.getAttendees() != null) {
-        existing.getAttendees().clear();
+            existing.getAttendees().clear();
 
-        List<UserProfile> attendeesList = onlineeventRequest.getAttendees().stream()
-        .map(item -> attendeesRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found")))
-        .collect(Collectors.toList());
+            List<UserProfile> attendeesList = onlineeventRequest.getAttendees().stream()
+                .map(item -> attendeesRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("UserProfile not found")))
+                .collect(Collectors.toList());
 
-        existing.getAttendees().addAll(attendeesList);
+            existing.getAttendees().addAll(attendeesList);
 
-        // Mettre à jour le côté inverse
-        attendeesList.forEach(it -> {
-        if (!it.getAttendedOnlineEvents().contains(existing)) {
-        it.getAttendedOnlineEvents().add(existing);
+            // Mettre à jour le côté inverse
+            attendeesList.forEach(it -> {
+                if (!it.getAttendedOnlineEvents().contains(existing)) {
+                    it.getAttendedOnlineEvents().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-
-        return onlineeventRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<OnlineEvent> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-OnlineEvent entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-        if (entity.getAttendees() != null) {
-        for (UserProfile item : new ArrayList<>(entity.getAttendees())) {
         
-            item.getAttendedOnlineEvents().remove(entity); // retire côté inverse
-        
-        }
-        entity.getAttendees().clear(); // puis vide côté courant
-        }
-    
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getHost() != null) {
-        entity.setHost(null);
-        }
-    
-
-    
-
-    
-        if (entity.getType() != null) {
-        entity.setType(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return onlineeventRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<OnlineEvent> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        OnlineEvent entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+        if (entity.getAttendees() != null) {
+            for (UserProfile item : new ArrayList<>(entity.getAttendees())) {
+                
+                item.getAttendedOnlineEvents().remove(entity); // retire côté inverse
+                
+            }
+            entity.getAttendees().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getHost() != null) {
+            entity.setHost(null);
+        }
+        
+        if (entity.getType() != null) {
+            entity.setType(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

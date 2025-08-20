@@ -31,7 +31,7 @@ public class StreamingContentLicenseService extends BaseService<StreamingContent
     private final MusicTrackRepository musicTrackRepository;
     private final ContentLicenseTypeRepository licenseTypeRepository;
 
-    public StreamingContentLicenseService(StreamingContentLicenseRepository repository,SubscriptionPlanRepository subscriptionPlanRepository,MovieRepository movieRepository,TVShowRepository tvShowRepository,MusicTrackRepository musicTrackRepository,ContentLicenseTypeRepository licenseTypeRepository)
+    public StreamingContentLicenseService(StreamingContentLicenseRepository repository, SubscriptionPlanRepository subscriptionPlanRepository, MovieRepository movieRepository, TVShowRepository tvShowRepository, MusicTrackRepository musicTrackRepository, ContentLicenseTypeRepository licenseTypeRepository)
     {
         super(repository);
         this.streamingcontentlicenseRepository = repository;
@@ -44,72 +44,63 @@ public class StreamingContentLicenseService extends BaseService<StreamingContent
 
     @Override
     public StreamingContentLicense save(StreamingContentLicense streamingcontentlicense) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (streamingcontentlicense.getSubscriptionPlan() != null &&
+            streamingcontentlicense.getSubscriptionPlan().getId() != null) {
 
+            SubscriptionPlan existingSubscriptionPlan = subscriptionPlanRepository.findById(
+                streamingcontentlicense.getSubscriptionPlan().getId()
+            ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
 
-    
-
-    
-
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    if (streamingcontentlicense.getSubscriptionPlan() != null
-        && streamingcontentlicense.getSubscriptionPlan().getId() != null) {
-        SubscriptionPlan existingSubscriptionPlan = subscriptionPlanRepository.findById(
-        streamingcontentlicense.getSubscriptionPlan().getId()
-        ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
-        streamingcontentlicense.setSubscriptionPlan(existingSubscriptionPlan);
+            streamingcontentlicense.setSubscriptionPlan(existingSubscriptionPlan);
         }
-    
-    if (streamingcontentlicense.getMovie() != null
-        && streamingcontentlicense.getMovie().getId() != null) {
-        Movie existingMovie = movieRepository.findById(
-        streamingcontentlicense.getMovie().getId()
-        ).orElseThrow(() -> new RuntimeException("Movie not found"));
-        streamingcontentlicense.setMovie(existingMovie);
-        }
-    
-    if (streamingcontentlicense.getTvShow() != null
-        && streamingcontentlicense.getTvShow().getId() != null) {
-        TVShow existingTvShow = tvShowRepository.findById(
-        streamingcontentlicense.getTvShow().getId()
-        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
-        streamingcontentlicense.setTvShow(existingTvShow);
-        }
-    
-    if (streamingcontentlicense.getMusicTrack() != null
-        && streamingcontentlicense.getMusicTrack().getId() != null) {
-        MusicTrack existingMusicTrack = musicTrackRepository.findById(
-        streamingcontentlicense.getMusicTrack().getId()
-        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-        streamingcontentlicense.setMusicTrack(existingMusicTrack);
-        }
-    
-    if (streamingcontentlicense.getLicenseType() != null
-        && streamingcontentlicense.getLicenseType().getId() != null) {
-        ContentLicenseType existingLicenseType = licenseTypeRepository.findById(
-        streamingcontentlicense.getLicenseType().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentLicenseType not found"));
-        streamingcontentlicense.setLicenseType(existingLicenseType);
-        }
-    
+        
+        if (streamingcontentlicense.getMovie() != null &&
+            streamingcontentlicense.getMovie().getId() != null) {
 
-        return streamingcontentlicenseRepository.save(streamingcontentlicense);
-    }
+            Movie existingMovie = movieRepository.findById(
+                streamingcontentlicense.getMovie().getId()
+            ).orElseThrow(() -> new RuntimeException("Movie not found"));
+
+            streamingcontentlicense.setMovie(existingMovie);
+        }
+        
+        if (streamingcontentlicense.getTvShow() != null &&
+            streamingcontentlicense.getTvShow().getId() != null) {
+
+            TVShow existingTvShow = tvShowRepository.findById(
+                streamingcontentlicense.getTvShow().getId()
+            ).orElseThrow(() -> new RuntimeException("TVShow not found"));
+
+            streamingcontentlicense.setTvShow(existingTvShow);
+        }
+        
+        if (streamingcontentlicense.getMusicTrack() != null &&
+            streamingcontentlicense.getMusicTrack().getId() != null) {
+
+            MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                streamingcontentlicense.getMusicTrack().getId()
+            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+
+            streamingcontentlicense.setMusicTrack(existingMusicTrack);
+        }
+        
+        if (streamingcontentlicense.getLicenseType() != null &&
+            streamingcontentlicense.getLicenseType().getId() != null) {
+
+            ContentLicenseType existingLicenseType = licenseTypeRepository.findById(
+                streamingcontentlicense.getLicenseType().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentLicenseType not found"));
+
+            streamingcontentlicense.setLicenseType(existingLicenseType);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return streamingcontentlicenseRepository.save(streamingcontentlicense);
+}
 
 
     public StreamingContentLicense update(Long id, StreamingContentLicense streamingcontentlicenseRequest) {
@@ -121,161 +112,104 @@ public class StreamingContentLicenseService extends BaseService<StreamingContent
         existing.setEndDate(streamingcontentlicenseRequest.getEndDate());
         existing.setRegion(streamingcontentlicenseRequest.getRegion());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (streamingcontentlicenseRequest.getSubscriptionPlan() != null &&
-        streamingcontentlicenseRequest.getSubscriptionPlan().getId() != null) {
+            streamingcontentlicenseRequest.getSubscriptionPlan().getId() != null) {
 
-        SubscriptionPlan existingSubscriptionPlan = subscriptionPlanRepository.findById(
-        streamingcontentlicenseRequest.getSubscriptionPlan().getId()
-        ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
+            SubscriptionPlan existingSubscriptionPlan = subscriptionPlanRepository.findById(
+                streamingcontentlicenseRequest.getSubscriptionPlan().getId()
+            ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
 
-        existing.setSubscriptionPlan(existingSubscriptionPlan);
+            existing.setSubscriptionPlan(existingSubscriptionPlan);
         } else {
-        existing.setSubscriptionPlan(null);
+            existing.setSubscriptionPlan(null);
         }
+        
         if (streamingcontentlicenseRequest.getMovie() != null &&
-        streamingcontentlicenseRequest.getMovie().getId() != null) {
+            streamingcontentlicenseRequest.getMovie().getId() != null) {
 
-        Movie existingMovie = movieRepository.findById(
-        streamingcontentlicenseRequest.getMovie().getId()
-        ).orElseThrow(() -> new RuntimeException("Movie not found"));
+            Movie existingMovie = movieRepository.findById(
+                streamingcontentlicenseRequest.getMovie().getId()
+            ).orElseThrow(() -> new RuntimeException("Movie not found"));
 
-        existing.setMovie(existingMovie);
+            existing.setMovie(existingMovie);
         } else {
-        existing.setMovie(null);
+            existing.setMovie(null);
         }
+        
         if (streamingcontentlicenseRequest.getTvShow() != null &&
-        streamingcontentlicenseRequest.getTvShow().getId() != null) {
+            streamingcontentlicenseRequest.getTvShow().getId() != null) {
 
-        TVShow existingTvShow = tvShowRepository.findById(
-        streamingcontentlicenseRequest.getTvShow().getId()
-        ).orElseThrow(() -> new RuntimeException("TVShow not found"));
+            TVShow existingTvShow = tvShowRepository.findById(
+                streamingcontentlicenseRequest.getTvShow().getId()
+            ).orElseThrow(() -> new RuntimeException("TVShow not found"));
 
-        existing.setTvShow(existingTvShow);
+            existing.setTvShow(existingTvShow);
         } else {
-        existing.setTvShow(null);
+            existing.setTvShow(null);
         }
+        
         if (streamingcontentlicenseRequest.getMusicTrack() != null &&
-        streamingcontentlicenseRequest.getMusicTrack().getId() != null) {
+            streamingcontentlicenseRequest.getMusicTrack().getId() != null) {
 
-        MusicTrack existingMusicTrack = musicTrackRepository.findById(
-        streamingcontentlicenseRequest.getMusicTrack().getId()
-        ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
+            MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                streamingcontentlicenseRequest.getMusicTrack().getId()
+            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
 
-        existing.setMusicTrack(existingMusicTrack);
+            existing.setMusicTrack(existingMusicTrack);
         } else {
-        existing.setMusicTrack(null);
+            existing.setMusicTrack(null);
         }
+        
         if (streamingcontentlicenseRequest.getLicenseType() != null &&
-        streamingcontentlicenseRequest.getLicenseType().getId() != null) {
+            streamingcontentlicenseRequest.getLicenseType().getId() != null) {
 
-        ContentLicenseType existingLicenseType = licenseTypeRepository.findById(
-        streamingcontentlicenseRequest.getLicenseType().getId()
-        ).orElseThrow(() -> new RuntimeException("ContentLicenseType not found"));
+            ContentLicenseType existingLicenseType = licenseTypeRepository.findById(
+                streamingcontentlicenseRequest.getLicenseType().getId()
+            ).orElseThrow(() -> new RuntimeException("ContentLicenseType not found"));
 
-        existing.setLicenseType(existingLicenseType);
+            existing.setLicenseType(existingLicenseType);
         } else {
-        existing.setLicenseType(null);
+            existing.setLicenseType(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-        return streamingcontentlicenseRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<StreamingContentLicense> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-StreamingContentLicense entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getSubscriptionPlan() != null) {
-        entity.setSubscriptionPlan(null);
-        }
-    
-
-    
-        if (entity.getMovie() != null) {
-        entity.setMovie(null);
-        }
-    
-
-    
-        if (entity.getTvShow() != null) {
-        entity.setTvShow(null);
-        }
-    
-
-    
-        if (entity.getMusicTrack() != null) {
-        entity.setMusicTrack(null);
-        }
-    
-
-    
-        if (entity.getLicenseType() != null) {
-        entity.setLicenseType(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return streamingcontentlicenseRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<StreamingContentLicense> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        StreamingContentLicense entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getSubscriptionPlan() != null) {
+            entity.setSubscriptionPlan(null);
+        }
+        
+        if (entity.getMovie() != null) {
+            entity.setMovie(null);
+        }
+        
+        if (entity.getTvShow() != null) {
+            entity.setTvShow(null);
+        }
+        
+        if (entity.getMusicTrack() != null) {
+            entity.setMusicTrack(null);
+        }
+        
+        if (entity.getLicenseType() != null) {
+            entity.setLicenseType(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

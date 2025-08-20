@@ -46,37 +46,35 @@ public class GameReviewCommentController {
 
         GameReviewComment entity = gamereviewcommentMapper.toEntity(gamereviewcommentDto);
         GameReviewComment saved = gamereviewcommentService.save(entity);
-        URI location = uriBuilder.path("/api/gamereviewcomments/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/gamereviewcomments/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(gamereviewcommentMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<GameReviewCommentDto> updateGameReviewComment(
-                @PathVariable Long id,
-                @RequestBody GameReviewCommentDto gamereviewcommentDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<GameReviewCommentDto> updateGameReviewComment(
+            @PathVariable Long id,
+            @Valid @RequestBody GameReviewCommentDto gamereviewcommentDto) {
 
-                // Transformer le DTO en entity pour le service
-                GameReviewComment entityToUpdate = gamereviewcommentMapper.toEntity(gamereviewcommentDto);
 
-                // Appel du service update
-                GameReviewComment updatedEntity = gamereviewcommentService.update(id, entityToUpdate);
+        GameReviewComment entityToUpdate = gamereviewcommentMapper.toEntity(gamereviewcommentDto);
+        GameReviewComment updatedEntity = gamereviewcommentService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                GameReviewCommentDto updatedDto = gamereviewcommentMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(gamereviewcommentMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteGameReviewComment(@PathVariable Long id) {
-                    boolean deleted = gamereviewcommentService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGameReviewComment(@PathVariable Long id) {
+        boolean deleted = gamereviewcommentService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

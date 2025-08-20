@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VideoGameRatingRepository extends BaseRepository<VideoGameRating, Long> {
+
 }

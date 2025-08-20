@@ -46,7 +46,7 @@ public class LiveEventService extends BaseService<LiveEvent> {
     private final ConcertVenueRepository venueRepository;
     private final TourRepository tourRepository;
 
-    public LiveEventService(LiveEventRepository repository,ArtistRepository performersRepository,TicketRepository ticketsRepository,EventTypeRepository eventTypeRepository,EventLocationRepository locationRepository,SponsorRepository sponsorRepository,EventAudienceRepository audienceRepository,EventSponsorshipRepository sponsorshipsRepository,ContentTagRepository tagsRepository,ConcertVenueRepository venueRepository,TourRepository tourRepository)
+    public LiveEventService(LiveEventRepository repository, ArtistRepository performersRepository, TicketRepository ticketsRepository, EventTypeRepository eventTypeRepository, EventLocationRepository locationRepository, SponsorRepository sponsorRepository, EventAudienceRepository audienceRepository, EventSponsorshipRepository sponsorshipsRepository, ContentTagRepository tagsRepository, ConcertVenueRepository venueRepository, TourRepository tourRepository)
     {
         super(repository);
         this.liveeventRepository = repository;
@@ -64,176 +64,137 @@ public class LiveEventService extends BaseService<LiveEvent> {
 
     @Override
     public LiveEvent save(LiveEvent liveevent) {
-
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (liveevent.getTickets() != null) {
+    // ---------- OneToMany ----------
+        if (liveevent.getTickets() != null) {
             List<Ticket> managedTickets = new ArrayList<>();
             for (Ticket item : liveevent.getTickets()) {
-            if (item.getId() != null) {
-            Ticket existingItem = ticketsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("Ticket not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setEvent(liveevent);
-            managedTickets.add(existingItem);
-            } else {
-            item.setEvent(liveevent);
-            managedTickets.add(item);
-            }
+                if (item.getId() != null) {
+                    Ticket existingItem = ticketsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+                     existingItem.setEvent(liveevent);
+                     managedTickets.add(existingItem);
+                } else {
+                    item.setEvent(liveevent);
+                    managedTickets.add(item);
+                }
             }
             liveevent.setTickets(managedTickets);
-            }
-        
+        }
     
-
-    
-
-    
-
-    
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (liveevent.getSponsorships() != null) {
+        if (liveevent.getSponsorships() != null) {
             List<EventSponsorship> managedSponsorships = new ArrayList<>();
             for (EventSponsorship item : liveevent.getSponsorships()) {
-            if (item.getId() != null) {
-            EventSponsorship existingItem = sponsorshipsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("EventSponsorship not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setEvent(liveevent);
-            managedSponsorships.add(existingItem);
-            } else {
-            item.setEvent(liveevent);
-            managedSponsorships.add(item);
-            }
+                if (item.getId() != null) {
+                    EventSponsorship existingItem = sponsorshipsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("EventSponsorship not found"));
+
+                     existingItem.setEvent(liveevent);
+                     managedSponsorships.add(existingItem);
+                } else {
+                    item.setEvent(liveevent);
+                    managedSponsorships.add(item);
+                }
             }
             liveevent.setSponsorships(managedSponsorships);
-            }
+        }
+    
+    // ---------- ManyToMany ----------
+        if (liveevent.getPerformers() != null &&
+            !liveevent.getPerformers().isEmpty()) {
+
+            List<Artist> attachedPerformers = liveevent.getPerformers().stream()
+            .map(item -> performersRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
+            .toList();
+
+            liveevent.setPerformers(attachedPerformers);
+
+            // côté propriétaire (Artist → LiveEvent)
+            attachedPerformers.forEach(it -> it.getParticipatedInEvents().add(liveevent));
+        }
         
-    
+        if (liveevent.getTags() != null &&
+            !liveevent.getTags().isEmpty()) {
 
-    
+            List<ContentTag> attachedTags = liveevent.getTags().stream()
+            .map(item -> tagsRepository.findById(item.getId())
+                .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
+            .toList();
 
-    
+            liveevent.setTags(attachedTags);
 
-    
-
-
-    
-        if (liveevent.getPerformers() != null
-        && !liveevent.getPerformers().isEmpty()) {
-
-        List<Artist> attachedPerformers = liveevent.getPerformers().stream()
-        .map(item -> performersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
-        .toList();
-
-        liveevent.setPerformers(attachedPerformers);
-
-        // côté propriétaire (Artist → LiveEvent)
-        attachedPerformers.forEach(it -> it.getParticipatedInEvents().add(liveevent));
+            // côté propriétaire (ContentTag → LiveEvent)
+            attachedTags.forEach(it -> it.getLiveEvents().add(liveevent));
         }
-    
+        
+    // ---------- ManyToOne ----------
+        if (liveevent.getEventType() != null &&
+            liveevent.getEventType().getId() != null) {
 
-    
+            EventType existingEventType = eventTypeRepository.findById(
+                liveevent.getEventType().getId()
+            ).orElseThrow(() -> new RuntimeException("EventType not found"));
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (liveevent.getTags() != null
-        && !liveevent.getTags().isEmpty()) {
-
-        List<ContentTag> attachedTags = liveevent.getTags().stream()
-        .map(item -> tagsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
-        .toList();
-
-        liveevent.setTags(attachedTags);
-
-        // côté propriétaire (ContentTag → LiveEvent)
-        attachedTags.forEach(it -> it.getLiveEvents().add(liveevent));
+            liveevent.setEventType(existingEventType);
         }
-    
+        
+        if (liveevent.getLocation() != null &&
+            liveevent.getLocation().getId() != null) {
 
-    
+            EventLocation existingLocation = locationRepository.findById(
+                liveevent.getLocation().getId()
+            ).orElseThrow(() -> new RuntimeException("EventLocation not found"));
 
-    
+            liveevent.setLocation(existingLocation);
+        }
+        
+        if (liveevent.getSponsor() != null &&
+            liveevent.getSponsor().getId() != null) {
 
-    
-    
-    if (liveevent.getEventType() != null
-        && liveevent.getEventType().getId() != null) {
-        EventType existingEventType = eventTypeRepository.findById(
-        liveevent.getEventType().getId()
-        ).orElseThrow(() -> new RuntimeException("EventType not found"));
-        liveevent.setEventType(existingEventType);
+            Sponsor existingSponsor = sponsorRepository.findById(
+                liveevent.getSponsor().getId()
+            ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
+
+            liveevent.setSponsor(existingSponsor);
         }
-    
-    if (liveevent.getLocation() != null
-        && liveevent.getLocation().getId() != null) {
-        EventLocation existingLocation = locationRepository.findById(
-        liveevent.getLocation().getId()
-        ).orElseThrow(() -> new RuntimeException("EventLocation not found"));
-        liveevent.setLocation(existingLocation);
+        
+        if (liveevent.getVenue() != null &&
+            liveevent.getVenue().getId() != null) {
+
+            ConcertVenue existingVenue = venueRepository.findById(
+                liveevent.getVenue().getId()
+            ).orElseThrow(() -> new RuntimeException("ConcertVenue not found"));
+
+            liveevent.setVenue(existingVenue);
         }
-    
-    if (liveevent.getSponsor() != null
-        && liveevent.getSponsor().getId() != null) {
-        Sponsor existingSponsor = sponsorRepository.findById(
-        liveevent.getSponsor().getId()
-        ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
-        liveevent.setSponsor(existingSponsor);
+        
+        if (liveevent.getTour() != null &&
+            liveevent.getTour().getId() != null) {
+
+            Tour existingTour = tourRepository.findById(
+                liveevent.getTour().getId()
+            ).orElseThrow(() -> new RuntimeException("Tour not found"));
+
+            liveevent.setTour(existingTour);
         }
-    
-    
-    
-    
-    if (liveevent.getVenue() != null
-        && liveevent.getVenue().getId() != null) {
-        ConcertVenue existingVenue = venueRepository.findById(
-        liveevent.getVenue().getId()
-        ).orElseThrow(() -> new RuntimeException("ConcertVenue not found"));
-        liveevent.setVenue(existingVenue);
-        }
-    
-    if (liveevent.getTour() != null
-        && liveevent.getTour().getId() != null) {
-        Tour existingTour = tourRepository.findById(
-        liveevent.getTour().getId()
-        ).orElseThrow(() -> new RuntimeException("Tour not found"));
-        liveevent.setTour(existingTour);
-        }
-    
+        
+    // ---------- OneToOne ----------
         if (liveevent.getAudience() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             liveevent.setAudience(
-            audienceRepository.findById(liveevent.getAudience().getId())
-            .orElseThrow(() -> new RuntimeException("audience not found"))
+                audienceRepository.findById(liveevent.getAudience().getId())
+                    .orElseThrow(() -> new RuntimeException("audience not found"))
             );
-        
-        liveevent.getAudience().setEvent(liveevent);
+            
+            liveevent.getAudience().setEvent(liveevent);
         }
+        
 
-        return liveeventRepository.save(liveevent);
-    }
+    return liveeventRepository.save(liveevent);
+}
 
 
     public LiveEvent update(Long id, LiveEvent liveeventRequest) {
@@ -245,346 +206,229 @@ public class LiveEventService extends BaseService<LiveEvent> {
         existing.setEventDate(liveeventRequest.getEventDate());
         existing.setDescription(liveeventRequest.getDescription());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (liveeventRequest.getEventType() != null &&
-        liveeventRequest.getEventType().getId() != null) {
+            liveeventRequest.getEventType().getId() != null) {
 
-        EventType existingEventType = eventTypeRepository.findById(
-        liveeventRequest.getEventType().getId()
-        ).orElseThrow(() -> new RuntimeException("EventType not found"));
+            EventType existingEventType = eventTypeRepository.findById(
+                liveeventRequest.getEventType().getId()
+            ).orElseThrow(() -> new RuntimeException("EventType not found"));
 
-        existing.setEventType(existingEventType);
+            existing.setEventType(existingEventType);
         } else {
-        existing.setEventType(null);
+            existing.setEventType(null);
         }
+        
         if (liveeventRequest.getLocation() != null &&
-        liveeventRequest.getLocation().getId() != null) {
+            liveeventRequest.getLocation().getId() != null) {
 
-        EventLocation existingLocation = locationRepository.findById(
-        liveeventRequest.getLocation().getId()
-        ).orElseThrow(() -> new RuntimeException("EventLocation not found"));
+            EventLocation existingLocation = locationRepository.findById(
+                liveeventRequest.getLocation().getId()
+            ).orElseThrow(() -> new RuntimeException("EventLocation not found"));
 
-        existing.setLocation(existingLocation);
+            existing.setLocation(existingLocation);
         } else {
-        existing.setLocation(null);
+            existing.setLocation(null);
         }
+        
         if (liveeventRequest.getSponsor() != null &&
-        liveeventRequest.getSponsor().getId() != null) {
+            liveeventRequest.getSponsor().getId() != null) {
 
-        Sponsor existingSponsor = sponsorRepository.findById(
-        liveeventRequest.getSponsor().getId()
-        ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
+            Sponsor existingSponsor = sponsorRepository.findById(
+                liveeventRequest.getSponsor().getId()
+            ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
 
-        existing.setSponsor(existingSponsor);
+            existing.setSponsor(existingSponsor);
         } else {
-        existing.setSponsor(null);
+            existing.setSponsor(null);
         }
+        
         if (liveeventRequest.getVenue() != null &&
-        liveeventRequest.getVenue().getId() != null) {
+            liveeventRequest.getVenue().getId() != null) {
 
-        ConcertVenue existingVenue = venueRepository.findById(
-        liveeventRequest.getVenue().getId()
-        ).orElseThrow(() -> new RuntimeException("ConcertVenue not found"));
+            ConcertVenue existingVenue = venueRepository.findById(
+                liveeventRequest.getVenue().getId()
+            ).orElseThrow(() -> new RuntimeException("ConcertVenue not found"));
 
-        existing.setVenue(existingVenue);
+            existing.setVenue(existingVenue);
         } else {
-        existing.setVenue(null);
+            existing.setVenue(null);
         }
+        
         if (liveeventRequest.getTour() != null &&
-        liveeventRequest.getTour().getId() != null) {
+            liveeventRequest.getTour().getId() != null) {
 
-        Tour existingTour = tourRepository.findById(
-        liveeventRequest.getTour().getId()
-        ).orElseThrow(() -> new RuntimeException("Tour not found"));
+            Tour existingTour = tourRepository.findById(
+                liveeventRequest.getTour().getId()
+            ).orElseThrow(() -> new RuntimeException("Tour not found"));
 
-        existing.setTour(existingTour);
+            existing.setTour(existingTour);
         } else {
-        existing.setTour(null);
+            existing.setTour(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
+        
+    // ---------- Relations ManyToOne ----------
         if (liveeventRequest.getPerformers() != null) {
-        existing.getPerformers().clear();
+            existing.getPerformers().clear();
 
-        List<Artist> performersList = liveeventRequest.getPerformers().stream()
-        .map(item -> performersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Artist not found")))
-        .collect(Collectors.toList());
+            List<Artist> performersList = liveeventRequest.getPerformers().stream()
+                .map(item -> performersRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("Artist not found")))
+                .collect(Collectors.toList());
 
-        existing.getPerformers().addAll(performersList);
+            existing.getPerformers().addAll(performersList);
 
-        // Mettre à jour le côté inverse
-        performersList.forEach(it -> {
-        if (!it.getParticipatedInEvents().contains(existing)) {
-        it.getParticipatedInEvents().add(existing);
+            // Mettre à jour le côté inverse
+            performersList.forEach(it -> {
+                if (!it.getParticipatedInEvents().contains(existing)) {
+                    it.getParticipatedInEvents().add(existing);
+                }
+            });
         }
-        });
-        }
+        
         if (liveeventRequest.getTags() != null) {
-        existing.getTags().clear();
+            existing.getTags().clear();
 
-        List<ContentTag> tagsList = liveeventRequest.getTags().stream()
-        .map(item -> tagsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("ContentTag not found")))
-        .collect(Collectors.toList());
+            List<ContentTag> tagsList = liveeventRequest.getTags().stream()
+                .map(item -> tagsRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("ContentTag not found")))
+                .collect(Collectors.toList());
 
-        existing.getTags().addAll(tagsList);
+            existing.getTags().addAll(tagsList);
 
-        // Mettre à jour le côté inverse
-        tagsList.forEach(it -> {
-        if (!it.getLiveEvents().contains(existing)) {
-        it.getLiveEvents().add(existing);
+            // Mettre à jour le côté inverse
+            tagsList.forEach(it -> {
+                if (!it.getLiveEvents().contains(existing)) {
+                    it.getLiveEvents().add(existing);
+                }
+            });
         }
-        });
-        }
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations OneToMany ----------
         existing.getTickets().clear();
 
         if (liveeventRequest.getTickets() != null) {
-        for (var item : liveeventRequest.getTickets()) {
-        Ticket existingItem;
-        if (item.getId() != null) {
-        existingItem = ticketsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("Ticket not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
-        }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setEvent(existing);
+            for (var item : liveeventRequest.getTickets()) {
+                Ticket existingItem;
+                if (item.getId() != null) {
+                    existingItem = ticketsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                } else {
+                existingItem = item;
+                }
 
-        // Ajouter directement dans la collection existante
-        existing.getTickets().add(existingItem);
+                existingItem.setEvent(existing);
+                existing.getTickets().add(existingItem);
+            }
         }
-        }
-        // NE PLUS FAIRE setCollection()
-        // Vider la collection existante
+        
         existing.getSponsorships().clear();
 
         if (liveeventRequest.getSponsorships() != null) {
-        for (var item : liveeventRequest.getSponsorships()) {
-        EventSponsorship existingItem;
-        if (item.getId() != null) {
-        existingItem = sponsorshipsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("EventSponsorship not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : liveeventRequest.getSponsorships()) {
+                EventSponsorship existingItem;
+                if (item.getId() != null) {
+                    existingItem = sponsorshipsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("EventSponsorship not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setEvent(existing);
+                existing.getSponsorships().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setEvent(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getSponsorships().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-        if (liveeventRequest.getAudience() != null
-        && liveeventRequest.getAudience().getId() != null) {
-
-        EventAudience audience = audienceRepository.findById(
-        liveeventRequest.getAudience().getId()
-        ).orElseThrow(() -> new RuntimeException("EventAudience not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setAudience(audience);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
         
+    // ---------- Relations OneToOne ----------
+            if (liveeventRequest.getAudience() != null &&
+            liveeventRequest.getAudience().getId() != null) {
+
+            EventAudience audience = audienceRepository.findById(
+                liveeventRequest.getAudience().getId()
+            ).orElseThrow(() -> new RuntimeException("EventAudience not found"));
+
+            existing.setAudience(audience);
+
+            
             audience.setEvent(existing);
+            
+        }
         
-        }
 
-    
-
-    
-
-    
-
-    
-
-    
-
-
-        return liveeventRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<LiveEvent> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-LiveEvent entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-        if (entity.getTickets() != null) {
-        for (var child : entity.getTickets()) {
-        
-            child.setEvent(null); // retirer la référence inverse
-        
-        }
-        entity.getTickets().clear();
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getSponsorships() != null) {
-        for (var child : entity.getSponsorships()) {
-        
-            child.setEvent(null); // retirer la référence inverse
-        
-        }
-        entity.getSponsorships().clear();
-        }
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-        if (entity.getPerformers() != null) {
-        for (Artist item : new ArrayList<>(entity.getPerformers())) {
-        
-            item.getParticipatedInEvents().remove(entity); // retire côté inverse
-        
-        }
-        entity.getPerformers().clear(); // puis vide côté courant
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getTags() != null) {
-        for (ContentTag item : new ArrayList<>(entity.getTags())) {
-        
-            item.getLiveEvents().remove(entity); // retire côté inverse
-        
-        }
-        entity.getTags().clear(); // puis vide côté courant
-        }
-    
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getAudience() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getAudience().setEvent(null);
-        // Dissocier côté direct
-        entity.setAudience(null);
-        }
-    
-
-    
-
-    
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-    
-
-    
-        if (entity.getEventType() != null) {
-        entity.setEventType(null);
-        }
-    
-
-    
-        if (entity.getLocation() != null) {
-        entity.setLocation(null);
-        }
-    
-
-    
-        if (entity.getSponsor() != null) {
-        entity.setSponsor(null);
-        }
-    
-
-    
-
-    
-
-    
-
-    
-        if (entity.getVenue() != null) {
-        entity.setVenue(null);
-        }
-    
-
-    
-        if (entity.getTour() != null) {
-        entity.setTour(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return liveeventRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<LiveEvent> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        LiveEvent entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getTickets() != null) {
+            for (var child : entity.getTickets()) {
+                
+                child.setEvent(null); // retirer la référence inverse
+                
+            }
+            entity.getTickets().clear();
+        }
+        
+        if (entity.getSponsorships() != null) {
+            for (var child : entity.getSponsorships()) {
+                
+                child.setEvent(null); // retirer la référence inverse
+                
+            }
+            entity.getSponsorships().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+        if (entity.getPerformers() != null) {
+            for (Artist item : new ArrayList<>(entity.getPerformers())) {
+                
+                item.getParticipatedInEvents().remove(entity); // retire côté inverse
+                
+            }
+            entity.getPerformers().clear(); // puis vide côté courant
+        }
+        
+        if (entity.getTags() != null) {
+            for (ContentTag item : new ArrayList<>(entity.getTags())) {
+                
+                item.getLiveEvents().remove(entity); // retire côté inverse
+                
+            }
+            entity.getTags().clear(); // puis vide côté courant
+        }
+        
+    // --- Dissocier OneToOne ---
+        if (entity.getAudience() != null) {
+            entity.getAudience().setEvent(null);
+            entity.setAudience(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        if (entity.getEventType() != null) {
+            entity.setEventType(null);
+        }
+        
+        if (entity.getLocation() != null) {
+            entity.setLocation(null);
+        }
+        
+        if (entity.getSponsor() != null) {
+            entity.setSponsor(null);
+        }
+        
+        if (entity.getVenue() != null) {
+            entity.setVenue(null);
+        }
+        
+        if (entity.getTour() != null) {
+            entity.setTour(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -19,7 +19,7 @@ public class UserLevelService extends BaseService<UserLevel> {
     protected final UserLevelRepository userlevelRepository;
     private final UserProfileRepository usersRepository;
 
-    public UserLevelService(UserLevelRepository repository,UserProfileRepository usersRepository)
+    public UserLevelService(UserLevelRepository repository, UserProfileRepository usersRepository)
     {
         super(repository);
         this.userlevelRepository = repository;
@@ -28,37 +28,30 @@ public class UserLevelService extends BaseService<UserLevel> {
 
     @Override
     public UserLevel save(UserLevel userlevel) {
-
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (userlevel.getUsers() != null) {
+    // ---------- OneToMany ----------
+        if (userlevel.getUsers() != null) {
             List<UserProfile> managedUsers = new ArrayList<>();
             for (UserProfile item : userlevel.getUsers()) {
-            if (item.getId() != null) {
-            UserProfile existingItem = usersRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setUserLevel(userlevel);
-            managedUsers.add(existingItem);
-            } else {
-            item.setUserLevel(userlevel);
-            managedUsers.add(item);
-            }
+                if (item.getId() != null) {
+                    UserProfile existingItem = usersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+                     existingItem.setUserLevel(userlevel);
+                     managedUsers.add(existingItem);
+                } else {
+                    item.setUserLevel(userlevel);
+                    managedUsers.add(item);
+                }
             }
             userlevel.setUsers(managedUsers);
-            }
-        
+        }
     
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
 
-
-    
-
-    
-
-        return userlevelRepository.save(userlevel);
-    }
+    return userlevelRepository.save(userlevel);
+}
 
 
     public UserLevel update(Long id, UserLevel userlevelRequest) {
@@ -70,75 +63,50 @@ public class UserLevelService extends BaseService<UserLevel> {
         existing.setName(userlevelRequest.getName());
         existing.setPointsRequired(userlevelRequest.getPointsRequired());
 
-// Relations ManyToOne : mise à jour conditionnelle
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getUsers().clear();
 
         if (userlevelRequest.getUsers() != null) {
-        for (var item : userlevelRequest.getUsers()) {
-        UserProfile existingItem;
-        if (item.getId() != null) {
-        existingItem = usersRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : userlevelRequest.getUsers()) {
+                UserProfile existingItem;
+                if (item.getId() != null) {
+                    existingItem = usersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setUserLevel(existing);
+                existing.getUsers().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setUserLevel(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getUsers().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-
-        return userlevelRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserLevel> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserLevel entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-        if (entity.getUsers() != null) {
-        for (var child : entity.getUsers()) {
         
-            child.setUserLevel(null); // retirer la référence inverse
-        
-        }
-        entity.getUsers().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return userlevelRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserLevel> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserLevel entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getUsers() != null) {
+            for (var child : entity.getUsers()) {
+                
+                child.setUserLevel(null); // retirer la référence inverse
+                
+            }
+            entity.getUsers().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

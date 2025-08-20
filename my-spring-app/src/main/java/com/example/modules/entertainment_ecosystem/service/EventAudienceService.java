@@ -19,7 +19,7 @@ public class EventAudienceService extends BaseService<EventAudience> {
     protected final EventAudienceRepository eventaudienceRepository;
     private final LiveEventRepository eventRepository;
 
-    public EventAudienceService(EventAudienceRepository repository,LiveEventRepository eventRepository)
+    public EventAudienceService(EventAudienceRepository repository, LiveEventRepository eventRepository)
     {
         super(repository);
         this.eventaudienceRepository = repository;
@@ -28,28 +28,25 @@ public class EventAudienceService extends BaseService<EventAudience> {
 
     @Override
     public EventAudience save(EventAudience eventaudience) {
-
-
-    
-
-
-    
-
-    
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
         if (eventaudience.getEvent() != null) {
-        
-        
-            // Vérifier si l'entité est déjà persistée
+            
+            
+                // Vérifier si l'entité est déjà persistée
             eventaudience.setEvent(
-            eventRepository.findById(eventaudience.getEvent().getId())
-            .orElseThrow(() -> new RuntimeException("event not found"))
+                eventRepository.findById(eventaudience.getEvent().getId())
+                    .orElseThrow(() -> new RuntimeException("event not found"))
             );
-        
-        eventaudience.getEvent().setAudience(eventaudience);
+            
+            eventaudience.getEvent().setAudience(eventaudience);
         }
+        
 
-        return eventaudienceRepository.save(eventaudience);
-    }
+    return eventaudienceRepository.save(eventaudience);
+}
 
 
     public EventAudience update(Long id, EventAudience eventaudienceRequest) {
@@ -60,71 +57,43 @@ public class EventAudienceService extends BaseService<EventAudience> {
         existing.setCount(eventaudienceRequest.getCount());
         existing.setAudienceType(eventaudienceRequest.getAudienceType());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+            if (eventaudienceRequest.getEvent() != null &&
+            eventaudienceRequest.getEvent().getId() != null) {
 
-// Relations ManyToMany : synchronisation sécurisée
+            LiveEvent event = eventRepository.findById(
+                eventaudienceRequest.getEvent().getId()
+            ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
 
-// Relations OneToMany : synchronisation sécurisée
+            existing.setEvent(event);
 
-    
-
-        if (eventaudienceRequest.getEvent() != null
-        && eventaudienceRequest.getEvent().getId() != null) {
-
-        LiveEvent event = eventRepository.findById(
-        eventaudienceRequest.getEvent().getId()
-        ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-
-        // Mise à jour de la relation côté propriétaire
-        existing.setEvent(event);
-
-        // Si la relation est bidirectionnelle et que le champ inverse existe
-        
+            
             event.setAudience(existing);
+            
+        }
         
-        }
 
-    
-
-
-        return eventaudienceRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<EventAudience> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-EventAudience entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-        if (entity.getEvent() != null) {
-        // Dissocier côté inverse automatiquement
-        entity.getEvent().setAudience(null);
-        // Dissocier côté direct
-        entity.setEvent(null);
-        }
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-
-
-repository.delete(entity);
-return true;
+    return eventaudienceRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<EventAudience> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        EventAudience entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+        if (entity.getEvent() != null) {
+            entity.getEvent().setAudience(null);
+            entity.setEvent(null);
+        }
+        
+    // --- Dissocier ManyToOne ---
+        repository.delete(entity);
+        return true;
+    }
 }

@@ -46,37 +46,35 @@ public class FeatureFlagController {
 
         FeatureFlag entity = featureflagMapper.toEntity(featureflagDto);
         FeatureFlag saved = featureflagService.save(entity);
-        URI location = uriBuilder.path("/api/featureflags/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/featureflags/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(featureflagMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<FeatureFlagDto> updateFeatureFlag(
-                @PathVariable Long id,
-                @RequestBody FeatureFlagDto featureflagDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<FeatureFlagDto> updateFeatureFlag(
+            @PathVariable Long id,
+            @Valid @RequestBody FeatureFlagDto featureflagDto) {
 
-                // Transformer le DTO en entity pour le service
-                FeatureFlag entityToUpdate = featureflagMapper.toEntity(featureflagDto);
 
-                // Appel du service update
-                FeatureFlag updatedEntity = featureflagService.update(id, entityToUpdate);
+        FeatureFlag entityToUpdate = featureflagMapper.toEntity(featureflagDto);
+        FeatureFlag updatedEntity = featureflagService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                FeatureFlagDto updatedDto = featureflagMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(featureflagMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteFeatureFlag(@PathVariable Long id) {
-                    boolean deleted = featureflagService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFeatureFlag(@PathVariable Long id) {
+        boolean deleted = featureflagService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

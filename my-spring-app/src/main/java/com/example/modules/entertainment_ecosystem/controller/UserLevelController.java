@@ -46,37 +46,35 @@ public class UserLevelController {
 
         UserLevel entity = userlevelMapper.toEntity(userlevelDto);
         UserLevel saved = userlevelService.save(entity);
-        URI location = uriBuilder.path("/api/userlevels/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/userlevels/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(userlevelMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<UserLevelDto> updateUserLevel(
-                @PathVariable Long id,
-                @RequestBody UserLevelDto userlevelDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserLevelDto> updateUserLevel(
+            @PathVariable Long id,
+            @Valid @RequestBody UserLevelDto userlevelDto) {
 
-                // Transformer le DTO en entity pour le service
-                UserLevel entityToUpdate = userlevelMapper.toEntity(userlevelDto);
 
-                // Appel du service update
-                UserLevel updatedEntity = userlevelService.update(id, entityToUpdate);
+        UserLevel entityToUpdate = userlevelMapper.toEntity(userlevelDto);
+        UserLevel updatedEntity = userlevelService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                UserLevelDto updatedDto = userlevelMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(userlevelMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteUserLevel(@PathVariable Long id) {
-                    boolean deleted = userlevelService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserLevel(@PathVariable Long id) {
+        boolean deleted = userlevelService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

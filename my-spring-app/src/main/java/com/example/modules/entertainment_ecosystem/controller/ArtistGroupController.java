@@ -46,37 +46,35 @@ public class ArtistGroupController {
 
         ArtistGroup entity = artistgroupMapper.toEntity(artistgroupDto);
         ArtistGroup saved = artistgroupService.save(entity);
-        URI location = uriBuilder.path("/api/artistgroups/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/artistgroups/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(artistgroupMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<ArtistGroupDto> updateArtistGroup(
-                @PathVariable Long id,
-                @RequestBody ArtistGroupDto artistgroupDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ArtistGroupDto> updateArtistGroup(
+            @PathVariable Long id,
+            @Valid @RequestBody ArtistGroupDto artistgroupDto) {
 
-                // Transformer le DTO en entity pour le service
-                ArtistGroup entityToUpdate = artistgroupMapper.toEntity(artistgroupDto);
 
-                // Appel du service update
-                ArtistGroup updatedEntity = artistgroupService.update(id, entityToUpdate);
+        ArtistGroup entityToUpdate = artistgroupMapper.toEntity(artistgroupDto);
+        ArtistGroup updatedEntity = artistgroupService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                ArtistGroupDto updatedDto = artistgroupMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(artistgroupMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteArtistGroup(@PathVariable Long id) {
-                    boolean deleted = artistgroupService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteArtistGroup(@PathVariable Long id) {
+        boolean deleted = artistgroupService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

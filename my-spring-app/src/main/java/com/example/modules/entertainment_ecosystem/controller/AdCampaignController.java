@@ -46,37 +46,35 @@ public class AdCampaignController {
 
         AdCampaign entity = adcampaignMapper.toEntity(adcampaignDto);
         AdCampaign saved = adcampaignService.save(entity);
-        URI location = uriBuilder.path("/api/adcampaigns/{id}")
-                                 .buildAndExpand(saved.getId()).toUri();
+
+        URI location = uriBuilder
+                                .path("/api/adcampaigns/{id}")
+                                .buildAndExpand(saved.getId())
+                                .toUri();
+
         return ResponseEntity.created(location).body(adcampaignMapper.toDto(saved));
     }
 
-            @PutMapping("/{id}")
-            public ResponseEntity<AdCampaignDto> updateAdCampaign(
-                @PathVariable Long id,
-                @RequestBody AdCampaignDto adcampaignDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<AdCampaignDto> updateAdCampaign(
+            @PathVariable Long id,
+            @Valid @RequestBody AdCampaignDto adcampaignDto) {
 
-                // Transformer le DTO en entity pour le service
-                AdCampaign entityToUpdate = adcampaignMapper.toEntity(adcampaignDto);
 
-                // Appel du service update
-                AdCampaign updatedEntity = adcampaignService.update(id, entityToUpdate);
+        AdCampaign entityToUpdate = adcampaignMapper.toEntity(adcampaignDto);
+        AdCampaign updatedEntity = adcampaignService.update(id, entityToUpdate);
 
-                // Transformer l’entity mise à jour en DTO pour le retour
-                AdCampaignDto updatedDto = adcampaignMapper.toDto(updatedEntity);
+        return ResponseEntity.ok(adcampaignMapper.toDto(updatedEntity));
+    }
 
-                return ResponseEntity.ok(updatedDto);
-                }
-                @DeleteMapping("/{id}")
-                public ResponseEntity<Void> deleteAdCampaign(@PathVariable Long id) {
-                    boolean deleted = adcampaignService.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAdCampaign(@PathVariable Long id) {
+        boolean deleted = adcampaignService.deleteById(id);
 
-                    if (!deleted) {
-                    // Renvoie 404 si l'ID n'existe pas
-                    return ResponseEntity.notFound().build();
-                    }
+        if (!deleted) {
+        return ResponseEntity.notFound().build();
+        }
 
-                    // Renvoie 204 si suppression réussie
-                    return ResponseEntity.noContent().build();
-                    }
+        return ResponseEntity.noContent().build();
+    }
 }

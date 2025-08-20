@@ -22,7 +22,7 @@ public class UserPlaylistService extends BaseService<UserPlaylist> {
     private final UserProfileRepository userRepository;
     private final UserPlaylistItemRepository itemsRepository;
 
-    public UserPlaylistService(UserPlaylistRepository repository,UserProfileRepository userRepository,UserPlaylistItemRepository itemsRepository)
+    public UserPlaylistService(UserPlaylistRepository repository, UserProfileRepository userRepository, UserPlaylistItemRepository itemsRepository)
     {
         super(repository);
         this.userplaylistRepository = repository;
@@ -32,49 +32,40 @@ public class UserPlaylistService extends BaseService<UserPlaylist> {
 
     @Override
     public UserPlaylist save(UserPlaylist userplaylist) {
-
-
-    
-
-    
-        // Cherche la relation ManyToOne correspondante dans l'entité enfant
-        
-            if (userplaylist.getItems() != null) {
+    // ---------- OneToMany ----------
+        if (userplaylist.getItems() != null) {
             List<UserPlaylistItem> managedItems = new ArrayList<>();
             for (UserPlaylistItem item : userplaylist.getItems()) {
-            if (item.getId() != null) {
-            UserPlaylistItem existingItem = itemsRepository.findById(item.getId())
-            .orElseThrow(() -> new RuntimeException("UserPlaylistItem not found"));
-            // Utilise le nom du champ ManyToOne côté enfant pour le setter
-            existingItem.setPlaylist(userplaylist);
-            managedItems.add(existingItem);
-            } else {
-            item.setPlaylist(userplaylist);
-            managedItems.add(item);
-            }
+                if (item.getId() != null) {
+                    UserPlaylistItem existingItem = itemsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserPlaylistItem not found"));
+
+                     existingItem.setPlaylist(userplaylist);
+                     managedItems.add(existingItem);
+                } else {
+                    item.setPlaylist(userplaylist);
+                    managedItems.add(item);
+                }
             }
             userplaylist.setItems(managedItems);
-            }
-        
-    
-
-
-    
-
-    
-
-    if (userplaylist.getUser() != null
-        && userplaylist.getUser().getId() != null) {
-        UserProfile existingUser = userRepository.findById(
-        userplaylist.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-        userplaylist.setUser(existingUser);
         }
     
-    
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (userplaylist.getUser() != null &&
+            userplaylist.getUser().getId() != null) {
 
-        return userplaylistRepository.save(userplaylist);
-    }
+            UserProfile existingUser = userRepository.findById(
+                userplaylist.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            userplaylist.setUser(existingUser);
+        }
+        
+    // ---------- OneToOne ----------
+
+    return userplaylistRepository.save(userplaylist);
+}
 
 
     public UserPlaylist update(Long id, UserPlaylist userplaylistRequest) {
@@ -85,100 +76,66 @@ public class UserPlaylistService extends BaseService<UserPlaylist> {
         existing.setName(userplaylistRequest.getName());
         existing.setIsPublic(userplaylistRequest.getIsPublic());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (userplaylistRequest.getUser() != null &&
-        userplaylistRequest.getUser().getId() != null) {
+            userplaylistRequest.getUser().getId() != null) {
 
-        UserProfile existingUser = userRepository.findById(
-        userplaylistRequest.getUser().getId()
-        ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+            UserProfile existingUser = userRepository.findById(
+                userplaylistRequest.getUser().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-        existing.setUser(existingUser);
+            existing.setUser(existingUser);
         } else {
-        existing.setUser(null);
+            existing.setUser(null);
         }
-
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-        // Vider la collection existante
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
         existing.getItems().clear();
 
         if (userplaylistRequest.getItems() != null) {
-        for (var item : userplaylistRequest.getItems()) {
-        UserPlaylistItem existingItem;
-        if (item.getId() != null) {
-        existingItem = itemsRepository.findById(item.getId())
-        .orElseThrow(() -> new RuntimeException("UserPlaylistItem not found"));
-        } else {
-        existingItem = item; // ou mapper les champs si DTO
+            for (var item : userplaylistRequest.getItems()) {
+                UserPlaylistItem existingItem;
+                if (item.getId() != null) {
+                    existingItem = itemsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserPlaylistItem not found"));
+                } else {
+                existingItem = item;
+                }
+
+                existingItem.setPlaylist(existing);
+                existing.getItems().add(existingItem);
+            }
         }
-        // Maintenir la relation bidirectionnelle
-        existingItem.setPlaylist(existing);
-
-        // Ajouter directement dans la collection existante
-        existing.getItems().add(existingItem);
-        }
-        }
-        // NE PLUS FAIRE setCollection()
-
-    
-
-    
-
-
-        return userplaylistRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<UserPlaylist> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-UserPlaylist entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-    
-        if (entity.getItems() != null) {
-        for (var child : entity.getItems()) {
         
-            child.setPlaylist(null); // retirer la référence inverse
-        
-        }
-        entity.getItems().clear();
-        }
-    
+    // ---------- Relations OneToOne ----------
 
-
-// --- Dissocier ManyToMany ---
-
-    
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getUser() != null) {
-        entity.setUser(null);
-        }
-    
-
-    
-
-
-repository.delete(entity);
-return true;
+    return userplaylistRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<UserPlaylist> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        UserPlaylist entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+        if (entity.getItems() != null) {
+            for (var child : entity.getItems()) {
+                
+                child.setPlaylist(null); // retirer la référence inverse
+                
+            }
+            entity.getItems().clear();
+        }
+        
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getUser() != null) {
+            entity.setUser(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }

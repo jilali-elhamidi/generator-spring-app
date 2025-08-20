@@ -19,7 +19,7 @@ public class MerchandiseStockHistoryService extends BaseService<MerchandiseStock
     protected final MerchandiseStockHistoryRepository merchandisestockhistoryRepository;
     private final MerchandiseRepository merchandiseItemRepository;
 
-    public MerchandiseStockHistoryService(MerchandiseStockHistoryRepository repository,MerchandiseRepository merchandiseItemRepository)
+    public MerchandiseStockHistoryService(MerchandiseStockHistoryRepository repository, MerchandiseRepository merchandiseItemRepository)
     {
         super(repository);
         this.merchandisestockhistoryRepository = repository;
@@ -28,24 +28,23 @@ public class MerchandiseStockHistoryService extends BaseService<MerchandiseStock
 
     @Override
     public MerchandiseStockHistory save(MerchandiseStockHistory merchandisestockhistory) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (merchandisestockhistory.getMerchandiseItem() != null &&
+            merchandisestockhistory.getMerchandiseItem().getId() != null) {
 
+            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                merchandisestockhistory.getMerchandiseItem().getId()
+            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
 
-    
-
-
-    
-
-    if (merchandisestockhistory.getMerchandiseItem() != null
-        && merchandisestockhistory.getMerchandiseItem().getId() != null) {
-        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-        merchandisestockhistory.getMerchandiseItem().getId()
-        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
-        merchandisestockhistory.setMerchandiseItem(existingMerchandiseItem);
+            merchandisestockhistory.setMerchandiseItem(existingMerchandiseItem);
         }
-    
+        
+    // ---------- OneToOne ----------
 
-        return merchandisestockhistoryRepository.save(merchandisestockhistory);
-    }
+    return merchandisestockhistoryRepository.save(merchandisestockhistory);
+}
 
 
     public MerchandiseStockHistory update(Long id, MerchandiseStockHistory merchandisestockhistoryRequest) {
@@ -57,61 +56,40 @@ public class MerchandiseStockHistoryService extends BaseService<MerchandiseStock
         existing.setQuantityChange(merchandisestockhistoryRequest.getQuantityChange());
         existing.setReason(merchandisestockhistoryRequest.getReason());
 
-// Relations ManyToOne : mise à jour conditionnelle
+    // ---------- Relations ManyToOne ----------
         if (merchandisestockhistoryRequest.getMerchandiseItem() != null &&
-        merchandisestockhistoryRequest.getMerchandiseItem().getId() != null) {
+            merchandisestockhistoryRequest.getMerchandiseItem().getId() != null) {
 
-        Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-        merchandisestockhistoryRequest.getMerchandiseItem().getId()
-        ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                merchandisestockhistoryRequest.getMerchandiseItem().getId()
+            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
 
-        existing.setMerchandiseItem(existingMerchandiseItem);
+            existing.setMerchandiseItem(existingMerchandiseItem);
         } else {
-        existing.setMerchandiseItem(null);
+            existing.setMerchandiseItem(null);
         }
+        
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
 
-// Relations ManyToMany : synchronisation sécurisée
-
-// Relations OneToMany : synchronisation sécurisée
-
-    
-
-
-        return merchandisestockhistoryRepository.save(existing);
-    }
-@Transactional
-public boolean deleteById(Long id) {
-Optional<MerchandiseStockHistory> entityOpt = repository.findById(id);
-if (entityOpt.isEmpty()) return false;
-
-MerchandiseStockHistory entity = entityOpt.get();
-
-// --- Dissocier OneToMany ---
-
-    
-
-
-// --- Dissocier ManyToMany ---
-
-    
-
-
-
-// --- Dissocier OneToOne ---
-
-    
-
-
-// --- Dissocier ManyToOne ---
-
-    
-        if (entity.getMerchandiseItem() != null) {
-        entity.setMerchandiseItem(null);
-        }
-    
-
-
-repository.delete(entity);
-return true;
+    return merchandisestockhistoryRepository.save(existing);
 }
+    @Transactional
+    public boolean deleteById(Long id) {
+        Optional<MerchandiseStockHistory> entityOpt = repository.findById(id);
+        if (entityOpt.isEmpty()) return false;
+
+        MerchandiseStockHistory entity = entityOpt.get();
+    // --- Dissocier OneToMany ---
+    // --- Dissocier ManyToMany ---
+    // --- Dissocier OneToOne ---
+    // --- Dissocier ManyToOne ---
+        if (entity.getMerchandiseItem() != null) {
+            entity.setMerchandiseItem(null);
+        }
+        
+        repository.delete(entity);
+        return true;
+    }
 }
