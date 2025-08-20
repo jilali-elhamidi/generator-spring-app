@@ -1,0 +1,82 @@
+package com.example.modules.entertainment_ecosystem.controller;
+
+import com.example.modules.entertainment_ecosystem.dto.VideoGameDto;
+import com.example.modules.entertainment_ecosystem.model.VideoGame;
+import com.example.modules.entertainment_ecosystem.mapper.VideoGameMapper;
+import com.example.modules.entertainment_ecosystem.service.VideoGameService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/videogames")
+public class VideoGameController {
+
+    private final VideoGameService videogameService;
+    private final VideoGameMapper videogameMapper;
+
+    public VideoGameController(VideoGameService videogameService,
+                                    VideoGameMapper videogameMapper) {
+        this.videogameService = videogameService;
+        this.videogameMapper = videogameMapper;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<VideoGameDto>> getAllVideoGames() {
+        List<VideoGame> entities = videogameService.findAll();
+        return ResponseEntity.ok(videogameMapper.toDtoList(entities));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<VideoGameDto> getVideoGameById(@PathVariable Long id) {
+        return videogameService.findById(id)
+                .map(videogameMapper::toDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<VideoGameDto> createVideoGame(
+            @Valid @RequestBody VideoGameDto videogameDto,
+            UriComponentsBuilder uriBuilder) {
+
+        VideoGame entity = videogameMapper.toEntity(videogameDto);
+        VideoGame saved = videogameService.save(entity);
+        URI location = uriBuilder.path("/api/videogames/{id}")
+                                 .buildAndExpand(saved.getId()).toUri();
+        return ResponseEntity.created(location).body(videogameMapper.toDto(saved));
+    }
+
+            @PutMapping("/{id}")
+            public ResponseEntity<VideoGameDto> updateVideoGame(
+                @PathVariable Long id,
+                @RequestBody VideoGameDto videogameDto) {
+
+                // Transformer le DTO en entity pour le service
+                VideoGame entityToUpdate = videogameMapper.toEntity(videogameDto);
+
+                // Appel du service update
+                VideoGame updatedEntity = videogameService.update(id, entityToUpdate);
+
+                // Transformer l’entity mise à jour en DTO pour le retour
+                VideoGameDto updatedDto = videogameMapper.toDto(updatedEntity);
+
+                return ResponseEntity.ok(updatedDto);
+                }
+                @DeleteMapping("/{id}")
+                public ResponseEntity<Void> deleteVideoGame(@PathVariable Long id) {
+                    boolean deleted = videogameService.deleteById(id);
+
+                    if (!deleted) {
+                    // Renvoie 404 si l'ID n'existe pas
+                    return ResponseEntity.notFound().build();
+                    }
+
+                    // Renvoie 204 si suppression réussie
+                    return ResponseEntity.noContent().build();
+                    }
+}
