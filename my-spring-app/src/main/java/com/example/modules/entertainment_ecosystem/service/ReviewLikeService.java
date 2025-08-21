@@ -35,28 +35,35 @@ public class ReviewLikeService extends BaseService<ReviewLike> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (reviewlike.getUser() != null &&
-            reviewlike.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                reviewlike.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            reviewlike.setUser(existingUser);
+        if (reviewlike.getUser() != null) {
+            if (reviewlike.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    reviewlike.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + reviewlike.getUser().getId()));
+                reviewlike.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(reviewlike.getUser());
+                reviewlike.setUser(newUser);
+            }
         }
         
-        if (reviewlike.getReview() != null &&
-            reviewlike.getReview().getId() != null) {
-
-            Review existingReview = reviewRepository.findById(
-                reviewlike.getReview().getId()
-            ).orElseThrow(() -> new RuntimeException("Review not found"));
-
-            reviewlike.setReview(existingReview);
+        if (reviewlike.getReview() != null) {
+            if (reviewlike.getReview().getId() != null) {
+                Review existingReview = reviewRepository.findById(
+                    reviewlike.getReview().getId()
+                ).orElseThrow(() -> new RuntimeException("Review not found with id "
+                    + reviewlike.getReview().getId()));
+                reviewlike.setReview(existingReview);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Review newReview = reviewRepository.save(reviewlike.getReview());
+                reviewlike.setReview(newReview);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return reviewlikeRepository.save(reviewlike);
 }
 
@@ -96,7 +103,6 @@ public class ReviewLikeService extends BaseService<ReviewLike> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return reviewlikeRepository.save(existing);
 }
     @Transactional

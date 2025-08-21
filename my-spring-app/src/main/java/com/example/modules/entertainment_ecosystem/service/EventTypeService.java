@@ -49,7 +49,6 @@ public class EventTypeService extends BaseService<EventType> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return eventtypeRepository.save(eventtype);
 }
 
@@ -82,7 +81,6 @@ public class EventTypeService extends BaseService<EventType> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return eventtypeRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class EventTypeService extends BaseService<EventType> {
     // --- Dissocier OneToMany ---
         if (entity.getEvents() != null) {
             for (var child : entity.getEvents()) {
-                
-                child.setEventType(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setEventType(null);
             }
             entity.getEvents().clear();
         }

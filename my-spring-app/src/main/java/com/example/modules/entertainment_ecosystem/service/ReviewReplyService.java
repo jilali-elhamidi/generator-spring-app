@@ -35,28 +35,35 @@ public class ReviewReplyService extends BaseService<ReviewReply> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (reviewreply.getUser() != null &&
-            reviewreply.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                reviewreply.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            reviewreply.setUser(existingUser);
+        if (reviewreply.getUser() != null) {
+            if (reviewreply.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    reviewreply.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + reviewreply.getUser().getId()));
+                reviewreply.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(reviewreply.getUser());
+                reviewreply.setUser(newUser);
+            }
         }
         
-        if (reviewreply.getReviewComment() != null &&
-            reviewreply.getReviewComment().getId() != null) {
-
-            ReviewComment existingReviewComment = reviewCommentRepository.findById(
-                reviewreply.getReviewComment().getId()
-            ).orElseThrow(() -> new RuntimeException("ReviewComment not found"));
-
-            reviewreply.setReviewComment(existingReviewComment);
+        if (reviewreply.getReviewComment() != null) {
+            if (reviewreply.getReviewComment().getId() != null) {
+                ReviewComment existingReviewComment = reviewCommentRepository.findById(
+                    reviewreply.getReviewComment().getId()
+                ).orElseThrow(() -> new RuntimeException("ReviewComment not found with id "
+                    + reviewreply.getReviewComment().getId()));
+                reviewreply.setReviewComment(existingReviewComment);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ReviewComment newReviewComment = reviewCommentRepository.save(reviewreply.getReviewComment());
+                reviewreply.setReviewComment(newReviewComment);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return reviewreplyRepository.save(reviewreply);
 }
 
@@ -97,7 +104,6 @@ public class ReviewReplyService extends BaseService<ReviewReply> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return reviewreplyRepository.save(existing);
 }
     @Transactional

@@ -49,7 +49,6 @@ public class ContentRatingAgeGroupService extends BaseService<ContentRatingAgeGr
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return contentratingagegroupRepository.save(contentratingagegroup);
 }
 
@@ -83,7 +82,6 @@ public class ContentRatingAgeGroupService extends BaseService<ContentRatingAgeGr
         }
         
     // ---------- Relations OneToOne ----------
-
     return contentratingagegroupRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class ContentRatingAgeGroupService extends BaseService<ContentRatingAgeGr
     // --- Dissocier OneToMany ---
         if (entity.getContentRatings() != null) {
             for (var child : entity.getContentRatings()) {
-                
-                child.setAgeGroup(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAgeGroup(null);
             }
             entity.getContentRatings().clear();
         }

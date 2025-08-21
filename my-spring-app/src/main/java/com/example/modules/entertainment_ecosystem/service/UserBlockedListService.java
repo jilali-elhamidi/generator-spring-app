@@ -35,28 +35,35 @@ public class UserBlockedListService extends BaseService<UserBlockedList> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (userblockedlist.getBlocker() != null &&
-            userblockedlist.getBlocker().getId() != null) {
-
-            UserProfile existingBlocker = blockerRepository.findById(
-                userblockedlist.getBlocker().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userblockedlist.setBlocker(existingBlocker);
+        if (userblockedlist.getBlocker() != null) {
+            if (userblockedlist.getBlocker().getId() != null) {
+                UserProfile existingBlocker = blockerRepository.findById(
+                    userblockedlist.getBlocker().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userblockedlist.getBlocker().getId()));
+                userblockedlist.setBlocker(existingBlocker);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newBlocker = blockerRepository.save(userblockedlist.getBlocker());
+                userblockedlist.setBlocker(newBlocker);
+            }
         }
         
-        if (userblockedlist.getBlocked() != null &&
-            userblockedlist.getBlocked().getId() != null) {
-
-            UserProfile existingBlocked = blockedRepository.findById(
-                userblockedlist.getBlocked().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userblockedlist.setBlocked(existingBlocked);
+        if (userblockedlist.getBlocked() != null) {
+            if (userblockedlist.getBlocked().getId() != null) {
+                UserProfile existingBlocked = blockedRepository.findById(
+                    userblockedlist.getBlocked().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userblockedlist.getBlocked().getId()));
+                userblockedlist.setBlocked(existingBlocked);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newBlocked = blockedRepository.save(userblockedlist.getBlocked());
+                userblockedlist.setBlocked(newBlocked);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return userblockedlistRepository.save(userblockedlist);
 }
 
@@ -96,7 +103,6 @@ public class UserBlockedListService extends BaseService<UserBlockedList> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return userblockedlistRepository.save(existing);
 }
     @Transactional

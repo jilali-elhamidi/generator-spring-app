@@ -49,7 +49,6 @@ public class NotificationTypeService extends BaseService<NotificationType> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return notificationtypeRepository.save(notificationtype);
 }
 
@@ -83,7 +82,6 @@ public class NotificationTypeService extends BaseService<NotificationType> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return notificationtypeRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class NotificationTypeService extends BaseService<NotificationType> {
     // --- Dissocier OneToMany ---
         if (entity.getNotifications() != null) {
             for (var child : entity.getNotifications()) {
-                
-                child.setType(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setType(null);
             }
             entity.getNotifications().clear();
         }

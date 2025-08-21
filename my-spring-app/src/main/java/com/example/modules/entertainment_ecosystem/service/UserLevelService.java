@@ -49,7 +49,6 @@ public class UserLevelService extends BaseService<UserLevel> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return userlevelRepository.save(userlevel);
 }
 
@@ -84,7 +83,6 @@ public class UserLevelService extends BaseService<UserLevel> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return userlevelRepository.save(existing);
 }
     @Transactional
@@ -96,9 +94,8 @@ public class UserLevelService extends BaseService<UserLevel> {
     // --- Dissocier OneToMany ---
         if (entity.getUsers() != null) {
             for (var child : entity.getUsers()) {
-                
-                child.setUserLevel(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUserLevel(null);
             }
             entity.getUsers().clear();
         }

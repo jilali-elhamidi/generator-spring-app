@@ -49,7 +49,6 @@ public class ManagerService extends BaseService<Manager> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return managerRepository.save(manager);
 }
 
@@ -83,7 +82,6 @@ public class ManagerService extends BaseService<Manager> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return managerRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class ManagerService extends BaseService<Manager> {
     // --- Dissocier OneToMany ---
         if (entity.getArtists() != null) {
             for (var child : entity.getArtists()) {
-                
-                child.setManager(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setManager(null);
             }
             entity.getArtists().clear();
         }

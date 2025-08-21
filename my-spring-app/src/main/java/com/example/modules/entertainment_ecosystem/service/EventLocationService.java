@@ -52,18 +52,21 @@ public class EventLocationService extends BaseService<EventLocation> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (eventlocation.getContactPerson() != null &&
-            eventlocation.getContactPerson().getId() != null) {
-
-            Employee existingContactPerson = contactPersonRepository.findById(
-                eventlocation.getContactPerson().getId()
-            ).orElseThrow(() -> new RuntimeException("Employee not found"));
-
-            eventlocation.setContactPerson(existingContactPerson);
+        if (eventlocation.getContactPerson() != null) {
+            if (eventlocation.getContactPerson().getId() != null) {
+                Employee existingContactPerson = contactPersonRepository.findById(
+                    eventlocation.getContactPerson().getId()
+                ).orElseThrow(() -> new RuntimeException("Employee not found with id "
+                    + eventlocation.getContactPerson().getId()));
+                eventlocation.setContactPerson(existingContactPerson);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Employee newContactPerson = contactPersonRepository.save(eventlocation.getContactPerson());
+                eventlocation.setContactPerson(newContactPerson);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return eventlocationRepository.save(eventlocation);
 }
 
@@ -109,7 +112,6 @@ public class EventLocationService extends BaseService<EventLocation> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return eventlocationRepository.save(existing);
 }
     @Transactional
@@ -121,9 +123,8 @@ public class EventLocationService extends BaseService<EventLocation> {
     // --- Dissocier OneToMany ---
         if (entity.getLiveEvents() != null) {
             for (var child : entity.getLiveEvents()) {
-                
-                child.setLocation(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setLocation(null);
             }
             entity.getLiveEvents().clear();
         }

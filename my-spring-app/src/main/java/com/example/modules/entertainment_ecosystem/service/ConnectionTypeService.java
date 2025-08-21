@@ -49,7 +49,6 @@ public class ConnectionTypeService extends BaseService<ConnectionType> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return connectiontypeRepository.save(connectiontype);
 }
 
@@ -82,7 +81,6 @@ public class ConnectionTypeService extends BaseService<ConnectionType> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return connectiontypeRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class ConnectionTypeService extends BaseService<ConnectionType> {
     // --- Dissocier OneToMany ---
         if (entity.getUserConnections() != null) {
             for (var child : entity.getUserConnections()) {
-                
-                child.setType(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setType(null);
             }
             entity.getUserConnections().clear();
         }

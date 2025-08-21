@@ -35,28 +35,35 @@ public class EpisodeReviewService extends BaseService<EpisodeReview> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (episodereview.getUser() != null &&
-            episodereview.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                episodereview.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            episodereview.setUser(existingUser);
+        if (episodereview.getUser() != null) {
+            if (episodereview.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    episodereview.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + episodereview.getUser().getId()));
+                episodereview.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(episodereview.getUser());
+                episodereview.setUser(newUser);
+            }
         }
         
-        if (episodereview.getEpisode() != null &&
-            episodereview.getEpisode().getId() != null) {
-
-            Episode existingEpisode = episodeRepository.findById(
-                episodereview.getEpisode().getId()
-            ).orElseThrow(() -> new RuntimeException("Episode not found"));
-
-            episodereview.setEpisode(existingEpisode);
+        if (episodereview.getEpisode() != null) {
+            if (episodereview.getEpisode().getId() != null) {
+                Episode existingEpisode = episodeRepository.findById(
+                    episodereview.getEpisode().getId()
+                ).orElseThrow(() -> new RuntimeException("Episode not found with id "
+                    + episodereview.getEpisode().getId()));
+                episodereview.setEpisode(existingEpisode);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Episode newEpisode = episodeRepository.save(episodereview.getEpisode());
+                episodereview.setEpisode(newEpisode);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return episodereviewRepository.save(episodereview);
 }
 
@@ -98,7 +105,6 @@ public class EpisodeReviewService extends BaseService<EpisodeReview> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return episodereviewRepository.save(existing);
 }
     @Transactional

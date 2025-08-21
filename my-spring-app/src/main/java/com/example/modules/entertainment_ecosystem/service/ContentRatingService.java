@@ -98,28 +98,35 @@ public class ContentRatingService extends BaseService<ContentRating> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (contentrating.getBoard() != null &&
-            contentrating.getBoard().getId() != null) {
-
-            ContentRatingBoard existingBoard = boardRepository.findById(
-                contentrating.getBoard().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
-
-            contentrating.setBoard(existingBoard);
+        if (contentrating.getBoard() != null) {
+            if (contentrating.getBoard().getId() != null) {
+                ContentRatingBoard existingBoard = boardRepository.findById(
+                    contentrating.getBoard().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found with id "
+                    + contentrating.getBoard().getId()));
+                contentrating.setBoard(existingBoard);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentRatingBoard newBoard = boardRepository.save(contentrating.getBoard());
+                contentrating.setBoard(newBoard);
+            }
         }
         
-        if (contentrating.getAgeGroup() != null &&
-            contentrating.getAgeGroup().getId() != null) {
-
-            ContentRatingAgeGroup existingAgeGroup = ageGroupRepository.findById(
-                contentrating.getAgeGroup().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentRatingAgeGroup not found"));
-
-            contentrating.setAgeGroup(existingAgeGroup);
+        if (contentrating.getAgeGroup() != null) {
+            if (contentrating.getAgeGroup().getId() != null) {
+                ContentRatingAgeGroup existingAgeGroup = ageGroupRepository.findById(
+                    contentrating.getAgeGroup().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentRatingAgeGroup not found with id "
+                    + contentrating.getAgeGroup().getId()));
+                contentrating.setAgeGroup(existingAgeGroup);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentRatingAgeGroup newAgeGroup = ageGroupRepository.save(contentrating.getAgeGroup());
+                contentrating.setAgeGroup(newAgeGroup);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return contentratingRepository.save(contentrating);
 }
 
@@ -211,7 +218,6 @@ public class ContentRatingService extends BaseService<ContentRating> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return contentratingRepository.save(existing);
 }
     @Transactional
@@ -223,27 +229,24 @@ public class ContentRatingService extends BaseService<ContentRating> {
     // --- Dissocier OneToMany ---
         if (entity.getRatedMovies() != null) {
             for (var child : entity.getRatedMovies()) {
-                
-                child.setContentRating(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setContentRating(null);
             }
             entity.getRatedMovies().clear();
         }
         
         if (entity.getRatedTvShows() != null) {
             for (var child : entity.getRatedTvShows()) {
-                
-                child.setContentRating(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setContentRating(null);
             }
             entity.getRatedTvShows().clear();
         }
         
         if (entity.getRatedVideoGames() != null) {
             for (var child : entity.getRatedVideoGames()) {
-                
-                child.setContentRating(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setContentRating(null);
             }
             entity.getRatedVideoGames().clear();
         }

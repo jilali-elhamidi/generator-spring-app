@@ -31,18 +31,21 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (artistaward.getArtist() != null &&
-            artistaward.getArtist().getId() != null) {
-
-            Artist existingArtist = artistRepository.findById(
-                artistaward.getArtist().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            artistaward.setArtist(existingArtist);
+        if (artistaward.getArtist() != null) {
+            if (artistaward.getArtist().getId() != null) {
+                Artist existingArtist = artistRepository.findById(
+                    artistaward.getArtist().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + artistaward.getArtist().getId()));
+                artistaward.setArtist(existingArtist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newArtist = artistRepository.save(artistaward.getArtist());
+                artistaward.setArtist(newArtist);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return artistawardRepository.save(artistaward);
 }
 
@@ -71,7 +74,6 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return artistawardRepository.save(existing);
 }
     @Transactional

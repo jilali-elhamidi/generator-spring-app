@@ -31,18 +31,21 @@ public class UserPreferenceService extends BaseService<UserPreference> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (userpreference.getUser() != null &&
-            userpreference.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                userpreference.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userpreference.setUser(existingUser);
+        if (userpreference.getUser() != null) {
+            if (userpreference.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    userpreference.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userpreference.getUser().getId()));
+                userpreference.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(userpreference.getUser());
+                userpreference.setUser(newUser);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return userpreferenceRepository.save(userpreference);
 }
 
@@ -71,7 +74,6 @@ public class UserPreferenceService extends BaseService<UserPreference> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return userpreferenceRepository.save(existing);
 }
     @Transactional

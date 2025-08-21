@@ -35,28 +35,35 @@ public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (merchandisesale.getMerchandiseItem() != null &&
-            merchandisesale.getMerchandiseItem().getId() != null) {
-
-            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-                merchandisesale.getMerchandiseItem().getId()
-            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
-
-            merchandisesale.setMerchandiseItem(existingMerchandiseItem);
+        if (merchandisesale.getMerchandiseItem() != null) {
+            if (merchandisesale.getMerchandiseItem().getId() != null) {
+                Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                    merchandisesale.getMerchandiseItem().getId()
+                ).orElseThrow(() -> new RuntimeException("Merchandise not found with id "
+                    + merchandisesale.getMerchandiseItem().getId()));
+                merchandisesale.setMerchandiseItem(existingMerchandiseItem);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Merchandise newMerchandiseItem = merchandiseItemRepository.save(merchandisesale.getMerchandiseItem());
+                merchandisesale.setMerchandiseItem(newMerchandiseItem);
+            }
         }
         
-        if (merchandisesale.getUser() != null &&
-            merchandisesale.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                merchandisesale.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            merchandisesale.setUser(existingUser);
+        if (merchandisesale.getUser() != null) {
+            if (merchandisesale.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    merchandisesale.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + merchandisesale.getUser().getId()));
+                merchandisesale.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(merchandisesale.getUser());
+                merchandisesale.setUser(newUser);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return merchandisesaleRepository.save(merchandisesale);
 }
 
@@ -97,7 +104,6 @@ public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return merchandisesaleRepository.save(existing);
 }
     @Transactional

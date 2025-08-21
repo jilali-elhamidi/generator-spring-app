@@ -27,6 +27,7 @@ import lombok.EqualsAndHashCode;
 public class GameSession extends BaseEntity {
 
     // === Attributs simples ===
+        @Column(unique = true, nullable = false)
     private Integer score;
 
     @Min(1)

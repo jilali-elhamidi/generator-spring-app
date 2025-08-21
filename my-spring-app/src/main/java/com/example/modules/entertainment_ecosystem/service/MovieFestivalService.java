@@ -33,10 +33,18 @@ public class MovieFestivalService extends BaseService<MovieFestival> {
         if (moviefestival.getMovies() != null &&
             !moviefestival.getMovies().isEmpty()) {
 
-            List<Movie> attachedMovies = moviefestival.getMovies().stream()
-            .map(item -> moviesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
-            .toList();
+            List<Movie> attachedMovies = new ArrayList<>();
+            for (Movie item : moviefestival.getMovies()) {
+                if (item.getId() != null) {
+                    Movie existingItem = moviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId()));
+                    attachedMovies.add(existingItem);
+                } else {
+
+                    Movie newItem = moviesRepository.save(item);
+                    attachedMovies.add(newItem);
+                }
+            }
 
             moviefestival.setMovies(attachedMovies);
 
@@ -46,7 +54,6 @@ public class MovieFestivalService extends BaseService<MovieFestival> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return moviefestivalRepository.save(moviefestival);
 }
 
@@ -83,7 +90,6 @@ public class MovieFestivalService extends BaseService<MovieFestival> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return moviefestivalRepository.save(existing);
 }
     @Transactional
@@ -98,7 +104,6 @@ public class MovieFestivalService extends BaseService<MovieFestival> {
             for (Movie item : new ArrayList<>(entity.getMovies())) {
                 
                 item.getFestivals().remove(entity); // retire côté inverse
-                
             }
             entity.getMovies().clear(); // puis vide côté courant
         }

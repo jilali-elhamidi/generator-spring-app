@@ -31,18 +31,21 @@ public class ShiftService extends BaseService<Shift> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (shift.getEmployee() != null &&
-            shift.getEmployee().getId() != null) {
-
-            Employee existingEmployee = employeeRepository.findById(
-                shift.getEmployee().getId()
-            ).orElseThrow(() -> new RuntimeException("Employee not found"));
-
-            shift.setEmployee(existingEmployee);
+        if (shift.getEmployee() != null) {
+            if (shift.getEmployee().getId() != null) {
+                Employee existingEmployee = employeeRepository.findById(
+                    shift.getEmployee().getId()
+                ).orElseThrow(() -> new RuntimeException("Employee not found with id "
+                    + shift.getEmployee().getId()));
+                shift.setEmployee(existingEmployee);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Employee newEmployee = employeeRepository.save(shift.getEmployee());
+                shift.setEmployee(newEmployee);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return shiftRepository.save(shift);
 }
 
@@ -72,7 +75,6 @@ public class ShiftService extends BaseService<Shift> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return shiftRepository.save(existing);
 }
     @Transactional

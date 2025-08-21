@@ -39,38 +39,49 @@ public class ReportedContentService extends BaseService<ReportedContent> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (reportedcontent.getUser() != null &&
-            reportedcontent.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                reportedcontent.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            reportedcontent.setUser(existingUser);
+        if (reportedcontent.getUser() != null) {
+            if (reportedcontent.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    reportedcontent.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + reportedcontent.getUser().getId()));
+                reportedcontent.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(reportedcontent.getUser());
+                reportedcontent.setUser(newUser);
+            }
         }
         
-        if (reportedcontent.getReview() != null &&
-            reportedcontent.getReview().getId() != null) {
-
-            Review existingReview = reviewRepository.findById(
-                reportedcontent.getReview().getId()
-            ).orElseThrow(() -> new RuntimeException("Review not found"));
-
-            reportedcontent.setReview(existingReview);
+        if (reportedcontent.getReview() != null) {
+            if (reportedcontent.getReview().getId() != null) {
+                Review existingReview = reviewRepository.findById(
+                    reportedcontent.getReview().getId()
+                ).orElseThrow(() -> new RuntimeException("Review not found with id "
+                    + reportedcontent.getReview().getId()));
+                reportedcontent.setReview(existingReview);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Review newReview = reviewRepository.save(reportedcontent.getReview());
+                reportedcontent.setReview(newReview);
+            }
         }
         
-        if (reportedcontent.getForumPost() != null &&
-            reportedcontent.getForumPost().getId() != null) {
-
-            ForumPost existingForumPost = forumPostRepository.findById(
-                reportedcontent.getForumPost().getId()
-            ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
-
-            reportedcontent.setForumPost(existingForumPost);
+        if (reportedcontent.getForumPost() != null) {
+            if (reportedcontent.getForumPost().getId() != null) {
+                ForumPost existingForumPost = forumPostRepository.findById(
+                    reportedcontent.getForumPost().getId()
+                ).orElseThrow(() -> new RuntimeException("ForumPost not found with id "
+                    + reportedcontent.getForumPost().getId()));
+                reportedcontent.setForumPost(existingForumPost);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ForumPost newForumPost = forumPostRepository.save(reportedcontent.getForumPost());
+                reportedcontent.setForumPost(newForumPost);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return reportedcontentRepository.save(reportedcontent);
 }
 
@@ -124,7 +135,6 @@ public class ReportedContentService extends BaseService<ReportedContent> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return reportedcontentRepository.save(existing);
 }
     @Transactional

@@ -39,38 +39,49 @@ public class UserMessageService extends BaseService<UserMessage> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (usermessage.getSender() != null &&
-            usermessage.getSender().getId() != null) {
-
-            UserProfile existingSender = senderRepository.findById(
-                usermessage.getSender().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            usermessage.setSender(existingSender);
+        if (usermessage.getSender() != null) {
+            if (usermessage.getSender().getId() != null) {
+                UserProfile existingSender = senderRepository.findById(
+                    usermessage.getSender().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + usermessage.getSender().getId()));
+                usermessage.setSender(existingSender);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newSender = senderRepository.save(usermessage.getSender());
+                usermessage.setSender(newSender);
+            }
         }
         
-        if (usermessage.getReceiver() != null &&
-            usermessage.getReceiver().getId() != null) {
-
-            UserProfile existingReceiver = receiverRepository.findById(
-                usermessage.getReceiver().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            usermessage.setReceiver(existingReceiver);
+        if (usermessage.getReceiver() != null) {
+            if (usermessage.getReceiver().getId() != null) {
+                UserProfile existingReceiver = receiverRepository.findById(
+                    usermessage.getReceiver().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + usermessage.getReceiver().getId()));
+                usermessage.setReceiver(existingReceiver);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newReceiver = receiverRepository.save(usermessage.getReceiver());
+                usermessage.setReceiver(newReceiver);
+            }
         }
         
-        if (usermessage.getThread() != null &&
-            usermessage.getThread().getId() != null) {
-
-            MessageThread existingThread = threadRepository.findById(
-                usermessage.getThread().getId()
-            ).orElseThrow(() -> new RuntimeException("MessageThread not found"));
-
-            usermessage.setThread(existingThread);
+        if (usermessage.getThread() != null) {
+            if (usermessage.getThread().getId() != null) {
+                MessageThread existingThread = threadRepository.findById(
+                    usermessage.getThread().getId()
+                ).orElseThrow(() -> new RuntimeException("MessageThread not found with id "
+                    + usermessage.getThread().getId()));
+                usermessage.setThread(existingThread);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MessageThread newThread = threadRepository.save(usermessage.getThread());
+                usermessage.setThread(newThread);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return usermessageRepository.save(usermessage);
 }
 
@@ -125,7 +136,6 @@ public class UserMessageService extends BaseService<UserMessage> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return usermessageRepository.save(existing);
 }
     @Transactional

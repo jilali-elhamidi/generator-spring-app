@@ -70,10 +70,18 @@ public class BookService extends BaseService<Book> {
         if (book.getGenres() != null &&
             !book.getGenres().isEmpty()) {
 
-            List<Genre> attachedGenres = book.getGenres().stream()
-            .map(item -> genresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
-            .toList();
+            List<Genre> attachedGenres = new ArrayList<>();
+            for (Genre item : book.getGenres()) {
+                if (item.getId() != null) {
+                    Genre existingItem = genresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId()));
+                    attachedGenres.add(existingItem);
+                } else {
+
+                    Genre newItem = genresRepository.save(item);
+                    attachedGenres.add(newItem);
+                }
+            }
 
             book.setGenres(attachedGenres);
 
@@ -84,10 +92,18 @@ public class BookService extends BaseService<Book> {
         if (book.getCharacters() != null &&
             !book.getCharacters().isEmpty()) {
 
-            List<BookCharacter> attachedCharacters = book.getCharacters().stream()
-            .map(item -> charactersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("BookCharacter not found with id " + item.getId())))
-            .toList();
+            List<BookCharacter> attachedCharacters = new ArrayList<>();
+            for (BookCharacter item : book.getCharacters()) {
+                if (item.getId() != null) {
+                    BookCharacter existingItem = charactersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("BookCharacter not found with id " + item.getId()));
+                    attachedCharacters.add(existingItem);
+                } else {
+
+                    BookCharacter newItem = charactersRepository.save(item);
+                    attachedCharacters.add(newItem);
+                }
+            }
 
             book.setCharacters(attachedCharacters);
 
@@ -96,38 +112,49 @@ public class BookService extends BaseService<Book> {
         }
         
     // ---------- ManyToOne ----------
-        if (book.getAuthor() != null &&
-            book.getAuthor().getId() != null) {
-
-            Artist existingAuthor = authorRepository.findById(
-                book.getAuthor().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            book.setAuthor(existingAuthor);
+        if (book.getAuthor() != null) {
+            if (book.getAuthor().getId() != null) {
+                Artist existingAuthor = authorRepository.findById(
+                    book.getAuthor().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + book.getAuthor().getId()));
+                book.setAuthor(existingAuthor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newAuthor = authorRepository.save(book.getAuthor());
+                book.setAuthor(newAuthor);
+            }
         }
         
-        if (book.getPublisher() != null &&
-            book.getPublisher().getId() != null) {
-
-            Publisher existingPublisher = publisherRepository.findById(
-                book.getPublisher().getId()
-            ).orElseThrow(() -> new RuntimeException("Publisher not found"));
-
-            book.setPublisher(existingPublisher);
+        if (book.getPublisher() != null) {
+            if (book.getPublisher().getId() != null) {
+                Publisher existingPublisher = publisherRepository.findById(
+                    book.getPublisher().getId()
+                ).orElseThrow(() -> new RuntimeException("Publisher not found with id "
+                    + book.getPublisher().getId()));
+                book.setPublisher(existingPublisher);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Publisher newPublisher = publisherRepository.save(book.getPublisher());
+                book.setPublisher(newPublisher);
+            }
         }
         
-        if (book.getSeries() != null &&
-            book.getSeries().getId() != null) {
-
-            BookSeries existingSeries = seriesRepository.findById(
-                book.getSeries().getId()
-            ).orElseThrow(() -> new RuntimeException("BookSeries not found"));
-
-            book.setSeries(existingSeries);
+        if (book.getSeries() != null) {
+            if (book.getSeries().getId() != null) {
+                BookSeries existingSeries = seriesRepository.findById(
+                    book.getSeries().getId()
+                ).orElseThrow(() -> new RuntimeException("BookSeries not found with id "
+                    + book.getSeries().getId()));
+                book.setSeries(existingSeries);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                BookSeries newSeries = seriesRepository.save(book.getSeries());
+                book.setSeries(newSeries);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return bookRepository.save(book);
 }
 
@@ -235,7 +262,6 @@ public class BookService extends BaseService<Book> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return bookRepository.save(existing);
 }
     @Transactional
@@ -247,9 +273,8 @@ public class BookService extends BaseService<Book> {
     // --- Dissocier OneToMany ---
         if (entity.getReviews() != null) {
             for (var child : entity.getReviews()) {
-                
-                child.setBook(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setBook(null);
             }
             entity.getReviews().clear();
         }
@@ -259,7 +284,6 @@ public class BookService extends BaseService<Book> {
             for (Genre item : new ArrayList<>(entity.getGenres())) {
                 
                 item.getBookGenres().remove(entity); // retire côté inverse
-                
             }
             entity.getGenres().clear(); // puis vide côté courant
         }
@@ -268,7 +292,6 @@ public class BookService extends BaseService<Book> {
             for (BookCharacter item : new ArrayList<>(entity.getCharacters())) {
                 
                 item.getBooks().remove(entity); // retire côté inverse
-                
             }
             entity.getCharacters().clear(); // puis vide côté courant
         }

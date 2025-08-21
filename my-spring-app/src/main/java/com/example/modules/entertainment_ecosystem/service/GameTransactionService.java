@@ -35,28 +35,35 @@ public class GameTransactionService extends BaseService<GameTransaction> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (gametransaction.getUser() != null &&
-            gametransaction.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                gametransaction.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            gametransaction.setUser(existingUser);
+        if (gametransaction.getUser() != null) {
+            if (gametransaction.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    gametransaction.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + gametransaction.getUser().getId()));
+                gametransaction.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(gametransaction.getUser());
+                gametransaction.setUser(newUser);
+            }
         }
         
-        if (gametransaction.getCurrency() != null &&
-            gametransaction.getCurrency().getId() != null) {
-
-            GameCurrency existingCurrency = currencyRepository.findById(
-                gametransaction.getCurrency().getId()
-            ).orElseThrow(() -> new RuntimeException("GameCurrency not found"));
-
-            gametransaction.setCurrency(existingCurrency);
+        if (gametransaction.getCurrency() != null) {
+            if (gametransaction.getCurrency().getId() != null) {
+                GameCurrency existingCurrency = currencyRepository.findById(
+                    gametransaction.getCurrency().getId()
+                ).orElseThrow(() -> new RuntimeException("GameCurrency not found with id "
+                    + gametransaction.getCurrency().getId()));
+                gametransaction.setCurrency(existingCurrency);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                GameCurrency newCurrency = currencyRepository.save(gametransaction.getCurrency());
+                gametransaction.setCurrency(newCurrency);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return gametransactionRepository.save(gametransaction);
 }
 
@@ -98,7 +105,6 @@ public class GameTransactionService extends BaseService<GameTransaction> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return gametransactionRepository.save(existing);
 }
     @Transactional

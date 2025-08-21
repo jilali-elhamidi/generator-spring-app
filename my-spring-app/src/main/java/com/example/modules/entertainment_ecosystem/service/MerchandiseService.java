@@ -170,10 +170,18 @@ public class MerchandiseService extends BaseService<Merchandise> {
         if (merchandise.getRelatedMovies() != null &&
             !merchandise.getRelatedMovies().isEmpty()) {
 
-            List<Movie> attachedRelatedMovies = merchandise.getRelatedMovies().stream()
-            .map(item -> relatedMoviesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
-            .toList();
+            List<Movie> attachedRelatedMovies = new ArrayList<>();
+            for (Movie item : merchandise.getRelatedMovies()) {
+                if (item.getId() != null) {
+                    Movie existingItem = relatedMoviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId()));
+                    attachedRelatedMovies.add(existingItem);
+                } else {
+
+                    Movie newItem = relatedMoviesRepository.save(item);
+                    attachedRelatedMovies.add(newItem);
+                }
+            }
 
             merchandise.setRelatedMovies(attachedRelatedMovies);
 
@@ -184,10 +192,18 @@ public class MerchandiseService extends BaseService<Merchandise> {
         if (merchandise.getRelatedShows() != null &&
             !merchandise.getRelatedShows().isEmpty()) {
 
-            List<TVShow> attachedRelatedShows = merchandise.getRelatedShows().stream()
-            .map(item -> relatedShowsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
-            .toList();
+            List<TVShow> attachedRelatedShows = new ArrayList<>();
+            for (TVShow item : merchandise.getRelatedShows()) {
+                if (item.getId() != null) {
+                    TVShow existingItem = relatedShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId()));
+                    attachedRelatedShows.add(existingItem);
+                } else {
+
+                    TVShow newItem = relatedShowsRepository.save(item);
+                    attachedRelatedShows.add(newItem);
+                }
+            }
 
             merchandise.setRelatedShows(attachedRelatedShows);
 
@@ -198,10 +214,18 @@ public class MerchandiseService extends BaseService<Merchandise> {
         if (merchandise.getOwnedByUsers() != null &&
             !merchandise.getOwnedByUsers().isEmpty()) {
 
-            List<UserProfile> attachedOwnedByUsers = merchandise.getOwnedByUsers().stream()
-            .map(item -> ownedByUsersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedOwnedByUsers = new ArrayList<>();
+            for (UserProfile item : merchandise.getOwnedByUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = ownedByUsersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedOwnedByUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = ownedByUsersRepository.save(item);
+                    attachedOwnedByUsers.add(newItem);
+                }
+            }
 
             merchandise.setOwnedByUsers(attachedOwnedByUsers);
 
@@ -210,70 +234,92 @@ public class MerchandiseService extends BaseService<Merchandise> {
         }
         
     // ---------- ManyToOne ----------
-        if (merchandise.getArtist() != null &&
-            merchandise.getArtist().getId() != null) {
-
-            Artist existingArtist = artistRepository.findById(
-                merchandise.getArtist().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            merchandise.setArtist(existingArtist);
+        if (merchandise.getArtist() != null) {
+            if (merchandise.getArtist().getId() != null) {
+                Artist existingArtist = artistRepository.findById(
+                    merchandise.getArtist().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + merchandise.getArtist().getId()));
+                merchandise.setArtist(existingArtist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newArtist = artistRepository.save(merchandise.getArtist());
+                merchandise.setArtist(newArtist);
+            }
         }
         
-        if (merchandise.getProductType() != null &&
-            merchandise.getProductType().getId() != null) {
-
-            MerchandiseType existingProductType = productTypeRepository.findById(
-                merchandise.getProductType().getId()
-            ).orElseThrow(() -> new RuntimeException("MerchandiseType not found"));
-
-            merchandise.setProductType(existingProductType);
+        if (merchandise.getProductType() != null) {
+            if (merchandise.getProductType().getId() != null) {
+                MerchandiseType existingProductType = productTypeRepository.findById(
+                    merchandise.getProductType().getId()
+                ).orElseThrow(() -> new RuntimeException("MerchandiseType not found with id "
+                    + merchandise.getProductType().getId()));
+                merchandise.setProductType(existingProductType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MerchandiseType newProductType = productTypeRepository.save(merchandise.getProductType());
+                merchandise.setProductType(newProductType);
+            }
         }
         
-        if (merchandise.getSupplier() != null &&
-            merchandise.getSupplier().getId() != null) {
-
-            MerchandiseSupplier existingSupplier = supplierRepository.findById(
-                merchandise.getSupplier().getId()
-            ).orElseThrow(() -> new RuntimeException("MerchandiseSupplier not found"));
-
-            merchandise.setSupplier(existingSupplier);
+        if (merchandise.getSupplier() != null) {
+            if (merchandise.getSupplier().getId() != null) {
+                MerchandiseSupplier existingSupplier = supplierRepository.findById(
+                    merchandise.getSupplier().getId()
+                ).orElseThrow(() -> new RuntimeException("MerchandiseSupplier not found with id "
+                    + merchandise.getSupplier().getId()));
+                merchandise.setSupplier(existingSupplier);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MerchandiseSupplier newSupplier = supplierRepository.save(merchandise.getSupplier());
+                merchandise.setSupplier(newSupplier);
+            }
         }
         
-        if (merchandise.getCollection() != null &&
-            merchandise.getCollection().getId() != null) {
-
-            MerchandiseCollection existingCollection = collectionRepository.findById(
-                merchandise.getCollection().getId()
-            ).orElseThrow(() -> new RuntimeException("MerchandiseCollection not found"));
-
-            merchandise.setCollection(existingCollection);
+        if (merchandise.getCollection() != null) {
+            if (merchandise.getCollection().getId() != null) {
+                MerchandiseCollection existingCollection = collectionRepository.findById(
+                    merchandise.getCollection().getId()
+                ).orElseThrow(() -> new RuntimeException("MerchandiseCollection not found with id "
+                    + merchandise.getCollection().getId()));
+                merchandise.setCollection(existingCollection);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MerchandiseCollection newCollection = collectionRepository.save(merchandise.getCollection());
+                merchandise.setCollection(newCollection);
+            }
         }
         
-        if (merchandise.getCategory() != null &&
-            merchandise.getCategory().getId() != null) {
-
-            MerchandiseCategory existingCategory = categoryRepository.findById(
-                merchandise.getCategory().getId()
-            ).orElseThrow(() -> new RuntimeException("MerchandiseCategory not found"));
-
-            merchandise.setCategory(existingCategory);
+        if (merchandise.getCategory() != null) {
+            if (merchandise.getCategory().getId() != null) {
+                MerchandiseCategory existingCategory = categoryRepository.findById(
+                    merchandise.getCategory().getId()
+                ).orElseThrow(() -> new RuntimeException("MerchandiseCategory not found with id "
+                    + merchandise.getCategory().getId()));
+                merchandise.setCategory(existingCategory);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MerchandiseCategory newCategory = categoryRepository.save(merchandise.getCategory());
+                merchandise.setCategory(newCategory);
+            }
         }
         
     // ---------- OneToOne ----------
         if (merchandise.getInventory() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            merchandise.setInventory(
-                inventoryRepository.findById(merchandise.getInventory().getId())
-                    .orElseThrow(() -> new RuntimeException("inventory not found"))
-            );
-            
+            if (merchandise.getInventory().getId() != null) {
+                MerchandiseInventory existingInventory = inventoryRepository.findById(merchandise.getInventory().getId())
+                    .orElseThrow(() -> new RuntimeException("MerchandiseInventory not found with id "
+                        + merchandise.getInventory().getId()));
+                merchandise.setInventory(existingInventory);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                MerchandiseInventory newInventory = inventoryRepository.save(merchandise.getInventory());
+                merchandise.setInventory(newInventory);
+            }
+
             merchandise.getInventory().setMerchandiseItem(merchandise);
         }
         
-
     return merchandiseRepository.save(merchandise);
 }
 
@@ -490,21 +536,16 @@ public class MerchandiseService extends BaseService<Merchandise> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (merchandiseRequest.getInventory() != null &&
-            merchandiseRequest.getInventory().getId() != null) {
+        if (merchandiseRequest.getInventory() != null &&merchandiseRequest.getInventory().getId() != null) {
 
-            MerchandiseInventory inventory = inventoryRepository.findById(
-                merchandiseRequest.getInventory().getId()
-            ).orElseThrow(() -> new RuntimeException("MerchandiseInventory not found"));
+        MerchandiseInventory inventory = inventoryRepository.findById(merchandiseRequest.getInventory().getId())
+                .orElseThrow(() -> new RuntimeException("MerchandiseInventory not found"));
 
-            existing.setInventory(inventory);
-
-            
-            inventory.setMerchandiseItem(existing);
-            
-        }
+        existing.setInventory(inventory);
+        inventory.setMerchandiseItem(existing);
         
-
+        }
+    
     return merchandiseRepository.save(existing);
 }
     @Transactional
@@ -516,45 +557,40 @@ public class MerchandiseService extends BaseService<Merchandise> {
     // --- Dissocier OneToMany ---
         if (entity.getReviews() != null) {
             for (var child : entity.getReviews()) {
-                
-                child.setMerchandise(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMerchandise(null);
             }
             entity.getReviews().clear();
         }
         
         if (entity.getSales() != null) {
             for (var child : entity.getSales()) {
-                
-                child.setMerchandiseItem(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMerchandiseItem(null);
             }
             entity.getSales().clear();
         }
         
         if (entity.getShipments() != null) {
             for (var child : entity.getShipments()) {
-                
-                child.setMerchandiseItem(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMerchandiseItem(null);
             }
             entity.getShipments().clear();
         }
         
         if (entity.getOrderItems() != null) {
             for (var child : entity.getOrderItems()) {
-                
-                child.setMerchandiseItem(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMerchandiseItem(null);
             }
             entity.getOrderItems().clear();
         }
         
         if (entity.getStockHistory() != null) {
             for (var child : entity.getStockHistory()) {
-                
-                child.setMerchandiseItem(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMerchandiseItem(null);
             }
             entity.getStockHistory().clear();
         }
@@ -564,7 +600,6 @@ public class MerchandiseService extends BaseService<Merchandise> {
             for (Movie item : new ArrayList<>(entity.getRelatedMovies())) {
                 
                 item.getRelatedMerchandise().remove(entity); // retire côté inverse
-                
             }
             entity.getRelatedMovies().clear(); // puis vide côté courant
         }
@@ -573,7 +608,6 @@ public class MerchandiseService extends BaseService<Merchandise> {
             for (TVShow item : new ArrayList<>(entity.getRelatedShows())) {
                 
                 item.getRelatedMerchandise().remove(entity); // retire côté inverse
-                
             }
             entity.getRelatedShows().clear(); // puis vide côté courant
         }
@@ -582,7 +616,6 @@ public class MerchandiseService extends BaseService<Merchandise> {
             for (UserProfile item : new ArrayList<>(entity.getOwnedByUsers())) {
                 
                 item.getOwnedMerchandise().remove(entity); // retire côté inverse
-                
             }
             entity.getOwnedByUsers().clear(); // puis vide côté courant
         }

@@ -152,10 +152,18 @@ public class MovieService extends BaseService<Movie> {
         if (movie.getCast() != null &&
             !movie.getCast().isEmpty()) {
 
-            List<Artist> attachedCast = movie.getCast().stream()
-            .map(item -> castRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
-            .toList();
+            List<Artist> attachedCast = new ArrayList<>();
+            for (Artist item : movie.getCast()) {
+                if (item.getId() != null) {
+                    Artist existingItem = castRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId()));
+                    attachedCast.add(existingItem);
+                } else {
+
+                    Artist newItem = castRepository.save(item);
+                    attachedCast.add(newItem);
+                }
+            }
 
             movie.setCast(attachedCast);
 
@@ -166,10 +174,18 @@ public class MovieService extends BaseService<Movie> {
         if (movie.getGenres() != null &&
             !movie.getGenres().isEmpty()) {
 
-            List<Genre> attachedGenres = movie.getGenres().stream()
-            .map(item -> genresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
-            .toList();
+            List<Genre> attachedGenres = new ArrayList<>();
+            for (Genre item : movie.getGenres()) {
+                if (item.getId() != null) {
+                    Genre existingItem = genresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId()));
+                    attachedGenres.add(existingItem);
+                } else {
+
+                    Genre newItem = genresRepository.save(item);
+                    attachedGenres.add(newItem);
+                }
+            }
 
             movie.setGenres(attachedGenres);
 
@@ -180,10 +196,18 @@ public class MovieService extends BaseService<Movie> {
         if (movie.getWatchlistUsers() != null &&
             !movie.getWatchlistUsers().isEmpty()) {
 
-            List<UserProfile> attachedWatchlistUsers = movie.getWatchlistUsers().stream()
-            .map(item -> watchlistUsersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedWatchlistUsers = new ArrayList<>();
+            for (UserProfile item : movie.getWatchlistUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = watchlistUsersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedWatchlistUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = watchlistUsersRepository.save(item);
+                    attachedWatchlistUsers.add(newItem);
+                }
+            }
 
             movie.setWatchlistUsers(attachedWatchlistUsers);
 
@@ -194,10 +218,18 @@ public class MovieService extends BaseService<Movie> {
         if (movie.getRelatedMerchandise() != null &&
             !movie.getRelatedMerchandise().isEmpty()) {
 
-            List<Merchandise> attachedRelatedMerchandise = movie.getRelatedMerchandise().stream()
-            .map(item -> relatedMerchandiseRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Merchandise not found with id " + item.getId())))
-            .toList();
+            List<Merchandise> attachedRelatedMerchandise = new ArrayList<>();
+            for (Merchandise item : movie.getRelatedMerchandise()) {
+                if (item.getId() != null) {
+                    Merchandise existingItem = relatedMerchandiseRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Merchandise not found with id " + item.getId()));
+                    attachedRelatedMerchandise.add(existingItem);
+                } else {
+
+                    Merchandise newItem = relatedMerchandiseRepository.save(item);
+                    attachedRelatedMerchandise.add(newItem);
+                }
+            }
 
             movie.setRelatedMerchandise(attachedRelatedMerchandise);
 
@@ -208,10 +240,18 @@ public class MovieService extends BaseService<Movie> {
         if (movie.getFormats() != null &&
             !movie.getFormats().isEmpty()) {
 
-            List<MovieFormat> attachedFormats = movie.getFormats().stream()
-            .map(item -> formatsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("MovieFormat not found with id " + item.getId())))
-            .toList();
+            List<MovieFormat> attachedFormats = new ArrayList<>();
+            for (MovieFormat item : movie.getFormats()) {
+                if (item.getId() != null) {
+                    MovieFormat existingItem = formatsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MovieFormat not found with id " + item.getId()));
+                    attachedFormats.add(existingItem);
+                } else {
+
+                    MovieFormat newItem = formatsRepository.save(item);
+                    attachedFormats.add(newItem);
+                }
+            }
 
             movie.setFormats(attachedFormats);
 
@@ -222,10 +262,18 @@ public class MovieService extends BaseService<Movie> {
         if (movie.getTags() != null &&
             !movie.getTags().isEmpty()) {
 
-            List<ContentTag> attachedTags = movie.getTags().stream()
-            .map(item -> tagsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
-            .toList();
+            List<ContentTag> attachedTags = new ArrayList<>();
+            for (ContentTag item : movie.getTags()) {
+                if (item.getId() != null) {
+                    ContentTag existingItem = tagsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId()));
+                    attachedTags.add(existingItem);
+                } else {
+
+                    ContentTag newItem = tagsRepository.save(item);
+                    attachedTags.add(newItem);
+                }
+            }
 
             movie.setTags(attachedTags);
 
@@ -236,10 +284,18 @@ public class MovieService extends BaseService<Movie> {
         if (movie.getLanguages() != null &&
             !movie.getLanguages().isEmpty()) {
 
-            List<ContentLanguage> attachedLanguages = movie.getLanguages().stream()
-            .map(item -> languagesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ContentLanguage not found with id " + item.getId())))
-            .toList();
+            List<ContentLanguage> attachedLanguages = new ArrayList<>();
+            for (ContentLanguage item : movie.getLanguages()) {
+                if (item.getId() != null) {
+                    ContentLanguage existingItem = languagesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ContentLanguage not found with id " + item.getId()));
+                    attachedLanguages.add(existingItem);
+                } else {
+
+                    ContentLanguage newItem = languagesRepository.save(item);
+                    attachedLanguages.add(newItem);
+                }
+            }
 
             movie.setLanguages(attachedLanguages);
 
@@ -250,10 +306,18 @@ public class MovieService extends BaseService<Movie> {
         if (movie.getPlatforms() != null &&
             !movie.getPlatforms().isEmpty()) {
 
-            List<StreamingPlatform> attachedPlatforms = movie.getPlatforms().stream()
-            .map(item -> platformsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("StreamingPlatform not found with id " + item.getId())))
-            .toList();
+            List<StreamingPlatform> attachedPlatforms = new ArrayList<>();
+            for (StreamingPlatform item : movie.getPlatforms()) {
+                if (item.getId() != null) {
+                    StreamingPlatform existingItem = platformsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found with id " + item.getId()));
+                    attachedPlatforms.add(existingItem);
+                } else {
+
+                    StreamingPlatform newItem = platformsRepository.save(item);
+                    attachedPlatforms.add(newItem);
+                }
+            }
 
             movie.setPlatforms(attachedPlatforms);
 
@@ -264,10 +328,18 @@ public class MovieService extends BaseService<Movie> {
         if (movie.getFestivals() != null &&
             !movie.getFestivals().isEmpty()) {
 
-            List<MovieFestival> attachedFestivals = movie.getFestivals().stream()
-            .map(item -> festivalsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("MovieFestival not found with id " + item.getId())))
-            .toList();
+            List<MovieFestival> attachedFestivals = new ArrayList<>();
+            for (MovieFestival item : movie.getFestivals()) {
+                if (item.getId() != null) {
+                    MovieFestival existingItem = festivalsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MovieFestival not found with id " + item.getId()));
+                    attachedFestivals.add(existingItem);
+                } else {
+
+                    MovieFestival newItem = festivalsRepository.save(item);
+                    attachedFestivals.add(newItem);
+                }
+            }
 
             movie.setFestivals(attachedFestivals);
 
@@ -276,70 +348,92 @@ public class MovieService extends BaseService<Movie> {
         }
         
     // ---------- ManyToOne ----------
-        if (movie.getDirector() != null &&
-            movie.getDirector().getId() != null) {
-
-            Artist existingDirector = directorRepository.findById(
-                movie.getDirector().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            movie.setDirector(existingDirector);
+        if (movie.getDirector() != null) {
+            if (movie.getDirector().getId() != null) {
+                Artist existingDirector = directorRepository.findById(
+                    movie.getDirector().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + movie.getDirector().getId()));
+                movie.setDirector(existingDirector);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newDirector = directorRepository.save(movie.getDirector());
+                movie.setDirector(newDirector);
+            }
         }
         
-        if (movie.getProductionCompany() != null &&
-            movie.getProductionCompany().getId() != null) {
-
-            ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
-                movie.getProductionCompany().getId()
-            ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-
-            movie.setProductionCompany(existingProductionCompany);
+        if (movie.getProductionCompany() != null) {
+            if (movie.getProductionCompany().getId() != null) {
+                ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+                    movie.getProductionCompany().getId()
+                ).orElseThrow(() -> new RuntimeException("ProductionCompany not found with id "
+                    + movie.getProductionCompany().getId()));
+                movie.setProductionCompany(existingProductionCompany);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ProductionCompany newProductionCompany = productionCompanyRepository.save(movie.getProductionCompany());
+                movie.setProductionCompany(newProductionCompany);
+            }
         }
         
-        if (movie.getProvider() != null &&
-            movie.getProvider().getId() != null) {
-
-            ContentProvider existingProvider = providerRepository.findById(
-                movie.getProvider().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-
-            movie.setProvider(existingProvider);
+        if (movie.getProvider() != null) {
+            if (movie.getProvider().getId() != null) {
+                ContentProvider existingProvider = providerRepository.findById(
+                    movie.getProvider().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentProvider not found with id "
+                    + movie.getProvider().getId()));
+                movie.setProvider(existingProvider);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentProvider newProvider = providerRepository.save(movie.getProvider());
+                movie.setProvider(newProvider);
+            }
         }
         
-        if (movie.getMovieStudio() != null &&
-            movie.getMovieStudio().getId() != null) {
-
-            MovieStudio existingMovieStudio = movieStudioRepository.findById(
-                movie.getMovieStudio().getId()
-            ).orElseThrow(() -> new RuntimeException("MovieStudio not found"));
-
-            movie.setMovieStudio(existingMovieStudio);
+        if (movie.getMovieStudio() != null) {
+            if (movie.getMovieStudio().getId() != null) {
+                MovieStudio existingMovieStudio = movieStudioRepository.findById(
+                    movie.getMovieStudio().getId()
+                ).orElseThrow(() -> new RuntimeException("MovieStudio not found with id "
+                    + movie.getMovieStudio().getId()));
+                movie.setMovieStudio(existingMovieStudio);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MovieStudio newMovieStudio = movieStudioRepository.save(movie.getMovieStudio());
+                movie.setMovieStudio(newMovieStudio);
+            }
         }
         
-        if (movie.getContentRating() != null &&
-            movie.getContentRating().getId() != null) {
-
-            ContentRating existingContentRating = contentRatingRepository.findById(
-                movie.getContentRating().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
-
-            movie.setContentRating(existingContentRating);
+        if (movie.getContentRating() != null) {
+            if (movie.getContentRating().getId() != null) {
+                ContentRating existingContentRating = contentRatingRepository.findById(
+                    movie.getContentRating().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentRating not found with id "
+                    + movie.getContentRating().getId()));
+                movie.setContentRating(existingContentRating);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentRating newContentRating = contentRatingRepository.save(movie.getContentRating());
+                movie.setContentRating(newContentRating);
+            }
         }
         
     // ---------- OneToOne ----------
         if (movie.getSoundtrack() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            movie.setSoundtrack(
-                soundtrackRepository.findById(movie.getSoundtrack().getId())
-                    .orElseThrow(() -> new RuntimeException("soundtrack not found"))
-            );
-            
+            if (movie.getSoundtrack().getId() != null) {
+                MovieSoundtrack existingSoundtrack = soundtrackRepository.findById(movie.getSoundtrack().getId())
+                    .orElseThrow(() -> new RuntimeException("MovieSoundtrack not found with id "
+                        + movie.getSoundtrack().getId()));
+                movie.setSoundtrack(existingSoundtrack);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                MovieSoundtrack newSoundtrack = soundtrackRepository.save(movie.getSoundtrack());
+                movie.setSoundtrack(newSoundtrack);
+            }
+
             movie.getSoundtrack().setMovie(movie);
         }
         
-
     return movieRepository.save(movie);
 }
 
@@ -632,21 +726,16 @@ public class MovieService extends BaseService<Movie> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (movieRequest.getSoundtrack() != null &&
-            movieRequest.getSoundtrack().getId() != null) {
+        if (movieRequest.getSoundtrack() != null &&movieRequest.getSoundtrack().getId() != null) {
 
-            MovieSoundtrack soundtrack = soundtrackRepository.findById(
-                movieRequest.getSoundtrack().getId()
-            ).orElseThrow(() -> new RuntimeException("MovieSoundtrack not found"));
+        MovieSoundtrack soundtrack = soundtrackRepository.findById(movieRequest.getSoundtrack().getId())
+                .orElseThrow(() -> new RuntimeException("MovieSoundtrack not found"));
 
-            existing.setSoundtrack(soundtrack);
-
-            
-            soundtrack.setMovie(existing);
-            
-        }
+        existing.setSoundtrack(soundtrack);
+        soundtrack.setMovie(existing);
         
-
+        }
+    
     return movieRepository.save(existing);
 }
     @Transactional
@@ -658,27 +747,24 @@ public class MovieService extends BaseService<Movie> {
     // --- Dissocier OneToMany ---
         if (entity.getReviews() != null) {
             for (var child : entity.getReviews()) {
-                
-                child.setMovie(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMovie(null);
             }
             entity.getReviews().clear();
         }
         
         if (entity.getPurchases() != null) {
             for (var child : entity.getPurchases()) {
-                
-                child.setMovie(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMovie(null);
             }
             entity.getPurchases().clear();
         }
         
         if (entity.getStreamingLicenses() != null) {
             for (var child : entity.getStreamingLicenses()) {
-                
-                child.setMovie(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMovie(null);
             }
             entity.getStreamingLicenses().clear();
         }
@@ -688,7 +774,6 @@ public class MovieService extends BaseService<Movie> {
             for (Artist item : new ArrayList<>(entity.getCast())) {
                 
                 item.getActedInMovies().remove(entity); // retire côté inverse
-                
             }
             entity.getCast().clear(); // puis vide côté courant
         }
@@ -697,7 +782,6 @@ public class MovieService extends BaseService<Movie> {
             for (Genre item : new ArrayList<>(entity.getGenres())) {
                 
                 item.getMovies().remove(entity); // retire côté inverse
-                
             }
             entity.getGenres().clear(); // puis vide côté courant
         }
@@ -706,7 +790,6 @@ public class MovieService extends BaseService<Movie> {
             for (UserProfile item : new ArrayList<>(entity.getWatchlistUsers())) {
                 
                 item.getWatchlistMovies().remove(entity); // retire côté inverse
-                
             }
             entity.getWatchlistUsers().clear(); // puis vide côté courant
         }
@@ -715,7 +798,6 @@ public class MovieService extends BaseService<Movie> {
             for (Merchandise item : new ArrayList<>(entity.getRelatedMerchandise())) {
                 
                 item.getRelatedMovies().remove(entity); // retire côté inverse
-                
             }
             entity.getRelatedMerchandise().clear(); // puis vide côté courant
         }
@@ -724,7 +806,6 @@ public class MovieService extends BaseService<Movie> {
             for (MovieFormat item : new ArrayList<>(entity.getFormats())) {
                 
                 item.getMovies().remove(entity); // retire côté inverse
-                
             }
             entity.getFormats().clear(); // puis vide côté courant
         }
@@ -733,7 +814,6 @@ public class MovieService extends BaseService<Movie> {
             for (ContentTag item : new ArrayList<>(entity.getTags())) {
                 
                 item.getMovies().remove(entity); // retire côté inverse
-                
             }
             entity.getTags().clear(); // puis vide côté courant
         }
@@ -742,7 +822,6 @@ public class MovieService extends BaseService<Movie> {
             for (ContentLanguage item : new ArrayList<>(entity.getLanguages())) {
                 
                 item.getMovies().remove(entity); // retire côté inverse
-                
             }
             entity.getLanguages().clear(); // puis vide côté courant
         }
@@ -751,7 +830,6 @@ public class MovieService extends BaseService<Movie> {
             for (StreamingPlatform item : new ArrayList<>(entity.getPlatforms())) {
                 
                 item.getMovies().remove(entity); // retire côté inverse
-                
             }
             entity.getPlatforms().clear(); // puis vide côté courant
         }
@@ -760,7 +838,6 @@ public class MovieService extends BaseService<Movie> {
             for (MovieFestival item : new ArrayList<>(entity.getFestivals())) {
                 
                 item.getMovies().remove(entity); // retire côté inverse
-                
             }
             entity.getFestivals().clear(); // puis vide côté courant
         }

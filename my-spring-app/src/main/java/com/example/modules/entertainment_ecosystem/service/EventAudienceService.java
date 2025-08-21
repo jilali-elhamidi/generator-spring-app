@@ -33,18 +33,20 @@ public class EventAudienceService extends BaseService<EventAudience> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (eventaudience.getEvent() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            eventaudience.setEvent(
-                eventRepository.findById(eventaudience.getEvent().getId())
-                    .orElseThrow(() -> new RuntimeException("event not found"))
-            );
-            
+            if (eventaudience.getEvent().getId() != null) {
+                LiveEvent existingEvent = eventRepository.findById(eventaudience.getEvent().getId())
+                    .orElseThrow(() -> new RuntimeException("LiveEvent not found with id "
+                        + eventaudience.getEvent().getId()));
+                eventaudience.setEvent(existingEvent);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                LiveEvent newEvent = eventRepository.save(eventaudience.getEvent());
+                eventaudience.setEvent(newEvent);
+            }
+
             eventaudience.getEvent().setAudience(eventaudience);
         }
         
-
     return eventaudienceRepository.save(eventaudience);
 }
 
@@ -61,21 +63,15 @@ public class EventAudienceService extends BaseService<EventAudience> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (eventaudienceRequest.getEvent() != null &&
-            eventaudienceRequest.getEvent().getId() != null) {
+        if (eventaudienceRequest.getEvent() != null &&eventaudienceRequest.getEvent().getId() != null) {
 
-            LiveEvent event = eventRepository.findById(
-                eventaudienceRequest.getEvent().getId()
-            ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
+        LiveEvent event = eventRepository.findById(eventaudienceRequest.getEvent().getId())
+                .orElseThrow(() -> new RuntimeException("LiveEvent not found"));
 
-            existing.setEvent(event);
-
-            
-            event.setAudience(existing);
-            
+        existing.setEvent(event);
+        event.setAudience(existing);
         }
-        
-
+    
     return eventaudienceRepository.save(existing);
 }
     @Transactional

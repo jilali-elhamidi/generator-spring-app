@@ -70,7 +70,6 @@ public class StreamingServiceService extends BaseService<StreamingService> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return streamingserviceRepository.save(streamingservice);
 }
 
@@ -121,7 +120,6 @@ public class StreamingServiceService extends BaseService<StreamingService> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return streamingserviceRepository.save(existing);
 }
     @Transactional
@@ -133,18 +131,16 @@ public class StreamingServiceService extends BaseService<StreamingService> {
     // --- Dissocier OneToMany ---
         if (entity.getPlatforms() != null) {
             for (var child : entity.getPlatforms()) {
-                
-                child.setStreamingService(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setStreamingService(null);
             }
             entity.getPlatforms().clear();
         }
         
         if (entity.getPlans() != null) {
             for (var child : entity.getPlans()) {
-                
-                child.setService(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setService(null);
             }
             entity.getPlans().clear();
         }

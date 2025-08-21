@@ -33,18 +33,20 @@ public class SubscriptionTierService extends BaseService<SubscriptionTier> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (subscriptiontier.getSubscriptionPlan() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            subscriptiontier.setSubscriptionPlan(
-                subscriptionPlanRepository.findById(subscriptiontier.getSubscriptionPlan().getId())
-                    .orElseThrow(() -> new RuntimeException("subscriptionPlan not found"))
-            );
-            
+            if (subscriptiontier.getSubscriptionPlan().getId() != null) {
+                SubscriptionPlan existingSubscriptionPlan = subscriptionPlanRepository.findById(subscriptiontier.getSubscriptionPlan().getId())
+                    .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found with id "
+                        + subscriptiontier.getSubscriptionPlan().getId()));
+                subscriptiontier.setSubscriptionPlan(existingSubscriptionPlan);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                SubscriptionPlan newSubscriptionPlan = subscriptionPlanRepository.save(subscriptiontier.getSubscriptionPlan());
+                subscriptiontier.setSubscriptionPlan(newSubscriptionPlan);
+            }
+
             subscriptiontier.getSubscriptionPlan().setTier(subscriptiontier);
         }
         
-
     return subscriptiontierRepository.save(subscriptiontier);
 }
 
@@ -63,21 +65,16 @@ public class SubscriptionTierService extends BaseService<SubscriptionTier> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (subscriptiontierRequest.getSubscriptionPlan() != null &&
-            subscriptiontierRequest.getSubscriptionPlan().getId() != null) {
+        if (subscriptiontierRequest.getSubscriptionPlan() != null &&subscriptiontierRequest.getSubscriptionPlan().getId() != null) {
 
-            SubscriptionPlan subscriptionPlan = subscriptionPlanRepository.findById(
-                subscriptiontierRequest.getSubscriptionPlan().getId()
-            ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
+        SubscriptionPlan subscriptionPlan = subscriptionPlanRepository.findById(subscriptiontierRequest.getSubscriptionPlan().getId())
+                .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
 
-            existing.setSubscriptionPlan(subscriptionPlan);
-
-            
-            subscriptionPlan.setTier(existing);
-            
-        }
+        existing.setSubscriptionPlan(subscriptionPlan);
+        subscriptionPlan.setTier(existing);
         
-
+        }
+    
     return subscriptiontierRepository.save(existing);
 }
     @Transactional

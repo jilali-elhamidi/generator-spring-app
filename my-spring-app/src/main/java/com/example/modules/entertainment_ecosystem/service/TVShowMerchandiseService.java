@@ -31,18 +31,21 @@ public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (tvshowmerchandise.getTvShow() != null &&
-            tvshowmerchandise.getTvShow().getId() != null) {
-
-            TVShow existingTvShow = tvShowRepository.findById(
-                tvshowmerchandise.getTvShow().getId()
-            ).orElseThrow(() -> new RuntimeException("TVShow not found"));
-
-            tvshowmerchandise.setTvShow(existingTvShow);
+        if (tvshowmerchandise.getTvShow() != null) {
+            if (tvshowmerchandise.getTvShow().getId() != null) {
+                TVShow existingTvShow = tvShowRepository.findById(
+                    tvshowmerchandise.getTvShow().getId()
+                ).orElseThrow(() -> new RuntimeException("TVShow not found with id "
+                    + tvshowmerchandise.getTvShow().getId()));
+                tvshowmerchandise.setTvShow(existingTvShow);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TVShow newTvShow = tvShowRepository.save(tvshowmerchandise.getTvShow());
+                tvshowmerchandise.setTvShow(newTvShow);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return tvshowmerchandiseRepository.save(tvshowmerchandise);
 }
 
@@ -71,7 +74,6 @@ public class TVShowMerchandiseService extends BaseService<TVShowMerchandise> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return tvshowmerchandiseRepository.save(existing);
 }
     @Transactional

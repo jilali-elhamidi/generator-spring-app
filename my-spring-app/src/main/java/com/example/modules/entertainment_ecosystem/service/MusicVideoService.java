@@ -35,28 +35,35 @@ public class MusicVideoService extends BaseService<MusicVideo> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (musicvideo.getMusicTrack() != null &&
-            musicvideo.getMusicTrack().getId() != null) {
-
-            MusicTrack existingMusicTrack = musicTrackRepository.findById(
-                musicvideo.getMusicTrack().getId()
-            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-
-            musicvideo.setMusicTrack(existingMusicTrack);
+        if (musicvideo.getMusicTrack() != null) {
+            if (musicvideo.getMusicTrack().getId() != null) {
+                MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                    musicvideo.getMusicTrack().getId()
+                ).orElseThrow(() -> new RuntimeException("MusicTrack not found with id "
+                    + musicvideo.getMusicTrack().getId()));
+                musicvideo.setMusicTrack(existingMusicTrack);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MusicTrack newMusicTrack = musicTrackRepository.save(musicvideo.getMusicTrack());
+                musicvideo.setMusicTrack(newMusicTrack);
+            }
         }
         
-        if (musicvideo.getDirector() != null &&
-            musicvideo.getDirector().getId() != null) {
-
-            Artist existingDirector = directorRepository.findById(
-                musicvideo.getDirector().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            musicvideo.setDirector(existingDirector);
+        if (musicvideo.getDirector() != null) {
+            if (musicvideo.getDirector().getId() != null) {
+                Artist existingDirector = directorRepository.findById(
+                    musicvideo.getDirector().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + musicvideo.getDirector().getId()));
+                musicvideo.setDirector(existingDirector);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newDirector = directorRepository.save(musicvideo.getDirector());
+                musicvideo.setDirector(newDirector);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return musicvideoRepository.save(musicvideo);
 }
 
@@ -98,7 +105,6 @@ public class MusicVideoService extends BaseService<MusicVideo> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return musicvideoRepository.save(existing);
 }
     @Transactional

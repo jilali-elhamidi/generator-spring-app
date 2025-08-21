@@ -52,18 +52,21 @@ public class SeasonService extends BaseService<Season> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (season.getShow() != null &&
-            season.getShow().getId() != null) {
-
-            TVShow existingShow = showRepository.findById(
-                season.getShow().getId()
-            ).orElseThrow(() -> new RuntimeException("TVShow not found"));
-
-            season.setShow(existingShow);
+        if (season.getShow() != null) {
+            if (season.getShow().getId() != null) {
+                TVShow existingShow = showRepository.findById(
+                    season.getShow().getId()
+                ).orElseThrow(() -> new RuntimeException("TVShow not found with id "
+                    + season.getShow().getId()));
+                season.setShow(existingShow);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TVShow newShow = showRepository.save(season.getShow());
+                season.setShow(newShow);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return seasonRepository.save(season);
 }
 
@@ -108,7 +111,6 @@ public class SeasonService extends BaseService<Season> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return seasonRepository.save(existing);
 }
     @Transactional
@@ -120,9 +122,8 @@ public class SeasonService extends BaseService<Season> {
     // --- Dissocier OneToMany ---
         if (entity.getEpisodes() != null) {
             for (var child : entity.getEpisodes()) {
-                
-                child.setSeason(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setSeason(null);
             }
             entity.getEpisodes().clear();
         }

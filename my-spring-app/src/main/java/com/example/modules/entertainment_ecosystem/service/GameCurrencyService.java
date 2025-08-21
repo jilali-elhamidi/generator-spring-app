@@ -49,7 +49,6 @@ public class GameCurrencyService extends BaseService<GameCurrency> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return gamecurrencyRepository.save(gamecurrency);
 }
 
@@ -83,7 +82,6 @@ public class GameCurrencyService extends BaseService<GameCurrency> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return gamecurrencyRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class GameCurrencyService extends BaseService<GameCurrency> {
     // --- Dissocier OneToMany ---
         if (entity.getTransactions() != null) {
             for (var child : entity.getTransactions()) {
-                
-                child.setCurrency(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setCurrency(null);
             }
             entity.getTransactions().clear();
         }

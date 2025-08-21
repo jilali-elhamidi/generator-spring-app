@@ -54,18 +54,20 @@ public class MovieSoundtrackService extends BaseService<MovieSoundtrack> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (moviesoundtrack.getMovie() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            moviesoundtrack.setMovie(
-                movieRepository.findById(moviesoundtrack.getMovie().getId())
-                    .orElseThrow(() -> new RuntimeException("movie not found"))
-            );
-            
+            if (moviesoundtrack.getMovie().getId() != null) {
+                Movie existingMovie = movieRepository.findById(moviesoundtrack.getMovie().getId())
+                    .orElseThrow(() -> new RuntimeException("Movie not found with id "
+                        + moviesoundtrack.getMovie().getId()));
+                moviesoundtrack.setMovie(existingMovie);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Movie newMovie = movieRepository.save(moviesoundtrack.getMovie());
+                moviesoundtrack.setMovie(newMovie);
+            }
+
             moviesoundtrack.getMovie().setSoundtrack(moviesoundtrack);
         }
         
-
     return moviesoundtrackRepository.save(moviesoundtrack);
 }
 
@@ -99,21 +101,15 @@ public class MovieSoundtrackService extends BaseService<MovieSoundtrack> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (moviesoundtrackRequest.getMovie() != null &&
-            moviesoundtrackRequest.getMovie().getId() != null) {
+        if (moviesoundtrackRequest.getMovie() != null &&moviesoundtrackRequest.getMovie().getId() != null) {
 
-            Movie movie = movieRepository.findById(
-                moviesoundtrackRequest.getMovie().getId()
-            ).orElseThrow(() -> new RuntimeException("Movie not found"));
+        Movie movie = movieRepository.findById(moviesoundtrackRequest.getMovie().getId())
+                .orElseThrow(() -> new RuntimeException("Movie not found"));
 
-            existing.setMovie(movie);
-
-            
-            movie.setSoundtrack(existing);
-            
+        existing.setMovie(movie);
+        movie.setSoundtrack(existing);
         }
-        
-
+    
     return moviesoundtrackRepository.save(existing);
 }
     @Transactional
@@ -125,9 +121,8 @@ public class MovieSoundtrackService extends BaseService<MovieSoundtrack> {
     // --- Dissocier OneToMany ---
         if (entity.getMusicTracks() != null) {
             for (var child : entity.getMusicTracks()) {
-                
-                child.setSoundtrack(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setSoundtrack(null);
             }
             entity.getMusicTracks().clear();
         }

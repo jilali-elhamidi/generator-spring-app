@@ -33,10 +33,18 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
         if (featureflag.getEnabledForUsers() != null &&
             !featureflag.getEnabledForUsers().isEmpty()) {
 
-            List<UserProfile> attachedEnabledForUsers = featureflag.getEnabledForUsers().stream()
-            .map(item -> enabledForUsersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedEnabledForUsers = new ArrayList<>();
+            for (UserProfile item : featureflag.getEnabledForUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = enabledForUsersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedEnabledForUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = enabledForUsersRepository.save(item);
+                    attachedEnabledForUsers.add(newItem);
+                }
+            }
 
             featureflag.setEnabledForUsers(attachedEnabledForUsers);
 
@@ -46,7 +54,6 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return featureflagRepository.save(featureflag);
 }
 
@@ -82,7 +89,6 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return featureflagRepository.save(existing);
 }
     @Transactional
@@ -97,7 +103,6 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
             for (UserProfile item : new ArrayList<>(entity.getEnabledForUsers())) {
                 
                 item.getEnabledFeatureFlags().remove(entity); // retire côté inverse
-                
             }
             entity.getEnabledForUsers().clear(); // puis vide côté courant
         }

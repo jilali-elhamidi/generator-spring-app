@@ -58,10 +58,18 @@ public class AdCampaignService extends BaseService<AdCampaign> {
         if (adcampaign.getDisplayedOnPlatforms() != null &&
             !adcampaign.getDisplayedOnPlatforms().isEmpty()) {
 
-            List<StreamingPlatform> attachedDisplayedOnPlatforms = adcampaign.getDisplayedOnPlatforms().stream()
-            .map(item -> displayedOnPlatformsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("StreamingPlatform not found with id " + item.getId())))
-            .toList();
+            List<StreamingPlatform> attachedDisplayedOnPlatforms = new ArrayList<>();
+            for (StreamingPlatform item : adcampaign.getDisplayedOnPlatforms()) {
+                if (item.getId() != null) {
+                    StreamingPlatform existingItem = displayedOnPlatformsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found with id " + item.getId()));
+                    attachedDisplayedOnPlatforms.add(existingItem);
+                } else {
+
+                    StreamingPlatform newItem = displayedOnPlatformsRepository.save(item);
+                    attachedDisplayedOnPlatforms.add(newItem);
+                }
+            }
 
             adcampaign.setDisplayedOnPlatforms(attachedDisplayedOnPlatforms);
 
@@ -70,18 +78,21 @@ public class AdCampaignService extends BaseService<AdCampaign> {
         }
         
     // ---------- ManyToOne ----------
-        if (adcampaign.getAdvertiser() != null &&
-            adcampaign.getAdvertiser().getId() != null) {
-
-            Sponsor existingAdvertiser = advertiserRepository.findById(
-                adcampaign.getAdvertiser().getId()
-            ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
-
-            adcampaign.setAdvertiser(existingAdvertiser);
+        if (adcampaign.getAdvertiser() != null) {
+            if (adcampaign.getAdvertiser().getId() != null) {
+                Sponsor existingAdvertiser = advertiserRepository.findById(
+                    adcampaign.getAdvertiser().getId()
+                ).orElseThrow(() -> new RuntimeException("Sponsor not found with id "
+                    + adcampaign.getAdvertiser().getId()));
+                adcampaign.setAdvertiser(existingAdvertiser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Sponsor newAdvertiser = advertiserRepository.save(adcampaign.getAdvertiser());
+                adcampaign.setAdvertiser(newAdvertiser);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return adcampaignRepository.save(adcampaign);
 }
 
@@ -147,7 +158,6 @@ public class AdCampaignService extends BaseService<AdCampaign> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return adcampaignRepository.save(existing);
 }
     @Transactional
@@ -159,9 +169,8 @@ public class AdCampaignService extends BaseService<AdCampaign> {
     // --- Dissocier OneToMany ---
         if (entity.getAdPlacements() != null) {
             for (var child : entity.getAdPlacements()) {
-                
-                child.setCampaign(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setCampaign(null);
             }
             entity.getAdPlacements().clear();
         }
@@ -171,7 +180,6 @@ public class AdCampaignService extends BaseService<AdCampaign> {
             for (StreamingPlatform item : new ArrayList<>(entity.getDisplayedOnPlatforms())) {
                 
                 item.getAdCampaigns().remove(entity); // retire côté inverse
-                
             }
             entity.getDisplayedOnPlatforms().clear(); // puis vide côté courant
         }

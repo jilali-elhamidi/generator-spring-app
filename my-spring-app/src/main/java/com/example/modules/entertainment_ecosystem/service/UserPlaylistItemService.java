@@ -39,38 +39,49 @@ public class UserPlaylistItemService extends BaseService<UserPlaylistItem> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (userplaylistitem.getPlaylist() != null &&
-            userplaylistitem.getPlaylist().getId() != null) {
-
-            UserPlaylist existingPlaylist = playlistRepository.findById(
-                userplaylistitem.getPlaylist().getId()
-            ).orElseThrow(() -> new RuntimeException("UserPlaylist not found"));
-
-            userplaylistitem.setPlaylist(existingPlaylist);
+        if (userplaylistitem.getPlaylist() != null) {
+            if (userplaylistitem.getPlaylist().getId() != null) {
+                UserPlaylist existingPlaylist = playlistRepository.findById(
+                    userplaylistitem.getPlaylist().getId()
+                ).orElseThrow(() -> new RuntimeException("UserPlaylist not found with id "
+                    + userplaylistitem.getPlaylist().getId()));
+                userplaylistitem.setPlaylist(existingPlaylist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserPlaylist newPlaylist = playlistRepository.save(userplaylistitem.getPlaylist());
+                userplaylistitem.setPlaylist(newPlaylist);
+            }
         }
         
-        if (userplaylistitem.getMusicTrack() != null &&
-            userplaylistitem.getMusicTrack().getId() != null) {
-
-            MusicTrack existingMusicTrack = musicTrackRepository.findById(
-                userplaylistitem.getMusicTrack().getId()
-            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-
-            userplaylistitem.setMusicTrack(existingMusicTrack);
+        if (userplaylistitem.getMusicTrack() != null) {
+            if (userplaylistitem.getMusicTrack().getId() != null) {
+                MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                    userplaylistitem.getMusicTrack().getId()
+                ).orElseThrow(() -> new RuntimeException("MusicTrack not found with id "
+                    + userplaylistitem.getMusicTrack().getId()));
+                userplaylistitem.setMusicTrack(existingMusicTrack);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MusicTrack newMusicTrack = musicTrackRepository.save(userplaylistitem.getMusicTrack());
+                userplaylistitem.setMusicTrack(newMusicTrack);
+            }
         }
         
-        if (userplaylistitem.getAddedBy() != null &&
-            userplaylistitem.getAddedBy().getId() != null) {
-
-            UserProfile existingAddedBy = addedByRepository.findById(
-                userplaylistitem.getAddedBy().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userplaylistitem.setAddedBy(existingAddedBy);
+        if (userplaylistitem.getAddedBy() != null) {
+            if (userplaylistitem.getAddedBy().getId() != null) {
+                UserProfile existingAddedBy = addedByRepository.findById(
+                    userplaylistitem.getAddedBy().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userplaylistitem.getAddedBy().getId()));
+                userplaylistitem.setAddedBy(existingAddedBy);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newAddedBy = addedByRepository.save(userplaylistitem.getAddedBy());
+                userplaylistitem.setAddedBy(newAddedBy);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return userplaylistitemRepository.save(userplaylistitem);
 }
 
@@ -122,7 +133,6 @@ public class UserPlaylistItemService extends BaseService<UserPlaylistItem> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return userplaylistitemRepository.save(existing);
 }
     @Transactional

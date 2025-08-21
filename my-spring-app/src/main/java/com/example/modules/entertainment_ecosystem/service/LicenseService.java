@@ -33,18 +33,20 @@ public class LicenseService extends BaseService<License> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (license.getAsset() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            license.setAsset(
-                assetRepository.findById(license.getAsset().getId())
-                    .orElseThrow(() -> new RuntimeException("asset not found"))
-            );
-            
+            if (license.getAsset().getId() != null) {
+                DigitalAsset existingAsset = assetRepository.findById(license.getAsset().getId())
+                    .orElseThrow(() -> new RuntimeException("DigitalAsset not found with id "
+                        + license.getAsset().getId()));
+                license.setAsset(existingAsset);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                DigitalAsset newAsset = assetRepository.save(license.getAsset());
+                license.setAsset(newAsset);
+            }
+
             license.getAsset().setLicense(license);
         }
         
-
     return licenseRepository.save(license);
 }
 
@@ -62,21 +64,15 @@ public class LicenseService extends BaseService<License> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (licenseRequest.getAsset() != null &&
-            licenseRequest.getAsset().getId() != null) {
+        if (licenseRequest.getAsset() != null &&licenseRequest.getAsset().getId() != null) {
 
-            DigitalAsset asset = assetRepository.findById(
-                licenseRequest.getAsset().getId()
-            ).orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
+        DigitalAsset asset = assetRepository.findById(licenseRequest.getAsset().getId())
+                .orElseThrow(() -> new RuntimeException("DigitalAsset not found"));
 
-            existing.setAsset(asset);
-
-            
-            asset.setLicense(existing);
-            
+        existing.setAsset(asset);
+        asset.setLicense(existing);
         }
-        
-
+    
     return licenseRepository.save(existing);
 }
     @Transactional

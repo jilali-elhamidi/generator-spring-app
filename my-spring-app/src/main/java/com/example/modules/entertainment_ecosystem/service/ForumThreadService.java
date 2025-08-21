@@ -62,10 +62,18 @@ public class ForumThreadService extends BaseService<ForumThread> {
         if (forumthread.getTags() != null &&
             !forumthread.getTags().isEmpty()) {
 
-            List<ForumThreadTag> attachedTags = forumthread.getTags().stream()
-            .map(item -> tagsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ForumThreadTag not found with id " + item.getId())))
-            .toList();
+            List<ForumThreadTag> attachedTags = new ArrayList<>();
+            for (ForumThreadTag item : forumthread.getTags()) {
+                if (item.getId() != null) {
+                    ForumThreadTag existingItem = tagsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumThreadTag not found with id " + item.getId()));
+                    attachedTags.add(existingItem);
+                } else {
+
+                    ForumThreadTag newItem = tagsRepository.save(item);
+                    attachedTags.add(newItem);
+                }
+            }
 
             forumthread.setTags(attachedTags);
 
@@ -74,28 +82,35 @@ public class ForumThreadService extends BaseService<ForumThread> {
         }
         
     // ---------- ManyToOne ----------
-        if (forumthread.getAuthor() != null &&
-            forumthread.getAuthor().getId() != null) {
-
-            UserProfile existingAuthor = authorRepository.findById(
-                forumthread.getAuthor().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            forumthread.setAuthor(existingAuthor);
+        if (forumthread.getAuthor() != null) {
+            if (forumthread.getAuthor().getId() != null) {
+                UserProfile existingAuthor = authorRepository.findById(
+                    forumthread.getAuthor().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + forumthread.getAuthor().getId()));
+                forumthread.setAuthor(existingAuthor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newAuthor = authorRepository.save(forumthread.getAuthor());
+                forumthread.setAuthor(newAuthor);
+            }
         }
         
-        if (forumthread.getCategory() != null &&
-            forumthread.getCategory().getId() != null) {
-
-            ForumCategory existingCategory = categoryRepository.findById(
-                forumthread.getCategory().getId()
-            ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-
-            forumthread.setCategory(existingCategory);
+        if (forumthread.getCategory() != null) {
+            if (forumthread.getCategory().getId() != null) {
+                ForumCategory existingCategory = categoryRepository.findById(
+                    forumthread.getCategory().getId()
+                ).orElseThrow(() -> new RuntimeException("ForumCategory not found with id "
+                    + forumthread.getCategory().getId()));
+                forumthread.setCategory(existingCategory);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ForumCategory newCategory = categoryRepository.save(forumthread.getCategory());
+                forumthread.setCategory(newCategory);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return forumthreadRepository.save(forumthread);
 }
 
@@ -172,7 +187,6 @@ public class ForumThreadService extends BaseService<ForumThread> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return forumthreadRepository.save(existing);
 }
     @Transactional
@@ -184,9 +198,8 @@ public class ForumThreadService extends BaseService<ForumThread> {
     // --- Dissocier OneToMany ---
         if (entity.getForumPosts() != null) {
             for (var child : entity.getForumPosts()) {
-                
-                child.setThread(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setThread(null);
             }
             entity.getForumPosts().clear();
         }
@@ -196,7 +209,6 @@ public class ForumThreadService extends BaseService<ForumThread> {
             for (ForumThreadTag item : new ArrayList<>(entity.getTags())) {
                 
                 item.getThreads().remove(entity); // retire côté inverse
-                
             }
             entity.getTags().clear(); // puis vide côté courant
         }

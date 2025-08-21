@@ -83,10 +83,18 @@ public class SubscriptionPlanService extends BaseService<SubscriptionPlan> {
         if (subscriptionplan.getFeatures() != null &&
             !subscriptionplan.getFeatures().isEmpty()) {
 
-            List<SubscriptionFeature> attachedFeatures = subscriptionplan.getFeatures().stream()
-            .map(item -> featuresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("SubscriptionFeature not found with id " + item.getId())))
-            .toList();
+            List<SubscriptionFeature> attachedFeatures = new ArrayList<>();
+            for (SubscriptionFeature item : subscriptionplan.getFeatures()) {
+                if (item.getId() != null) {
+                    SubscriptionFeature existingItem = featuresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("SubscriptionFeature not found with id " + item.getId()));
+                    attachedFeatures.add(existingItem);
+                } else {
+
+                    SubscriptionFeature newItem = featuresRepository.save(item);
+                    attachedFeatures.add(newItem);
+                }
+            }
 
             subscriptionplan.setFeatures(attachedFeatures);
 
@@ -95,30 +103,36 @@ public class SubscriptionPlanService extends BaseService<SubscriptionPlan> {
         }
         
     // ---------- ManyToOne ----------
-        if (subscriptionplan.getService() != null &&
-            subscriptionplan.getService().getId() != null) {
-
-            StreamingService existingService = serviceRepository.findById(
-                subscriptionplan.getService().getId()
-            ).orElseThrow(() -> new RuntimeException("StreamingService not found"));
-
-            subscriptionplan.setService(existingService);
+        if (subscriptionplan.getService() != null) {
+            if (subscriptionplan.getService().getId() != null) {
+                StreamingService existingService = serviceRepository.findById(
+                    subscriptionplan.getService().getId()
+                ).orElseThrow(() -> new RuntimeException("StreamingService not found with id "
+                    + subscriptionplan.getService().getId()));
+                subscriptionplan.setService(existingService);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                StreamingService newService = serviceRepository.save(subscriptionplan.getService());
+                subscriptionplan.setService(newService);
+            }
         }
         
     // ---------- OneToOne ----------
         if (subscriptionplan.getTier() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            subscriptionplan.setTier(
-                tierRepository.findById(subscriptionplan.getTier().getId())
-                    .orElseThrow(() -> new RuntimeException("tier not found"))
-            );
-            
+            if (subscriptionplan.getTier().getId() != null) {
+                SubscriptionTier existingTier = tierRepository.findById(subscriptionplan.getTier().getId())
+                    .orElseThrow(() -> new RuntimeException("SubscriptionTier not found with id "
+                        + subscriptionplan.getTier().getId()));
+                subscriptionplan.setTier(existingTier);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                SubscriptionTier newTier = tierRepository.save(subscriptionplan.getTier());
+                subscriptionplan.setTier(newTier);
+            }
+
             subscriptionplan.getTier().setSubscriptionPlan(subscriptionplan);
         }
         
-
     return subscriptionplanRepository.save(subscriptionplan);
 }
 
@@ -200,21 +214,15 @@ public class SubscriptionPlanService extends BaseService<SubscriptionPlan> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (subscriptionplanRequest.getTier() != null &&
-            subscriptionplanRequest.getTier().getId() != null) {
+        if (subscriptionplanRequest.getTier() != null &&subscriptionplanRequest.getTier().getId() != null) {
 
-            SubscriptionTier tier = tierRepository.findById(
-                subscriptionplanRequest.getTier().getId()
-            ).orElseThrow(() -> new RuntimeException("SubscriptionTier not found"));
+        SubscriptionTier tier = tierRepository.findById(subscriptionplanRequest.getTier().getId())
+                .orElseThrow(() -> new RuntimeException("SubscriptionTier not found"));
 
-            existing.setTier(tier);
-
-            
-            tier.setSubscriptionPlan(existing);
-            
+        existing.setTier(tier);
+        tier.setSubscriptionPlan(existing);
         }
-        
-
+    
     return subscriptionplanRepository.save(existing);
 }
     @Transactional
@@ -226,18 +234,16 @@ public class SubscriptionPlanService extends BaseService<SubscriptionPlan> {
     // --- Dissocier OneToMany ---
         if (entity.getSubscriptions() != null) {
             for (var child : entity.getSubscriptions()) {
-                
-                child.setPlan(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPlan(null);
             }
             entity.getSubscriptions().clear();
         }
         
         if (entity.getIncludedStreamingContentLicenses() != null) {
             for (var child : entity.getIncludedStreamingContentLicenses()) {
-                
-                child.setSubscriptionPlan(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setSubscriptionPlan(null);
             }
             entity.getIncludedStreamingContentLicenses().clear();
         }
@@ -247,7 +253,6 @@ public class SubscriptionPlanService extends BaseService<SubscriptionPlan> {
             for (SubscriptionFeature item : new ArrayList<>(entity.getFeatures())) {
                 
                 item.getSubscriptionPlans().remove(entity); // retire côté inverse
-                
             }
             entity.getFeatures().clear(); // puis vide côté courant
         }

@@ -37,10 +37,18 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
         if (podcastguest.getAppearances() != null &&
             !podcastguest.getAppearances().isEmpty()) {
 
-            List<PodcastEpisode> attachedAppearances = podcastguest.getAppearances().stream()
-            .map(item -> appearancesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("PodcastEpisode not found with id " + item.getId())))
-            .toList();
+            List<PodcastEpisode> attachedAppearances = new ArrayList<>();
+            for (PodcastEpisode item : podcastguest.getAppearances()) {
+                if (item.getId() != null) {
+                    PodcastEpisode existingItem = appearancesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("PodcastEpisode not found with id " + item.getId()));
+                    attachedAppearances.add(existingItem);
+                } else {
+
+                    PodcastEpisode newItem = appearancesRepository.save(item);
+                    attachedAppearances.add(newItem);
+                }
+            }
 
             podcastguest.setAppearances(attachedAppearances);
 
@@ -49,18 +57,21 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
         }
         
     // ---------- ManyToOne ----------
-        if (podcastguest.getPodcast() != null &&
-            podcastguest.getPodcast().getId() != null) {
-
-            Podcast existingPodcast = podcastRepository.findById(
-                podcastguest.getPodcast().getId()
-            ).orElseThrow(() -> new RuntimeException("Podcast not found"));
-
-            podcastguest.setPodcast(existingPodcast);
+        if (podcastguest.getPodcast() != null) {
+            if (podcastguest.getPodcast().getId() != null) {
+                Podcast existingPodcast = podcastRepository.findById(
+                    podcastguest.getPodcast().getId()
+                ).orElseThrow(() -> new RuntimeException("Podcast not found with id "
+                    + podcastguest.getPodcast().getId()));
+                podcastguest.setPodcast(existingPodcast);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Podcast newPodcast = podcastRepository.save(podcastguest.getPodcast());
+                podcastguest.setPodcast(newPodcast);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return podcastguestRepository.save(podcastguest);
 }
 
@@ -107,7 +118,6 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return podcastguestRepository.save(existing);
 }
     @Transactional
@@ -122,7 +132,6 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
             for (PodcastEpisode item : new ArrayList<>(entity.getAppearances())) {
                 
                 item.getGuestAppearances().remove(entity); // retire côté inverse
-                
             }
             entity.getAppearances().clear(); // puis vide côté courant
         }

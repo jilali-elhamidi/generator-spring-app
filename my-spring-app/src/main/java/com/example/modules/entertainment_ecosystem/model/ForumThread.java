@@ -29,6 +29,7 @@ public class ForumThread extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 5, max = 255)
+        @Column(unique = true, nullable = false)
     private String title;
 
     @NotNull

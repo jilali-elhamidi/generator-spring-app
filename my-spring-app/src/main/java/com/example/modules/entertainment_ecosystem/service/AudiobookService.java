@@ -56,28 +56,35 @@ public class AudiobookService extends BaseService<Audiobook> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (audiobook.getAuthor() != null &&
-            audiobook.getAuthor().getId() != null) {
-
-            Artist existingAuthor = authorRepository.findById(
-                audiobook.getAuthor().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            audiobook.setAuthor(existingAuthor);
+        if (audiobook.getAuthor() != null) {
+            if (audiobook.getAuthor().getId() != null) {
+                Artist existingAuthor = authorRepository.findById(
+                    audiobook.getAuthor().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + audiobook.getAuthor().getId()));
+                audiobook.setAuthor(existingAuthor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newAuthor = authorRepository.save(audiobook.getAuthor());
+                audiobook.setAuthor(newAuthor);
+            }
         }
         
-        if (audiobook.getPublisher() != null &&
-            audiobook.getPublisher().getId() != null) {
-
-            Publisher existingPublisher = publisherRepository.findById(
-                audiobook.getPublisher().getId()
-            ).orElseThrow(() -> new RuntimeException("Publisher not found"));
-
-            audiobook.setPublisher(existingPublisher);
+        if (audiobook.getPublisher() != null) {
+            if (audiobook.getPublisher().getId() != null) {
+                Publisher existingPublisher = publisherRepository.findById(
+                    audiobook.getPublisher().getId()
+                ).orElseThrow(() -> new RuntimeException("Publisher not found with id "
+                    + audiobook.getPublisher().getId()));
+                audiobook.setPublisher(existingPublisher);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Publisher newPublisher = publisherRepository.save(audiobook.getPublisher());
+                audiobook.setPublisher(newPublisher);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return audiobookRepository.save(audiobook);
 }
 
@@ -137,7 +144,6 @@ public class AudiobookService extends BaseService<Audiobook> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return audiobookRepository.save(existing);
 }
     @Transactional
@@ -149,9 +155,8 @@ public class AudiobookService extends BaseService<Audiobook> {
     // --- Dissocier OneToMany ---
         if (entity.getChapters() != null) {
             for (var child : entity.getChapters()) {
-                
-                child.setAudiobook(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAudiobook(null);
             }
             entity.getChapters().clear();
         }

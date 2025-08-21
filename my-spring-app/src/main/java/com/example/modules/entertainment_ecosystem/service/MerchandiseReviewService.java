@@ -35,28 +35,35 @@ public class MerchandiseReviewService extends BaseService<MerchandiseReview> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (merchandisereview.getUser() != null &&
-            merchandisereview.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                merchandisereview.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            merchandisereview.setUser(existingUser);
+        if (merchandisereview.getUser() != null) {
+            if (merchandisereview.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    merchandisereview.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + merchandisereview.getUser().getId()));
+                merchandisereview.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(merchandisereview.getUser());
+                merchandisereview.setUser(newUser);
+            }
         }
         
-        if (merchandisereview.getMerchandise() != null &&
-            merchandisereview.getMerchandise().getId() != null) {
-
-            Merchandise existingMerchandise = merchandiseRepository.findById(
-                merchandisereview.getMerchandise().getId()
-            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
-
-            merchandisereview.setMerchandise(existingMerchandise);
+        if (merchandisereview.getMerchandise() != null) {
+            if (merchandisereview.getMerchandise().getId() != null) {
+                Merchandise existingMerchandise = merchandiseRepository.findById(
+                    merchandisereview.getMerchandise().getId()
+                ).orElseThrow(() -> new RuntimeException("Merchandise not found with id "
+                    + merchandisereview.getMerchandise().getId()));
+                merchandisereview.setMerchandise(existingMerchandise);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Merchandise newMerchandise = merchandiseRepository.save(merchandisereview.getMerchandise());
+                merchandisereview.setMerchandise(newMerchandise);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return merchandisereviewRepository.save(merchandisereview);
 }
 
@@ -98,7 +105,6 @@ public class MerchandiseReviewService extends BaseService<MerchandiseReview> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return merchandisereviewRepository.save(existing);
 }
     @Transactional

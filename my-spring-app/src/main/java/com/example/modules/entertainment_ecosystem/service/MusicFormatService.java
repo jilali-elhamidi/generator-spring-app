@@ -33,10 +33,18 @@ public class MusicFormatService extends BaseService<MusicFormat> {
         if (musicformat.getMusicTracks() != null &&
             !musicformat.getMusicTracks().isEmpty()) {
 
-            List<MusicTrack> attachedMusicTracks = musicformat.getMusicTracks().stream()
-            .map(item -> musicTracksRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("MusicTrack not found with id " + item.getId())))
-            .toList();
+            List<MusicTrack> attachedMusicTracks = new ArrayList<>();
+            for (MusicTrack item : musicformat.getMusicTracks()) {
+                if (item.getId() != null) {
+                    MusicTrack existingItem = musicTracksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MusicTrack not found with id " + item.getId()));
+                    attachedMusicTracks.add(existingItem);
+                } else {
+
+                    MusicTrack newItem = musicTracksRepository.save(item);
+                    attachedMusicTracks.add(newItem);
+                }
+            }
 
             musicformat.setMusicTracks(attachedMusicTracks);
 
@@ -46,7 +54,6 @@ public class MusicFormatService extends BaseService<MusicFormat> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return musicformatRepository.save(musicformat);
 }
 
@@ -80,7 +87,6 @@ public class MusicFormatService extends BaseService<MusicFormat> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return musicformatRepository.save(existing);
 }
     @Transactional
@@ -95,7 +101,6 @@ public class MusicFormatService extends BaseService<MusicFormat> {
             for (MusicTrack item : new ArrayList<>(entity.getMusicTracks())) {
                 
                 item.getFormats().remove(entity); // retire côté inverse
-                
             }
             entity.getMusicTracks().clear(); // puis vide côté courant
         }

@@ -52,18 +52,21 @@ public class GameExpansionPackService extends BaseService<GameExpansionPack> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (gameexpansionpack.getBaseGame() != null &&
-            gameexpansionpack.getBaseGame().getId() != null) {
-
-            VideoGame existingBaseGame = baseGameRepository.findById(
-                gameexpansionpack.getBaseGame().getId()
-            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-
-            gameexpansionpack.setBaseGame(existingBaseGame);
+        if (gameexpansionpack.getBaseGame() != null) {
+            if (gameexpansionpack.getBaseGame().getId() != null) {
+                VideoGame existingBaseGame = baseGameRepository.findById(
+                    gameexpansionpack.getBaseGame().getId()
+                ).orElseThrow(() -> new RuntimeException("VideoGame not found with id "
+                    + gameexpansionpack.getBaseGame().getId()));
+                gameexpansionpack.setBaseGame(existingBaseGame);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                VideoGame newBaseGame = baseGameRepository.save(gameexpansionpack.getBaseGame());
+                gameexpansionpack.setBaseGame(newBaseGame);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return gameexpansionpackRepository.save(gameexpansionpack);
 }
 
@@ -110,7 +113,6 @@ public class GameExpansionPackService extends BaseService<GameExpansionPack> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return gameexpansionpackRepository.save(existing);
 }
     @Transactional
@@ -122,9 +124,8 @@ public class GameExpansionPackService extends BaseService<GameExpansionPack> {
     // --- Dissocier OneToMany ---
         if (entity.getPurchases() != null) {
             for (var child : entity.getPurchases()) {
-                
-                child.setExpansionPack(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setExpansionPack(null);
             }
             entity.getPurchases().clear();
         }

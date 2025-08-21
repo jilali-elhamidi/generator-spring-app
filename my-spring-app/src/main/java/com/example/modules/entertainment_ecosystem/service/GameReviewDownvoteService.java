@@ -39,38 +39,49 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (gamereviewdownvote.getUser() != null &&
-            gamereviewdownvote.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                gamereviewdownvote.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            gamereviewdownvote.setUser(existingUser);
+        if (gamereviewdownvote.getUser() != null) {
+            if (gamereviewdownvote.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    gamereviewdownvote.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + gamereviewdownvote.getUser().getId()));
+                gamereviewdownvote.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(gamereviewdownvote.getUser());
+                gamereviewdownvote.setUser(newUser);
+            }
         }
         
-        if (gamereviewdownvote.getReview() != null &&
-            gamereviewdownvote.getReview().getId() != null) {
-
-            GameReview existingReview = reviewRepository.findById(
-                gamereviewdownvote.getReview().getId()
-            ).orElseThrow(() -> new RuntimeException("GameReview not found"));
-
-            gamereviewdownvote.setReview(existingReview);
+        if (gamereviewdownvote.getReview() != null) {
+            if (gamereviewdownvote.getReview().getId() != null) {
+                GameReview existingReview = reviewRepository.findById(
+                    gamereviewdownvote.getReview().getId()
+                ).orElseThrow(() -> new RuntimeException("GameReview not found with id "
+                    + gamereviewdownvote.getReview().getId()));
+                gamereviewdownvote.setReview(existingReview);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                GameReview newReview = reviewRepository.save(gamereviewdownvote.getReview());
+                gamereviewdownvote.setReview(newReview);
+            }
         }
         
-        if (gamereviewdownvote.getGame() != null &&
-            gamereviewdownvote.getGame().getId() != null) {
-
-            VideoGame existingGame = gameRepository.findById(
-                gamereviewdownvote.getGame().getId()
-            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-
-            gamereviewdownvote.setGame(existingGame);
+        if (gamereviewdownvote.getGame() != null) {
+            if (gamereviewdownvote.getGame().getId() != null) {
+                VideoGame existingGame = gameRepository.findById(
+                    gamereviewdownvote.getGame().getId()
+                ).orElseThrow(() -> new RuntimeException("VideoGame not found with id "
+                    + gamereviewdownvote.getGame().getId()));
+                gamereviewdownvote.setGame(existingGame);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                VideoGame newGame = gameRepository.save(gamereviewdownvote.getGame());
+                gamereviewdownvote.setGame(newGame);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return gamereviewdownvoteRepository.save(gamereviewdownvote);
 }
 
@@ -122,7 +133,6 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return gamereviewdownvoteRepository.save(existing);
 }
     @Transactional

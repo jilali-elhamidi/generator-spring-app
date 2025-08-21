@@ -49,7 +49,6 @@ public class SocialMediaPlatformService extends BaseService<SocialMediaPlatform>
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return socialmediaplatformRepository.save(socialmediaplatform);
 }
 
@@ -83,7 +82,6 @@ public class SocialMediaPlatformService extends BaseService<SocialMediaPlatform>
         }
         
     // ---------- Relations OneToOne ----------
-
     return socialmediaplatformRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class SocialMediaPlatformService extends BaseService<SocialMediaPlatform>
     // --- Dissocier OneToMany ---
         if (entity.getArtistSocialMedia() != null) {
             for (var child : entity.getArtistSocialMedia()) {
-                
-                child.setPlatform(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPlatform(null);
             }
             entity.getArtistSocialMedia().clear();
         }

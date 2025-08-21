@@ -37,10 +37,18 @@ public class GamePlatformService extends BaseService<GamePlatform> {
         if (gameplatform.getVideoGames() != null &&
             !gameplatform.getVideoGames().isEmpty()) {
 
-            List<VideoGame> attachedVideoGames = gameplatform.getVideoGames().stream()
-            .map(item -> videoGamesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId())))
-            .toList();
+            List<VideoGame> attachedVideoGames = new ArrayList<>();
+            for (VideoGame item : gameplatform.getVideoGames()) {
+                if (item.getId() != null) {
+                    VideoGame existingItem = videoGamesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId()));
+                    attachedVideoGames.add(existingItem);
+                } else {
+
+                    VideoGame newItem = videoGamesRepository.save(item);
+                    attachedVideoGames.add(newItem);
+                }
+            }
 
             gameplatform.setVideoGames(attachedVideoGames);
 
@@ -49,18 +57,21 @@ public class GamePlatformService extends BaseService<GamePlatform> {
         }
         
     // ---------- ManyToOne ----------
-        if (gameplatform.getType() != null &&
-            gameplatform.getType().getId() != null) {
-
-            GamePlatformType existingType = typeRepository.findById(
-                gameplatform.getType().getId()
-            ).orElseThrow(() -> new RuntimeException("GamePlatformType not found"));
-
-            gameplatform.setType(existingType);
+        if (gameplatform.getType() != null) {
+            if (gameplatform.getType().getId() != null) {
+                GamePlatformType existingType = typeRepository.findById(
+                    gameplatform.getType().getId()
+                ).orElseThrow(() -> new RuntimeException("GamePlatformType not found with id "
+                    + gameplatform.getType().getId()));
+                gameplatform.setType(existingType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                GamePlatformType newType = typeRepository.save(gameplatform.getType());
+                gameplatform.setType(newType);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return gameplatformRepository.save(gameplatform);
 }
 
@@ -106,7 +117,6 @@ public class GamePlatformService extends BaseService<GamePlatform> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return gameplatformRepository.save(existing);
 }
     @Transactional
@@ -121,7 +131,6 @@ public class GamePlatformService extends BaseService<GamePlatform> {
             for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
                 
                 item.getPlatforms().remove(entity); // retire côté inverse
-                
             }
             entity.getVideoGames().clear(); // puis vide côté courant
         }

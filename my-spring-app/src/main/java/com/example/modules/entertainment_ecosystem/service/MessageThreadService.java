@@ -54,10 +54,18 @@ public class MessageThreadService extends BaseService<MessageThread> {
         if (messagethread.getParticipants() != null &&
             !messagethread.getParticipants().isEmpty()) {
 
-            List<UserProfile> attachedParticipants = messagethread.getParticipants().stream()
-            .map(item -> participantsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedParticipants = new ArrayList<>();
+            for (UserProfile item : messagethread.getParticipants()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = participantsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedParticipants.add(existingItem);
+                } else {
+
+                    UserProfile newItem = participantsRepository.save(item);
+                    attachedParticipants.add(newItem);
+                }
+            }
 
             messagethread.setParticipants(attachedParticipants);
 
@@ -67,7 +75,6 @@ public class MessageThreadService extends BaseService<MessageThread> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return messagethreadRepository.save(messagethread);
 }
 
@@ -119,7 +126,6 @@ public class MessageThreadService extends BaseService<MessageThread> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return messagethreadRepository.save(existing);
 }
     @Transactional
@@ -131,9 +137,8 @@ public class MessageThreadService extends BaseService<MessageThread> {
     // --- Dissocier OneToMany ---
         if (entity.getMessages() != null) {
             for (var child : entity.getMessages()) {
-                
-                child.setThread(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setThread(null);
             }
             entity.getMessages().clear();
         }
@@ -143,7 +148,6 @@ public class MessageThreadService extends BaseService<MessageThread> {
             for (UserProfile item : new ArrayList<>(entity.getParticipants())) {
                 
                 item.getMessageThreads().remove(entity); // retire côté inverse
-                
             }
             entity.getParticipants().clear(); // puis vide côté courant
         }

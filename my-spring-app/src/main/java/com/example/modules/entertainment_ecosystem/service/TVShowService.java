@@ -115,10 +115,18 @@ public class TVShowService extends BaseService<TVShow> {
         if (tvshow.getGenres() != null &&
             !tvshow.getGenres().isEmpty()) {
 
-            List<Genre> attachedGenres = tvshow.getGenres().stream()
-            .map(item -> genresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
-            .toList();
+            List<Genre> attachedGenres = new ArrayList<>();
+            for (Genre item : tvshow.getGenres()) {
+                if (item.getId() != null) {
+                    Genre existingItem = genresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId()));
+                    attachedGenres.add(existingItem);
+                } else {
+
+                    Genre newItem = genresRepository.save(item);
+                    attachedGenres.add(newItem);
+                }
+            }
 
             tvshow.setGenres(attachedGenres);
 
@@ -129,10 +137,18 @@ public class TVShowService extends BaseService<TVShow> {
         if (tvshow.getRelatedMerchandise() != null &&
             !tvshow.getRelatedMerchandise().isEmpty()) {
 
-            List<Merchandise> attachedRelatedMerchandise = tvshow.getRelatedMerchandise().stream()
-            .map(item -> relatedMerchandiseRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Merchandise not found with id " + item.getId())))
-            .toList();
+            List<Merchandise> attachedRelatedMerchandise = new ArrayList<>();
+            for (Merchandise item : tvshow.getRelatedMerchandise()) {
+                if (item.getId() != null) {
+                    Merchandise existingItem = relatedMerchandiseRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Merchandise not found with id " + item.getId()));
+                    attachedRelatedMerchandise.add(existingItem);
+                } else {
+
+                    Merchandise newItem = relatedMerchandiseRepository.save(item);
+                    attachedRelatedMerchandise.add(newItem);
+                }
+            }
 
             tvshow.setRelatedMerchandise(attachedRelatedMerchandise);
 
@@ -143,10 +159,18 @@ public class TVShowService extends BaseService<TVShow> {
         if (tvshow.getCast() != null &&
             !tvshow.getCast().isEmpty()) {
 
-            List<Artist> attachedCast = tvshow.getCast().stream()
-            .map(item -> castRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
-            .toList();
+            List<Artist> attachedCast = new ArrayList<>();
+            for (Artist item : tvshow.getCast()) {
+                if (item.getId() != null) {
+                    Artist existingItem = castRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId()));
+                    attachedCast.add(existingItem);
+                } else {
+
+                    Artist newItem = castRepository.save(item);
+                    attachedCast.add(newItem);
+                }
+            }
 
             tvshow.setCast(attachedCast);
 
@@ -157,10 +181,18 @@ public class TVShowService extends BaseService<TVShow> {
         if (tvshow.getTags() != null &&
             !tvshow.getTags().isEmpty()) {
 
-            List<ContentTag> attachedTags = tvshow.getTags().stream()
-            .map(item -> tagsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
-            .toList();
+            List<ContentTag> attachedTags = new ArrayList<>();
+            for (ContentTag item : tvshow.getTags()) {
+                if (item.getId() != null) {
+                    ContentTag existingItem = tagsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId()));
+                    attachedTags.add(existingItem);
+                } else {
+
+                    ContentTag newItem = tagsRepository.save(item);
+                    attachedTags.add(newItem);
+                }
+            }
 
             tvshow.setTags(attachedTags);
 
@@ -171,10 +203,18 @@ public class TVShowService extends BaseService<TVShow> {
         if (tvshow.getLanguages() != null &&
             !tvshow.getLanguages().isEmpty()) {
 
-            List<ContentLanguage> attachedLanguages = tvshow.getLanguages().stream()
-            .map(item -> languagesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ContentLanguage not found with id " + item.getId())))
-            .toList();
+            List<ContentLanguage> attachedLanguages = new ArrayList<>();
+            for (ContentLanguage item : tvshow.getLanguages()) {
+                if (item.getId() != null) {
+                    ContentLanguage existingItem = languagesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ContentLanguage not found with id " + item.getId()));
+                    attachedLanguages.add(existingItem);
+                } else {
+
+                    ContentLanguage newItem = languagesRepository.save(item);
+                    attachedLanguages.add(newItem);
+                }
+            }
 
             tvshow.setLanguages(attachedLanguages);
 
@@ -185,10 +225,18 @@ public class TVShowService extends BaseService<TVShow> {
         if (tvshow.getPlatforms() != null &&
             !tvshow.getPlatforms().isEmpty()) {
 
-            List<StreamingPlatform> attachedPlatforms = tvshow.getPlatforms().stream()
-            .map(item -> platformsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("StreamingPlatform not found with id " + item.getId())))
-            .toList();
+            List<StreamingPlatform> attachedPlatforms = new ArrayList<>();
+            for (StreamingPlatform item : tvshow.getPlatforms()) {
+                if (item.getId() != null) {
+                    StreamingPlatform existingItem = platformsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("StreamingPlatform not found with id " + item.getId()));
+                    attachedPlatforms.add(existingItem);
+                } else {
+
+                    StreamingPlatform newItem = platformsRepository.save(item);
+                    attachedPlatforms.add(newItem);
+                }
+            }
 
             tvshow.setPlatforms(attachedPlatforms);
 
@@ -197,58 +245,77 @@ public class TVShowService extends BaseService<TVShow> {
         }
         
     // ---------- ManyToOne ----------
-        if (tvshow.getDirector() != null &&
-            tvshow.getDirector().getId() != null) {
-
-            Artist existingDirector = directorRepository.findById(
-                tvshow.getDirector().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            tvshow.setDirector(existingDirector);
+        if (tvshow.getDirector() != null) {
+            if (tvshow.getDirector().getId() != null) {
+                Artist existingDirector = directorRepository.findById(
+                    tvshow.getDirector().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + tvshow.getDirector().getId()));
+                tvshow.setDirector(existingDirector);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newDirector = directorRepository.save(tvshow.getDirector());
+                tvshow.setDirector(newDirector);
+            }
         }
         
-        if (tvshow.getProductionCompany() != null &&
-            tvshow.getProductionCompany().getId() != null) {
-
-            ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
-                tvshow.getProductionCompany().getId()
-            ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-
-            tvshow.setProductionCompany(existingProductionCompany);
+        if (tvshow.getProductionCompany() != null) {
+            if (tvshow.getProductionCompany().getId() != null) {
+                ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+                    tvshow.getProductionCompany().getId()
+                ).orElseThrow(() -> new RuntimeException("ProductionCompany not found with id "
+                    + tvshow.getProductionCompany().getId()));
+                tvshow.setProductionCompany(existingProductionCompany);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ProductionCompany newProductionCompany = productionCompanyRepository.save(tvshow.getProductionCompany());
+                tvshow.setProductionCompany(newProductionCompany);
+            }
         }
         
-        if (tvshow.getProvider() != null &&
-            tvshow.getProvider().getId() != null) {
-
-            ContentProvider existingProvider = providerRepository.findById(
-                tvshow.getProvider().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-
-            tvshow.setProvider(existingProvider);
+        if (tvshow.getProvider() != null) {
+            if (tvshow.getProvider().getId() != null) {
+                ContentProvider existingProvider = providerRepository.findById(
+                    tvshow.getProvider().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentProvider not found with id "
+                    + tvshow.getProvider().getId()));
+                tvshow.setProvider(existingProvider);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentProvider newProvider = providerRepository.save(tvshow.getProvider());
+                tvshow.setProvider(newProvider);
+            }
         }
         
-        if (tvshow.getTvShowStudio() != null &&
-            tvshow.getTvShowStudio().getId() != null) {
-
-            TVShowStudio existingTvShowStudio = tvShowStudioRepository.findById(
-                tvshow.getTvShowStudio().getId()
-            ).orElseThrow(() -> new RuntimeException("TVShowStudio not found"));
-
-            tvshow.setTvShowStudio(existingTvShowStudio);
+        if (tvshow.getTvShowStudio() != null) {
+            if (tvshow.getTvShowStudio().getId() != null) {
+                TVShowStudio existingTvShowStudio = tvShowStudioRepository.findById(
+                    tvshow.getTvShowStudio().getId()
+                ).orElseThrow(() -> new RuntimeException("TVShowStudio not found with id "
+                    + tvshow.getTvShowStudio().getId()));
+                tvshow.setTvShowStudio(existingTvShowStudio);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TVShowStudio newTvShowStudio = tvShowStudioRepository.save(tvshow.getTvShowStudio());
+                tvshow.setTvShowStudio(newTvShowStudio);
+            }
         }
         
-        if (tvshow.getContentRating() != null &&
-            tvshow.getContentRating().getId() != null) {
-
-            ContentRating existingContentRating = contentRatingRepository.findById(
-                tvshow.getContentRating().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
-
-            tvshow.setContentRating(existingContentRating);
+        if (tvshow.getContentRating() != null) {
+            if (tvshow.getContentRating().getId() != null) {
+                ContentRating existingContentRating = contentRatingRepository.findById(
+                    tvshow.getContentRating().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentRating not found with id "
+                    + tvshow.getContentRating().getId()));
+                tvshow.setContentRating(existingContentRating);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentRating newContentRating = contentRatingRepository.save(tvshow.getContentRating());
+                tvshow.setContentRating(newContentRating);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return tvshowRepository.save(tvshow);
 }
 
@@ -469,7 +536,6 @@ public class TVShowService extends BaseService<TVShow> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return tvshowRepository.save(existing);
 }
     @Transactional
@@ -481,18 +547,16 @@ public class TVShowService extends BaseService<TVShow> {
     // --- Dissocier OneToMany ---
         if (entity.getSeasons() != null) {
             for (var child : entity.getSeasons()) {
-                
-                child.setShow(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setShow(null);
             }
             entity.getSeasons().clear();
         }
         
         if (entity.getStreamingLicenses() != null) {
             for (var child : entity.getStreamingLicenses()) {
-                
-                child.setTvShow(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setTvShow(null);
             }
             entity.getStreamingLicenses().clear();
         }
@@ -502,7 +566,6 @@ public class TVShowService extends BaseService<TVShow> {
             for (Genre item : new ArrayList<>(entity.getGenres())) {
                 
                 item.getTvShows().remove(entity); // retire côté inverse
-                
             }
             entity.getGenres().clear(); // puis vide côté courant
         }
@@ -511,7 +574,6 @@ public class TVShowService extends BaseService<TVShow> {
             for (Merchandise item : new ArrayList<>(entity.getRelatedMerchandise())) {
                 
                 item.getRelatedShows().remove(entity); // retire côté inverse
-                
             }
             entity.getRelatedMerchandise().clear(); // puis vide côté courant
         }
@@ -520,7 +582,6 @@ public class TVShowService extends BaseService<TVShow> {
             for (Artist item : new ArrayList<>(entity.getCast())) {
                 
                 item.getActedInShows().remove(entity); // retire côté inverse
-                
             }
             entity.getCast().clear(); // puis vide côté courant
         }
@@ -529,7 +590,6 @@ public class TVShowService extends BaseService<TVShow> {
             for (ContentTag item : new ArrayList<>(entity.getTags())) {
                 
                 item.getTvShows().remove(entity); // retire côté inverse
-                
             }
             entity.getTags().clear(); // puis vide côté courant
         }
@@ -538,7 +598,6 @@ public class TVShowService extends BaseService<TVShow> {
             for (ContentLanguage item : new ArrayList<>(entity.getLanguages())) {
                 
                 item.getTvShows().remove(entity); // retire côté inverse
-                
             }
             entity.getLanguages().clear(); // puis vide côté courant
         }
@@ -547,7 +606,6 @@ public class TVShowService extends BaseService<TVShow> {
             for (StreamingPlatform item : new ArrayList<>(entity.getPlatforms())) {
                 
                 item.getTvShows().remove(entity); // retire côté inverse
-                
             }
             entity.getPlatforms().clear(); // puis vide côté courant
         }

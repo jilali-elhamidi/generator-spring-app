@@ -99,10 +99,18 @@ public class PodcastService extends BaseService<Podcast> {
         if (podcast.getGenres() != null &&
             !podcast.getGenres().isEmpty()) {
 
-            List<Genre> attachedGenres = podcast.getGenres().stream()
-            .map(item -> genresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
-            .toList();
+            List<Genre> attachedGenres = new ArrayList<>();
+            for (Genre item : podcast.getGenres()) {
+                if (item.getId() != null) {
+                    Genre existingItem = genresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId()));
+                    attachedGenres.add(existingItem);
+                } else {
+
+                    Genre newItem = genresRepository.save(item);
+                    attachedGenres.add(newItem);
+                }
+            }
 
             podcast.setGenres(attachedGenres);
 
@@ -113,10 +121,18 @@ public class PodcastService extends BaseService<Podcast> {
         if (podcast.getListeners() != null &&
             !podcast.getListeners().isEmpty()) {
 
-            List<UserProfile> attachedListeners = podcast.getListeners().stream()
-            .map(item -> listenersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedListeners = new ArrayList<>();
+            for (UserProfile item : podcast.getListeners()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = listenersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedListeners.add(existingItem);
+                } else {
+
+                    UserProfile newItem = listenersRepository.save(item);
+                    attachedListeners.add(newItem);
+                }
+            }
 
             podcast.setListeners(attachedListeners);
 
@@ -127,10 +143,18 @@ public class PodcastService extends BaseService<Podcast> {
         if (podcast.getCategories() != null &&
             !podcast.getCategories().isEmpty()) {
 
-            List<PodcastCategory> attachedCategories = podcast.getCategories().stream()
-            .map(item -> categoriesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("PodcastCategory not found with id " + item.getId())))
-            .toList();
+            List<PodcastCategory> attachedCategories = new ArrayList<>();
+            for (PodcastCategory item : podcast.getCategories()) {
+                if (item.getId() != null) {
+                    PodcastCategory existingItem = categoriesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("PodcastCategory not found with id " + item.getId()));
+                    attachedCategories.add(existingItem);
+                } else {
+
+                    PodcastCategory newItem = categoriesRepository.save(item);
+                    attachedCategories.add(newItem);
+                }
+            }
 
             podcast.setCategories(attachedCategories);
 
@@ -141,10 +165,18 @@ public class PodcastService extends BaseService<Podcast> {
         if (podcast.getLanguages() != null &&
             !podcast.getLanguages().isEmpty()) {
 
-            List<ContentLanguage> attachedLanguages = podcast.getLanguages().stream()
-            .map(item -> languagesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ContentLanguage not found with id " + item.getId())))
-            .toList();
+            List<ContentLanguage> attachedLanguages = new ArrayList<>();
+            for (ContentLanguage item : podcast.getLanguages()) {
+                if (item.getId() != null) {
+                    ContentLanguage existingItem = languagesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ContentLanguage not found with id " + item.getId()));
+                    attachedLanguages.add(existingItem);
+                } else {
+
+                    ContentLanguage newItem = languagesRepository.save(item);
+                    attachedLanguages.add(newItem);
+                }
+            }
 
             podcast.setLanguages(attachedLanguages);
 
@@ -153,38 +185,49 @@ public class PodcastService extends BaseService<Podcast> {
         }
         
     // ---------- ManyToOne ----------
-        if (podcast.getHost() != null &&
-            podcast.getHost().getId() != null) {
-
-            Artist existingHost = hostRepository.findById(
-                podcast.getHost().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            podcast.setHost(existingHost);
+        if (podcast.getHost() != null) {
+            if (podcast.getHost().getId() != null) {
+                Artist existingHost = hostRepository.findById(
+                    podcast.getHost().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + podcast.getHost().getId()));
+                podcast.setHost(existingHost);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newHost = hostRepository.save(podcast.getHost());
+                podcast.setHost(newHost);
+            }
         }
         
-        if (podcast.getPublisher() != null &&
-            podcast.getPublisher().getId() != null) {
-
-            Publisher existingPublisher = publisherRepository.findById(
-                podcast.getPublisher().getId()
-            ).orElseThrow(() -> new RuntimeException("Publisher not found"));
-
-            podcast.setPublisher(existingPublisher);
+        if (podcast.getPublisher() != null) {
+            if (podcast.getPublisher().getId() != null) {
+                Publisher existingPublisher = publisherRepository.findById(
+                    podcast.getPublisher().getId()
+                ).orElseThrow(() -> new RuntimeException("Publisher not found with id "
+                    + podcast.getPublisher().getId()));
+                podcast.setPublisher(existingPublisher);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Publisher newPublisher = publisherRepository.save(podcast.getPublisher());
+                podcast.setPublisher(newPublisher);
+            }
         }
         
-        if (podcast.getProvider() != null &&
-            podcast.getProvider().getId() != null) {
-
-            ContentProvider existingProvider = providerRepository.findById(
-                podcast.getProvider().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-
-            podcast.setProvider(existingProvider);
+        if (podcast.getProvider() != null) {
+            if (podcast.getProvider().getId() != null) {
+                ContentProvider existingProvider = providerRepository.findById(
+                    podcast.getProvider().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentProvider not found with id "
+                    + podcast.getProvider().getId()));
+                podcast.setProvider(existingProvider);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentProvider newProvider = providerRepository.save(podcast.getProvider());
+                podcast.setProvider(newProvider);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return podcastRepository.save(podcast);
 }
 
@@ -344,7 +387,6 @@ public class PodcastService extends BaseService<Podcast> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return podcastRepository.save(existing);
 }
     @Transactional
@@ -356,18 +398,16 @@ public class PodcastService extends BaseService<Podcast> {
     // --- Dissocier OneToMany ---
         if (entity.getEpisodes() != null) {
             for (var child : entity.getEpisodes()) {
-                
-                child.setPodcast(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPodcast(null);
             }
             entity.getEpisodes().clear();
         }
         
         if (entity.getGuests() != null) {
             for (var child : entity.getGuests()) {
-                
-                child.setPodcast(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPodcast(null);
             }
             entity.getGuests().clear();
         }
@@ -377,7 +417,6 @@ public class PodcastService extends BaseService<Podcast> {
             for (Genre item : new ArrayList<>(entity.getGenres())) {
                 
                 item.getPodcasts().remove(entity); // retire côté inverse
-                
             }
             entity.getGenres().clear(); // puis vide côté courant
         }
@@ -386,7 +425,6 @@ public class PodcastService extends BaseService<Podcast> {
             for (UserProfile item : new ArrayList<>(entity.getListeners())) {
                 
                 item.getLibraryPodcasts().remove(entity); // retire côté inverse
-                
             }
             entity.getListeners().clear(); // puis vide côté courant
         }
@@ -395,7 +433,6 @@ public class PodcastService extends BaseService<Podcast> {
             for (PodcastCategory item : new ArrayList<>(entity.getCategories())) {
                 
                 item.getPodcasts().remove(entity); // retire côté inverse
-                
             }
             entity.getCategories().clear(); // puis vide côté courant
         }
@@ -404,7 +441,6 @@ public class PodcastService extends BaseService<Podcast> {
             for (ContentLanguage item : new ArrayList<>(entity.getLanguages())) {
                 
                 item.getPodcasts().remove(entity); // retire côté inverse
-                
             }
             entity.getLanguages().clear(); // puis vide côté courant
         }

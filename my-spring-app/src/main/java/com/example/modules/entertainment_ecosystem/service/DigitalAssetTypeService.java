@@ -49,7 +49,6 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return digitalassettypeRepository.save(digitalassettype);
 }
 
@@ -82,7 +81,6 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return digitalassettypeRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class DigitalAssetTypeService extends BaseService<DigitalAssetType> {
     // --- Dissocier OneToMany ---
         if (entity.getAssets() != null) {
             for (var child : entity.getAssets()) {
-                
-                child.setAssetType(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAssetType(null);
             }
             entity.getAssets().clear();
         }

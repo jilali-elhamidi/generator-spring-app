@@ -31,18 +31,21 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (useractivitylog.getUser() != null &&
-            useractivitylog.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                useractivitylog.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            useractivitylog.setUser(existingUser);
+        if (useractivitylog.getUser() != null) {
+            if (useractivitylog.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    useractivitylog.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + useractivitylog.getUser().getId()));
+                useractivitylog.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(useractivitylog.getUser());
+                useractivitylog.setUser(newUser);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return useractivitylogRepository.save(useractivitylog);
 }
 
@@ -72,7 +75,6 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return useractivitylogRepository.save(existing);
 }
     @Transactional

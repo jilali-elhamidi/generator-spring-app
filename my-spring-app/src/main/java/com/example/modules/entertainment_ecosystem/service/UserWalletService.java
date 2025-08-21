@@ -54,18 +54,20 @@ public class UserWalletService extends BaseService<UserWallet> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (userwallet.getUser() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            userwallet.setUser(
-                userRepository.findById(userwallet.getUser().getId())
-                    .orElseThrow(() -> new RuntimeException("user not found"))
-            );
-            
+            if (userwallet.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(userwallet.getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                        + userwallet.getUser().getId()));
+                userwallet.setUser(existingUser);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                UserProfile newUser = userRepository.save(userwallet.getUser());
+                userwallet.setUser(newUser);
+            }
+
             userwallet.getUser().setWallet(userwallet);
         }
         
-
     return userwalletRepository.save(userwallet);
 }
 
@@ -98,21 +100,16 @@ public class UserWalletService extends BaseService<UserWallet> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (userwalletRequest.getUser() != null &&
-            userwalletRequest.getUser().getId() != null) {
+        if (userwalletRequest.getUser() != null &&userwalletRequest.getUser().getId() != null) {
 
-            UserProfile user = userRepository.findById(
-                userwalletRequest.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        UserProfile user = userRepository.findById(userwalletRequest.getUser().getId())
+                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-            existing.setUser(user);
-
-            
-            user.setWallet(existing);
-            
-        }
+        existing.setUser(user);
+        user.setWallet(existing);
         
-
+        }
+    
     return userwalletRepository.save(existing);
 }
     @Transactional
@@ -124,9 +121,8 @@ public class UserWalletService extends BaseService<UserWallet> {
     // --- Dissocier OneToMany ---
         if (entity.getTransactions() != null) {
             for (var child : entity.getTransactions()) {
-                
-                child.setWallet(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setWallet(null);
             }
             entity.getTransactions().clear();
         }

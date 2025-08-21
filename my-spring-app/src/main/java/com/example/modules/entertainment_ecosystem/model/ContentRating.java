@@ -29,6 +29,7 @@ public class ContentRating extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 2, max = 20)
+        @Column(unique = true, nullable = false)
     private String name;
 
     @Size(max = 200)

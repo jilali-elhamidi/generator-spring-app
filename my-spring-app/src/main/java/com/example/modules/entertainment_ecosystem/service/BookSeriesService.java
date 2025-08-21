@@ -49,7 +49,6 @@ public class BookSeriesService extends BaseService<BookSeries> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return bookseriesRepository.save(bookseries);
 }
 
@@ -83,7 +82,6 @@ public class BookSeriesService extends BaseService<BookSeries> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return bookseriesRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class BookSeriesService extends BaseService<BookSeries> {
     // --- Dissocier OneToMany ---
         if (entity.getBooks() != null) {
             for (var child : entity.getBooks()) {
-                
-                child.setSeries(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setSeries(null);
             }
             entity.getBooks().clear();
         }

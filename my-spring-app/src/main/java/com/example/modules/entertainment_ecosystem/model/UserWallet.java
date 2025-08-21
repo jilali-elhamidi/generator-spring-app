@@ -28,6 +28,7 @@ public class UserWallet extends BaseEntity {
 
     // === Attributs simples ===
     @NotNull
+        @Column(unique = true, nullable = false)
     private Double balance;
 
 

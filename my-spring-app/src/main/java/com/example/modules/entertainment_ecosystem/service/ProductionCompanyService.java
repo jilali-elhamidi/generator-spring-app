@@ -91,7 +91,6 @@ public class ProductionCompanyService extends BaseService<ProductionCompany> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return productioncompanyRepository.save(productioncompany);
 }
 
@@ -160,7 +159,6 @@ public class ProductionCompanyService extends BaseService<ProductionCompany> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return productioncompanyRepository.save(existing);
 }
     @Transactional
@@ -172,27 +170,24 @@ public class ProductionCompanyService extends BaseService<ProductionCompany> {
     // --- Dissocier OneToMany ---
         if (entity.getMovies() != null) {
             for (var child : entity.getMovies()) {
-                
-                child.setProductionCompany(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setProductionCompany(null);
             }
             entity.getMovies().clear();
         }
         
         if (entity.getTvShows() != null) {
             for (var child : entity.getTvShows()) {
-                
-                child.setProductionCompany(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setProductionCompany(null);
             }
             entity.getTvShows().clear();
         }
         
         if (entity.getStaff() != null) {
             for (var child : entity.getStaff()) {
-                
-                child.setProductionCompany(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setProductionCompany(null);
             }
             entity.getStaff().clear();
         }

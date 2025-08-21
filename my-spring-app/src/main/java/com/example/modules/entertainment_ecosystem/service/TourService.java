@@ -52,18 +52,21 @@ public class TourService extends BaseService<Tour> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (tour.getArtist() != null &&
-            tour.getArtist().getId() != null) {
-
-            Artist existingArtist = artistRepository.findById(
-                tour.getArtist().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            tour.setArtist(existingArtist);
+        if (tour.getArtist() != null) {
+            if (tour.getArtist().getId() != null) {
+                Artist existingArtist = artistRepository.findById(
+                    tour.getArtist().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + tour.getArtist().getId()));
+                tour.setArtist(existingArtist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newArtist = artistRepository.save(tour.getArtist());
+                tour.setArtist(newArtist);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return tourRepository.save(tour);
 }
 
@@ -110,7 +113,6 @@ public class TourService extends BaseService<Tour> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return tourRepository.save(existing);
 }
     @Transactional
@@ -122,9 +124,8 @@ public class TourService extends BaseService<Tour> {
     // --- Dissocier OneToMany ---
         if (entity.getLiveEvents() != null) {
             for (var child : entity.getLiveEvents()) {
-                
-                child.setTour(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setTour(null);
             }
             entity.getLiveEvents().clear();
         }

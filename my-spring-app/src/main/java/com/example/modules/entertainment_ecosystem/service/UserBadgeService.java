@@ -33,10 +33,18 @@ public class UserBadgeService extends BaseService<UserBadge> {
         if (userbadge.getUsers() != null &&
             !userbadge.getUsers().isEmpty()) {
 
-            List<UserProfile> attachedUsers = userbadge.getUsers().stream()
-            .map(item -> usersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedUsers = new ArrayList<>();
+            for (UserProfile item : userbadge.getUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = usersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = usersRepository.save(item);
+                    attachedUsers.add(newItem);
+                }
+            }
 
             userbadge.setUsers(attachedUsers);
 
@@ -46,7 +54,6 @@ public class UserBadgeService extends BaseService<UserBadge> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return userbadgeRepository.save(userbadge);
 }
 
@@ -82,7 +89,6 @@ public class UserBadgeService extends BaseService<UserBadge> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return userbadgeRepository.save(existing);
 }
     @Transactional
@@ -97,7 +103,6 @@ public class UserBadgeService extends BaseService<UserBadge> {
             for (UserProfile item : new ArrayList<>(entity.getUsers())) {
                 
                 item.getBadges().remove(entity); // retire côté inverse
-                
             }
             entity.getUsers().clear(); // puis vide côté courant
         }

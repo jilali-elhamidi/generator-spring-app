@@ -141,10 +141,18 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         if (musictrack.getGenres() != null &&
             !musictrack.getGenres().isEmpty()) {
 
-            List<Genre> attachedGenres = musictrack.getGenres().stream()
-            .map(item -> genresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
-            .toList();
+            List<Genre> attachedGenres = new ArrayList<>();
+            for (Genre item : musictrack.getGenres()) {
+                if (item.getId() != null) {
+                    Genre existingItem = genresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId()));
+                    attachedGenres.add(existingItem);
+                } else {
+
+                    Genre newItem = genresRepository.save(item);
+                    attachedGenres.add(newItem);
+                }
+            }
 
             musictrack.setGenres(attachedGenres);
 
@@ -155,10 +163,18 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         if (musictrack.getListenedByUsers() != null &&
             !musictrack.getListenedByUsers().isEmpty()) {
 
-            List<UserProfile> attachedListenedByUsers = musictrack.getListenedByUsers().stream()
-            .map(item -> listenedByUsersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedListenedByUsers = new ArrayList<>();
+            for (UserProfile item : musictrack.getListenedByUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = listenedByUsersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedListenedByUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = listenedByUsersRepository.save(item);
+                    attachedListenedByUsers.add(newItem);
+                }
+            }
 
             musictrack.setListenedByUsers(attachedListenedByUsers);
 
@@ -169,10 +185,18 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         if (musictrack.getFormats() != null &&
             !musictrack.getFormats().isEmpty()) {
 
-            List<MusicFormat> attachedFormats = musictrack.getFormats().stream()
-            .map(item -> formatsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("MusicFormat not found with id " + item.getId())))
-            .toList();
+            List<MusicFormat> attachedFormats = new ArrayList<>();
+            for (MusicFormat item : musictrack.getFormats()) {
+                if (item.getId() != null) {
+                    MusicFormat existingItem = formatsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MusicFormat not found with id " + item.getId()));
+                    attachedFormats.add(existingItem);
+                } else {
+
+                    MusicFormat newItem = formatsRepository.save(item);
+                    attachedFormats.add(newItem);
+                }
+            }
 
             musictrack.setFormats(attachedFormats);
 
@@ -181,48 +205,63 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         }
         
     // ---------- ManyToOne ----------
-        if (musictrack.getAlbum() != null &&
-            musictrack.getAlbum().getId() != null) {
-
-            Album existingAlbum = albumRepository.findById(
-                musictrack.getAlbum().getId()
-            ).orElseThrow(() -> new RuntimeException("Album not found"));
-
-            musictrack.setAlbum(existingAlbum);
+        if (musictrack.getAlbum() != null) {
+            if (musictrack.getAlbum().getId() != null) {
+                Album existingAlbum = albumRepository.findById(
+                    musictrack.getAlbum().getId()
+                ).orElseThrow(() -> new RuntimeException("Album not found with id "
+                    + musictrack.getAlbum().getId()));
+                musictrack.setAlbum(existingAlbum);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Album newAlbum = albumRepository.save(musictrack.getAlbum());
+                musictrack.setAlbum(newAlbum);
+            }
         }
         
-        if (musictrack.getArtist() != null &&
-            musictrack.getArtist().getId() != null) {
-
-            Artist existingArtist = artistRepository.findById(
-                musictrack.getArtist().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            musictrack.setArtist(existingArtist);
+        if (musictrack.getArtist() != null) {
+            if (musictrack.getArtist().getId() != null) {
+                Artist existingArtist = artistRepository.findById(
+                    musictrack.getArtist().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + musictrack.getArtist().getId()));
+                musictrack.setArtist(existingArtist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newArtist = artistRepository.save(musictrack.getArtist());
+                musictrack.setArtist(newArtist);
+            }
         }
         
-        if (musictrack.getProvider() != null &&
-            musictrack.getProvider().getId() != null) {
-
-            ContentProvider existingProvider = providerRepository.findById(
-                musictrack.getProvider().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentProvider not found"));
-
-            musictrack.setProvider(existingProvider);
+        if (musictrack.getProvider() != null) {
+            if (musictrack.getProvider().getId() != null) {
+                ContentProvider existingProvider = providerRepository.findById(
+                    musictrack.getProvider().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentProvider not found with id "
+                    + musictrack.getProvider().getId()));
+                musictrack.setProvider(existingProvider);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentProvider newProvider = providerRepository.save(musictrack.getProvider());
+                musictrack.setProvider(newProvider);
+            }
         }
         
-        if (musictrack.getSoundtrack() != null &&
-            musictrack.getSoundtrack().getId() != null) {
-
-            MovieSoundtrack existingSoundtrack = soundtrackRepository.findById(
-                musictrack.getSoundtrack().getId()
-            ).orElseThrow(() -> new RuntimeException("MovieSoundtrack not found"));
-
-            musictrack.setSoundtrack(existingSoundtrack);
+        if (musictrack.getSoundtrack() != null) {
+            if (musictrack.getSoundtrack().getId() != null) {
+                MovieSoundtrack existingSoundtrack = soundtrackRepository.findById(
+                    musictrack.getSoundtrack().getId()
+                ).orElseThrow(() -> new RuntimeException("MovieSoundtrack not found with id "
+                    + musictrack.getSoundtrack().getId()));
+                musictrack.setSoundtrack(existingSoundtrack);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MovieSoundtrack newSoundtrack = soundtrackRepository.save(musictrack.getSoundtrack());
+                musictrack.setSoundtrack(newSoundtrack);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return musictrackRepository.save(musictrack);
 }
 
@@ -410,7 +449,6 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return musictrackRepository.save(existing);
 }
     @Transactional
@@ -422,36 +460,32 @@ public class MusicTrackService extends BaseService<MusicTrack> {
     // --- Dissocier OneToMany ---
         if (entity.getPlaylistItems() != null) {
             for (var child : entity.getPlaylistItems()) {
-                
-                child.setTrack(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setTrack(null);
             }
             entity.getPlaylistItems().clear();
         }
         
         if (entity.getPurchases() != null) {
             for (var child : entity.getPurchases()) {
-                
-                child.setMusicTrack(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMusicTrack(null);
             }
             entity.getPurchases().clear();
         }
         
         if (entity.getStreamingLicenses() != null) {
             for (var child : entity.getStreamingLicenses()) {
-                
-                child.setMusicTrack(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMusicTrack(null);
             }
             entity.getStreamingLicenses().clear();
         }
         
         if (entity.getMusicVideos() != null) {
             for (var child : entity.getMusicVideos()) {
-                
-                child.setMusicTrack(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMusicTrack(null);
             }
             entity.getMusicVideos().clear();
         }
@@ -461,7 +495,6 @@ public class MusicTrackService extends BaseService<MusicTrack> {
             for (Genre item : new ArrayList<>(entity.getGenres())) {
                 
                 item.getMusicTracks().remove(entity); // retire côté inverse
-                
             }
             entity.getGenres().clear(); // puis vide côté courant
         }
@@ -470,7 +503,6 @@ public class MusicTrackService extends BaseService<MusicTrack> {
             for (UserProfile item : new ArrayList<>(entity.getListenedByUsers())) {
                 
                 item.getListenedMusic().remove(entity); // retire côté inverse
-                
             }
             entity.getListenedByUsers().clear(); // puis vide côté courant
         }
@@ -479,7 +511,6 @@ public class MusicTrackService extends BaseService<MusicTrack> {
             for (MusicFormat item : new ArrayList<>(entity.getFormats())) {
                 
                 item.getMusicTracks().remove(entity); // retire côté inverse
-                
             }
             entity.getFormats().clear(); // puis vide côté courant
         }

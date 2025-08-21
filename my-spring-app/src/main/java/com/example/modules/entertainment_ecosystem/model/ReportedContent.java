@@ -29,6 +29,7 @@ public class ReportedContent extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 5, max = 500)
+        @Column(unique = true, nullable = false)
     private String reason;
 
     @NotNull

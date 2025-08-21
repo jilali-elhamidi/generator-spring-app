@@ -39,42 +39,51 @@ public class TransactionService extends BaseService<Transaction> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (transaction.getWallet() != null &&
-            transaction.getWallet().getId() != null) {
-
-            UserWallet existingWallet = walletRepository.findById(
-                transaction.getWallet().getId()
-            ).orElseThrow(() -> new RuntimeException("UserWallet not found"));
-
-            transaction.setWallet(existingWallet);
+        if (transaction.getWallet() != null) {
+            if (transaction.getWallet().getId() != null) {
+                UserWallet existingWallet = walletRepository.findById(
+                    transaction.getWallet().getId()
+                ).orElseThrow(() -> new RuntimeException("UserWallet not found with id "
+                    + transaction.getWallet().getId()));
+                transaction.setWallet(existingWallet);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserWallet newWallet = walletRepository.save(transaction.getWallet());
+                transaction.setWallet(newWallet);
+            }
         }
         
     // ---------- OneToOne ----------
         if (transaction.getRelatedInvoice() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            transaction.setRelatedInvoice(
-                relatedInvoiceRepository.findById(transaction.getRelatedInvoice().getId())
-                    .orElseThrow(() -> new RuntimeException("relatedInvoice not found"))
-            );
-            
+            if (transaction.getRelatedInvoice().getId() != null) {
+                Invoice existingRelatedInvoice = relatedInvoiceRepository.findById(transaction.getRelatedInvoice().getId())
+                    .orElseThrow(() -> new RuntimeException("Invoice not found with id "
+                        + transaction.getRelatedInvoice().getId()));
+                transaction.setRelatedInvoice(existingRelatedInvoice);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Invoice newRelatedInvoice = relatedInvoiceRepository.save(transaction.getRelatedInvoice());
+                transaction.setRelatedInvoice(newRelatedInvoice);
+            }
+
             transaction.getRelatedInvoice().setTransaction(transaction);
         }
         
         if (transaction.getDigitalPurchase() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            transaction.setDigitalPurchase(
-                digitalPurchaseRepository.findById(transaction.getDigitalPurchase().getId())
-                    .orElseThrow(() -> new RuntimeException("digitalPurchase not found"))
-            );
-            
+            if (transaction.getDigitalPurchase().getId() != null) {
+                DigitalPurchase existingDigitalPurchase = digitalPurchaseRepository.findById(transaction.getDigitalPurchase().getId())
+                    .orElseThrow(() -> new RuntimeException("DigitalPurchase not found with id "
+                        + transaction.getDigitalPurchase().getId()));
+                transaction.setDigitalPurchase(existingDigitalPurchase);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                DigitalPurchase newDigitalPurchase = digitalPurchaseRepository.save(transaction.getDigitalPurchase());
+                transaction.setDigitalPurchase(newDigitalPurchase);
+            }
+
             transaction.getDigitalPurchase().setTransaction(transaction);
         }
         
-
     return transactionRepository.save(transaction);
 }
 
@@ -104,35 +113,26 @@ public class TransactionService extends BaseService<Transaction> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (transactionRequest.getRelatedInvoice() != null &&
-            transactionRequest.getRelatedInvoice().getId() != null) {
+        if (transactionRequest.getRelatedInvoice() != null &&transactionRequest.getRelatedInvoice().getId() != null) {
 
-            Invoice relatedInvoice = relatedInvoiceRepository.findById(
-                transactionRequest.getRelatedInvoice().getId()
-            ).orElseThrow(() -> new RuntimeException("Invoice not found"));
+        Invoice relatedInvoice = relatedInvoiceRepository.findById(transactionRequest.getRelatedInvoice().getId())
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
 
-            existing.setRelatedInvoice(relatedInvoice);
-
-            
-            relatedInvoice.setTransaction(existing);
-            
-        }
+        existing.setRelatedInvoice(relatedInvoice);
+        relatedInvoice.setTransaction(existing);
         
-            if (transactionRequest.getDigitalPurchase() != null &&
-            transactionRequest.getDigitalPurchase().getId() != null) {
-
-            DigitalPurchase digitalPurchase = digitalPurchaseRepository.findById(
-                transactionRequest.getDigitalPurchase().getId()
-            ).orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
-
-            existing.setDigitalPurchase(digitalPurchase);
-
-            
-            digitalPurchase.setTransaction(existing);
-            
         }
-        
+    
+        if (transactionRequest.getDigitalPurchase() != null &&transactionRequest.getDigitalPurchase().getId() != null) {
 
+        DigitalPurchase digitalPurchase = digitalPurchaseRepository.findById(transactionRequest.getDigitalPurchase().getId())
+                .orElseThrow(() -> new RuntimeException("DigitalPurchase not found"));
+
+        existing.setDigitalPurchase(digitalPurchase);
+        digitalPurchase.setTransaction(existing);
+        
+        }
+    
     return transactionRepository.save(existing);
 }
     @Transactional

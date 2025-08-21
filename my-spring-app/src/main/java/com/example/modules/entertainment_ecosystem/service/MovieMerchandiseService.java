@@ -31,18 +31,21 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (moviemerchandise.getMovie() != null &&
-            moviemerchandise.getMovie().getId() != null) {
-
-            Movie existingMovie = movieRepository.findById(
-                moviemerchandise.getMovie().getId()
-            ).orElseThrow(() -> new RuntimeException("Movie not found"));
-
-            moviemerchandise.setMovie(existingMovie);
+        if (moviemerchandise.getMovie() != null) {
+            if (moviemerchandise.getMovie().getId() != null) {
+                Movie existingMovie = movieRepository.findById(
+                    moviemerchandise.getMovie().getId()
+                ).orElseThrow(() -> new RuntimeException("Movie not found with id "
+                    + moviemerchandise.getMovie().getId()));
+                moviemerchandise.setMovie(existingMovie);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Movie newMovie = movieRepository.save(moviemerchandise.getMovie());
+                moviemerchandise.setMovie(newMovie);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return moviemerchandiseRepository.save(moviemerchandise);
 }
 
@@ -71,7 +74,6 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return moviemerchandiseRepository.save(existing);
 }
     @Transactional

@@ -30,6 +30,7 @@ public class MerchandiseReview extends BaseEntity {
     @NotNull
     @Min(1)
     @Max(5)
+        @Column(unique = true, nullable = false)
     private Integer rating;
 
     @Size(max = 500)

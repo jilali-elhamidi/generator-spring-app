@@ -33,10 +33,18 @@ public class BookCharacterService extends BaseService<BookCharacter> {
         if (bookcharacter.getBooks() != null &&
             !bookcharacter.getBooks().isEmpty()) {
 
-            List<Book> attachedBooks = bookcharacter.getBooks().stream()
-            .map(item -> booksRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Book not found with id " + item.getId())))
-            .toList();
+            List<Book> attachedBooks = new ArrayList<>();
+            for (Book item : bookcharacter.getBooks()) {
+                if (item.getId() != null) {
+                    Book existingItem = booksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Book not found with id " + item.getId()));
+                    attachedBooks.add(existingItem);
+                } else {
+
+                    Book newItem = booksRepository.save(item);
+                    attachedBooks.add(newItem);
+                }
+            }
 
             bookcharacter.setBooks(attachedBooks);
 
@@ -46,7 +54,6 @@ public class BookCharacterService extends BaseService<BookCharacter> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return bookcharacterRepository.save(bookcharacter);
 }
 
@@ -81,7 +88,6 @@ public class BookCharacterService extends BaseService<BookCharacter> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return bookcharacterRepository.save(existing);
 }
     @Transactional
@@ -96,7 +102,6 @@ public class BookCharacterService extends BaseService<BookCharacter> {
             for (Book item : new ArrayList<>(entity.getBooks())) {
                 
                 item.getCharacters().remove(entity); // retire côté inverse
-                
             }
             entity.getBooks().clear(); // puis vide côté courant
         }

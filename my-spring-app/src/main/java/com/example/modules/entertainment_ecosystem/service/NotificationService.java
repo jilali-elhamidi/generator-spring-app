@@ -35,28 +35,35 @@ public class NotificationService extends BaseService<Notification> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (notification.getRecipient() != null &&
-            notification.getRecipient().getId() != null) {
-
-            UserProfile existingRecipient = recipientRepository.findById(
-                notification.getRecipient().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            notification.setRecipient(existingRecipient);
+        if (notification.getRecipient() != null) {
+            if (notification.getRecipient().getId() != null) {
+                UserProfile existingRecipient = recipientRepository.findById(
+                    notification.getRecipient().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + notification.getRecipient().getId()));
+                notification.setRecipient(existingRecipient);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newRecipient = recipientRepository.save(notification.getRecipient());
+                notification.setRecipient(newRecipient);
+            }
         }
         
-        if (notification.getType() != null &&
-            notification.getType().getId() != null) {
-
-            NotificationType existingType = typeRepository.findById(
-                notification.getType().getId()
-            ).orElseThrow(() -> new RuntimeException("NotificationType not found"));
-
-            notification.setType(existingType);
+        if (notification.getType() != null) {
+            if (notification.getType().getId() != null) {
+                NotificationType existingType = typeRepository.findById(
+                    notification.getType().getId()
+                ).orElseThrow(() -> new RuntimeException("NotificationType not found with id "
+                    + notification.getType().getId()));
+                notification.setType(existingType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                NotificationType newType = typeRepository.save(notification.getType());
+                notification.setType(newType);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return notificationRepository.save(notification);
 }
 
@@ -99,7 +106,6 @@ public class NotificationService extends BaseService<Notification> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return notificationRepository.save(existing);
 }
     @Transactional

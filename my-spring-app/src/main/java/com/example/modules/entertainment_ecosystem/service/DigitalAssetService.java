@@ -39,40 +39,50 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (digitalasset.getAssetType() != null &&
-            digitalasset.getAssetType().getId() != null) {
-
-            DigitalAssetType existingAssetType = assetTypeRepository.findById(
-                digitalasset.getAssetType().getId()
-            ).orElseThrow(() -> new RuntimeException("DigitalAssetType not found"));
-
-            digitalasset.setAssetType(existingAssetType);
+        if (digitalasset.getAssetType() != null) {
+            if (digitalasset.getAssetType().getId() != null) {
+                DigitalAssetType existingAssetType = assetTypeRepository.findById(
+                    digitalasset.getAssetType().getId()
+                ).orElseThrow(() -> new RuntimeException("DigitalAssetType not found with id "
+                    + digitalasset.getAssetType().getId()));
+                digitalasset.setAssetType(existingAssetType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                DigitalAssetType newAssetType = assetTypeRepository.save(digitalasset.getAssetType());
+                digitalasset.setAssetType(newAssetType);
+            }
         }
         
-        if (digitalasset.getArtist() != null &&
-            digitalasset.getArtist().getId() != null) {
-
-            Artist existingArtist = artistRepository.findById(
-                digitalasset.getArtist().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            digitalasset.setArtist(existingArtist);
+        if (digitalasset.getArtist() != null) {
+            if (digitalasset.getArtist().getId() != null) {
+                Artist existingArtist = artistRepository.findById(
+                    digitalasset.getArtist().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + digitalasset.getArtist().getId()));
+                digitalasset.setArtist(existingArtist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newArtist = artistRepository.save(digitalasset.getArtist());
+                digitalasset.setArtist(newArtist);
+            }
         }
         
     // ---------- OneToOne ----------
         if (digitalasset.getLicense() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            digitalasset.setLicense(
-                licenseRepository.findById(digitalasset.getLicense().getId())
-                    .orElseThrow(() -> new RuntimeException("license not found"))
-            );
-            
+            if (digitalasset.getLicense().getId() != null) {
+                License existingLicense = licenseRepository.findById(digitalasset.getLicense().getId())
+                    .orElseThrow(() -> new RuntimeException("License not found with id "
+                        + digitalasset.getLicense().getId()));
+                digitalasset.setLicense(existingLicense);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                License newLicense = licenseRepository.save(digitalasset.getLicense());
+                digitalasset.setLicense(newLicense);
+            }
+
             digitalasset.getLicense().setAsset(digitalasset);
         }
         
-
     return digitalassetRepository.save(digitalasset);
 }
 
@@ -113,21 +123,16 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (digitalassetRequest.getLicense() != null &&
-            digitalassetRequest.getLicense().getId() != null) {
+        if (digitalassetRequest.getLicense() != null &&digitalassetRequest.getLicense().getId() != null) {
 
-            License license = licenseRepository.findById(
-                digitalassetRequest.getLicense().getId()
-            ).orElseThrow(() -> new RuntimeException("License not found"));
+        License license = licenseRepository.findById(digitalassetRequest.getLicense().getId())
+                .orElseThrow(() -> new RuntimeException("License not found"));
 
-            existing.setLicense(license);
-
-            
-            license.setAsset(existing);
-            
-        }
+        existing.setLicense(license);
+        license.setAsset(existing);
         
-
+        }
+    
     return digitalassetRepository.save(existing);
 }
     @Transactional

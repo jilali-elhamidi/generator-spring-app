@@ -79,10 +79,18 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
         if (forumcategory.getModerators() != null &&
             !forumcategory.getModerators().isEmpty()) {
 
-            List<ForumModerator> attachedModerators = forumcategory.getModerators().stream()
-            .map(item -> moderatorsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ForumModerator not found with id " + item.getId())))
-            .toList();
+            List<ForumModerator> attachedModerators = new ArrayList<>();
+            for (ForumModerator item : forumcategory.getModerators()) {
+                if (item.getId() != null) {
+                    ForumModerator existingItem = moderatorsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumModerator not found with id " + item.getId()));
+                    attachedModerators.add(existingItem);
+                } else {
+
+                    ForumModerator newItem = moderatorsRepository.save(item);
+                    attachedModerators.add(newItem);
+                }
+            }
 
             forumcategory.setModerators(attachedModerators);
 
@@ -91,18 +99,21 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
         }
         
     // ---------- ManyToOne ----------
-        if (forumcategory.getParentCategory() != null &&
-            forumcategory.getParentCategory().getId() != null) {
-
-            ForumCategory existingParentCategory = parentCategoryRepository.findById(
-                forumcategory.getParentCategory().getId()
-            ).orElseThrow(() -> new RuntimeException("ForumCategory not found"));
-
-            forumcategory.setParentCategory(existingParentCategory);
+        if (forumcategory.getParentCategory() != null) {
+            if (forumcategory.getParentCategory().getId() != null) {
+                ForumCategory existingParentCategory = parentCategoryRepository.findById(
+                    forumcategory.getParentCategory().getId()
+                ).orElseThrow(() -> new RuntimeException("ForumCategory not found with id "
+                    + forumcategory.getParentCategory().getId()));
+                forumcategory.setParentCategory(existingParentCategory);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ForumCategory newParentCategory = parentCategoryRepository.save(forumcategory.getParentCategory());
+                forumcategory.setParentCategory(newParentCategory);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return forumcategoryRepository.save(forumcategory);
 }
 
@@ -182,7 +193,6 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return forumcategoryRepository.save(existing);
 }
     @Transactional
@@ -194,18 +204,16 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
     // --- Dissocier OneToMany ---
         if (entity.getThreads() != null) {
             for (var child : entity.getThreads()) {
-                
-                child.setCategory(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setCategory(null);
             }
             entity.getThreads().clear();
         }
         
         if (entity.getChildCategories() != null) {
             for (var child : entity.getChildCategories()) {
-                
-                child.setParentCategory(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setParentCategory(null);
             }
             entity.getChildCategories().clear();
         }
@@ -215,7 +223,6 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
             for (ForumModerator item : new ArrayList<>(entity.getModerators())) {
                 
                 item.getModeratedCategories().remove(entity); // retire côté inverse
-                
             }
             entity.getModerators().clear(); // puis vide côté courant
         }

@@ -49,7 +49,6 @@ public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return developmentstudioRepository.save(developmentstudio);
 }
 
@@ -82,7 +81,6 @@ public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return developmentstudioRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
     // --- Dissocier OneToMany ---
         if (entity.getGames() != null) {
             for (var child : entity.getGames()) {
-                
-                child.setDeveloperStudio(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setDeveloperStudio(null);
             }
             entity.getGames().clear();
         }

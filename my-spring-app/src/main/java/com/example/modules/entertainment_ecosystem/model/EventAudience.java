@@ -27,6 +27,7 @@ import lombok.EqualsAndHashCode;
 public class EventAudience extends BaseEntity {
 
     // === Attributs simples ===
+        @Column(unique = true, nullable = false)
     private Integer count;
 
     private String audienceType;

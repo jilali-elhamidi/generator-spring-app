@@ -33,18 +33,20 @@ public class InvoiceService extends BaseService<Invoice> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (invoice.getTransaction() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            invoice.setTransaction(
-                transactionRepository.findById(invoice.getTransaction().getId())
-                    .orElseThrow(() -> new RuntimeException("transaction not found"))
-            );
-            
+            if (invoice.getTransaction().getId() != null) {
+                Transaction existingTransaction = transactionRepository.findById(invoice.getTransaction().getId())
+                    .orElseThrow(() -> new RuntimeException("Transaction not found with id "
+                        + invoice.getTransaction().getId()));
+                invoice.setTransaction(existingTransaction);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Transaction newTransaction = transactionRepository.save(invoice.getTransaction());
+                invoice.setTransaction(newTransaction);
+            }
+
             invoice.getTransaction().setRelatedInvoice(invoice);
         }
         
-
     return invoiceRepository.save(invoice);
 }
 
@@ -61,21 +63,15 @@ public class InvoiceService extends BaseService<Invoice> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (invoiceRequest.getTransaction() != null &&
-            invoiceRequest.getTransaction().getId() != null) {
+        if (invoiceRequest.getTransaction() != null &&invoiceRequest.getTransaction().getId() != null) {
 
-            Transaction transaction = transactionRepository.findById(
-                invoiceRequest.getTransaction().getId()
-            ).orElseThrow(() -> new RuntimeException("Transaction not found"));
+        Transaction transaction = transactionRepository.findById(invoiceRequest.getTransaction().getId())
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
-            existing.setTransaction(transaction);
-
-            
-            transaction.setRelatedInvoice(existing);
-            
+        existing.setTransaction(transaction);
+        transaction.setRelatedInvoice(existing);
         }
-        
-
+    
     return invoiceRepository.save(existing);
 }
     @Transactional

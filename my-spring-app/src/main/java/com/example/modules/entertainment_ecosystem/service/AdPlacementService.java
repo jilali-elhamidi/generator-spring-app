@@ -31,18 +31,21 @@ public class AdPlacementService extends BaseService<AdPlacement> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (adplacement.getCampaign() != null &&
-            adplacement.getCampaign().getId() != null) {
-
-            AdCampaign existingCampaign = campaignRepository.findById(
-                adplacement.getCampaign().getId()
-            ).orElseThrow(() -> new RuntimeException("AdCampaign not found"));
-
-            adplacement.setCampaign(existingCampaign);
+        if (adplacement.getCampaign() != null) {
+            if (adplacement.getCampaign().getId() != null) {
+                AdCampaign existingCampaign = campaignRepository.findById(
+                    adplacement.getCampaign().getId()
+                ).orElseThrow(() -> new RuntimeException("AdCampaign not found with id "
+                    + adplacement.getCampaign().getId()));
+                adplacement.setCampaign(existingCampaign);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                AdCampaign newCampaign = campaignRepository.save(adplacement.getCampaign());
+                adplacement.setCampaign(newCampaign);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return adplacementRepository.save(adplacement);
 }
 
@@ -72,7 +75,6 @@ public class AdPlacementService extends BaseService<AdPlacement> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return adplacementRepository.save(existing);
 }
     @Transactional

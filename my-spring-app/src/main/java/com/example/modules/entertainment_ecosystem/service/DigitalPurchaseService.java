@@ -51,70 +51,92 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (digitalpurchase.getUser() != null &&
-            digitalpurchase.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                digitalpurchase.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            digitalpurchase.setUser(existingUser);
+        if (digitalpurchase.getUser() != null) {
+            if (digitalpurchase.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    digitalpurchase.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + digitalpurchase.getUser().getId()));
+                digitalpurchase.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(digitalpurchase.getUser());
+                digitalpurchase.setUser(newUser);
+            }
         }
         
-        if (digitalpurchase.getMovie() != null &&
-            digitalpurchase.getMovie().getId() != null) {
-
-            Movie existingMovie = movieRepository.findById(
-                digitalpurchase.getMovie().getId()
-            ).orElseThrow(() -> new RuntimeException("Movie not found"));
-
-            digitalpurchase.setMovie(existingMovie);
+        if (digitalpurchase.getMovie() != null) {
+            if (digitalpurchase.getMovie().getId() != null) {
+                Movie existingMovie = movieRepository.findById(
+                    digitalpurchase.getMovie().getId()
+                ).orElseThrow(() -> new RuntimeException("Movie not found with id "
+                    + digitalpurchase.getMovie().getId()));
+                digitalpurchase.setMovie(existingMovie);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Movie newMovie = movieRepository.save(digitalpurchase.getMovie());
+                digitalpurchase.setMovie(newMovie);
+            }
         }
         
-        if (digitalpurchase.getMusicTrack() != null &&
-            digitalpurchase.getMusicTrack().getId() != null) {
-
-            MusicTrack existingMusicTrack = musicTrackRepository.findById(
-                digitalpurchase.getMusicTrack().getId()
-            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-
-            digitalpurchase.setMusicTrack(existingMusicTrack);
+        if (digitalpurchase.getMusicTrack() != null) {
+            if (digitalpurchase.getMusicTrack().getId() != null) {
+                MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                    digitalpurchase.getMusicTrack().getId()
+                ).orElseThrow(() -> new RuntimeException("MusicTrack not found with id "
+                    + digitalpurchase.getMusicTrack().getId()));
+                digitalpurchase.setMusicTrack(existingMusicTrack);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MusicTrack newMusicTrack = musicTrackRepository.save(digitalpurchase.getMusicTrack());
+                digitalpurchase.setMusicTrack(newMusicTrack);
+            }
         }
         
-        if (digitalpurchase.getVideoGame() != null &&
-            digitalpurchase.getVideoGame().getId() != null) {
-
-            VideoGame existingVideoGame = videoGameRepository.findById(
-                digitalpurchase.getVideoGame().getId()
-            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-
-            digitalpurchase.setVideoGame(existingVideoGame);
+        if (digitalpurchase.getVideoGame() != null) {
+            if (digitalpurchase.getVideoGame().getId() != null) {
+                VideoGame existingVideoGame = videoGameRepository.findById(
+                    digitalpurchase.getVideoGame().getId()
+                ).orElseThrow(() -> new RuntimeException("VideoGame not found with id "
+                    + digitalpurchase.getVideoGame().getId()));
+                digitalpurchase.setVideoGame(existingVideoGame);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                VideoGame newVideoGame = videoGameRepository.save(digitalpurchase.getVideoGame());
+                digitalpurchase.setVideoGame(newVideoGame);
+            }
         }
         
-        if (digitalpurchase.getExpansionPack() != null &&
-            digitalpurchase.getExpansionPack().getId() != null) {
-
-            GameExpansionPack existingExpansionPack = expansionPackRepository.findById(
-                digitalpurchase.getExpansionPack().getId()
-            ).orElseThrow(() -> new RuntimeException("GameExpansionPack not found"));
-
-            digitalpurchase.setExpansionPack(existingExpansionPack);
+        if (digitalpurchase.getExpansionPack() != null) {
+            if (digitalpurchase.getExpansionPack().getId() != null) {
+                GameExpansionPack existingExpansionPack = expansionPackRepository.findById(
+                    digitalpurchase.getExpansionPack().getId()
+                ).orElseThrow(() -> new RuntimeException("GameExpansionPack not found with id "
+                    + digitalpurchase.getExpansionPack().getId()));
+                digitalpurchase.setExpansionPack(existingExpansionPack);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                GameExpansionPack newExpansionPack = expansionPackRepository.save(digitalpurchase.getExpansionPack());
+                digitalpurchase.setExpansionPack(newExpansionPack);
+            }
         }
         
     // ---------- OneToOne ----------
         if (digitalpurchase.getTransaction() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            digitalpurchase.setTransaction(
-                transactionRepository.findById(digitalpurchase.getTransaction().getId())
-                    .orElseThrow(() -> new RuntimeException("transaction not found"))
-            );
-            
+            if (digitalpurchase.getTransaction().getId() != null) {
+                Transaction existingTransaction = transactionRepository.findById(digitalpurchase.getTransaction().getId())
+                    .orElseThrow(() -> new RuntimeException("Transaction not found with id "
+                        + digitalpurchase.getTransaction().getId()));
+                digitalpurchase.setTransaction(existingTransaction);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Transaction newTransaction = transactionRepository.save(digitalpurchase.getTransaction());
+                digitalpurchase.setTransaction(newTransaction);
+            }
+
             digitalpurchase.getTransaction().setDigitalPurchase(digitalpurchase);
         }
         
-
     return digitalpurchaseRepository.save(digitalpurchase);
 }
 
@@ -191,21 +213,15 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (digitalpurchaseRequest.getTransaction() != null &&
-            digitalpurchaseRequest.getTransaction().getId() != null) {
+        if (digitalpurchaseRequest.getTransaction() != null &&digitalpurchaseRequest.getTransaction().getId() != null) {
 
-            Transaction transaction = transactionRepository.findById(
-                digitalpurchaseRequest.getTransaction().getId()
-            ).orElseThrow(() -> new RuntimeException("Transaction not found"));
+        Transaction transaction = transactionRepository.findById(digitalpurchaseRequest.getTransaction().getId())
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
-            existing.setTransaction(transaction);
-
-            
-            transaction.setDigitalPurchase(existing);
-            
+        existing.setTransaction(transaction);
+        transaction.setDigitalPurchase(existing);
         }
-        
-
+    
     return digitalpurchaseRepository.save(existing);
 }
     @Transactional

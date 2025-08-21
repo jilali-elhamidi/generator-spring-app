@@ -49,7 +49,6 @@ public class CountryService extends BaseService<Country> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return countryRepository.save(country);
 }
 
@@ -83,7 +82,6 @@ public class CountryService extends BaseService<Country> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return countryRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class CountryService extends BaseService<Country> {
     // --- Dissocier OneToMany ---
         if (entity.getUserProfiles() != null) {
             for (var child : entity.getUserProfiles()) {
-                
-                child.setCountry(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setCountry(null);
             }
             entity.getUserProfiles().clear();
         }

@@ -49,7 +49,6 @@ public class PaymentMethodService extends BaseService<PaymentMethod> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return paymentmethodRepository.save(paymentmethod);
 }
 
@@ -83,7 +82,6 @@ public class PaymentMethodService extends BaseService<PaymentMethod> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return paymentmethodRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class PaymentMethodService extends BaseService<PaymentMethod> {
     // --- Dissocier OneToMany ---
         if (entity.getPayments() != null) {
             for (var child : entity.getPayments()) {
-                
-                child.setMethod(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMethod(null);
             }
             entity.getPayments().clear();
         }

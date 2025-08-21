@@ -49,7 +49,6 @@ public class GamePlatformTypeService extends BaseService<GamePlatformType> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return gameplatformtypeRepository.save(gameplatformtype);
 }
 
@@ -82,7 +81,6 @@ public class GamePlatformTypeService extends BaseService<GamePlatformType> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return gameplatformtypeRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class GamePlatformTypeService extends BaseService<GamePlatformType> {
     // --- Dissocier OneToMany ---
         if (entity.getGamePlatforms() != null) {
             for (var child : entity.getGamePlatforms()) {
-                
-                child.setType(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setType(null);
             }
             entity.getGamePlatforms().clear();
         }

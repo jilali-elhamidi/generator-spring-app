@@ -52,18 +52,21 @@ public class EventTicketTypeService extends BaseService<EventTicketType> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (eventtickettype.getPlatform() != null &&
-            eventtickettype.getPlatform().getId() != null) {
-
-            SocialMediaPlatform existingPlatform = platformRepository.findById(
-                eventtickettype.getPlatform().getId()
-            ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
-
-            eventtickettype.setPlatform(existingPlatform);
+        if (eventtickettype.getPlatform() != null) {
+            if (eventtickettype.getPlatform().getId() != null) {
+                SocialMediaPlatform existingPlatform = platformRepository.findById(
+                    eventtickettype.getPlatform().getId()
+                ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found with id "
+                    + eventtickettype.getPlatform().getId()));
+                eventtickettype.setPlatform(existingPlatform);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                SocialMediaPlatform newPlatform = platformRepository.save(eventtickettype.getPlatform());
+                eventtickettype.setPlatform(newPlatform);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return eventtickettypeRepository.save(eventtickettype);
 }
 
@@ -109,7 +112,6 @@ public class EventTicketTypeService extends BaseService<EventTicketType> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return eventtickettypeRepository.save(existing);
 }
     @Transactional
@@ -121,9 +123,8 @@ public class EventTicketTypeService extends BaseService<EventTicketType> {
     // --- Dissocier OneToMany ---
         if (entity.getTickets() != null) {
             for (var child : entity.getTickets()) {
-                
-                child.setType(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setType(null);
             }
             entity.getTickets().clear();
         }

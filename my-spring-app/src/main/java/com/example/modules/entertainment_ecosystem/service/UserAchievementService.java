@@ -35,28 +35,35 @@ public class UserAchievementService extends BaseService<UserAchievement> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (userachievement.getUser() != null &&
-            userachievement.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                userachievement.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userachievement.setUser(existingUser);
+        if (userachievement.getUser() != null) {
+            if (userachievement.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    userachievement.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userachievement.getUser().getId()));
+                userachievement.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(userachievement.getUser());
+                userachievement.setUser(newUser);
+            }
         }
         
-        if (userachievement.getAchievement() != null &&
-            userachievement.getAchievement().getId() != null) {
-
-            GameAchievement existingAchievement = achievementRepository.findById(
-                userachievement.getAchievement().getId()
-            ).orElseThrow(() -> new RuntimeException("GameAchievement not found"));
-
-            userachievement.setAchievement(existingAchievement);
+        if (userachievement.getAchievement() != null) {
+            if (userachievement.getAchievement().getId() != null) {
+                GameAchievement existingAchievement = achievementRepository.findById(
+                    userachievement.getAchievement().getId()
+                ).orElseThrow(() -> new RuntimeException("GameAchievement not found with id "
+                    + userachievement.getAchievement().getId()));
+                userachievement.setAchievement(existingAchievement);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                GameAchievement newAchievement = achievementRepository.save(userachievement.getAchievement());
+                userachievement.setAchievement(newAchievement);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return userachievementRepository.save(userachievement);
 }
 
@@ -96,7 +103,6 @@ public class UserAchievementService extends BaseService<UserAchievement> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return userachievementRepository.save(existing);
 }
     @Transactional

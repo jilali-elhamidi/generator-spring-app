@@ -35,28 +35,35 @@ public class UserRatingService extends BaseService<UserRating> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (userrating.getUser() != null &&
-            userrating.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                userrating.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userrating.setUser(existingUser);
+        if (userrating.getUser() != null) {
+            if (userrating.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    userrating.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userrating.getUser().getId()));
+                userrating.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(userrating.getUser());
+                userrating.setUser(newUser);
+            }
         }
         
-        if (userrating.getRatedUser() != null &&
-            userrating.getRatedUser().getId() != null) {
-
-            UserProfile existingRatedUser = ratedUserRepository.findById(
-                userrating.getRatedUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userrating.setRatedUser(existingRatedUser);
+        if (userrating.getRatedUser() != null) {
+            if (userrating.getRatedUser().getId() != null) {
+                UserProfile existingRatedUser = ratedUserRepository.findById(
+                    userrating.getRatedUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userrating.getRatedUser().getId()));
+                userrating.setRatedUser(existingRatedUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newRatedUser = ratedUserRepository.save(userrating.getRatedUser());
+                userrating.setRatedUser(newRatedUser);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return userratingRepository.save(userrating);
 }
 
@@ -97,7 +104,6 @@ public class UserRatingService extends BaseService<UserRating> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return userratingRepository.save(existing);
 }
     @Transactional

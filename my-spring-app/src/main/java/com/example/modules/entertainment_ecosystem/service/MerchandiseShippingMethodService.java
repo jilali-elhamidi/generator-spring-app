@@ -49,7 +49,6 @@ public class MerchandiseShippingMethodService extends BaseService<MerchandiseShi
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return merchandiseshippingmethodRepository.save(merchandiseshippingmethod);
 }
 
@@ -84,7 +83,6 @@ public class MerchandiseShippingMethodService extends BaseService<MerchandiseShi
         }
         
     // ---------- Relations OneToOne ----------
-
     return merchandiseshippingmethodRepository.save(existing);
 }
     @Transactional
@@ -96,9 +94,8 @@ public class MerchandiseShippingMethodService extends BaseService<MerchandiseShi
     // --- Dissocier OneToMany ---
         if (entity.getShipments() != null) {
             for (var child : entity.getShipments()) {
-                
-                child.setShippingMethod(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setShippingMethod(null);
             }
             entity.getShipments().clear();
         }

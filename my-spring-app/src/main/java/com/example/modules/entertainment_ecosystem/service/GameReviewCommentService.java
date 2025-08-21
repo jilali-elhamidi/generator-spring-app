@@ -60,38 +60,49 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (gamereviewcomment.getUser() != null &&
-            gamereviewcomment.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                gamereviewcomment.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            gamereviewcomment.setUser(existingUser);
+        if (gamereviewcomment.getUser() != null) {
+            if (gamereviewcomment.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    gamereviewcomment.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + gamereviewcomment.getUser().getId()));
+                gamereviewcomment.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(gamereviewcomment.getUser());
+                gamereviewcomment.setUser(newUser);
+            }
         }
         
-        if (gamereviewcomment.getReview() != null &&
-            gamereviewcomment.getReview().getId() != null) {
-
-            GameReview existingReview = reviewRepository.findById(
-                gamereviewcomment.getReview().getId()
-            ).orElseThrow(() -> new RuntimeException("GameReview not found"));
-
-            gamereviewcomment.setReview(existingReview);
+        if (gamereviewcomment.getReview() != null) {
+            if (gamereviewcomment.getReview().getId() != null) {
+                GameReview existingReview = reviewRepository.findById(
+                    gamereviewcomment.getReview().getId()
+                ).orElseThrow(() -> new RuntimeException("GameReview not found with id "
+                    + gamereviewcomment.getReview().getId()));
+                gamereviewcomment.setReview(existingReview);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                GameReview newReview = reviewRepository.save(gamereviewcomment.getReview());
+                gamereviewcomment.setReview(newReview);
+            }
         }
         
-        if (gamereviewcomment.getParentComment() != null &&
-            gamereviewcomment.getParentComment().getId() != null) {
-
-            GameReviewComment existingParentComment = parentCommentRepository.findById(
-                gamereviewcomment.getParentComment().getId()
-            ).orElseThrow(() -> new RuntimeException("GameReviewComment not found"));
-
-            gamereviewcomment.setParentComment(existingParentComment);
+        if (gamereviewcomment.getParentComment() != null) {
+            if (gamereviewcomment.getParentComment().getId() != null) {
+                GameReviewComment existingParentComment = parentCommentRepository.findById(
+                    gamereviewcomment.getParentComment().getId()
+                ).orElseThrow(() -> new RuntimeException("GameReviewComment not found with id "
+                    + gamereviewcomment.getParentComment().getId()));
+                gamereviewcomment.setParentComment(existingParentComment);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                GameReviewComment newParentComment = parentCommentRepository.save(gamereviewcomment.getParentComment());
+                gamereviewcomment.setParentComment(newParentComment);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return gamereviewcommentRepository.save(gamereviewcomment);
 }
 
@@ -161,7 +172,6 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return gamereviewcommentRepository.save(existing);
 }
     @Transactional
@@ -173,9 +183,8 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
     // --- Dissocier OneToMany ---
         if (entity.getReplies() != null) {
             for (var child : entity.getReplies()) {
-                
-                child.setParentComment(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setParentComment(null);
             }
             entity.getReplies().clear();
         }

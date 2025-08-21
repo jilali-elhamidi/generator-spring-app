@@ -288,10 +288,18 @@ public class VideoGameService extends BaseService<VideoGame> {
         if (videogame.getGenres() != null &&
             !videogame.getGenres().isEmpty()) {
 
-            List<Genre> attachedGenres = videogame.getGenres().stream()
-            .map(item -> genresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
-            .toList();
+            List<Genre> attachedGenres = new ArrayList<>();
+            for (Genre item : videogame.getGenres()) {
+                if (item.getId() != null) {
+                    Genre existingItem = genresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId()));
+                    attachedGenres.add(existingItem);
+                } else {
+
+                    Genre newItem = genresRepository.save(item);
+                    attachedGenres.add(newItem);
+                }
+            }
 
             videogame.setGenres(attachedGenres);
 
@@ -302,10 +310,18 @@ public class VideoGameService extends BaseService<VideoGame> {
         if (videogame.getPlayedBy() != null &&
             !videogame.getPlayedBy().isEmpty()) {
 
-            List<UserProfile> attachedPlayedBy = videogame.getPlayedBy().stream()
-            .map(item -> playedByRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedPlayedBy = new ArrayList<>();
+            for (UserProfile item : videogame.getPlayedBy()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = playedByRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedPlayedBy.add(existingItem);
+                } else {
+
+                    UserProfile newItem = playedByRepository.save(item);
+                    attachedPlayedBy.add(newItem);
+                }
+            }
 
             videogame.setPlayedBy(attachedPlayedBy);
 
@@ -316,10 +332,18 @@ public class VideoGameService extends BaseService<VideoGame> {
         if (videogame.getPlatforms() != null &&
             !videogame.getPlatforms().isEmpty()) {
 
-            List<GamePlatform> attachedPlatforms = videogame.getPlatforms().stream()
-            .map(item -> platformsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("GamePlatform not found with id " + item.getId())))
-            .toList();
+            List<GamePlatform> attachedPlatforms = new ArrayList<>();
+            for (GamePlatform item : videogame.getPlatforms()) {
+                if (item.getId() != null) {
+                    GamePlatform existingItem = platformsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("GamePlatform not found with id " + item.getId()));
+                    attachedPlatforms.add(existingItem);
+                } else {
+
+                    GamePlatform newItem = platformsRepository.save(item);
+                    attachedPlatforms.add(newItem);
+                }
+            }
 
             videogame.setPlatforms(attachedPlatforms);
 
@@ -330,10 +354,18 @@ public class VideoGameService extends BaseService<VideoGame> {
         if (videogame.getTags() != null &&
             !videogame.getTags().isEmpty()) {
 
-            List<ContentTag> attachedTags = videogame.getTags().stream()
-            .map(item -> tagsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
-            .toList();
+            List<ContentTag> attachedTags = new ArrayList<>();
+            for (ContentTag item : videogame.getTags()) {
+                if (item.getId() != null) {
+                    ContentTag existingItem = tagsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId()));
+                    attachedTags.add(existingItem);
+                } else {
+
+                    ContentTag newItem = tagsRepository.save(item);
+                    attachedTags.add(newItem);
+                }
+            }
 
             videogame.setTags(attachedTags);
 
@@ -342,38 +374,49 @@ public class VideoGameService extends BaseService<VideoGame> {
         }
         
     // ---------- ManyToOne ----------
-        if (videogame.getDeveloperStudio() != null &&
-            videogame.getDeveloperStudio().getId() != null) {
-
-            DevelopmentStudio existingDeveloperStudio = developerStudioRepository.findById(
-                videogame.getDeveloperStudio().getId()
-            ).orElseThrow(() -> new RuntimeException("DevelopmentStudio not found"));
-
-            videogame.setDeveloperStudio(existingDeveloperStudio);
+        if (videogame.getDeveloperStudio() != null) {
+            if (videogame.getDeveloperStudio().getId() != null) {
+                DevelopmentStudio existingDeveloperStudio = developerStudioRepository.findById(
+                    videogame.getDeveloperStudio().getId()
+                ).orElseThrow(() -> new RuntimeException("DevelopmentStudio not found with id "
+                    + videogame.getDeveloperStudio().getId()));
+                videogame.setDeveloperStudio(existingDeveloperStudio);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                DevelopmentStudio newDeveloperStudio = developerStudioRepository.save(videogame.getDeveloperStudio());
+                videogame.setDeveloperStudio(newDeveloperStudio);
+            }
         }
         
-        if (videogame.getContentRating() != null &&
-            videogame.getContentRating().getId() != null) {
-
-            ContentRating existingContentRating = contentRatingRepository.findById(
-                videogame.getContentRating().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentRating not found"));
-
-            videogame.setContentRating(existingContentRating);
+        if (videogame.getContentRating() != null) {
+            if (videogame.getContentRating().getId() != null) {
+                ContentRating existingContentRating = contentRatingRepository.findById(
+                    videogame.getContentRating().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentRating not found with id "
+                    + videogame.getContentRating().getId()));
+                videogame.setContentRating(existingContentRating);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentRating newContentRating = contentRatingRepository.save(videogame.getContentRating());
+                videogame.setContentRating(newContentRating);
+            }
         }
         
-        if (videogame.getContentRatingBoard() != null &&
-            videogame.getContentRatingBoard().getId() != null) {
-
-            ContentRatingBoard existingContentRatingBoard = contentRatingBoardRepository.findById(
-                videogame.getContentRatingBoard().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found"));
-
-            videogame.setContentRatingBoard(existingContentRatingBoard);
+        if (videogame.getContentRatingBoard() != null) {
+            if (videogame.getContentRatingBoard().getId() != null) {
+                ContentRatingBoard existingContentRatingBoard = contentRatingBoardRepository.findById(
+                    videogame.getContentRatingBoard().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentRatingBoard not found with id "
+                    + videogame.getContentRatingBoard().getId()));
+                videogame.setContentRatingBoard(existingContentRatingBoard);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentRatingBoard newContentRatingBoard = contentRatingBoardRepository.save(videogame.getContentRatingBoard());
+                videogame.setContentRatingBoard(newContentRatingBoard);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return videogameRepository.save(videogame);
 }
 
@@ -688,7 +731,6 @@ public class VideoGameService extends BaseService<VideoGame> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return videogameRepository.save(existing);
 }
     @Transactional
@@ -700,99 +742,88 @@ public class VideoGameService extends BaseService<VideoGame> {
     // --- Dissocier OneToMany ---
         if (entity.getGeneralReviews() != null) {
             for (var child : entity.getGeneralReviews()) {
-                
-                child.setVideoGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setVideoGame(null);
             }
             entity.getGeneralReviews().clear();
         }
         
         if (entity.getGameReviews() != null) {
             for (var child : entity.getGameReviews()) {
-                
-                child.setGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setGame(null);
             }
             entity.getGameReviews().clear();
         }
         
         if (entity.getAchievements() != null) {
             for (var child : entity.getAchievements()) {
-                
-                child.setGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setGame(null);
             }
             entity.getAchievements().clear();
         }
         
         if (entity.getSessions() != null) {
             for (var child : entity.getSessions()) {
-                
-                child.setGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setGame(null);
             }
             entity.getSessions().clear();
         }
         
         if (entity.getPurchases() != null) {
             for (var child : entity.getPurchases()) {
-                
-                child.setVideoGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setVideoGame(null);
             }
             entity.getPurchases().clear();
         }
         
         if (entity.getRatings() != null) {
             for (var child : entity.getRatings()) {
-                
-                child.setGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setGame(null);
             }
             entity.getRatings().clear();
         }
         
         if (entity.getGamePlaySessions() != null) {
             for (var child : entity.getGamePlaySessions()) {
-                
-                child.setGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setGame(null);
             }
             entity.getGamePlaySessions().clear();
         }
         
         if (entity.getGameReviewUpvotes() != null) {
             for (var child : entity.getGameReviewUpvotes()) {
-                
-                child.setGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setGame(null);
             }
             entity.getGameReviewUpvotes().clear();
         }
         
         if (entity.getGameReviewDownvotes() != null) {
             for (var child : entity.getGameReviewDownvotes()) {
-                
-                child.setGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setGame(null);
             }
             entity.getGameReviewDownvotes().clear();
         }
         
         if (entity.getExpansionPacks() != null) {
             for (var child : entity.getExpansionPacks()) {
-                
-                child.setBaseGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setBaseGame(null);
             }
             entity.getExpansionPacks().clear();
         }
         
         if (entity.getLiveStreams() != null) {
             for (var child : entity.getLiveStreams()) {
-                
-                child.setGame(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setGame(null);
             }
             entity.getLiveStreams().clear();
         }
@@ -802,7 +833,6 @@ public class VideoGameService extends BaseService<VideoGame> {
             for (Genre item : new ArrayList<>(entity.getGenres())) {
                 
                 item.getVideoGames().remove(entity); // retire côté inverse
-                
             }
             entity.getGenres().clear(); // puis vide côté courant
         }
@@ -811,7 +841,6 @@ public class VideoGameService extends BaseService<VideoGame> {
             for (UserProfile item : new ArrayList<>(entity.getPlayedBy())) {
                 
                 item.getPlayedGames().remove(entity); // retire côté inverse
-                
             }
             entity.getPlayedBy().clear(); // puis vide côté courant
         }
@@ -820,7 +849,6 @@ public class VideoGameService extends BaseService<VideoGame> {
             for (GamePlatform item : new ArrayList<>(entity.getPlatforms())) {
                 
                 item.getVideoGames().remove(entity); // retire côté inverse
-                
             }
             entity.getPlatforms().clear(); // puis vide côté courant
         }
@@ -829,7 +857,6 @@ public class VideoGameService extends BaseService<VideoGame> {
             for (ContentTag item : new ArrayList<>(entity.getTags())) {
                 
                 item.getVideoGames().remove(entity); // retire côté inverse
-                
             }
             entity.getTags().clear(); // puis vide côté courant
         }

@@ -49,7 +49,6 @@ public class MerchandiseCategoryService extends BaseService<MerchandiseCategory>
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return merchandisecategoryRepository.save(merchandisecategory);
 }
 
@@ -82,7 +81,6 @@ public class MerchandiseCategoryService extends BaseService<MerchandiseCategory>
         }
         
     // ---------- Relations OneToOne ----------
-
     return merchandisecategoryRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class MerchandiseCategoryService extends BaseService<MerchandiseCategory>
     // --- Dissocier OneToMany ---
         if (entity.getMerchandise() != null) {
             for (var child : entity.getMerchandise()) {
-                
-                child.setCategory(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setCategory(null);
             }
             entity.getMerchandise().clear();
         }

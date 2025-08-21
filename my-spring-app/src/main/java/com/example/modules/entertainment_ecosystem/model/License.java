@@ -29,6 +29,7 @@ public class License extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 10, max = 100)
+        @Column(unique = true, nullable = false)
     private String licenseKey;
 
     @NotNull

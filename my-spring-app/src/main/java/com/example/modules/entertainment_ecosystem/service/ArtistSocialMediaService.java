@@ -35,28 +35,35 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (artistsocialmedia.getArtist() != null &&
-            artistsocialmedia.getArtist().getId() != null) {
-
-            Artist existingArtist = artistRepository.findById(
-                artistsocialmedia.getArtist().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            artistsocialmedia.setArtist(existingArtist);
+        if (artistsocialmedia.getArtist() != null) {
+            if (artistsocialmedia.getArtist().getId() != null) {
+                Artist existingArtist = artistRepository.findById(
+                    artistsocialmedia.getArtist().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + artistsocialmedia.getArtist().getId()));
+                artistsocialmedia.setArtist(existingArtist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newArtist = artistRepository.save(artistsocialmedia.getArtist());
+                artistsocialmedia.setArtist(newArtist);
+            }
         }
         
-        if (artistsocialmedia.getPlatform() != null &&
-            artistsocialmedia.getPlatform().getId() != null) {
-
-            SocialMediaPlatform existingPlatform = platformRepository.findById(
-                artistsocialmedia.getPlatform().getId()
-            ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found"));
-
-            artistsocialmedia.setPlatform(existingPlatform);
+        if (artistsocialmedia.getPlatform() != null) {
+            if (artistsocialmedia.getPlatform().getId() != null) {
+                SocialMediaPlatform existingPlatform = platformRepository.findById(
+                    artistsocialmedia.getPlatform().getId()
+                ).orElseThrow(() -> new RuntimeException("SocialMediaPlatform not found with id "
+                    + artistsocialmedia.getPlatform().getId()));
+                artistsocialmedia.setPlatform(existingPlatform);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                SocialMediaPlatform newPlatform = platformRepository.save(artistsocialmedia.getPlatform());
+                artistsocialmedia.setPlatform(newPlatform);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return artistsocialmediaRepository.save(artistsocialmedia);
 }
 
@@ -96,7 +103,6 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return artistsocialmediaRepository.save(existing);
 }
     @Transactional

@@ -31,18 +31,21 @@ public class MerchandiseShippingStatusService extends BaseService<MerchandiseShi
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (merchandiseshippingstatus.getShipment() != null &&
-            merchandiseshippingstatus.getShipment().getId() != null) {
-
-            MerchandiseShipping existingShipment = shipmentRepository.findById(
-                merchandiseshippingstatus.getShipment().getId()
-            ).orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
-
-            merchandiseshippingstatus.setShipment(existingShipment);
+        if (merchandiseshippingstatus.getShipment() != null) {
+            if (merchandiseshippingstatus.getShipment().getId() != null) {
+                MerchandiseShipping existingShipment = shipmentRepository.findById(
+                    merchandiseshippingstatus.getShipment().getId()
+                ).orElseThrow(() -> new RuntimeException("MerchandiseShipping not found with id "
+                    + merchandiseshippingstatus.getShipment().getId()));
+                merchandiseshippingstatus.setShipment(existingShipment);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MerchandiseShipping newShipment = shipmentRepository.save(merchandiseshippingstatus.getShipment());
+                merchandiseshippingstatus.setShipment(newShipment);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return merchandiseshippingstatusRepository.save(merchandiseshippingstatus);
 }
 
@@ -71,7 +74,6 @@ public class MerchandiseShippingStatusService extends BaseService<MerchandiseShi
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return merchandiseshippingstatusRepository.save(existing);
 }
     @Transactional

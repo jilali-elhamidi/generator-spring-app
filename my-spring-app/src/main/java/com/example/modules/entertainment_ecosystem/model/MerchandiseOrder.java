@@ -28,6 +28,7 @@ public class MerchandiseOrder extends BaseEntity {
 
     // === Attributs simples ===
     @NotNull
+        @Column(unique = true, nullable = false)
     private Date orderDate;
 
     @NotNull

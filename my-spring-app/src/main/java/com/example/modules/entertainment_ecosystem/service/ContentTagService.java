@@ -45,10 +45,18 @@ public class ContentTagService extends BaseService<ContentTag> {
         if (contenttag.getMovies() != null &&
             !contenttag.getMovies().isEmpty()) {
 
-            List<Movie> attachedMovies = contenttag.getMovies().stream()
-            .map(item -> moviesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
-            .toList();
+            List<Movie> attachedMovies = new ArrayList<>();
+            for (Movie item : contenttag.getMovies()) {
+                if (item.getId() != null) {
+                    Movie existingItem = moviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId()));
+                    attachedMovies.add(existingItem);
+                } else {
+
+                    Movie newItem = moviesRepository.save(item);
+                    attachedMovies.add(newItem);
+                }
+            }
 
             contenttag.setMovies(attachedMovies);
 
@@ -59,10 +67,18 @@ public class ContentTagService extends BaseService<ContentTag> {
         if (contenttag.getTvShows() != null &&
             !contenttag.getTvShows().isEmpty()) {
 
-            List<TVShow> attachedTvShows = contenttag.getTvShows().stream()
-            .map(item -> tvShowsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
-            .toList();
+            List<TVShow> attachedTvShows = new ArrayList<>();
+            for (TVShow item : contenttag.getTvShows()) {
+                if (item.getId() != null) {
+                    TVShow existingItem = tvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId()));
+                    attachedTvShows.add(existingItem);
+                } else {
+
+                    TVShow newItem = tvShowsRepository.save(item);
+                    attachedTvShows.add(newItem);
+                }
+            }
 
             contenttag.setTvShows(attachedTvShows);
 
@@ -73,10 +89,18 @@ public class ContentTagService extends BaseService<ContentTag> {
         if (contenttag.getVideoGames() != null &&
             !contenttag.getVideoGames().isEmpty()) {
 
-            List<VideoGame> attachedVideoGames = contenttag.getVideoGames().stream()
-            .map(item -> videoGamesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId())))
-            .toList();
+            List<VideoGame> attachedVideoGames = new ArrayList<>();
+            for (VideoGame item : contenttag.getVideoGames()) {
+                if (item.getId() != null) {
+                    VideoGame existingItem = videoGamesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId()));
+                    attachedVideoGames.add(existingItem);
+                } else {
+
+                    VideoGame newItem = videoGamesRepository.save(item);
+                    attachedVideoGames.add(newItem);
+                }
+            }
 
             contenttag.setVideoGames(attachedVideoGames);
 
@@ -87,10 +111,18 @@ public class ContentTagService extends BaseService<ContentTag> {
         if (contenttag.getLiveEvents() != null &&
             !contenttag.getLiveEvents().isEmpty()) {
 
-            List<LiveEvent> attachedLiveEvents = contenttag.getLiveEvents().stream()
-            .map(item -> liveEventsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("LiveEvent not found with id " + item.getId())))
-            .toList();
+            List<LiveEvent> attachedLiveEvents = new ArrayList<>();
+            for (LiveEvent item : contenttag.getLiveEvents()) {
+                if (item.getId() != null) {
+                    LiveEvent existingItem = liveEventsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("LiveEvent not found with id " + item.getId()));
+                    attachedLiveEvents.add(existingItem);
+                } else {
+
+                    LiveEvent newItem = liveEventsRepository.save(item);
+                    attachedLiveEvents.add(newItem);
+                }
+            }
 
             contenttag.setLiveEvents(attachedLiveEvents);
 
@@ -100,7 +132,6 @@ public class ContentTagService extends BaseService<ContentTag> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return contenttagRepository.save(contenttag);
 }
 
@@ -188,7 +219,6 @@ public class ContentTagService extends BaseService<ContentTag> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return contenttagRepository.save(existing);
 }
     @Transactional
@@ -203,7 +233,6 @@ public class ContentTagService extends BaseService<ContentTag> {
             for (Movie item : new ArrayList<>(entity.getMovies())) {
                 
                 item.getTags().remove(entity); // retire côté inverse
-                
             }
             entity.getMovies().clear(); // puis vide côté courant
         }
@@ -212,7 +241,6 @@ public class ContentTagService extends BaseService<ContentTag> {
             for (TVShow item : new ArrayList<>(entity.getTvShows())) {
                 
                 item.getTags().remove(entity); // retire côté inverse
-                
             }
             entity.getTvShows().clear(); // puis vide côté courant
         }
@@ -221,7 +249,6 @@ public class ContentTagService extends BaseService<ContentTag> {
             for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
                 
                 item.getTags().remove(entity); // retire côté inverse
-                
             }
             entity.getVideoGames().clear(); // puis vide côté courant
         }
@@ -230,7 +257,6 @@ public class ContentTagService extends BaseService<ContentTag> {
             for (LiveEvent item : new ArrayList<>(entity.getLiveEvents())) {
                 
                 item.getTags().remove(entity); // retire côté inverse
-                
             }
             entity.getLiveEvents().clear(); // puis vide côté courant
         }

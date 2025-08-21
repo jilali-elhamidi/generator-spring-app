@@ -52,18 +52,21 @@ public class PlaylistService extends BaseService<Playlist> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (playlist.getOwner() != null &&
-            playlist.getOwner().getId() != null) {
-
-            UserProfile existingOwner = ownerRepository.findById(
-                playlist.getOwner().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            playlist.setOwner(existingOwner);
+        if (playlist.getOwner() != null) {
+            if (playlist.getOwner().getId() != null) {
+                UserProfile existingOwner = ownerRepository.findById(
+                    playlist.getOwner().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + playlist.getOwner().getId()));
+                playlist.setOwner(existingOwner);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newOwner = ownerRepository.save(playlist.getOwner());
+                playlist.setOwner(newOwner);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return playlistRepository.save(playlist);
 }
 
@@ -110,7 +113,6 @@ public class PlaylistService extends BaseService<Playlist> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return playlistRepository.save(existing);
 }
     @Transactional
@@ -122,9 +124,8 @@ public class PlaylistService extends BaseService<Playlist> {
     // --- Dissocier OneToMany ---
         if (entity.getItems() != null) {
             for (var child : entity.getItems()) {
-                
-                child.setPlaylist(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPlaylist(null);
             }
             entity.getItems().clear();
         }

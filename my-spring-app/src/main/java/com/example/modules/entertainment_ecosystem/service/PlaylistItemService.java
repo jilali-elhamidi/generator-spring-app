@@ -39,38 +39,49 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (playlistitem.getPlaylist() != null &&
-            playlistitem.getPlaylist().getId() != null) {
-
-            Playlist existingPlaylist = playlistRepository.findById(
-                playlistitem.getPlaylist().getId()
-            ).orElseThrow(() -> new RuntimeException("Playlist not found"));
-
-            playlistitem.setPlaylist(existingPlaylist);
+        if (playlistitem.getPlaylist() != null) {
+            if (playlistitem.getPlaylist().getId() != null) {
+                Playlist existingPlaylist = playlistRepository.findById(
+                    playlistitem.getPlaylist().getId()
+                ).orElseThrow(() -> new RuntimeException("Playlist not found with id "
+                    + playlistitem.getPlaylist().getId()));
+                playlistitem.setPlaylist(existingPlaylist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Playlist newPlaylist = playlistRepository.save(playlistitem.getPlaylist());
+                playlistitem.setPlaylist(newPlaylist);
+            }
         }
         
-        if (playlistitem.getTrack() != null &&
-            playlistitem.getTrack().getId() != null) {
-
-            MusicTrack existingTrack = trackRepository.findById(
-                playlistitem.getTrack().getId()
-            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-
-            playlistitem.setTrack(existingTrack);
+        if (playlistitem.getTrack() != null) {
+            if (playlistitem.getTrack().getId() != null) {
+                MusicTrack existingTrack = trackRepository.findById(
+                    playlistitem.getTrack().getId()
+                ).orElseThrow(() -> new RuntimeException("MusicTrack not found with id "
+                    + playlistitem.getTrack().getId()));
+                playlistitem.setTrack(existingTrack);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MusicTrack newTrack = trackRepository.save(playlistitem.getTrack());
+                playlistitem.setTrack(newTrack);
+            }
         }
         
-        if (playlistitem.getAddedBy() != null &&
-            playlistitem.getAddedBy().getId() != null) {
-
-            UserProfile existingAddedBy = addedByRepository.findById(
-                playlistitem.getAddedBy().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            playlistitem.setAddedBy(existingAddedBy);
+        if (playlistitem.getAddedBy() != null) {
+            if (playlistitem.getAddedBy().getId() != null) {
+                UserProfile existingAddedBy = addedByRepository.findById(
+                    playlistitem.getAddedBy().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + playlistitem.getAddedBy().getId()));
+                playlistitem.setAddedBy(existingAddedBy);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newAddedBy = addedByRepository.save(playlistitem.getAddedBy());
+                playlistitem.setAddedBy(newAddedBy);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return playlistitemRepository.save(playlistitem);
 }
 
@@ -122,7 +133,6 @@ public class PlaylistItemService extends BaseService<PlaylistItem> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return playlistitemRepository.save(existing);
 }
     @Transactional

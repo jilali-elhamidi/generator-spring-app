@@ -33,10 +33,18 @@ public class MovieFormatService extends BaseService<MovieFormat> {
         if (movieformat.getMovies() != null &&
             !movieformat.getMovies().isEmpty()) {
 
-            List<Movie> attachedMovies = movieformat.getMovies().stream()
-            .map(item -> moviesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
-            .toList();
+            List<Movie> attachedMovies = new ArrayList<>();
+            for (Movie item : movieformat.getMovies()) {
+                if (item.getId() != null) {
+                    Movie existingItem = moviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId()));
+                    attachedMovies.add(existingItem);
+                } else {
+
+                    Movie newItem = moviesRepository.save(item);
+                    attachedMovies.add(newItem);
+                }
+            }
 
             movieformat.setMovies(attachedMovies);
 
@@ -46,7 +54,6 @@ public class MovieFormatService extends BaseService<MovieFormat> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return movieformatRepository.save(movieformat);
 }
 
@@ -80,7 +87,6 @@ public class MovieFormatService extends BaseService<MovieFormat> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return movieformatRepository.save(existing);
 }
     @Transactional
@@ -95,7 +101,6 @@ public class MovieFormatService extends BaseService<MovieFormat> {
             for (Movie item : new ArrayList<>(entity.getMovies())) {
                 
                 item.getFormats().remove(entity); // retire côté inverse
-                
             }
             entity.getMovies().clear(); // puis vide côté courant
         }

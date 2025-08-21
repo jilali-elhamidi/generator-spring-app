@@ -35,28 +35,35 @@ public class EpisodeCreditService extends BaseService<EpisodeCredit> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (episodecredit.getEpisode() != null &&
-            episodecredit.getEpisode().getId() != null) {
-
-            Episode existingEpisode = episodeRepository.findById(
-                episodecredit.getEpisode().getId()
-            ).orElseThrow(() -> new RuntimeException("Episode not found"));
-
-            episodecredit.setEpisode(existingEpisode);
+        if (episodecredit.getEpisode() != null) {
+            if (episodecredit.getEpisode().getId() != null) {
+                Episode existingEpisode = episodeRepository.findById(
+                    episodecredit.getEpisode().getId()
+                ).orElseThrow(() -> new RuntimeException("Episode not found with id "
+                    + episodecredit.getEpisode().getId()));
+                episodecredit.setEpisode(existingEpisode);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Episode newEpisode = episodeRepository.save(episodecredit.getEpisode());
+                episodecredit.setEpisode(newEpisode);
+            }
         }
         
-        if (episodecredit.getArtist() != null &&
-            episodecredit.getArtist().getId() != null) {
-
-            Artist existingArtist = artistRepository.findById(
-                episodecredit.getArtist().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            episodecredit.setArtist(existingArtist);
+        if (episodecredit.getArtist() != null) {
+            if (episodecredit.getArtist().getId() != null) {
+                Artist existingArtist = artistRepository.findById(
+                    episodecredit.getArtist().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + episodecredit.getArtist().getId()));
+                episodecredit.setArtist(existingArtist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newArtist = artistRepository.save(episodecredit.getArtist());
+                episodecredit.setArtist(newArtist);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return episodecreditRepository.save(episodecredit);
 }
 
@@ -96,7 +103,6 @@ public class EpisodeCreditService extends BaseService<EpisodeCredit> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return episodecreditRepository.save(existing);
 }
     @Transactional

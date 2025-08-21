@@ -35,28 +35,35 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (merchandiseorderitem.getMerchandiseItem() != null &&
-            merchandiseorderitem.getMerchandiseItem().getId() != null) {
-
-            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-                merchandiseorderitem.getMerchandiseItem().getId()
-            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
-
-            merchandiseorderitem.setMerchandiseItem(existingMerchandiseItem);
+        if (merchandiseorderitem.getMerchandiseItem() != null) {
+            if (merchandiseorderitem.getMerchandiseItem().getId() != null) {
+                Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                    merchandiseorderitem.getMerchandiseItem().getId()
+                ).orElseThrow(() -> new RuntimeException("Merchandise not found with id "
+                    + merchandiseorderitem.getMerchandiseItem().getId()));
+                merchandiseorderitem.setMerchandiseItem(existingMerchandiseItem);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Merchandise newMerchandiseItem = merchandiseItemRepository.save(merchandiseorderitem.getMerchandiseItem());
+                merchandiseorderitem.setMerchandiseItem(newMerchandiseItem);
+            }
         }
         
-        if (merchandiseorderitem.getOrder() != null &&
-            merchandiseorderitem.getOrder().getId() != null) {
-
-            MerchandiseOrder existingOrder = orderRepository.findById(
-                merchandiseorderitem.getOrder().getId()
-            ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found"));
-
-            merchandiseorderitem.setOrder(existingOrder);
+        if (merchandiseorderitem.getOrder() != null) {
+            if (merchandiseorderitem.getOrder().getId() != null) {
+                MerchandiseOrder existingOrder = orderRepository.findById(
+                    merchandiseorderitem.getOrder().getId()
+                ).orElseThrow(() -> new RuntimeException("MerchandiseOrder not found with id "
+                    + merchandiseorderitem.getOrder().getId()));
+                merchandiseorderitem.setOrder(existingOrder);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MerchandiseOrder newOrder = orderRepository.save(merchandiseorderitem.getOrder());
+                merchandiseorderitem.setOrder(newOrder);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return merchandiseorderitemRepository.save(merchandiseorderitem);
 }
 
@@ -97,7 +104,6 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return merchandiseorderitemRepository.save(existing);
 }
     @Transactional

@@ -70,10 +70,18 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         if (streamingplatform.getMovies() != null &&
             !streamingplatform.getMovies().isEmpty()) {
 
-            List<Movie> attachedMovies = streamingplatform.getMovies().stream()
-            .map(item -> moviesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
-            .toList();
+            List<Movie> attachedMovies = new ArrayList<>();
+            for (Movie item : streamingplatform.getMovies()) {
+                if (item.getId() != null) {
+                    Movie existingItem = moviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId()));
+                    attachedMovies.add(existingItem);
+                } else {
+
+                    Movie newItem = moviesRepository.save(item);
+                    attachedMovies.add(newItem);
+                }
+            }
 
             streamingplatform.setMovies(attachedMovies);
 
@@ -84,10 +92,18 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         if (streamingplatform.getTvShows() != null &&
             !streamingplatform.getTvShows().isEmpty()) {
 
-            List<TVShow> attachedTvShows = streamingplatform.getTvShows().stream()
-            .map(item -> tvShowsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
-            .toList();
+            List<TVShow> attachedTvShows = new ArrayList<>();
+            for (TVShow item : streamingplatform.getTvShows()) {
+                if (item.getId() != null) {
+                    TVShow existingItem = tvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId()));
+                    attachedTvShows.add(existingItem);
+                } else {
+
+                    TVShow newItem = tvShowsRepository.save(item);
+                    attachedTvShows.add(newItem);
+                }
+            }
 
             streamingplatform.setTvShows(attachedTvShows);
 
@@ -98,10 +114,18 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         if (streamingplatform.getAdCampaigns() != null &&
             !streamingplatform.getAdCampaigns().isEmpty()) {
 
-            List<AdCampaign> attachedAdCampaigns = streamingplatform.getAdCampaigns().stream()
-            .map(item -> adCampaignsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("AdCampaign not found with id " + item.getId())))
-            .toList();
+            List<AdCampaign> attachedAdCampaigns = new ArrayList<>();
+            for (AdCampaign item : streamingplatform.getAdCampaigns()) {
+                if (item.getId() != null) {
+                    AdCampaign existingItem = adCampaignsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("AdCampaign not found with id " + item.getId()));
+                    attachedAdCampaigns.add(existingItem);
+                } else {
+
+                    AdCampaign newItem = adCampaignsRepository.save(item);
+                    attachedAdCampaigns.add(newItem);
+                }
+            }
 
             streamingplatform.setAdCampaigns(attachedAdCampaigns);
 
@@ -110,28 +134,35 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         }
         
     // ---------- ManyToOne ----------
-        if (streamingplatform.getStreamingService() != null &&
-            streamingplatform.getStreamingService().getId() != null) {
-
-            StreamingService existingStreamingService = streamingServiceRepository.findById(
-                streamingplatform.getStreamingService().getId()
-            ).orElseThrow(() -> new RuntimeException("StreamingService not found"));
-
-            streamingplatform.setStreamingService(existingStreamingService);
+        if (streamingplatform.getStreamingService() != null) {
+            if (streamingplatform.getStreamingService().getId() != null) {
+                StreamingService existingStreamingService = streamingServiceRepository.findById(
+                    streamingplatform.getStreamingService().getId()
+                ).orElseThrow(() -> new RuntimeException("StreamingService not found with id "
+                    + streamingplatform.getStreamingService().getId()));
+                streamingplatform.setStreamingService(existingStreamingService);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                StreamingService newStreamingService = streamingServiceRepository.save(streamingplatform.getStreamingService());
+                streamingplatform.setStreamingService(newStreamingService);
+            }
         }
         
-        if (streamingplatform.getOnlinePlatform() != null &&
-            streamingplatform.getOnlinePlatform().getId() != null) {
-
-            OnlinePlatform existingOnlinePlatform = onlinePlatformRepository.findById(
-                streamingplatform.getOnlinePlatform().getId()
-            ).orElseThrow(() -> new RuntimeException("OnlinePlatform not found"));
-
-            streamingplatform.setOnlinePlatform(existingOnlinePlatform);
+        if (streamingplatform.getOnlinePlatform() != null) {
+            if (streamingplatform.getOnlinePlatform().getId() != null) {
+                OnlinePlatform existingOnlinePlatform = onlinePlatformRepository.findById(
+                    streamingplatform.getOnlinePlatform().getId()
+                ).orElseThrow(() -> new RuntimeException("OnlinePlatform not found with id "
+                    + streamingplatform.getOnlinePlatform().getId()));
+                streamingplatform.setOnlinePlatform(existingOnlinePlatform);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                OnlinePlatform newOnlinePlatform = onlinePlatformRepository.save(streamingplatform.getOnlinePlatform());
+                streamingplatform.setOnlinePlatform(newOnlinePlatform);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return streamingplatformRepository.save(streamingplatform);
 }
 
@@ -243,7 +274,6 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return streamingplatformRepository.save(existing);
 }
     @Transactional
@@ -255,9 +285,8 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
     // --- Dissocier OneToMany ---
         if (entity.getSubscriptions() != null) {
             for (var child : entity.getSubscriptions()) {
-                
-                child.setPlatform(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPlatform(null);
             }
             entity.getSubscriptions().clear();
         }
@@ -267,7 +296,6 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
             for (Movie item : new ArrayList<>(entity.getMovies())) {
                 
                 item.getPlatforms().remove(entity); // retire côté inverse
-                
             }
             entity.getMovies().clear(); // puis vide côté courant
         }
@@ -276,7 +304,6 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
             for (TVShow item : new ArrayList<>(entity.getTvShows())) {
                 
                 item.getPlatforms().remove(entity); // retire côté inverse
-                
             }
             entity.getTvShows().clear(); // puis vide côté courant
         }
@@ -285,7 +312,6 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
             for (AdCampaign item : new ArrayList<>(entity.getAdCampaigns())) {
                 
                 item.getDisplayedOnPlatforms().remove(entity); // retire côté inverse
-                
             }
             entity.getAdCampaigns().clear(); // puis vide côté courant
         }

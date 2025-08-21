@@ -49,7 +49,6 @@ public class TicketStatusService extends BaseService<TicketStatus> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return ticketstatusRepository.save(ticketstatus);
 }
 
@@ -82,7 +81,6 @@ public class TicketStatusService extends BaseService<TicketStatus> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return ticketstatusRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class TicketStatusService extends BaseService<TicketStatus> {
     // --- Dissocier OneToMany ---
         if (entity.getTickets() != null) {
             for (var child : entity.getTickets()) {
-                
-                child.setStatus(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setStatus(null);
             }
             entity.getTickets().clear();
         }

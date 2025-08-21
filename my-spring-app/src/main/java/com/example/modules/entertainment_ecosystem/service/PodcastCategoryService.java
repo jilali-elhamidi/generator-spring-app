@@ -33,10 +33,18 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
         if (podcastcategory.getPodcasts() != null &&
             !podcastcategory.getPodcasts().isEmpty()) {
 
-            List<Podcast> attachedPodcasts = podcastcategory.getPodcasts().stream()
-            .map(item -> podcastsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId())))
-            .toList();
+            List<Podcast> attachedPodcasts = new ArrayList<>();
+            for (Podcast item : podcastcategory.getPodcasts()) {
+                if (item.getId() != null) {
+                    Podcast existingItem = podcastsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId()));
+                    attachedPodcasts.add(existingItem);
+                } else {
+
+                    Podcast newItem = podcastsRepository.save(item);
+                    attachedPodcasts.add(newItem);
+                }
+            }
 
             podcastcategory.setPodcasts(attachedPodcasts);
 
@@ -46,7 +54,6 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return podcastcategoryRepository.save(podcastcategory);
 }
 
@@ -80,7 +87,6 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return podcastcategoryRepository.save(existing);
 }
     @Transactional
@@ -95,7 +101,6 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
             for (Podcast item : new ArrayList<>(entity.getPodcasts())) {
                 
                 item.getCategories().remove(entity); // retire côté inverse
-                
             }
             entity.getPodcasts().clear(); // puis vide côté courant
         }

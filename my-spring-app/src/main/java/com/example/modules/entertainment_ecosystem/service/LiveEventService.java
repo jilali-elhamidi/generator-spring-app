@@ -103,10 +103,18 @@ public class LiveEventService extends BaseService<LiveEvent> {
         if (liveevent.getPerformers() != null &&
             !liveevent.getPerformers().isEmpty()) {
 
-            List<Artist> attachedPerformers = liveevent.getPerformers().stream()
-            .map(item -> performersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
-            .toList();
+            List<Artist> attachedPerformers = new ArrayList<>();
+            for (Artist item : liveevent.getPerformers()) {
+                if (item.getId() != null) {
+                    Artist existingItem = performersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId()));
+                    attachedPerformers.add(existingItem);
+                } else {
+
+                    Artist newItem = performersRepository.save(item);
+                    attachedPerformers.add(newItem);
+                }
+            }
 
             liveevent.setPerformers(attachedPerformers);
 
@@ -117,10 +125,18 @@ public class LiveEventService extends BaseService<LiveEvent> {
         if (liveevent.getTags() != null &&
             !liveevent.getTags().isEmpty()) {
 
-            List<ContentTag> attachedTags = liveevent.getTags().stream()
-            .map(item -> tagsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId())))
-            .toList();
+            List<ContentTag> attachedTags = new ArrayList<>();
+            for (ContentTag item : liveevent.getTags()) {
+                if (item.getId() != null) {
+                    ContentTag existingItem = tagsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ContentTag not found with id " + item.getId()));
+                    attachedTags.add(existingItem);
+                } else {
+
+                    ContentTag newItem = tagsRepository.save(item);
+                    attachedTags.add(newItem);
+                }
+            }
 
             liveevent.setTags(attachedTags);
 
@@ -129,70 +145,92 @@ public class LiveEventService extends BaseService<LiveEvent> {
         }
         
     // ---------- ManyToOne ----------
-        if (liveevent.getEventType() != null &&
-            liveevent.getEventType().getId() != null) {
-
-            EventType existingEventType = eventTypeRepository.findById(
-                liveevent.getEventType().getId()
-            ).orElseThrow(() -> new RuntimeException("EventType not found"));
-
-            liveevent.setEventType(existingEventType);
+        if (liveevent.getEventType() != null) {
+            if (liveevent.getEventType().getId() != null) {
+                EventType existingEventType = eventTypeRepository.findById(
+                    liveevent.getEventType().getId()
+                ).orElseThrow(() -> new RuntimeException("EventType not found with id "
+                    + liveevent.getEventType().getId()));
+                liveevent.setEventType(existingEventType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                EventType newEventType = eventTypeRepository.save(liveevent.getEventType());
+                liveevent.setEventType(newEventType);
+            }
         }
         
-        if (liveevent.getLocation() != null &&
-            liveevent.getLocation().getId() != null) {
-
-            EventLocation existingLocation = locationRepository.findById(
-                liveevent.getLocation().getId()
-            ).orElseThrow(() -> new RuntimeException("EventLocation not found"));
-
-            liveevent.setLocation(existingLocation);
+        if (liveevent.getLocation() != null) {
+            if (liveevent.getLocation().getId() != null) {
+                EventLocation existingLocation = locationRepository.findById(
+                    liveevent.getLocation().getId()
+                ).orElseThrow(() -> new RuntimeException("EventLocation not found with id "
+                    + liveevent.getLocation().getId()));
+                liveevent.setLocation(existingLocation);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                EventLocation newLocation = locationRepository.save(liveevent.getLocation());
+                liveevent.setLocation(newLocation);
+            }
         }
         
-        if (liveevent.getSponsor() != null &&
-            liveevent.getSponsor().getId() != null) {
-
-            Sponsor existingSponsor = sponsorRepository.findById(
-                liveevent.getSponsor().getId()
-            ).orElseThrow(() -> new RuntimeException("Sponsor not found"));
-
-            liveevent.setSponsor(existingSponsor);
+        if (liveevent.getSponsor() != null) {
+            if (liveevent.getSponsor().getId() != null) {
+                Sponsor existingSponsor = sponsorRepository.findById(
+                    liveevent.getSponsor().getId()
+                ).orElseThrow(() -> new RuntimeException("Sponsor not found with id "
+                    + liveevent.getSponsor().getId()));
+                liveevent.setSponsor(existingSponsor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Sponsor newSponsor = sponsorRepository.save(liveevent.getSponsor());
+                liveevent.setSponsor(newSponsor);
+            }
         }
         
-        if (liveevent.getVenue() != null &&
-            liveevent.getVenue().getId() != null) {
-
-            ConcertVenue existingVenue = venueRepository.findById(
-                liveevent.getVenue().getId()
-            ).orElseThrow(() -> new RuntimeException("ConcertVenue not found"));
-
-            liveevent.setVenue(existingVenue);
+        if (liveevent.getVenue() != null) {
+            if (liveevent.getVenue().getId() != null) {
+                ConcertVenue existingVenue = venueRepository.findById(
+                    liveevent.getVenue().getId()
+                ).orElseThrow(() -> new RuntimeException("ConcertVenue not found with id "
+                    + liveevent.getVenue().getId()));
+                liveevent.setVenue(existingVenue);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ConcertVenue newVenue = venueRepository.save(liveevent.getVenue());
+                liveevent.setVenue(newVenue);
+            }
         }
         
-        if (liveevent.getTour() != null &&
-            liveevent.getTour().getId() != null) {
-
-            Tour existingTour = tourRepository.findById(
-                liveevent.getTour().getId()
-            ).orElseThrow(() -> new RuntimeException("Tour not found"));
-
-            liveevent.setTour(existingTour);
+        if (liveevent.getTour() != null) {
+            if (liveevent.getTour().getId() != null) {
+                Tour existingTour = tourRepository.findById(
+                    liveevent.getTour().getId()
+                ).orElseThrow(() -> new RuntimeException("Tour not found with id "
+                    + liveevent.getTour().getId()));
+                liveevent.setTour(existingTour);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Tour newTour = tourRepository.save(liveevent.getTour());
+                liveevent.setTour(newTour);
+            }
         }
         
     // ---------- OneToOne ----------
         if (liveevent.getAudience() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            liveevent.setAudience(
-                audienceRepository.findById(liveevent.getAudience().getId())
-                    .orElseThrow(() -> new RuntimeException("audience not found"))
-            );
-            
+            if (liveevent.getAudience().getId() != null) {
+                EventAudience existingAudience = audienceRepository.findById(liveevent.getAudience().getId())
+                    .orElseThrow(() -> new RuntimeException("EventAudience not found with id "
+                        + liveevent.getAudience().getId()));
+                liveevent.setAudience(existingAudience);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                EventAudience newAudience = audienceRepository.save(liveevent.getAudience());
+                liveevent.setAudience(newAudience);
+            }
+
             liveevent.getAudience().setEvent(liveevent);
         }
         
-
     return liveeventRepository.save(liveevent);
 }
 
@@ -340,21 +378,15 @@ public class LiveEventService extends BaseService<LiveEvent> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (liveeventRequest.getAudience() != null &&
-            liveeventRequest.getAudience().getId() != null) {
+        if (liveeventRequest.getAudience() != null &&liveeventRequest.getAudience().getId() != null) {
 
-            EventAudience audience = audienceRepository.findById(
-                liveeventRequest.getAudience().getId()
-            ).orElseThrow(() -> new RuntimeException("EventAudience not found"));
+        EventAudience audience = audienceRepository.findById(liveeventRequest.getAudience().getId())
+                .orElseThrow(() -> new RuntimeException("EventAudience not found"));
 
-            existing.setAudience(audience);
-
-            
-            audience.setEvent(existing);
-            
+        existing.setAudience(audience);
+        audience.setEvent(existing);
         }
-        
-
+    
     return liveeventRepository.save(existing);
 }
     @Transactional
@@ -366,18 +398,16 @@ public class LiveEventService extends BaseService<LiveEvent> {
     // --- Dissocier OneToMany ---
         if (entity.getTickets() != null) {
             for (var child : entity.getTickets()) {
-                
-                child.setEvent(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setEvent(null);
             }
             entity.getTickets().clear();
         }
         
         if (entity.getSponsorships() != null) {
             for (var child : entity.getSponsorships()) {
-                
-                child.setEvent(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setEvent(null);
             }
             entity.getSponsorships().clear();
         }
@@ -387,7 +417,6 @@ public class LiveEventService extends BaseService<LiveEvent> {
             for (Artist item : new ArrayList<>(entity.getPerformers())) {
                 
                 item.getParticipatedInEvents().remove(entity); // retire côté inverse
-                
             }
             entity.getPerformers().clear(); // puis vide côté courant
         }
@@ -396,7 +425,6 @@ public class LiveEventService extends BaseService<LiveEvent> {
             for (ContentTag item : new ArrayList<>(entity.getTags())) {
                 
                 item.getLiveEvents().remove(entity); // retire côté inverse
-                
             }
             entity.getTags().clear(); // puis vide côté courant
         }

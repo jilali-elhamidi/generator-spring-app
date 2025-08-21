@@ -49,7 +49,6 @@ public class EmployeeRoleService extends BaseService<EmployeeRole> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return employeeroleRepository.save(employeerole);
 }
 
@@ -83,7 +82,6 @@ public class EmployeeRoleService extends BaseService<EmployeeRole> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return employeeroleRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class EmployeeRoleService extends BaseService<EmployeeRole> {
     // --- Dissocier OneToMany ---
         if (entity.getEmployees() != null) {
             for (var child : entity.getEmployees()) {
-                
-                child.setRole(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setRole(null);
             }
             entity.getEmployees().clear();
         }

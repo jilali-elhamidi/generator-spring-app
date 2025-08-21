@@ -54,18 +54,20 @@ public class BookingService extends BaseService<Booking> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (booking.getPayment() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            booking.setPayment(
-                paymentRepository.findById(booking.getPayment().getId())
-                    .orElseThrow(() -> new RuntimeException("payment not found"))
-            );
-            
+            if (booking.getPayment().getId() != null) {
+                Payment existingPayment = paymentRepository.findById(booking.getPayment().getId())
+                    .orElseThrow(() -> new RuntimeException("Payment not found with id "
+                        + booking.getPayment().getId()));
+                booking.setPayment(existingPayment);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Payment newPayment = paymentRepository.save(booking.getPayment());
+                booking.setPayment(newPayment);
+            }
+
             booking.getPayment().setBooking(booking);
         }
         
-
     return bookingRepository.save(booking);
 }
 
@@ -99,21 +101,15 @@ public class BookingService extends BaseService<Booking> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (bookingRequest.getPayment() != null &&
-            bookingRequest.getPayment().getId() != null) {
+        if (bookingRequest.getPayment() != null &&bookingRequest.getPayment().getId() != null) {
 
-            Payment payment = paymentRepository.findById(
-                bookingRequest.getPayment().getId()
-            ).orElseThrow(() -> new RuntimeException("Payment not found"));
+        Payment payment = paymentRepository.findById(bookingRequest.getPayment().getId())
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
 
-            existing.setPayment(payment);
-
-            
-            payment.setBooking(existing);
-            
+        existing.setPayment(payment);
+        payment.setBooking(existing);
         }
-        
-
+    
     return bookingRepository.save(existing);
 }
     @Transactional
@@ -125,9 +121,8 @@ public class BookingService extends BaseService<Booking> {
     // --- Dissocier OneToMany ---
         if (entity.getTickets() != null) {
             for (var child : entity.getTickets()) {
-                
-                child.setBooking(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setBooking(null);
             }
             entity.getTickets().clear();
         }

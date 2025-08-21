@@ -28,6 +28,7 @@ public class StreamingContentLicense extends BaseEntity {
 
     // === Attributs simples ===
     @NotNull
+        @Column(unique = true, nullable = false)
     private Date startDate;
 
     @NotNull

@@ -41,10 +41,18 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
         if (contentlanguage.getMovies() != null &&
             !contentlanguage.getMovies().isEmpty()) {
 
-            List<Movie> attachedMovies = contentlanguage.getMovies().stream()
-            .map(item -> moviesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
-            .toList();
+            List<Movie> attachedMovies = new ArrayList<>();
+            for (Movie item : contentlanguage.getMovies()) {
+                if (item.getId() != null) {
+                    Movie existingItem = moviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId()));
+                    attachedMovies.add(existingItem);
+                } else {
+
+                    Movie newItem = moviesRepository.save(item);
+                    attachedMovies.add(newItem);
+                }
+            }
 
             contentlanguage.setMovies(attachedMovies);
 
@@ -55,10 +63,18 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
         if (contentlanguage.getTvShows() != null &&
             !contentlanguage.getTvShows().isEmpty()) {
 
-            List<TVShow> attachedTvShows = contentlanguage.getTvShows().stream()
-            .map(item -> tvShowsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
-            .toList();
+            List<TVShow> attachedTvShows = new ArrayList<>();
+            for (TVShow item : contentlanguage.getTvShows()) {
+                if (item.getId() != null) {
+                    TVShow existingItem = tvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId()));
+                    attachedTvShows.add(existingItem);
+                } else {
+
+                    TVShow newItem = tvShowsRepository.save(item);
+                    attachedTvShows.add(newItem);
+                }
+            }
 
             contentlanguage.setTvShows(attachedTvShows);
 
@@ -69,10 +85,18 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
         if (contentlanguage.getPodcasts() != null &&
             !contentlanguage.getPodcasts().isEmpty()) {
 
-            List<Podcast> attachedPodcasts = contentlanguage.getPodcasts().stream()
-            .map(item -> podcastsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId())))
-            .toList();
+            List<Podcast> attachedPodcasts = new ArrayList<>();
+            for (Podcast item : contentlanguage.getPodcasts()) {
+                if (item.getId() != null) {
+                    Podcast existingItem = podcastsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId()));
+                    attachedPodcasts.add(existingItem);
+                } else {
+
+                    Podcast newItem = podcastsRepository.save(item);
+                    attachedPodcasts.add(newItem);
+                }
+            }
 
             contentlanguage.setPodcasts(attachedPodcasts);
 
@@ -82,7 +106,6 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return contentlanguageRepository.save(contentlanguage);
 }
 
@@ -153,7 +176,6 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return contentlanguageRepository.save(existing);
 }
     @Transactional
@@ -168,7 +190,6 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
             for (Movie item : new ArrayList<>(entity.getMovies())) {
                 
                 item.getLanguages().remove(entity); // retire côté inverse
-                
             }
             entity.getMovies().clear(); // puis vide côté courant
         }
@@ -177,7 +198,6 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
             for (TVShow item : new ArrayList<>(entity.getTvShows())) {
                 
                 item.getLanguages().remove(entity); // retire côté inverse
-                
             }
             entity.getTvShows().clear(); // puis vide côté courant
         }
@@ -186,7 +206,6 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
             for (Podcast item : new ArrayList<>(entity.getPodcasts())) {
                 
                 item.getLanguages().remove(entity); // retire côté inverse
-                
             }
             entity.getPodcasts().clear(); // puis vide côté courant
         }

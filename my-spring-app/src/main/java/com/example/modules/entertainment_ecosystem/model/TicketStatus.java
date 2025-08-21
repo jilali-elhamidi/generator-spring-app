@@ -28,6 +28,7 @@ public class TicketStatus extends BaseEntity {
 
     // === Attributs simples ===
     @NotNull
+        @Column(unique = true, nullable = false)
     private String name;
 
 

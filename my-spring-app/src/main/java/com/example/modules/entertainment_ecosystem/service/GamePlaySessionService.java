@@ -35,28 +35,35 @@ public class GamePlaySessionService extends BaseService<GamePlaySession> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (gameplaysession.getUser() != null &&
-            gameplaysession.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                gameplaysession.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            gameplaysession.setUser(existingUser);
+        if (gameplaysession.getUser() != null) {
+            if (gameplaysession.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    gameplaysession.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + gameplaysession.getUser().getId()));
+                gameplaysession.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(gameplaysession.getUser());
+                gameplaysession.setUser(newUser);
+            }
         }
         
-        if (gameplaysession.getGame() != null &&
-            gameplaysession.getGame().getId() != null) {
-
-            VideoGame existingGame = gameRepository.findById(
-                gameplaysession.getGame().getId()
-            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-
-            gameplaysession.setGame(existingGame);
+        if (gameplaysession.getGame() != null) {
+            if (gameplaysession.getGame().getId() != null) {
+                VideoGame existingGame = gameRepository.findById(
+                    gameplaysession.getGame().getId()
+                ).orElseThrow(() -> new RuntimeException("VideoGame not found with id "
+                    + gameplaysession.getGame().getId()));
+                gameplaysession.setGame(existingGame);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                VideoGame newGame = gameRepository.save(gameplaysession.getGame());
+                gameplaysession.setGame(newGame);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return gameplaysessionRepository.save(gameplaysession);
 }
 
@@ -98,7 +105,6 @@ public class GamePlaySessionService extends BaseService<GamePlaySession> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return gameplaysessionRepository.save(existing);
 }
     @Transactional

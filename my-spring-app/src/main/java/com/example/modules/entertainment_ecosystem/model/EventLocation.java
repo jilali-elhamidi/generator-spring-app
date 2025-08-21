@@ -29,6 +29,7 @@ public class EventLocation extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 2, max = 255)
+        @Column(unique = true, nullable = false)
     private String name;
 
     @NotNull

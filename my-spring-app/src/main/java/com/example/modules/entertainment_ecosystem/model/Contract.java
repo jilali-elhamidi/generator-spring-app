@@ -29,6 +29,7 @@ public class Contract extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 5, max = 50)
+        @Column(unique = true, nullable = false)
     private String contractNumber;
 
     @Size(max = 2000)

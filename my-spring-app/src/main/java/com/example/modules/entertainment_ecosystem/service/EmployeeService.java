@@ -77,28 +77,35 @@ public class EmployeeService extends BaseService<Employee> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (employee.getProductionCompany() != null &&
-            employee.getProductionCompany().getId() != null) {
-
-            ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
-                employee.getProductionCompany().getId()
-            ).orElseThrow(() -> new RuntimeException("ProductionCompany not found"));
-
-            employee.setProductionCompany(existingProductionCompany);
+        if (employee.getProductionCompany() != null) {
+            if (employee.getProductionCompany().getId() != null) {
+                ProductionCompany existingProductionCompany = productionCompanyRepository.findById(
+                    employee.getProductionCompany().getId()
+                ).orElseThrow(() -> new RuntimeException("ProductionCompany not found with id "
+                    + employee.getProductionCompany().getId()));
+                employee.setProductionCompany(existingProductionCompany);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ProductionCompany newProductionCompany = productionCompanyRepository.save(employee.getProductionCompany());
+                employee.setProductionCompany(newProductionCompany);
+            }
         }
         
-        if (employee.getRole() != null &&
-            employee.getRole().getId() != null) {
-
-            EmployeeRole existingRole = roleRepository.findById(
-                employee.getRole().getId()
-            ).orElseThrow(() -> new RuntimeException("EmployeeRole not found"));
-
-            employee.setRole(existingRole);
+        if (employee.getRole() != null) {
+            if (employee.getRole().getId() != null) {
+                EmployeeRole existingRole = roleRepository.findById(
+                    employee.getRole().getId()
+                ).orElseThrow(() -> new RuntimeException("EmployeeRole not found with id "
+                    + employee.getRole().getId()));
+                employee.setRole(existingRole);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                EmployeeRole newRole = roleRepository.save(employee.getRole());
+                employee.setRole(newRole);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return employeeRepository.save(employee);
 }
 
@@ -175,7 +182,6 @@ public class EmployeeService extends BaseService<Employee> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return employeeRepository.save(existing);
 }
     @Transactional
@@ -187,18 +193,16 @@ public class EmployeeService extends BaseService<Employee> {
     // --- Dissocier OneToMany ---
         if (entity.getShifts() != null) {
             for (var child : entity.getShifts()) {
-                
-                child.setEmployee(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setEmployee(null);
             }
             entity.getShifts().clear();
         }
         
         if (entity.getManagedLocations() != null) {
             for (var child : entity.getManagedLocations()) {
-                
-                child.setContactPerson(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setContactPerson(null);
             }
             entity.getManagedLocations().clear();
         }

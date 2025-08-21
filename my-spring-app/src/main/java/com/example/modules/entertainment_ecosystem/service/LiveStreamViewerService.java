@@ -35,28 +35,35 @@ public class LiveStreamViewerService extends BaseService<LiveStreamViewer> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (livestreamviewer.getUser() != null &&
-            livestreamviewer.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                livestreamviewer.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            livestreamviewer.setUser(existingUser);
+        if (livestreamviewer.getUser() != null) {
+            if (livestreamviewer.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    livestreamviewer.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + livestreamviewer.getUser().getId()));
+                livestreamviewer.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(livestreamviewer.getUser());
+                livestreamviewer.setUser(newUser);
+            }
         }
         
-        if (livestreamviewer.getLiveStream() != null &&
-            livestreamviewer.getLiveStream().getId() != null) {
-
-            LiveStream existingLiveStream = liveStreamRepository.findById(
-                livestreamviewer.getLiveStream().getId()
-            ).orElseThrow(() -> new RuntimeException("LiveStream not found"));
-
-            livestreamviewer.setLiveStream(existingLiveStream);
+        if (livestreamviewer.getLiveStream() != null) {
+            if (livestreamviewer.getLiveStream().getId() != null) {
+                LiveStream existingLiveStream = liveStreamRepository.findById(
+                    livestreamviewer.getLiveStream().getId()
+                ).orElseThrow(() -> new RuntimeException("LiveStream not found with id "
+                    + livestreamviewer.getLiveStream().getId()));
+                livestreamviewer.setLiveStream(existingLiveStream);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                LiveStream newLiveStream = liveStreamRepository.save(livestreamviewer.getLiveStream());
+                livestreamviewer.setLiveStream(newLiveStream);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return livestreamviewerRepository.save(livestreamviewer);
 }
 
@@ -97,7 +104,6 @@ public class LiveStreamViewerService extends BaseService<LiveStreamViewer> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return livestreamviewerRepository.save(existing);
 }
     @Transactional

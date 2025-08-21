@@ -37,10 +37,18 @@ public class ForumModeratorService extends BaseService<ForumModerator> {
         if (forummoderator.getModeratedCategories() != null &&
             !forummoderator.getModeratedCategories().isEmpty()) {
 
-            List<ForumCategory> attachedModeratedCategories = forummoderator.getModeratedCategories().stream()
-            .map(item -> moderatedCategoriesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ForumCategory not found with id " + item.getId())))
-            .toList();
+            List<ForumCategory> attachedModeratedCategories = new ArrayList<>();
+            for (ForumCategory item : forummoderator.getModeratedCategories()) {
+                if (item.getId() != null) {
+                    ForumCategory existingItem = moderatedCategoriesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumCategory not found with id " + item.getId()));
+                    attachedModeratedCategories.add(existingItem);
+                } else {
+
+                    ForumCategory newItem = moderatedCategoriesRepository.save(item);
+                    attachedModeratedCategories.add(newItem);
+                }
+            }
 
             forummoderator.setModeratedCategories(attachedModeratedCategories);
 
@@ -51,18 +59,20 @@ public class ForumModeratorService extends BaseService<ForumModerator> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (forummoderator.getUser() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            forummoderator.setUser(
-                userRepository.findById(forummoderator.getUser().getId())
-                    .orElseThrow(() -> new RuntimeException("user not found"))
-            );
-            
+            if (forummoderator.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(forummoderator.getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                        + forummoderator.getUser().getId()));
+                forummoderator.setUser(existingUser);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                UserProfile newUser = userRepository.save(forummoderator.getUser());
+                forummoderator.setUser(newUser);
+            }
+
             forummoderator.getUser().setModerator(forummoderator);
         }
         
-
     return forummoderatorRepository.save(forummoderator);
 }
 
@@ -96,21 +106,15 @@ public class ForumModeratorService extends BaseService<ForumModerator> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (forummoderatorRequest.getUser() != null &&
-            forummoderatorRequest.getUser().getId() != null) {
+        if (forummoderatorRequest.getUser() != null &&forummoderatorRequest.getUser().getId() != null) {
 
-            UserProfile user = userRepository.findById(
-                forummoderatorRequest.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        UserProfile user = userRepository.findById(forummoderatorRequest.getUser().getId())
+                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-            existing.setUser(user);
-
-            
-            user.setModerator(existing);
-            
+        existing.setUser(user);
+        user.setModerator(existing);
         }
-        
-
+    
     return forummoderatorRepository.save(existing);
 }
     @Transactional
@@ -125,7 +129,6 @@ public class ForumModeratorService extends BaseService<ForumModerator> {
             for (ForumCategory item : new ArrayList<>(entity.getModeratedCategories())) {
                 
                 item.getModerators().remove(entity); // retire côté inverse
-                
             }
             entity.getModeratedCategories().clear(); // puis vide côté courant
         }

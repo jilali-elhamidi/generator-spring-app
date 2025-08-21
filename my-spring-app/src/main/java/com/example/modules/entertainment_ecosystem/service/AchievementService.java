@@ -31,18 +31,21 @@ public class AchievementService extends BaseService<Achievement> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (achievement.getUser() != null &&
-            achievement.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                achievement.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            achievement.setUser(existingUser);
+        if (achievement.getUser() != null) {
+            if (achievement.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    achievement.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + achievement.getUser().getId()));
+                achievement.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(achievement.getUser());
+                achievement.setUser(newUser);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return achievementRepository.save(achievement);
 }
 
@@ -72,7 +75,6 @@ public class AchievementService extends BaseService<Achievement> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return achievementRepository.save(existing);
 }
     @Transactional

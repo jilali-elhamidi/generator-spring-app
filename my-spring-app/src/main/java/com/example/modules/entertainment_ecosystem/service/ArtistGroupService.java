@@ -33,10 +33,18 @@ public class ArtistGroupService extends BaseService<ArtistGroup> {
         if (artistgroup.getMembers() != null &&
             !artistgroup.getMembers().isEmpty()) {
 
-            List<Artist> attachedMembers = artistgroup.getMembers().stream()
-            .map(item -> membersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
-            .toList();
+            List<Artist> attachedMembers = new ArrayList<>();
+            for (Artist item : artistgroup.getMembers()) {
+                if (item.getId() != null) {
+                    Artist existingItem = membersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId()));
+                    attachedMembers.add(existingItem);
+                } else {
+
+                    Artist newItem = membersRepository.save(item);
+                    attachedMembers.add(newItem);
+                }
+            }
 
             artistgroup.setMembers(attachedMembers);
 
@@ -46,7 +54,6 @@ public class ArtistGroupService extends BaseService<ArtistGroup> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return artistgroupRepository.save(artistgroup);
 }
 
@@ -81,7 +88,6 @@ public class ArtistGroupService extends BaseService<ArtistGroup> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return artistgroupRepository.save(existing);
 }
     @Transactional
@@ -96,7 +102,6 @@ public class ArtistGroupService extends BaseService<ArtistGroup> {
             for (Artist item : new ArrayList<>(entity.getMembers())) {
                 
                 item.getGroups().remove(entity); // retire côté inverse
-                
             }
             entity.getMembers().clear(); // puis vide côté courant
         }

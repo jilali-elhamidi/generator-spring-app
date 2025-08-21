@@ -49,7 +49,6 @@ public class MusicLabelService extends BaseService<MusicLabel> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return musiclabelRepository.save(musiclabel);
 }
 
@@ -82,7 +81,6 @@ public class MusicLabelService extends BaseService<MusicLabel> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return musiclabelRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class MusicLabelService extends BaseService<MusicLabel> {
     // --- Dissocier OneToMany ---
         if (entity.getAlbums() != null) {
             for (var child : entity.getAlbums()) {
-                
-                child.setMusicLabel(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMusicLabel(null);
             }
             entity.getAlbums().clear();
         }

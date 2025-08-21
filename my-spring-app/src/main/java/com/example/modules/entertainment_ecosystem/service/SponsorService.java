@@ -91,7 +91,6 @@ public class SponsorService extends BaseService<Sponsor> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return sponsorRepository.save(sponsor);
 }
 
@@ -160,7 +159,6 @@ public class SponsorService extends BaseService<Sponsor> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return sponsorRepository.save(existing);
 }
     @Transactional
@@ -172,27 +170,24 @@ public class SponsorService extends BaseService<Sponsor> {
     // --- Dissocier OneToMany ---
         if (entity.getSponsoredEvents() != null) {
             for (var child : entity.getSponsoredEvents()) {
-                
-                child.setSponsor(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setSponsor(null);
             }
             entity.getSponsoredEvents().clear();
         }
         
         if (entity.getSponsorships() != null) {
             for (var child : entity.getSponsorships()) {
-                
-                child.setSponsor(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setSponsor(null);
             }
             entity.getSponsorships().clear();
         }
         
         if (entity.getAdCampaigns() != null) {
             for (var child : entity.getAdCampaigns()) {
-                
-                child.setAdvertiser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAdvertiser(null);
             }
             entity.getAdCampaigns().clear();
         }

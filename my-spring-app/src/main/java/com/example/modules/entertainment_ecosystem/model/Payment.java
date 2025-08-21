@@ -28,6 +28,7 @@ public class Payment extends BaseEntity {
 
     // === Attributs simples ===
     @NotNull
+        @Column(unique = true, nullable = false)
     private Double amount;
 
     @NotNull

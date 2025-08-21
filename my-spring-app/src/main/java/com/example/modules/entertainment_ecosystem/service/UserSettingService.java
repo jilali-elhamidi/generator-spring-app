@@ -31,18 +31,21 @@ public class UserSettingService extends BaseService<UserSetting> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (usersetting.getUser() != null &&
-            usersetting.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                usersetting.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            usersetting.setUser(existingUser);
+        if (usersetting.getUser() != null) {
+            if (usersetting.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    usersetting.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + usersetting.getUser().getId()));
+                usersetting.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(usersetting.getUser());
+                usersetting.setUser(newUser);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return usersettingRepository.save(usersetting);
 }
 
@@ -71,7 +74,6 @@ public class UserSettingService extends BaseService<UserSetting> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return usersettingRepository.save(existing);
 }
     @Transactional

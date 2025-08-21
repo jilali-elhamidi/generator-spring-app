@@ -39,38 +39,49 @@ public class UserConnectionService extends BaseService<UserConnection> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (userconnection.getUser1() != null &&
-            userconnection.getUser1().getId() != null) {
-
-            UserProfile existingUser1 = user1Repository.findById(
-                userconnection.getUser1().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userconnection.setUser1(existingUser1);
+        if (userconnection.getUser1() != null) {
+            if (userconnection.getUser1().getId() != null) {
+                UserProfile existingUser1 = user1Repository.findById(
+                    userconnection.getUser1().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userconnection.getUser1().getId()));
+                userconnection.setUser1(existingUser1);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser1 = user1Repository.save(userconnection.getUser1());
+                userconnection.setUser1(newUser1);
+            }
         }
         
-        if (userconnection.getUser2() != null &&
-            userconnection.getUser2().getId() != null) {
-
-            UserProfile existingUser2 = user2Repository.findById(
-                userconnection.getUser2().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userconnection.setUser2(existingUser2);
+        if (userconnection.getUser2() != null) {
+            if (userconnection.getUser2().getId() != null) {
+                UserProfile existingUser2 = user2Repository.findById(
+                    userconnection.getUser2().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userconnection.getUser2().getId()));
+                userconnection.setUser2(existingUser2);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser2 = user2Repository.save(userconnection.getUser2());
+                userconnection.setUser2(newUser2);
+            }
         }
         
-        if (userconnection.getType() != null &&
-            userconnection.getType().getId() != null) {
-
-            ConnectionType existingType = typeRepository.findById(
-                userconnection.getType().getId()
-            ).orElseThrow(() -> new RuntimeException("ConnectionType not found"));
-
-            userconnection.setType(existingType);
+        if (userconnection.getType() != null) {
+            if (userconnection.getType().getId() != null) {
+                ConnectionType existingType = typeRepository.findById(
+                    userconnection.getType().getId()
+                ).orElseThrow(() -> new RuntimeException("ConnectionType not found with id "
+                    + userconnection.getType().getId()));
+                userconnection.setType(existingType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ConnectionType newType = typeRepository.save(userconnection.getType());
+                userconnection.setType(newType);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return userconnectionRepository.save(userconnection);
 }
 
@@ -122,7 +133,6 @@ public class UserConnectionService extends BaseService<UserConnection> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return userconnectionRepository.save(existing);
 }
     @Transactional

@@ -29,6 +29,7 @@ public class Episode extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Min(1)
+        @Column(unique = true, nullable = false)
     private Integer episodeNumber;
 
     @NotNull

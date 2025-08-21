@@ -49,7 +49,6 @@ public class WarehouseService extends BaseService<Warehouse> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return warehouseRepository.save(warehouse);
 }
 
@@ -83,7 +82,6 @@ public class WarehouseService extends BaseService<Warehouse> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return warehouseRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class WarehouseService extends BaseService<Warehouse> {
     // --- Dissocier OneToMany ---
         if (entity.getInventoryItems() != null) {
             for (var child : entity.getInventoryItems()) {
-                
-                child.setWarehouse(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setWarehouse(null);
             }
             entity.getInventoryItems().clear();
         }

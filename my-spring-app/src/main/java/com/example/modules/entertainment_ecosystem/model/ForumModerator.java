@@ -28,6 +28,7 @@ public class ForumModerator extends BaseEntity {
 
     // === Attributs simples ===
     @NotNull
+        @Column(unique = true, nullable = false)
     private Date moderatorSince;
 
 

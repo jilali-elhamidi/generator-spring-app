@@ -35,28 +35,35 @@ public class UserFollowService extends BaseService<UserFollow> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (userfollow.getFollower() != null &&
-            userfollow.getFollower().getId() != null) {
-
-            UserProfile existingFollower = followerRepository.findById(
-                userfollow.getFollower().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userfollow.setFollower(existingFollower);
+        if (userfollow.getFollower() != null) {
+            if (userfollow.getFollower().getId() != null) {
+                UserProfile existingFollower = followerRepository.findById(
+                    userfollow.getFollower().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userfollow.getFollower().getId()));
+                userfollow.setFollower(existingFollower);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newFollower = followerRepository.save(userfollow.getFollower());
+                userfollow.setFollower(newFollower);
+            }
         }
         
-        if (userfollow.getFollowed() != null &&
-            userfollow.getFollowed().getId() != null) {
-
-            UserProfile existingFollowed = followedRepository.findById(
-                userfollow.getFollowed().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            userfollow.setFollowed(existingFollowed);
+        if (userfollow.getFollowed() != null) {
+            if (userfollow.getFollowed().getId() != null) {
+                UserProfile existingFollowed = followedRepository.findById(
+                    userfollow.getFollowed().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userfollow.getFollowed().getId()));
+                userfollow.setFollowed(existingFollowed);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newFollowed = followedRepository.save(userfollow.getFollowed());
+                userfollow.setFollowed(newFollowed);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return userfollowRepository.save(userfollow);
 }
 
@@ -96,7 +103,6 @@ public class UserFollowService extends BaseService<UserFollow> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return userfollowRepository.save(existing);
 }
     @Transactional

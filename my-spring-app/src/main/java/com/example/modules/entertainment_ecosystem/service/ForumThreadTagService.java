@@ -33,10 +33,18 @@ public class ForumThreadTagService extends BaseService<ForumThreadTag> {
         if (forumthreadtag.getThreads() != null &&
             !forumthreadtag.getThreads().isEmpty()) {
 
-            List<ForumThread> attachedThreads = forumthreadtag.getThreads().stream()
-            .map(item -> threadsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ForumThread not found with id " + item.getId())))
-            .toList();
+            List<ForumThread> attachedThreads = new ArrayList<>();
+            for (ForumThread item : forumthreadtag.getThreads()) {
+                if (item.getId() != null) {
+                    ForumThread existingItem = threadsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ForumThread not found with id " + item.getId()));
+                    attachedThreads.add(existingItem);
+                } else {
+
+                    ForumThread newItem = threadsRepository.save(item);
+                    attachedThreads.add(newItem);
+                }
+            }
 
             forumthreadtag.setThreads(attachedThreads);
 
@@ -46,7 +54,6 @@ public class ForumThreadTagService extends BaseService<ForumThreadTag> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return forumthreadtagRepository.save(forumthreadtag);
 }
 
@@ -80,7 +87,6 @@ public class ForumThreadTagService extends BaseService<ForumThreadTag> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return forumthreadtagRepository.save(existing);
 }
     @Transactional
@@ -95,7 +101,6 @@ public class ForumThreadTagService extends BaseService<ForumThreadTag> {
             for (ForumThread item : new ArrayList<>(entity.getThreads())) {
                 
                 item.getTags().remove(entity); // retire côté inverse
-                
             }
             entity.getThreads().clear(); // puis vide côté courant
         }

@@ -33,18 +33,20 @@ public class UserLoyaltyProgramService extends BaseService<UserLoyaltyProgram> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (userloyaltyprogram.getUser() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            userloyaltyprogram.setUser(
-                userRepository.findById(userloyaltyprogram.getUser().getId())
-                    .orElseThrow(() -> new RuntimeException("user not found"))
-            );
-            
+            if (userloyaltyprogram.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(userloyaltyprogram.getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                        + userloyaltyprogram.getUser().getId()));
+                userloyaltyprogram.setUser(existingUser);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                UserProfile newUser = userRepository.save(userloyaltyprogram.getUser());
+                userloyaltyprogram.setUser(newUser);
+            }
+
             userloyaltyprogram.getUser().setLoyaltyProgram(userloyaltyprogram);
         }
         
-
     return userloyaltyprogramRepository.save(userloyaltyprogram);
 }
 
@@ -61,21 +63,15 @@ public class UserLoyaltyProgramService extends BaseService<UserLoyaltyProgram> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (userloyaltyprogramRequest.getUser() != null &&
-            userloyaltyprogramRequest.getUser().getId() != null) {
+        if (userloyaltyprogramRequest.getUser() != null &&userloyaltyprogramRequest.getUser().getId() != null) {
 
-            UserProfile user = userRepository.findById(
-                userloyaltyprogramRequest.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+        UserProfile user = userRepository.findById(userloyaltyprogramRequest.getUser().getId())
+                .orElseThrow(() -> new RuntimeException("UserProfile not found"));
 
-            existing.setUser(user);
-
-            
-            user.setLoyaltyProgram(existing);
-            
+        existing.setUser(user);
+        user.setLoyaltyProgram(existing);
         }
-        
-
+    
     return userloyaltyprogramRepository.save(existing);
 }
     @Transactional

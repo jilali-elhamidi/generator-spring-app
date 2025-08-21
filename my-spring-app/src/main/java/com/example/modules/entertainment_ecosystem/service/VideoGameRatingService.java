@@ -31,18 +31,21 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (videogamerating.getGame() != null &&
-            videogamerating.getGame().getId() != null) {
-
-            VideoGame existingGame = gameRepository.findById(
-                videogamerating.getGame().getId()
-            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-
-            videogamerating.setGame(existingGame);
+        if (videogamerating.getGame() != null) {
+            if (videogamerating.getGame().getId() != null) {
+                VideoGame existingGame = gameRepository.findById(
+                    videogamerating.getGame().getId()
+                ).orElseThrow(() -> new RuntimeException("VideoGame not found with id "
+                    + videogamerating.getGame().getId()));
+                videogamerating.setGame(existingGame);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                VideoGame newGame = gameRepository.save(videogamerating.getGame());
+                videogamerating.setGame(newGame);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return videogameratingRepository.save(videogamerating);
 }
 
@@ -71,7 +74,6 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return videogameratingRepository.save(existing);
 }
     @Transactional

@@ -47,58 +47,77 @@ public class StreamingContentLicenseService extends BaseService<StreamingContent
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (streamingcontentlicense.getSubscriptionPlan() != null &&
-            streamingcontentlicense.getSubscriptionPlan().getId() != null) {
-
-            SubscriptionPlan existingSubscriptionPlan = subscriptionPlanRepository.findById(
-                streamingcontentlicense.getSubscriptionPlan().getId()
-            ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found"));
-
-            streamingcontentlicense.setSubscriptionPlan(existingSubscriptionPlan);
+        if (streamingcontentlicense.getSubscriptionPlan() != null) {
+            if (streamingcontentlicense.getSubscriptionPlan().getId() != null) {
+                SubscriptionPlan existingSubscriptionPlan = subscriptionPlanRepository.findById(
+                    streamingcontentlicense.getSubscriptionPlan().getId()
+                ).orElseThrow(() -> new RuntimeException("SubscriptionPlan not found with id "
+                    + streamingcontentlicense.getSubscriptionPlan().getId()));
+                streamingcontentlicense.setSubscriptionPlan(existingSubscriptionPlan);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                SubscriptionPlan newSubscriptionPlan = subscriptionPlanRepository.save(streamingcontentlicense.getSubscriptionPlan());
+                streamingcontentlicense.setSubscriptionPlan(newSubscriptionPlan);
+            }
         }
         
-        if (streamingcontentlicense.getMovie() != null &&
-            streamingcontentlicense.getMovie().getId() != null) {
-
-            Movie existingMovie = movieRepository.findById(
-                streamingcontentlicense.getMovie().getId()
-            ).orElseThrow(() -> new RuntimeException("Movie not found"));
-
-            streamingcontentlicense.setMovie(existingMovie);
+        if (streamingcontentlicense.getMovie() != null) {
+            if (streamingcontentlicense.getMovie().getId() != null) {
+                Movie existingMovie = movieRepository.findById(
+                    streamingcontentlicense.getMovie().getId()
+                ).orElseThrow(() -> new RuntimeException("Movie not found with id "
+                    + streamingcontentlicense.getMovie().getId()));
+                streamingcontentlicense.setMovie(existingMovie);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Movie newMovie = movieRepository.save(streamingcontentlicense.getMovie());
+                streamingcontentlicense.setMovie(newMovie);
+            }
         }
         
-        if (streamingcontentlicense.getTvShow() != null &&
-            streamingcontentlicense.getTvShow().getId() != null) {
-
-            TVShow existingTvShow = tvShowRepository.findById(
-                streamingcontentlicense.getTvShow().getId()
-            ).orElseThrow(() -> new RuntimeException("TVShow not found"));
-
-            streamingcontentlicense.setTvShow(existingTvShow);
+        if (streamingcontentlicense.getTvShow() != null) {
+            if (streamingcontentlicense.getTvShow().getId() != null) {
+                TVShow existingTvShow = tvShowRepository.findById(
+                    streamingcontentlicense.getTvShow().getId()
+                ).orElseThrow(() -> new RuntimeException("TVShow not found with id "
+                    + streamingcontentlicense.getTvShow().getId()));
+                streamingcontentlicense.setTvShow(existingTvShow);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TVShow newTvShow = tvShowRepository.save(streamingcontentlicense.getTvShow());
+                streamingcontentlicense.setTvShow(newTvShow);
+            }
         }
         
-        if (streamingcontentlicense.getMusicTrack() != null &&
-            streamingcontentlicense.getMusicTrack().getId() != null) {
-
-            MusicTrack existingMusicTrack = musicTrackRepository.findById(
-                streamingcontentlicense.getMusicTrack().getId()
-            ).orElseThrow(() -> new RuntimeException("MusicTrack not found"));
-
-            streamingcontentlicense.setMusicTrack(existingMusicTrack);
+        if (streamingcontentlicense.getMusicTrack() != null) {
+            if (streamingcontentlicense.getMusicTrack().getId() != null) {
+                MusicTrack existingMusicTrack = musicTrackRepository.findById(
+                    streamingcontentlicense.getMusicTrack().getId()
+                ).orElseThrow(() -> new RuntimeException("MusicTrack not found with id "
+                    + streamingcontentlicense.getMusicTrack().getId()));
+                streamingcontentlicense.setMusicTrack(existingMusicTrack);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MusicTrack newMusicTrack = musicTrackRepository.save(streamingcontentlicense.getMusicTrack());
+                streamingcontentlicense.setMusicTrack(newMusicTrack);
+            }
         }
         
-        if (streamingcontentlicense.getLicenseType() != null &&
-            streamingcontentlicense.getLicenseType().getId() != null) {
-
-            ContentLicenseType existingLicenseType = licenseTypeRepository.findById(
-                streamingcontentlicense.getLicenseType().getId()
-            ).orElseThrow(() -> new RuntimeException("ContentLicenseType not found"));
-
-            streamingcontentlicense.setLicenseType(existingLicenseType);
+        if (streamingcontentlicense.getLicenseType() != null) {
+            if (streamingcontentlicense.getLicenseType().getId() != null) {
+                ContentLicenseType existingLicenseType = licenseTypeRepository.findById(
+                    streamingcontentlicense.getLicenseType().getId()
+                ).orElseThrow(() -> new RuntimeException("ContentLicenseType not found with id "
+                    + streamingcontentlicense.getLicenseType().getId()));
+                streamingcontentlicense.setLicenseType(existingLicenseType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ContentLicenseType newLicenseType = licenseTypeRepository.save(streamingcontentlicense.getLicenseType());
+                streamingcontentlicense.setLicenseType(newLicenseType);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return streamingcontentlicenseRepository.save(streamingcontentlicense);
 }
 
@@ -176,7 +195,6 @@ public class StreamingContentLicenseService extends BaseService<StreamingContent
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return streamingcontentlicenseRepository.save(existing);
 }
     @Transactional

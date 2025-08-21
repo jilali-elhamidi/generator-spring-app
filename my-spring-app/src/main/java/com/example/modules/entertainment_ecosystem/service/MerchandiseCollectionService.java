@@ -49,7 +49,6 @@ public class MerchandiseCollectionService extends BaseService<MerchandiseCollect
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return merchandisecollectionRepository.save(merchandisecollection);
 }
 
@@ -83,7 +82,6 @@ public class MerchandiseCollectionService extends BaseService<MerchandiseCollect
         }
         
     // ---------- Relations OneToOne ----------
-
     return merchandisecollectionRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class MerchandiseCollectionService extends BaseService<MerchandiseCollect
     // --- Dissocier OneToMany ---
         if (entity.getItems() != null) {
             for (var child : entity.getItems()) {
-                
-                child.setCollection(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setCollection(null);
             }
             entity.getItems().clear();
         }

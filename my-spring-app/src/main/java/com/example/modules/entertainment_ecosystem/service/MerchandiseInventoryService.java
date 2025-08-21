@@ -35,30 +35,36 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (merchandiseinventory.getWarehouse() != null &&
-            merchandiseinventory.getWarehouse().getId() != null) {
-
-            Warehouse existingWarehouse = warehouseRepository.findById(
-                merchandiseinventory.getWarehouse().getId()
-            ).orElseThrow(() -> new RuntimeException("Warehouse not found"));
-
-            merchandiseinventory.setWarehouse(existingWarehouse);
+        if (merchandiseinventory.getWarehouse() != null) {
+            if (merchandiseinventory.getWarehouse().getId() != null) {
+                Warehouse existingWarehouse = warehouseRepository.findById(
+                    merchandiseinventory.getWarehouse().getId()
+                ).orElseThrow(() -> new RuntimeException("Warehouse not found with id "
+                    + merchandiseinventory.getWarehouse().getId()));
+                merchandiseinventory.setWarehouse(existingWarehouse);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Warehouse newWarehouse = warehouseRepository.save(merchandiseinventory.getWarehouse());
+                merchandiseinventory.setWarehouse(newWarehouse);
+            }
         }
         
     // ---------- OneToOne ----------
         if (merchandiseinventory.getMerchandiseItem() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            merchandiseinventory.setMerchandiseItem(
-                merchandiseItemRepository.findById(merchandiseinventory.getMerchandiseItem().getId())
-                    .orElseThrow(() -> new RuntimeException("merchandiseItem not found"))
-            );
-            
+            if (merchandiseinventory.getMerchandiseItem().getId() != null) {
+                Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(merchandiseinventory.getMerchandiseItem().getId())
+                    .orElseThrow(() -> new RuntimeException("Merchandise not found with id "
+                        + merchandiseinventory.getMerchandiseItem().getId()));
+                merchandiseinventory.setMerchandiseItem(existingMerchandiseItem);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Merchandise newMerchandiseItem = merchandiseItemRepository.save(merchandiseinventory.getMerchandiseItem());
+                merchandiseinventory.setMerchandiseItem(newMerchandiseItem);
+            }
+
             merchandiseinventory.getMerchandiseItem().setInventory(merchandiseinventory);
         }
         
-
     return merchandiseinventoryRepository.save(merchandiseinventory);
 }
 
@@ -87,21 +93,16 @@ public class MerchandiseInventoryService extends BaseService<MerchandiseInventor
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (merchandiseinventoryRequest.getMerchandiseItem() != null &&
-            merchandiseinventoryRequest.getMerchandiseItem().getId() != null) {
+        if (merchandiseinventoryRequest.getMerchandiseItem() != null &&merchandiseinventoryRequest.getMerchandiseItem().getId() != null) {
 
-            Merchandise merchandiseItem = merchandiseItemRepository.findById(
-                merchandiseinventoryRequest.getMerchandiseItem().getId()
-            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
+        Merchandise merchandiseItem = merchandiseItemRepository.findById(merchandiseinventoryRequest.getMerchandiseItem().getId())
+                .orElseThrow(() -> new RuntimeException("Merchandise not found"));
 
-            existing.setMerchandiseItem(merchandiseItem);
-
-            
-            merchandiseItem.setInventory(existing);
-            
-        }
+        existing.setMerchandiseItem(merchandiseItem);
+        merchandiseItem.setInventory(existing);
         
-
+        }
+    
     return merchandiseinventoryRepository.save(existing);
 }
     @Transactional

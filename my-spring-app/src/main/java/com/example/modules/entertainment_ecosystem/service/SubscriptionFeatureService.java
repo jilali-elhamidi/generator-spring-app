@@ -33,10 +33,18 @@ public class SubscriptionFeatureService extends BaseService<SubscriptionFeature>
         if (subscriptionfeature.getSubscriptionPlans() != null &&
             !subscriptionfeature.getSubscriptionPlans().isEmpty()) {
 
-            List<SubscriptionPlan> attachedSubscriptionPlans = subscriptionfeature.getSubscriptionPlans().stream()
-            .map(item -> subscriptionPlansRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found with id " + item.getId())))
-            .toList();
+            List<SubscriptionPlan> attachedSubscriptionPlans = new ArrayList<>();
+            for (SubscriptionPlan item : subscriptionfeature.getSubscriptionPlans()) {
+                if (item.getId() != null) {
+                    SubscriptionPlan existingItem = subscriptionPlansRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("SubscriptionPlan not found with id " + item.getId()));
+                    attachedSubscriptionPlans.add(existingItem);
+                } else {
+
+                    SubscriptionPlan newItem = subscriptionPlansRepository.save(item);
+                    attachedSubscriptionPlans.add(newItem);
+                }
+            }
 
             subscriptionfeature.setSubscriptionPlans(attachedSubscriptionPlans);
 
@@ -46,7 +54,6 @@ public class SubscriptionFeatureService extends BaseService<SubscriptionFeature>
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return subscriptionfeatureRepository.save(subscriptionfeature);
 }
 
@@ -81,7 +88,6 @@ public class SubscriptionFeatureService extends BaseService<SubscriptionFeature>
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return subscriptionfeatureRepository.save(existing);
 }
     @Transactional
@@ -96,7 +102,6 @@ public class SubscriptionFeatureService extends BaseService<SubscriptionFeature>
             for (SubscriptionPlan item : new ArrayList<>(entity.getSubscriptionPlans())) {
                 
                 item.getFeatures().remove(entity); // retire côté inverse
-                
             }
             entity.getSubscriptionPlans().clear(); // puis vide côté courant
         }

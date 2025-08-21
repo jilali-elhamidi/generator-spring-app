@@ -83,10 +83,18 @@ public class EpisodeService extends BaseService<Episode> {
         if (episode.getWatchedByUsers() != null &&
             !episode.getWatchedByUsers().isEmpty()) {
 
-            List<UserProfile> attachedWatchedByUsers = episode.getWatchedByUsers().stream()
-            .map(item -> watchedByUsersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedWatchedByUsers = new ArrayList<>();
+            for (UserProfile item : episode.getWatchedByUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = watchedByUsersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedWatchedByUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = watchedByUsersRepository.save(item);
+                    attachedWatchedByUsers.add(newItem);
+                }
+            }
 
             episode.setWatchedByUsers(attachedWatchedByUsers);
 
@@ -95,30 +103,36 @@ public class EpisodeService extends BaseService<Episode> {
         }
         
     // ---------- ManyToOne ----------
-        if (episode.getSeason() != null &&
-            episode.getSeason().getId() != null) {
-
-            Season existingSeason = seasonRepository.findById(
-                episode.getSeason().getId()
-            ).orElseThrow(() -> new RuntimeException("Season not found"));
-
-            episode.setSeason(existingSeason);
+        if (episode.getSeason() != null) {
+            if (episode.getSeason().getId() != null) {
+                Season existingSeason = seasonRepository.findById(
+                    episode.getSeason().getId()
+                ).orElseThrow(() -> new RuntimeException("Season not found with id "
+                    + episode.getSeason().getId()));
+                episode.setSeason(existingSeason);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Season newSeason = seasonRepository.save(episode.getSeason());
+                episode.setSeason(newSeason);
+            }
         }
         
     // ---------- OneToOne ----------
         if (episode.getRelatedPodcastEpisode() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            episode.setRelatedPodcastEpisode(
-                relatedPodcastEpisodeRepository.findById(episode.getRelatedPodcastEpisode().getId())
-                    .orElseThrow(() -> new RuntimeException("relatedPodcastEpisode not found"))
-            );
-            
+            if (episode.getRelatedPodcastEpisode().getId() != null) {
+                PodcastEpisode existingRelatedPodcastEpisode = relatedPodcastEpisodeRepository.findById(episode.getRelatedPodcastEpisode().getId())
+                    .orElseThrow(() -> new RuntimeException("PodcastEpisode not found with id "
+                        + episode.getRelatedPodcastEpisode().getId()));
+                episode.setRelatedPodcastEpisode(existingRelatedPodcastEpisode);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                PodcastEpisode newRelatedPodcastEpisode = relatedPodcastEpisodeRepository.save(episode.getRelatedPodcastEpisode());
+                episode.setRelatedPodcastEpisode(newRelatedPodcastEpisode);
+            }
+
             episode.getRelatedPodcastEpisode().setRelatedEpisode(episode);
         }
         
-
     return episodeRepository.save(episode);
 }
 
@@ -201,21 +215,16 @@ public class EpisodeService extends BaseService<Episode> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (episodeRequest.getRelatedPodcastEpisode() != null &&
-            episodeRequest.getRelatedPodcastEpisode().getId() != null) {
+        if (episodeRequest.getRelatedPodcastEpisode() != null &&episodeRequest.getRelatedPodcastEpisode().getId() != null) {
 
-            PodcastEpisode relatedPodcastEpisode = relatedPodcastEpisodeRepository.findById(
-                episodeRequest.getRelatedPodcastEpisode().getId()
-            ).orElseThrow(() -> new RuntimeException("PodcastEpisode not found"));
+        PodcastEpisode relatedPodcastEpisode = relatedPodcastEpisodeRepository.findById(episodeRequest.getRelatedPodcastEpisode().getId())
+                .orElseThrow(() -> new RuntimeException("PodcastEpisode not found"));
 
-            existing.setRelatedPodcastEpisode(relatedPodcastEpisode);
-
-            
-            relatedPodcastEpisode.setRelatedEpisode(existing);
-            
-        }
+        existing.setRelatedPodcastEpisode(relatedPodcastEpisode);
+        relatedPodcastEpisode.setRelatedEpisode(existing);
         
-
+        }
+    
     return episodeRepository.save(existing);
 }
     @Transactional
@@ -227,18 +236,16 @@ public class EpisodeService extends BaseService<Episode> {
     // --- Dissocier OneToMany ---
         if (entity.getCredits() != null) {
             for (var child : entity.getCredits()) {
-                
-                child.setEpisode(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setEpisode(null);
             }
             entity.getCredits().clear();
         }
         
         if (entity.getReviews() != null) {
             for (var child : entity.getReviews()) {
-                
-                child.setEpisode(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setEpisode(null);
             }
             entity.getReviews().clear();
         }
@@ -248,7 +255,6 @@ public class EpisodeService extends BaseService<Episode> {
             for (UserProfile item : new ArrayList<>(entity.getWatchedByUsers())) {
                 
                 item.getWatchedEpisodes().remove(entity); // retire côté inverse
-                
             }
             entity.getWatchedByUsers().clear(); // puis vide côté courant
         }

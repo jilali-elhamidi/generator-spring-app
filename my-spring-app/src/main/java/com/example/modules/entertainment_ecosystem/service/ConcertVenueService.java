@@ -49,7 +49,6 @@ public class ConcertVenueService extends BaseService<ConcertVenue> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return concertvenueRepository.save(concertvenue);
 }
 
@@ -84,7 +83,6 @@ public class ConcertVenueService extends BaseService<ConcertVenue> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return concertvenueRepository.save(existing);
 }
     @Transactional
@@ -96,9 +94,8 @@ public class ConcertVenueService extends BaseService<ConcertVenue> {
     // --- Dissocier OneToMany ---
         if (entity.getConcerts() != null) {
             for (var child : entity.getConcerts()) {
-                
-                child.setVenue(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setVenue(null);
             }
             entity.getConcerts().clear();
         }

@@ -63,10 +63,18 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         if ({{../entityNameLowercase}}.get{{capitalize name}}() != null &&
             !{{../entityNameLowercase}}.get{{capitalize name}}().isEmpty()) {
 
-            List<{{type}}> attached{{capitalize name}} = {{../entityNameLowercase}}.get{{capitalize name}}().stream()
-            .map(item -> {{name}}Repository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("{{type}} not found with id " + item.getId())))
-            .toList();
+            List<{{type}}> attached{{capitalize name}} = new ArrayList<>();
+            for ({{type}} item : {{../entityNameLowercase}}.get{{capitalize name}}()) {
+                if (item.getId() != null) {
+                    {{type}} existingItem = {{name}}Repository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("{{type}} not found with id " + item.getId()));
+                    attached{{capitalize name}}.add(existingItem);
+                } else {
+
+                    {{type}} newItem = {{name}}Repository.save(item);
+                    attached{{capitalize name}}.add(newItem);
+                }
+            }
 
             {{../entityNameLowercase}}.set{{capitalize name}}(attached{{capitalize name}});
 
@@ -78,14 +86,18 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
     // ---------- ManyToOne ----------
         {{~#each relationships}}
         {{~#if (eq relationType "ManyToOne")}}
-        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null &&
-            {{../entityNameLowercase}}.get{{capitalize name}}().getId() != null) {
-
-            {{type}} existing{{capitalize name}} = {{name}}Repository.findById(
-                {{../entityNameLowercase}}.get{{capitalize name}}().getId()
-            ).orElseThrow(() -> new RuntimeException("{{type}} not found"));
-
-            {{../entityNameLowercase}}.set{{capitalize name}}(existing{{capitalize name}});
+        if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
+            if ({{../entityNameLowercase}}.get{{capitalize name}}().getId() != null) {
+                {{type}} existing{{capitalize name}} = {{name}}Repository.findById(
+                    {{../entityNameLowercase}}.get{{capitalize name}}().getId()
+                ).orElseThrow(() -> new RuntimeException("{{type}} not found with id "
+                    + {{../entityNameLowercase}}.get{{capitalize name}}().getId()));
+                {{../entityNameLowercase}}.set{{capitalize name}}(existing{{capitalize name}});
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                {{type}} new{{capitalize name}} = {{name}}Repository.save({{../entityNameLowercase}}.get{{capitalize name}}());
+                {{../entityNameLowercase}}.set{{capitalize name}}(new{{capitalize name}});
+            }
         }
         {{/if}}
         {{~/each}}
@@ -93,13 +105,17 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         {{~#each relationships}}
         {{~#if (eq relationType "OneToOne")}}
         if ({{../entityNameLowercase}}.get{{capitalize name}}() != null) {
-            {{~#if }}
+            if ({{../entityNameLowercase}}.get{{capitalize name}}().getId() != null) {
+                {{type}} existing{{capitalize name}} = {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
+                    .orElseThrow(() -> new RuntimeException("{{type}} not found with id "
+                        + {{../entityNameLowercase}}.get{{capitalize name}}().getId()));
+                {{../entityNameLowercase}}.set{{capitalize name}}(existing{{capitalize name}});
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                {{type}} new{{capitalize name}} = {{name}}Repository.save({{../entityNameLowercase}}.get{{capitalize name}}());
+                {{../entityNameLowercase}}.set{{capitalize name}}(new{{capitalize name}});
+            }
 
-            {{../entityNameLowercase}}.set{{capitalize name}}(
-                {{name}}Repository.findById({{../entityNameLowercase}}.get{{capitalize name}}().getId())
-                    .orElseThrow(() -> new RuntimeException("{{name}} not found"))
-            );
-            {{~/if}}
             {{../entityNameLowercase}}.get{{capitalize name}}().set{{capitalize inverseField}}({{../entityNameLowercase}});
         }
         {{/if}}

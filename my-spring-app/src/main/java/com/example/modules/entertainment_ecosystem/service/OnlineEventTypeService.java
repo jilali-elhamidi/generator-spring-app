@@ -49,7 +49,6 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return onlineeventtypeRepository.save(onlineeventtype);
 }
 
@@ -82,7 +81,6 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return onlineeventtypeRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
     // --- Dissocier OneToMany ---
         if (entity.getEvents() != null) {
             for (var child : entity.getEvents()) {
-                
-                child.setType(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setType(null);
             }
             entity.getEvents().clear();
         }

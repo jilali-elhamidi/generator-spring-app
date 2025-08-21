@@ -49,7 +49,6 @@ public class MovieStudioService extends BaseService<MovieStudio> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return moviestudioRepository.save(moviestudio);
 }
 
@@ -83,7 +82,6 @@ public class MovieStudioService extends BaseService<MovieStudio> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return moviestudioRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class MovieStudioService extends BaseService<MovieStudio> {
     // --- Dissocier OneToMany ---
         if (entity.getMovies() != null) {
             for (var child : entity.getMovies()) {
-                
-                child.setMovieStudio(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setMovieStudio(null);
             }
             entity.getMovies().clear();
         }

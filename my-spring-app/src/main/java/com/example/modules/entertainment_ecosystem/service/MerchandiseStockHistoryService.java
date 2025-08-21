@@ -31,18 +31,21 @@ public class MerchandiseStockHistoryService extends BaseService<MerchandiseStock
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (merchandisestockhistory.getMerchandiseItem() != null &&
-            merchandisestockhistory.getMerchandiseItem().getId() != null) {
-
-            Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
-                merchandisestockhistory.getMerchandiseItem().getId()
-            ).orElseThrow(() -> new RuntimeException("Merchandise not found"));
-
-            merchandisestockhistory.setMerchandiseItem(existingMerchandiseItem);
+        if (merchandisestockhistory.getMerchandiseItem() != null) {
+            if (merchandisestockhistory.getMerchandiseItem().getId() != null) {
+                Merchandise existingMerchandiseItem = merchandiseItemRepository.findById(
+                    merchandisestockhistory.getMerchandiseItem().getId()
+                ).orElseThrow(() -> new RuntimeException("Merchandise not found with id "
+                    + merchandisestockhistory.getMerchandiseItem().getId()));
+                merchandisestockhistory.setMerchandiseItem(existingMerchandiseItem);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Merchandise newMerchandiseItem = merchandiseItemRepository.save(merchandisestockhistory.getMerchandiseItem());
+                merchandisestockhistory.setMerchandiseItem(newMerchandiseItem);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return merchandisestockhistoryRepository.save(merchandisestockhistory);
 }
 
@@ -72,7 +75,6 @@ public class MerchandiseStockHistoryService extends BaseService<MerchandiseStock
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return merchandisestockhistoryRepository.save(existing);
 }
     @Transactional

@@ -57,6 +57,9 @@ public class {{entityName}} extends BaseEntity {
     @Email
     {{~/if}}
     {{~/if}}
+    {{~#if @first}}
+    @Column(unique = true, nullable = false)
+    {{~/if}}
     private {{type}} {{name}};
 {{/each}}
 

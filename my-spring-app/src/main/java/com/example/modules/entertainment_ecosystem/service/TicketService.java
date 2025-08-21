@@ -47,58 +47,77 @@ public class TicketService extends BaseService<Ticket> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (ticket.getUser() != null &&
-            ticket.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                ticket.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            ticket.setUser(existingUser);
+        if (ticket.getUser() != null) {
+            if (ticket.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    ticket.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + ticket.getUser().getId()));
+                ticket.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(ticket.getUser());
+                ticket.setUser(newUser);
+            }
         }
         
-        if (ticket.getEvent() != null &&
-            ticket.getEvent().getId() != null) {
-
-            LiveEvent existingEvent = eventRepository.findById(
-                ticket.getEvent().getId()
-            ).orElseThrow(() -> new RuntimeException("LiveEvent not found"));
-
-            ticket.setEvent(existingEvent);
+        if (ticket.getEvent() != null) {
+            if (ticket.getEvent().getId() != null) {
+                LiveEvent existingEvent = eventRepository.findById(
+                    ticket.getEvent().getId()
+                ).orElseThrow(() -> new RuntimeException("LiveEvent not found with id "
+                    + ticket.getEvent().getId()));
+                ticket.setEvent(existingEvent);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                LiveEvent newEvent = eventRepository.save(ticket.getEvent());
+                ticket.setEvent(newEvent);
+            }
         }
         
-        if (ticket.getStatus() != null &&
-            ticket.getStatus().getId() != null) {
-
-            TicketStatus existingStatus = statusRepository.findById(
-                ticket.getStatus().getId()
-            ).orElseThrow(() -> new RuntimeException("TicketStatus not found"));
-
-            ticket.setStatus(existingStatus);
+        if (ticket.getStatus() != null) {
+            if (ticket.getStatus().getId() != null) {
+                TicketStatus existingStatus = statusRepository.findById(
+                    ticket.getStatus().getId()
+                ).orElseThrow(() -> new RuntimeException("TicketStatus not found with id "
+                    + ticket.getStatus().getId()));
+                ticket.setStatus(existingStatus);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TicketStatus newStatus = statusRepository.save(ticket.getStatus());
+                ticket.setStatus(newStatus);
+            }
         }
         
-        if (ticket.getBooking() != null &&
-            ticket.getBooking().getId() != null) {
-
-            Booking existingBooking = bookingRepository.findById(
-                ticket.getBooking().getId()
-            ).orElseThrow(() -> new RuntimeException("Booking not found"));
-
-            ticket.setBooking(existingBooking);
+        if (ticket.getBooking() != null) {
+            if (ticket.getBooking().getId() != null) {
+                Booking existingBooking = bookingRepository.findById(
+                    ticket.getBooking().getId()
+                ).orElseThrow(() -> new RuntimeException("Booking not found with id "
+                    + ticket.getBooking().getId()));
+                ticket.setBooking(existingBooking);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Booking newBooking = bookingRepository.save(ticket.getBooking());
+                ticket.setBooking(newBooking);
+            }
         }
         
-        if (ticket.getType() != null &&
-            ticket.getType().getId() != null) {
-
-            EventTicketType existingType = typeRepository.findById(
-                ticket.getType().getId()
-            ).orElseThrow(() -> new RuntimeException("EventTicketType not found"));
-
-            ticket.setType(existingType);
+        if (ticket.getType() != null) {
+            if (ticket.getType().getId() != null) {
+                EventTicketType existingType = typeRepository.findById(
+                    ticket.getType().getId()
+                ).orElseThrow(() -> new RuntimeException("EventTicketType not found with id "
+                    + ticket.getType().getId()));
+                ticket.setType(existingType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                EventTicketType newType = typeRepository.save(ticket.getType());
+                ticket.setType(newType);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return ticketRepository.save(ticket);
 }
 
@@ -176,7 +195,6 @@ public class TicketService extends BaseService<Ticket> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return ticketRepository.save(existing);
 }
     @Transactional

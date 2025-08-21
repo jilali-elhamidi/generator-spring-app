@@ -33,10 +33,18 @@ public class UserRoleService extends BaseService<UserRole> {
         if (userrole.getUsers() != null &&
             !userrole.getUsers().isEmpty()) {
 
-            List<UserProfile> attachedUsers = userrole.getUsers().stream()
-            .map(item -> usersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedUsers = new ArrayList<>();
+            for (UserProfile item : userrole.getUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = usersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = usersRepository.save(item);
+                    attachedUsers.add(newItem);
+                }
+            }
 
             userrole.setUsers(attachedUsers);
 
@@ -46,7 +54,6 @@ public class UserRoleService extends BaseService<UserRole> {
         
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return userroleRepository.save(userrole);
 }
 
@@ -80,7 +87,6 @@ public class UserRoleService extends BaseService<UserRole> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return userroleRepository.save(existing);
 }
     @Transactional
@@ -95,7 +101,6 @@ public class UserRoleService extends BaseService<UserRole> {
             for (UserProfile item : new ArrayList<>(entity.getUsers())) {
                 
                 item.getUserRoles().remove(entity); // retire côté inverse
-                
             }
             entity.getUsers().clear(); // puis vide côté courant
         }

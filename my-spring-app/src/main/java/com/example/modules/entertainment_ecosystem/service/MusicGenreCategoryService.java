@@ -49,7 +49,6 @@ public class MusicGenreCategoryService extends BaseService<MusicGenreCategory> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return musicgenrecategoryRepository.save(musicgenrecategory);
 }
 
@@ -82,7 +81,6 @@ public class MusicGenreCategoryService extends BaseService<MusicGenreCategory> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return musicgenrecategoryRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class MusicGenreCategoryService extends BaseService<MusicGenreCategory> {
     // --- Dissocier OneToMany ---
         if (entity.getGenres() != null) {
             for (var child : entity.getGenres()) {
-                
-                child.setCategory(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setCategory(null);
             }
             entity.getGenres().clear();
         }

@@ -98,28 +98,35 @@ public class GameReviewService extends BaseService<GameReview> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (gamereview.getUser() != null &&
-            gamereview.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                gamereview.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            gamereview.setUser(existingUser);
+        if (gamereview.getUser() != null) {
+            if (gamereview.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    gamereview.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + gamereview.getUser().getId()));
+                gamereview.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(gamereview.getUser());
+                gamereview.setUser(newUser);
+            }
         }
         
-        if (gamereview.getGame() != null &&
-            gamereview.getGame().getId() != null) {
-
-            VideoGame existingGame = gameRepository.findById(
-                gamereview.getGame().getId()
-            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-
-            gamereview.setGame(existingGame);
+        if (gamereview.getGame() != null) {
+            if (gamereview.getGame().getId() != null) {
+                VideoGame existingGame = gameRepository.findById(
+                    gamereview.getGame().getId()
+                ).orElseThrow(() -> new RuntimeException("VideoGame not found with id "
+                    + gamereview.getGame().getId()));
+                gamereview.setGame(existingGame);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                VideoGame newGame = gameRepository.save(gamereview.getGame());
+                gamereview.setGame(newGame);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return gamereviewRepository.save(gamereview);
 }
 
@@ -211,7 +218,6 @@ public class GameReviewService extends BaseService<GameReview> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return gamereviewRepository.save(existing);
 }
     @Transactional
@@ -223,27 +229,24 @@ public class GameReviewService extends BaseService<GameReview> {
     // --- Dissocier OneToMany ---
         if (entity.getComments() != null) {
             for (var child : entity.getComments()) {
-                
-                child.setReview(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setReview(null);
             }
             entity.getComments().clear();
         }
         
         if (entity.getUpvotes() != null) {
             for (var child : entity.getUpvotes()) {
-                
-                child.setReview(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setReview(null);
             }
             entity.getUpvotes().clear();
         }
         
         if (entity.getDownvotes() != null) {
             for (var child : entity.getDownvotes()) {
-                
-                child.setReview(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setReview(null);
             }
             entity.getDownvotes().clear();
         }

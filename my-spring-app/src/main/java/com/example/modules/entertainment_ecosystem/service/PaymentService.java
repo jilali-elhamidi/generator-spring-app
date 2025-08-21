@@ -35,30 +35,36 @@ public class PaymentService extends BaseService<Payment> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (payment.getMethod() != null &&
-            payment.getMethod().getId() != null) {
-
-            PaymentMethod existingMethod = methodRepository.findById(
-                payment.getMethod().getId()
-            ).orElseThrow(() -> new RuntimeException("PaymentMethod not found"));
-
-            payment.setMethod(existingMethod);
+        if (payment.getMethod() != null) {
+            if (payment.getMethod().getId() != null) {
+                PaymentMethod existingMethod = methodRepository.findById(
+                    payment.getMethod().getId()
+                ).orElseThrow(() -> new RuntimeException("PaymentMethod not found with id "
+                    + payment.getMethod().getId()));
+                payment.setMethod(existingMethod);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                PaymentMethod newMethod = methodRepository.save(payment.getMethod());
+                payment.setMethod(newMethod);
+            }
         }
         
     // ---------- OneToOne ----------
         if (payment.getBooking() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            payment.setBooking(
-                bookingRepository.findById(payment.getBooking().getId())
-                    .orElseThrow(() -> new RuntimeException("booking not found"))
-            );
-            
+            if (payment.getBooking().getId() != null) {
+                Booking existingBooking = bookingRepository.findById(payment.getBooking().getId())
+                    .orElseThrow(() -> new RuntimeException("Booking not found with id "
+                        + payment.getBooking().getId()));
+                payment.setBooking(existingBooking);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Booking newBooking = bookingRepository.save(payment.getBooking());
+                payment.setBooking(newBooking);
+            }
+
             payment.getBooking().setPayment(payment);
         }
         
-
     return paymentRepository.save(payment);
 }
 
@@ -87,21 +93,16 @@ public class PaymentService extends BaseService<Payment> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (paymentRequest.getBooking() != null &&
-            paymentRequest.getBooking().getId() != null) {
+        if (paymentRequest.getBooking() != null &&paymentRequest.getBooking().getId() != null) {
 
-            Booking booking = bookingRepository.findById(
-                paymentRequest.getBooking().getId()
-            ).orElseThrow(() -> new RuntimeException("Booking not found"));
+        Booking booking = bookingRepository.findById(paymentRequest.getBooking().getId())
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-            existing.setBooking(booking);
-
-            
-            booking.setPayment(existing);
-            
-        }
+        existing.setBooking(booking);
+        booking.setPayment(existing);
         
-
+        }
+    
     return paymentRepository.save(existing);
 }
     @Transactional

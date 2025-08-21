@@ -949,10 +949,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getWatchlistMovies() != null &&
             !userprofile.getWatchlistMovies().isEmpty()) {
 
-            List<Movie> attachedWatchlistMovies = userprofile.getWatchlistMovies().stream()
-            .map(item -> watchlistMoviesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
-            .toList();
+            List<Movie> attachedWatchlistMovies = new ArrayList<>();
+            for (Movie item : userprofile.getWatchlistMovies()) {
+                if (item.getId() != null) {
+                    Movie existingItem = watchlistMoviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId()));
+                    attachedWatchlistMovies.add(existingItem);
+                } else {
+
+                    Movie newItem = watchlistMoviesRepository.save(item);
+                    attachedWatchlistMovies.add(newItem);
+                }
+            }
 
             userprofile.setWatchlistMovies(attachedWatchlistMovies);
 
@@ -963,10 +971,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getFavoriteArtists() != null &&
             !userprofile.getFavoriteArtists().isEmpty()) {
 
-            List<Artist> attachedFavoriteArtists = userprofile.getFavoriteArtists().stream()
-            .map(item -> favoriteArtistsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId())))
-            .toList();
+            List<Artist> attachedFavoriteArtists = new ArrayList<>();
+            for (Artist item : userprofile.getFavoriteArtists()) {
+                if (item.getId() != null) {
+                    Artist existingItem = favoriteArtistsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Artist not found with id " + item.getId()));
+                    attachedFavoriteArtists.add(existingItem);
+                } else {
+
+                    Artist newItem = favoriteArtistsRepository.save(item);
+                    attachedFavoriteArtists.add(newItem);
+                }
+            }
 
             userprofile.setFavoriteArtists(attachedFavoriteArtists);
 
@@ -977,10 +993,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getFollowedUsers() != null &&
             !userprofile.getFollowedUsers().isEmpty()) {
 
-            List<UserProfile> attachedFollowedUsers = userprofile.getFollowedUsers().stream()
-            .map(item -> followedUsersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedFollowedUsers = new ArrayList<>();
+            for (UserProfile item : userprofile.getFollowedUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = followedUsersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedFollowedUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = followedUsersRepository.save(item);
+                    attachedFollowedUsers.add(newItem);
+                }
+            }
 
             userprofile.setFollowedUsers(attachedFollowedUsers);
 
@@ -991,10 +1015,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getFollowingUsers() != null &&
             !userprofile.getFollowingUsers().isEmpty()) {
 
-            List<UserProfile> attachedFollowingUsers = userprofile.getFollowingUsers().stream()
-            .map(item -> followingUsersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedFollowingUsers = new ArrayList<>();
+            for (UserProfile item : userprofile.getFollowingUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = followingUsersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedFollowingUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = followingUsersRepository.save(item);
+                    attachedFollowingUsers.add(newItem);
+                }
+            }
 
             userprofile.setFollowingUsers(attachedFollowingUsers);
 
@@ -1005,10 +1037,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getFavoriteGenres() != null &&
             !userprofile.getFavoriteGenres().isEmpty()) {
 
-            List<Genre> attachedFavoriteGenres = userprofile.getFavoriteGenres().stream()
-            .map(item -> favoriteGenresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
-            .toList();
+            List<Genre> attachedFavoriteGenres = new ArrayList<>();
+            for (Genre item : userprofile.getFavoriteGenres()) {
+                if (item.getId() != null) {
+                    Genre existingItem = favoriteGenresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId()));
+                    attachedFavoriteGenres.add(existingItem);
+                } else {
+
+                    Genre newItem = favoriteGenresRepository.save(item);
+                    attachedFavoriteGenres.add(newItem);
+                }
+            }
 
             userprofile.setFavoriteGenres(attachedFavoriteGenres);
 
@@ -1019,10 +1059,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getWatchedEpisodes() != null &&
             !userprofile.getWatchedEpisodes().isEmpty()) {
 
-            List<Episode> attachedWatchedEpisodes = userprofile.getWatchedEpisodes().stream()
-            .map(item -> watchedEpisodesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Episode not found with id " + item.getId())))
-            .toList();
+            List<Episode> attachedWatchedEpisodes = new ArrayList<>();
+            for (Episode item : userprofile.getWatchedEpisodes()) {
+                if (item.getId() != null) {
+                    Episode existingItem = watchedEpisodesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Episode not found with id " + item.getId()));
+                    attachedWatchedEpisodes.add(existingItem);
+                } else {
+
+                    Episode newItem = watchedEpisodesRepository.save(item);
+                    attachedWatchedEpisodes.add(newItem);
+                }
+            }
 
             userprofile.setWatchedEpisodes(attachedWatchedEpisodes);
 
@@ -1033,10 +1081,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getPlayedGames() != null &&
             !userprofile.getPlayedGames().isEmpty()) {
 
-            List<VideoGame> attachedPlayedGames = userprofile.getPlayedGames().stream()
-            .map(item -> playedGamesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId())))
-            .toList();
+            List<VideoGame> attachedPlayedGames = new ArrayList<>();
+            for (VideoGame item : userprofile.getPlayedGames()) {
+                if (item.getId() != null) {
+                    VideoGame existingItem = playedGamesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId()));
+                    attachedPlayedGames.add(existingItem);
+                } else {
+
+                    VideoGame newItem = playedGamesRepository.save(item);
+                    attachedPlayedGames.add(newItem);
+                }
+            }
 
             userprofile.setPlayedGames(attachedPlayedGames);
 
@@ -1047,10 +1103,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getAttendedOnlineEvents() != null &&
             !userprofile.getAttendedOnlineEvents().isEmpty()) {
 
-            List<OnlineEvent> attachedAttendedOnlineEvents = userprofile.getAttendedOnlineEvents().stream()
-            .map(item -> attendedOnlineEventsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("OnlineEvent not found with id " + item.getId())))
-            .toList();
+            List<OnlineEvent> attachedAttendedOnlineEvents = new ArrayList<>();
+            for (OnlineEvent item : userprofile.getAttendedOnlineEvents()) {
+                if (item.getId() != null) {
+                    OnlineEvent existingItem = attendedOnlineEventsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("OnlineEvent not found with id " + item.getId()));
+                    attachedAttendedOnlineEvents.add(existingItem);
+                } else {
+
+                    OnlineEvent newItem = attendedOnlineEventsRepository.save(item);
+                    attachedAttendedOnlineEvents.add(newItem);
+                }
+            }
 
             userprofile.setAttendedOnlineEvents(attachedAttendedOnlineEvents);
 
@@ -1061,10 +1125,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getOwnedMerchandise() != null &&
             !userprofile.getOwnedMerchandise().isEmpty()) {
 
-            List<Merchandise> attachedOwnedMerchandise = userprofile.getOwnedMerchandise().stream()
-            .map(item -> ownedMerchandiseRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Merchandise not found with id " + item.getId())))
-            .toList();
+            List<Merchandise> attachedOwnedMerchandise = new ArrayList<>();
+            for (Merchandise item : userprofile.getOwnedMerchandise()) {
+                if (item.getId() != null) {
+                    Merchandise existingItem = ownedMerchandiseRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Merchandise not found with id " + item.getId()));
+                    attachedOwnedMerchandise.add(existingItem);
+                } else {
+
+                    Merchandise newItem = ownedMerchandiseRepository.save(item);
+                    attachedOwnedMerchandise.add(newItem);
+                }
+            }
 
             userprofile.setOwnedMerchandise(attachedOwnedMerchandise);
 
@@ -1075,10 +1147,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getLibraryPodcasts() != null &&
             !userprofile.getLibraryPodcasts().isEmpty()) {
 
-            List<Podcast> attachedLibraryPodcasts = userprofile.getLibraryPodcasts().stream()
-            .map(item -> libraryPodcastsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId())))
-            .toList();
+            List<Podcast> attachedLibraryPodcasts = new ArrayList<>();
+            for (Podcast item : userprofile.getLibraryPodcasts()) {
+                if (item.getId() != null) {
+                    Podcast existingItem = libraryPodcastsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId()));
+                    attachedLibraryPodcasts.add(existingItem);
+                } else {
+
+                    Podcast newItem = libraryPodcastsRepository.save(item);
+                    attachedLibraryPodcasts.add(newItem);
+                }
+            }
 
             userprofile.setLibraryPodcasts(attachedLibraryPodcasts);
 
@@ -1089,10 +1169,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getListenedMusic() != null &&
             !userprofile.getListenedMusic().isEmpty()) {
 
-            List<MusicTrack> attachedListenedMusic = userprofile.getListenedMusic().stream()
-            .map(item -> listenedMusicRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("MusicTrack not found with id " + item.getId())))
-            .toList();
+            List<MusicTrack> attachedListenedMusic = new ArrayList<>();
+            for (MusicTrack item : userprofile.getListenedMusic()) {
+                if (item.getId() != null) {
+                    MusicTrack existingItem = listenedMusicRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MusicTrack not found with id " + item.getId()));
+                    attachedListenedMusic.add(existingItem);
+                } else {
+
+                    MusicTrack newItem = listenedMusicRepository.save(item);
+                    attachedListenedMusic.add(newItem);
+                }
+            }
 
             userprofile.setListenedMusic(attachedListenedMusic);
 
@@ -1103,10 +1191,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getUserRoles() != null &&
             !userprofile.getUserRoles().isEmpty()) {
 
-            List<UserRole> attachedUserRoles = userprofile.getUserRoles().stream()
-            .map(item -> userRolesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserRole not found with id " + item.getId())))
-            .toList();
+            List<UserRole> attachedUserRoles = new ArrayList<>();
+            for (UserRole item : userprofile.getUserRoles()) {
+                if (item.getId() != null) {
+                    UserRole existingItem = userRolesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserRole not found with id " + item.getId()));
+                    attachedUserRoles.add(existingItem);
+                } else {
+
+                    UserRole newItem = userRolesRepository.save(item);
+                    attachedUserRoles.add(newItem);
+                }
+            }
 
             userprofile.setUserRoles(attachedUserRoles);
 
@@ -1117,10 +1213,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getEnabledFeatureFlags() != null &&
             !userprofile.getEnabledFeatureFlags().isEmpty()) {
 
-            List<FeatureFlag> attachedEnabledFeatureFlags = userprofile.getEnabledFeatureFlags().stream()
-            .map(item -> enabledFeatureFlagsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("FeatureFlag not found with id " + item.getId())))
-            .toList();
+            List<FeatureFlag> attachedEnabledFeatureFlags = new ArrayList<>();
+            for (FeatureFlag item : userprofile.getEnabledFeatureFlags()) {
+                if (item.getId() != null) {
+                    FeatureFlag existingItem = enabledFeatureFlagsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("FeatureFlag not found with id " + item.getId()));
+                    attachedEnabledFeatureFlags.add(existingItem);
+                } else {
+
+                    FeatureFlag newItem = enabledFeatureFlagsRepository.save(item);
+                    attachedEnabledFeatureFlags.add(newItem);
+                }
+            }
 
             userprofile.setEnabledFeatureFlags(attachedEnabledFeatureFlags);
 
@@ -1131,10 +1235,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getMessageThreads() != null &&
             !userprofile.getMessageThreads().isEmpty()) {
 
-            List<MessageThread> attachedMessageThreads = userprofile.getMessageThreads().stream()
-            .map(item -> messageThreadsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("MessageThread not found with id " + item.getId())))
-            .toList();
+            List<MessageThread> attachedMessageThreads = new ArrayList<>();
+            for (MessageThread item : userprofile.getMessageThreads()) {
+                if (item.getId() != null) {
+                    MessageThread existingItem = messageThreadsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MessageThread not found with id " + item.getId()));
+                    attachedMessageThreads.add(existingItem);
+                } else {
+
+                    MessageThread newItem = messageThreadsRepository.save(item);
+                    attachedMessageThreads.add(newItem);
+                }
+            }
 
             userprofile.setMessageThreads(attachedMessageThreads);
 
@@ -1145,10 +1257,18 @@ public class UserProfileService extends BaseService<UserProfile> {
         if (userprofile.getBadges() != null &&
             !userprofile.getBadges().isEmpty()) {
 
-            List<UserBadge> attachedBadges = userprofile.getBadges().stream()
-            .map(item -> badgesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserBadge not found with id " + item.getId())))
-            .toList();
+            List<UserBadge> attachedBadges = new ArrayList<>();
+            for (UserBadge item : userprofile.getBadges()) {
+                if (item.getId() != null) {
+                    UserBadge existingItem = badgesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserBadge not found with id " + item.getId()));
+                    attachedBadges.add(existingItem);
+                } else {
+
+                    UserBadge newItem = badgesRepository.save(item);
+                    attachedBadges.add(newItem);
+                }
+            }
 
             userprofile.setBadges(attachedBadges);
 
@@ -1157,64 +1277,80 @@ public class UserProfileService extends BaseService<UserProfile> {
         }
         
     // ---------- ManyToOne ----------
-        if (userprofile.getUserLevel() != null &&
-            userprofile.getUserLevel().getId() != null) {
-
-            UserLevel existingUserLevel = userLevelRepository.findById(
-                userprofile.getUserLevel().getId()
-            ).orElseThrow(() -> new RuntimeException("UserLevel not found"));
-
-            userprofile.setUserLevel(existingUserLevel);
+        if (userprofile.getUserLevel() != null) {
+            if (userprofile.getUserLevel().getId() != null) {
+                UserLevel existingUserLevel = userLevelRepository.findById(
+                    userprofile.getUserLevel().getId()
+                ).orElseThrow(() -> new RuntimeException("UserLevel not found with id "
+                    + userprofile.getUserLevel().getId()));
+                userprofile.setUserLevel(existingUserLevel);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserLevel newUserLevel = userLevelRepository.save(userprofile.getUserLevel());
+                userprofile.setUserLevel(newUserLevel);
+            }
         }
         
-        if (userprofile.getCountry() != null &&
-            userprofile.getCountry().getId() != null) {
-
-            Country existingCountry = countryRepository.findById(
-                userprofile.getCountry().getId()
-            ).orElseThrow(() -> new RuntimeException("Country not found"));
-
-            userprofile.setCountry(existingCountry);
+        if (userprofile.getCountry() != null) {
+            if (userprofile.getCountry().getId() != null) {
+                Country existingCountry = countryRepository.findById(
+                    userprofile.getCountry().getId()
+                ).orElseThrow(() -> new RuntimeException("Country not found with id "
+                    + userprofile.getCountry().getId()));
+                userprofile.setCountry(existingCountry);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Country newCountry = countryRepository.save(userprofile.getCountry());
+                userprofile.setCountry(newCountry);
+            }
         }
         
     // ---------- OneToOne ----------
         if (userprofile.getWallet() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            userprofile.setWallet(
-                walletRepository.findById(userprofile.getWallet().getId())
-                    .orElseThrow(() -> new RuntimeException("wallet not found"))
-            );
-            
+            if (userprofile.getWallet().getId() != null) {
+                UserWallet existingWallet = walletRepository.findById(userprofile.getWallet().getId())
+                    .orElseThrow(() -> new RuntimeException("UserWallet not found with id "
+                        + userprofile.getWallet().getId()));
+                userprofile.setWallet(existingWallet);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                UserWallet newWallet = walletRepository.save(userprofile.getWallet());
+                userprofile.setWallet(newWallet);
+            }
+
             userprofile.getWallet().setUser(userprofile);
         }
         
         if (userprofile.getLoyaltyProgram() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            userprofile.setLoyaltyProgram(
-                loyaltyProgramRepository.findById(userprofile.getLoyaltyProgram().getId())
-                    .orElseThrow(() -> new RuntimeException("loyaltyProgram not found"))
-            );
-            
+            if (userprofile.getLoyaltyProgram().getId() != null) {
+                UserLoyaltyProgram existingLoyaltyProgram = loyaltyProgramRepository.findById(userprofile.getLoyaltyProgram().getId())
+                    .orElseThrow(() -> new RuntimeException("UserLoyaltyProgram not found with id "
+                        + userprofile.getLoyaltyProgram().getId()));
+                userprofile.setLoyaltyProgram(existingLoyaltyProgram);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                UserLoyaltyProgram newLoyaltyProgram = loyaltyProgramRepository.save(userprofile.getLoyaltyProgram());
+                userprofile.setLoyaltyProgram(newLoyaltyProgram);
+            }
+
             userprofile.getLoyaltyProgram().setUser(userprofile);
         }
         
         if (userprofile.getModerator() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            userprofile.setModerator(
-                moderatorRepository.findById(userprofile.getModerator().getId())
-                    .orElseThrow(() -> new RuntimeException("moderator not found"))
-            );
-            
+            if (userprofile.getModerator().getId() != null) {
+                ForumModerator existingModerator = moderatorRepository.findById(userprofile.getModerator().getId())
+                    .orElseThrow(() -> new RuntimeException("ForumModerator not found with id "
+                        + userprofile.getModerator().getId()));
+                userprofile.setModerator(existingModerator);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                ForumModerator newModerator = moderatorRepository.save(userprofile.getModerator());
+                userprofile.setModerator(newModerator);
+            }
+
             userprofile.getModerator().setUser(userprofile);
         }
         
-
     return userprofileRepository.save(userprofile);
 }
 
@@ -2211,49 +2347,35 @@ public class UserProfileService extends BaseService<UserProfile> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (userprofileRequest.getWallet() != null &&
-            userprofileRequest.getWallet().getId() != null) {
+        if (userprofileRequest.getWallet() != null &&userprofileRequest.getWallet().getId() != null) {
 
-            UserWallet wallet = walletRepository.findById(
-                userprofileRequest.getWallet().getId()
-            ).orElseThrow(() -> new RuntimeException("UserWallet not found"));
+        UserWallet wallet = walletRepository.findById(userprofileRequest.getWallet().getId())
+                .orElseThrow(() -> new RuntimeException("UserWallet not found"));
 
-            existing.setWallet(wallet);
-
-            
-            wallet.setUser(existing);
-            
+        existing.setWallet(wallet);
+        wallet.setUser(existing);
         }
+    
+        if (userprofileRequest.getLoyaltyProgram() != null &&userprofileRequest.getLoyaltyProgram().getId() != null) {
+
+        UserLoyaltyProgram loyaltyProgram = loyaltyProgramRepository.findById(userprofileRequest.getLoyaltyProgram().getId())
+                .orElseThrow(() -> new RuntimeException("UserLoyaltyProgram not found"));
+
+        existing.setLoyaltyProgram(loyaltyProgram);
+        loyaltyProgram.setUser(existing);
         
-            if (userprofileRequest.getLoyaltyProgram() != null &&
-            userprofileRequest.getLoyaltyProgram().getId() != null) {
-
-            UserLoyaltyProgram loyaltyProgram = loyaltyProgramRepository.findById(
-                userprofileRequest.getLoyaltyProgram().getId()
-            ).orElseThrow(() -> new RuntimeException("UserLoyaltyProgram not found"));
-
-            existing.setLoyaltyProgram(loyaltyProgram);
-
-            
-            loyaltyProgram.setUser(existing);
-            
         }
+    
+        if (userprofileRequest.getModerator() != null &&userprofileRequest.getModerator().getId() != null) {
+
+        ForumModerator moderator = moderatorRepository.findById(userprofileRequest.getModerator().getId())
+                .orElseThrow(() -> new RuntimeException("ForumModerator not found"));
+
+        existing.setModerator(moderator);
+        moderator.setUser(existing);
         
-            if (userprofileRequest.getModerator() != null &&
-            userprofileRequest.getModerator().getId() != null) {
-
-            ForumModerator moderator = moderatorRepository.findById(
-                userprofileRequest.getModerator().getId()
-            ).orElseThrow(() -> new RuntimeException("ForumModerator not found"));
-
-            existing.setModerator(moderator);
-
-            
-            moderator.setUser(existing);
-            
         }
-        
-
+    
     return userprofileRepository.save(existing);
 }
     @Transactional
@@ -2265,360 +2387,320 @@ public class UserProfileService extends BaseService<UserProfile> {
     // --- Dissocier OneToMany ---
         if (entity.getReviews() != null) {
             for (var child : entity.getReviews()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getReviews().clear();
         }
         
         if (entity.getSubscriptions() != null) {
             for (var child : entity.getSubscriptions()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getSubscriptions().clear();
         }
         
         if (entity.getForumThreads() != null) {
             for (var child : entity.getForumThreads()) {
-                
-                child.setAuthor(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAuthor(null);
             }
             entity.getForumThreads().clear();
         }
         
         if (entity.getForumPosts() != null) {
             for (var child : entity.getForumPosts()) {
-                
-                child.setAuthor(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAuthor(null);
             }
             entity.getForumPosts().clear();
         }
         
         if (entity.getAchievements() != null) {
             for (var child : entity.getAchievements()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getAchievements().clear();
         }
         
         if (entity.getHostedOnlineEvents() != null) {
             for (var child : entity.getHostedOnlineEvents()) {
-                
-                child.setHost(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setHost(null);
             }
             entity.getHostedOnlineEvents().clear();
         }
         
         if (entity.getPlaylists() != null) {
             for (var child : entity.getPlaylists()) {
-                
-                child.setOwner(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setOwner(null);
             }
             entity.getPlaylists().clear();
         }
         
         if (entity.getDigitalPurchases() != null) {
             for (var child : entity.getDigitalPurchases()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getDigitalPurchases().clear();
         }
         
         if (entity.getGameSessions() != null) {
             for (var child : entity.getGameSessions()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getGameSessions().clear();
         }
         
         if (entity.getGameReviewComments() != null) {
             for (var child : entity.getGameReviewComments()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getGameReviewComments().clear();
         }
         
         if (entity.getUserPlaylists() != null) {
             for (var child : entity.getUserPlaylists()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getUserPlaylists().clear();
         }
         
         if (entity.getUserPlaylistItems() != null) {
             for (var child : entity.getUserPlaylistItems()) {
-                
-                child.setAddedBy(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAddedBy(null);
             }
             entity.getUserPlaylistItems().clear();
         }
         
         if (entity.getGivenRatings() != null) {
             for (var child : entity.getGivenRatings()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getGivenRatings().clear();
         }
         
         if (entity.getLikedReviews() != null) {
             for (var child : entity.getLikedReviews()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getLikedReviews().clear();
         }
         
         if (entity.getActivityLogs() != null) {
             for (var child : entity.getActivityLogs()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getActivityLogs().clear();
         }
         
         if (entity.getSettings() != null) {
             for (var child : entity.getSettings()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getSettings().clear();
         }
         
         if (entity.getFollowers() != null) {
             for (var child : entity.getFollowers()) {
-                
-                child.setFollowed(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setFollowed(null);
             }
             entity.getFollowers().clear();
         }
         
         if (entity.getFollowing() != null) {
             for (var child : entity.getFollowing()) {
-                
-                child.setFollower(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setFollower(null);
             }
             entity.getFollowing().clear();
         }
         
         if (entity.getUserAchievements() != null) {
             for (var child : entity.getUserAchievements()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getUserAchievements().clear();
         }
         
         if (entity.getNotifications() != null) {
             for (var child : entity.getNotifications()) {
-                
-                child.setRecipient(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setRecipient(null);
             }
             entity.getNotifications().clear();
         }
         
         if (entity.getMerchandiseReviews() != null) {
             for (var child : entity.getMerchandiseReviews()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getMerchandiseReviews().clear();
         }
         
         if (entity.getPreferences() != null) {
             for (var child : entity.getPreferences()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getPreferences().clear();
         }
         
         if (entity.getMerchandiseSales() != null) {
             for (var child : entity.getMerchandiseSales()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getMerchandiseSales().clear();
         }
         
         if (entity.getGamePlaySessions() != null) {
             for (var child : entity.getGamePlaySessions()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getGamePlaySessions().clear();
         }
         
         if (entity.getGameReviewUpvotes() != null) {
             for (var child : entity.getGameReviewUpvotes()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getGameReviewUpvotes().clear();
         }
         
         if (entity.getGameReviewDownvotes() != null) {
             for (var child : entity.getGameReviewDownvotes()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getGameReviewDownvotes().clear();
         }
         
         if (entity.getSentMessages() != null) {
             for (var child : entity.getSentMessages()) {
-                
-                child.setSender(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setSender(null);
             }
             entity.getSentMessages().clear();
         }
         
         if (entity.getReceivedMessages() != null) {
             for (var child : entity.getReceivedMessages()) {
-                
-                child.setReceiver(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setReceiver(null);
             }
             entity.getReceivedMessages().clear();
         }
         
         if (entity.getHostedLiveStreams() != null) {
             for (var child : entity.getHostedLiveStreams()) {
-                
-                child.setHost(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setHost(null);
             }
             entity.getHostedLiveStreams().clear();
         }
         
         if (entity.getWatchedLiveStreams() != null) {
             for (var child : entity.getWatchedLiveStreams()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getWatchedLiveStreams().clear();
         }
         
         if (entity.getGivenUserRatings() != null) {
             for (var child : entity.getGivenUserRatings()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getGivenUserRatings().clear();
         }
         
         if (entity.getReceivedUserRatings() != null) {
             for (var child : entity.getReceivedUserRatings()) {
-                
-                child.setRatedUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setRatedUser(null);
             }
             entity.getReceivedUserRatings().clear();
         }
         
         if (entity.getConnections() != null) {
             for (var child : entity.getConnections()) {
-                
-                child.setUser1(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser1(null);
             }
             entity.getConnections().clear();
         }
         
         if (entity.getConnectedBy() != null) {
             for (var child : entity.getConnectedBy()) {
-                
-                child.setUser2(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser2(null);
             }
             entity.getConnectedBy().clear();
         }
         
         if (entity.getBlockedUsers() != null) {
             for (var child : entity.getBlockedUsers()) {
-                
-                child.setBlocker(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setBlocker(null);
             }
             entity.getBlockedUsers().clear();
         }
         
         if (entity.getBlockedByUsers() != null) {
             for (var child : entity.getBlockedByUsers()) {
-                
-                child.setBlocked(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setBlocked(null);
             }
             entity.getBlockedByUsers().clear();
         }
         
         if (entity.getReportedContent() != null) {
             for (var child : entity.getReportedContent()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getReportedContent().clear();
         }
         
         if (entity.getReviewReplies() != null) {
             for (var child : entity.getReviewReplies()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getReviewReplies().clear();
         }
         
         if (entity.getEpisodeReviews() != null) {
             for (var child : entity.getEpisodeReviews()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getEpisodeReviews().clear();
         }
         
         if (entity.getGameTransactions() != null) {
             for (var child : entity.getGameTransactions()) {
-                
-                child.setUser(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setUser(null);
             }
             entity.getGameTransactions().clear();
         }
@@ -2628,7 +2710,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (Movie item : new ArrayList<>(entity.getWatchlistMovies())) {
                 
                 item.getWatchlistUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getWatchlistMovies().clear(); // puis vide côté courant
         }
@@ -2637,7 +2718,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (Artist item : new ArrayList<>(entity.getFavoriteArtists())) {
                 
                 item.getFavoriteArtists().remove(entity); // retire côté inverse
-                
             }
             entity.getFavoriteArtists().clear(); // puis vide côté courant
         }
@@ -2646,7 +2726,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (UserProfile item : new ArrayList<>(entity.getFollowedUsers())) {
                 
                 item.getFollowingUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getFollowedUsers().clear(); // puis vide côté courant
         }
@@ -2655,7 +2734,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (UserProfile item : new ArrayList<>(entity.getFollowingUsers())) {
                 
                 item.getFollowedUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getFollowingUsers().clear(); // puis vide côté courant
         }
@@ -2664,7 +2742,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (Genre item : new ArrayList<>(entity.getFavoriteGenres())) {
                 
                 item.getFavoriteUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getFavoriteGenres().clear(); // puis vide côté courant
         }
@@ -2673,7 +2750,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (Episode item : new ArrayList<>(entity.getWatchedEpisodes())) {
                 
                 item.getWatchedByUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getWatchedEpisodes().clear(); // puis vide côté courant
         }
@@ -2682,7 +2758,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (VideoGame item : new ArrayList<>(entity.getPlayedGames())) {
                 
                 item.getPlayedBy().remove(entity); // retire côté inverse
-                
             }
             entity.getPlayedGames().clear(); // puis vide côté courant
         }
@@ -2691,7 +2766,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (OnlineEvent item : new ArrayList<>(entity.getAttendedOnlineEvents())) {
                 
                 item.getAttendees().remove(entity); // retire côté inverse
-                
             }
             entity.getAttendedOnlineEvents().clear(); // puis vide côté courant
         }
@@ -2700,7 +2774,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (Merchandise item : new ArrayList<>(entity.getOwnedMerchandise())) {
                 
                 item.getOwnedByUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getOwnedMerchandise().clear(); // puis vide côté courant
         }
@@ -2709,7 +2782,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (Podcast item : new ArrayList<>(entity.getLibraryPodcasts())) {
                 
                 item.getListeners().remove(entity); // retire côté inverse
-                
             }
             entity.getLibraryPodcasts().clear(); // puis vide côté courant
         }
@@ -2718,7 +2790,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (MusicTrack item : new ArrayList<>(entity.getListenedMusic())) {
                 
                 item.getListenedByUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getListenedMusic().clear(); // puis vide côté courant
         }
@@ -2727,7 +2798,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (UserRole item : new ArrayList<>(entity.getUserRoles())) {
                 
                 item.getUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getUserRoles().clear(); // puis vide côté courant
         }
@@ -2736,7 +2806,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (FeatureFlag item : new ArrayList<>(entity.getEnabledFeatureFlags())) {
                 
                 item.getEnabledForUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getEnabledFeatureFlags().clear(); // puis vide côté courant
         }
@@ -2745,7 +2814,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (MessageThread item : new ArrayList<>(entity.getMessageThreads())) {
                 
                 item.getParticipants().remove(entity); // retire côté inverse
-                
             }
             entity.getMessageThreads().clear(); // puis vide côté courant
         }
@@ -2754,7 +2822,6 @@ public class UserProfileService extends BaseService<UserProfile> {
             for (UserBadge item : new ArrayList<>(entity.getBadges())) {
                 
                 item.getUsers().remove(entity); // retire côté inverse
-                
             }
             entity.getBadges().clear(); // puis vide côté courant
         }

@@ -96,7 +96,6 @@ public class PublisherService extends BaseService<Publisher> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return publisherRepository.save(publisher);
 }
 
@@ -181,7 +180,6 @@ public class PublisherService extends BaseService<Publisher> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return publisherRepository.save(existing);
 }
     @Transactional
@@ -193,36 +191,32 @@ public class PublisherService extends BaseService<Publisher> {
     // --- Dissocier OneToMany ---
         if (entity.getBooks() != null) {
             for (var child : entity.getBooks()) {
-                
-                child.setPublisher(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPublisher(null);
             }
             entity.getBooks().clear();
         }
         
         if (entity.getPodcasts() != null) {
             for (var child : entity.getPodcasts()) {
-                
-                child.setPublisher(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPublisher(null);
             }
             entity.getPodcasts().clear();
         }
         
         if (entity.getVideoGames() != null) {
             for (var child : entity.getVideoGames()) {
-                
-                child.setPublisher(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPublisher(null);
             }
             entity.getVideoGames().clear();
         }
         
         if (entity.getAudiobooks() != null) {
             for (var child : entity.getAudiobooks()) {
-                
-                child.setPublisher(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setPublisher(null);
             }
             entity.getAudiobooks().clear();
         }

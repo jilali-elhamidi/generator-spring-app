@@ -31,18 +31,21 @@ public class AudiobookChapterService extends BaseService<AudiobookChapter> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (audiobookchapter.getAudiobook() != null &&
-            audiobookchapter.getAudiobook().getId() != null) {
-
-            Audiobook existingAudiobook = audiobookRepository.findById(
-                audiobookchapter.getAudiobook().getId()
-            ).orElseThrow(() -> new RuntimeException("Audiobook not found"));
-
-            audiobookchapter.setAudiobook(existingAudiobook);
+        if (audiobookchapter.getAudiobook() != null) {
+            if (audiobookchapter.getAudiobook().getId() != null) {
+                Audiobook existingAudiobook = audiobookRepository.findById(
+                    audiobookchapter.getAudiobook().getId()
+                ).orElseThrow(() -> new RuntimeException("Audiobook not found with id "
+                    + audiobookchapter.getAudiobook().getId()));
+                audiobookchapter.setAudiobook(existingAudiobook);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Audiobook newAudiobook = audiobookRepository.save(audiobookchapter.getAudiobook());
+                audiobookchapter.setAudiobook(newAudiobook);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return audiobookchapterRepository.save(audiobookchapter);
 }
 
@@ -72,7 +75,6 @@ public class AudiobookChapterService extends BaseService<AudiobookChapter> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return audiobookchapterRepository.save(existing);
 }
     @Transactional

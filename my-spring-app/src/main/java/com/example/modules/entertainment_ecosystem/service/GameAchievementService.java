@@ -52,18 +52,21 @@ public class GameAchievementService extends BaseService<GameAchievement> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (gameachievement.getGame() != null &&
-            gameachievement.getGame().getId() != null) {
-
-            VideoGame existingGame = gameRepository.findById(
-                gameachievement.getGame().getId()
-            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-
-            gameachievement.setGame(existingGame);
+        if (gameachievement.getGame() != null) {
+            if (gameachievement.getGame().getId() != null) {
+                VideoGame existingGame = gameRepository.findById(
+                    gameachievement.getGame().getId()
+                ).orElseThrow(() -> new RuntimeException("VideoGame not found with id "
+                    + gameachievement.getGame().getId()));
+                gameachievement.setGame(existingGame);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                VideoGame newGame = gameRepository.save(gameachievement.getGame());
+                gameachievement.setGame(newGame);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return gameachievementRepository.save(gameachievement);
 }
 
@@ -110,7 +113,6 @@ public class GameAchievementService extends BaseService<GameAchievement> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return gameachievementRepository.save(existing);
 }
     @Transactional
@@ -122,9 +124,8 @@ public class GameAchievementService extends BaseService<GameAchievement> {
     // --- Dissocier OneToMany ---
         if (entity.getUserAchievements() != null) {
             for (var child : entity.getUserAchievements()) {
-                
-                child.setAchievement(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAchievement(null);
             }
             entity.getUserAchievements().clear();
         }

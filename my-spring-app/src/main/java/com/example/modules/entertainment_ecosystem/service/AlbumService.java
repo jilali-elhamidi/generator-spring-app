@@ -62,10 +62,18 @@ public class AlbumService extends BaseService<Album> {
         if (album.getGenres() != null &&
             !album.getGenres().isEmpty()) {
 
-            List<Genre> attachedGenres = album.getGenres().stream()
-            .map(item -> genresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId())))
-            .toList();
+            List<Genre> attachedGenres = new ArrayList<>();
+            for (Genre item : album.getGenres()) {
+                if (item.getId() != null) {
+                    Genre existingItem = genresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Genre not found with id " + item.getId()));
+                    attachedGenres.add(existingItem);
+                } else {
+
+                    Genre newItem = genresRepository.save(item);
+                    attachedGenres.add(newItem);
+                }
+            }
 
             album.setGenres(attachedGenres);
 
@@ -74,28 +82,35 @@ public class AlbumService extends BaseService<Album> {
         }
         
     // ---------- ManyToOne ----------
-        if (album.getArtist() != null &&
-            album.getArtist().getId() != null) {
-
-            Artist existingArtist = artistRepository.findById(
-                album.getArtist().getId()
-            ).orElseThrow(() -> new RuntimeException("Artist not found"));
-
-            album.setArtist(existingArtist);
+        if (album.getArtist() != null) {
+            if (album.getArtist().getId() != null) {
+                Artist existingArtist = artistRepository.findById(
+                    album.getArtist().getId()
+                ).orElseThrow(() -> new RuntimeException("Artist not found with id "
+                    + album.getArtist().getId()));
+                album.setArtist(existingArtist);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Artist newArtist = artistRepository.save(album.getArtist());
+                album.setArtist(newArtist);
+            }
         }
         
-        if (album.getMusicLabel() != null &&
-            album.getMusicLabel().getId() != null) {
-
-            MusicLabel existingMusicLabel = musicLabelRepository.findById(
-                album.getMusicLabel().getId()
-            ).orElseThrow(() -> new RuntimeException("MusicLabel not found"));
-
-            album.setMusicLabel(existingMusicLabel);
+        if (album.getMusicLabel() != null) {
+            if (album.getMusicLabel().getId() != null) {
+                MusicLabel existingMusicLabel = musicLabelRepository.findById(
+                    album.getMusicLabel().getId()
+                ).orElseThrow(() -> new RuntimeException("MusicLabel not found with id "
+                    + album.getMusicLabel().getId()));
+                album.setMusicLabel(existingMusicLabel);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MusicLabel newMusicLabel = musicLabelRepository.save(album.getMusicLabel());
+                album.setMusicLabel(newMusicLabel);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return albumRepository.save(album);
 }
 
@@ -171,7 +186,6 @@ public class AlbumService extends BaseService<Album> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return albumRepository.save(existing);
 }
     @Transactional
@@ -183,9 +197,8 @@ public class AlbumService extends BaseService<Album> {
     // --- Dissocier OneToMany ---
         if (entity.getTracks() != null) {
             for (var child : entity.getTracks()) {
-                
-                child.setAlbum(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAlbum(null);
             }
             entity.getTracks().clear();
         }
@@ -195,7 +208,6 @@ public class AlbumService extends BaseService<Album> {
             for (Genre item : new ArrayList<>(entity.getGenres())) {
                 
                 item.getAlbums().remove(entity); // retire côté inverse
-                
             }
             entity.getGenres().clear(); // puis vide côté courant
         }

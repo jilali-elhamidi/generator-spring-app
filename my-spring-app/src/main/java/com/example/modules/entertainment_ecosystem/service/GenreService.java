@@ -65,10 +65,18 @@ public class GenreService extends BaseService<Genre> {
         if (genre.getMovies() != null &&
             !genre.getMovies().isEmpty()) {
 
-            List<Movie> attachedMovies = genre.getMovies().stream()
-            .map(item -> moviesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
-            .toList();
+            List<Movie> attachedMovies = new ArrayList<>();
+            for (Movie item : genre.getMovies()) {
+                if (item.getId() != null) {
+                    Movie existingItem = moviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId()));
+                    attachedMovies.add(existingItem);
+                } else {
+
+                    Movie newItem = moviesRepository.save(item);
+                    attachedMovies.add(newItem);
+                }
+            }
 
             genre.setMovies(attachedMovies);
 
@@ -79,10 +87,18 @@ public class GenreService extends BaseService<Genre> {
         if (genre.getTvShows() != null &&
             !genre.getTvShows().isEmpty()) {
 
-            List<TVShow> attachedTvShows = genre.getTvShows().stream()
-            .map(item -> tvShowsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
-            .toList();
+            List<TVShow> attachedTvShows = new ArrayList<>();
+            for (TVShow item : genre.getTvShows()) {
+                if (item.getId() != null) {
+                    TVShow existingItem = tvShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId()));
+                    attachedTvShows.add(existingItem);
+                } else {
+
+                    TVShow newItem = tvShowsRepository.save(item);
+                    attachedTvShows.add(newItem);
+                }
+            }
 
             genre.setTvShows(attachedTvShows);
 
@@ -93,10 +109,18 @@ public class GenreService extends BaseService<Genre> {
         if (genre.getBookGenres() != null &&
             !genre.getBookGenres().isEmpty()) {
 
-            List<Book> attachedBookGenres = genre.getBookGenres().stream()
-            .map(item -> bookGenresRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Book not found with id " + item.getId())))
-            .toList();
+            List<Book> attachedBookGenres = new ArrayList<>();
+            for (Book item : genre.getBookGenres()) {
+                if (item.getId() != null) {
+                    Book existingItem = bookGenresRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Book not found with id " + item.getId()));
+                    attachedBookGenres.add(existingItem);
+                } else {
+
+                    Book newItem = bookGenresRepository.save(item);
+                    attachedBookGenres.add(newItem);
+                }
+            }
 
             genre.setBookGenres(attachedBookGenres);
 
@@ -107,10 +131,18 @@ public class GenreService extends BaseService<Genre> {
         if (genre.getMusicTracks() != null &&
             !genre.getMusicTracks().isEmpty()) {
 
-            List<MusicTrack> attachedMusicTracks = genre.getMusicTracks().stream()
-            .map(item -> musicTracksRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("MusicTrack not found with id " + item.getId())))
-            .toList();
+            List<MusicTrack> attachedMusicTracks = new ArrayList<>();
+            for (MusicTrack item : genre.getMusicTracks()) {
+                if (item.getId() != null) {
+                    MusicTrack existingItem = musicTracksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("MusicTrack not found with id " + item.getId()));
+                    attachedMusicTracks.add(existingItem);
+                } else {
+
+                    MusicTrack newItem = musicTracksRepository.save(item);
+                    attachedMusicTracks.add(newItem);
+                }
+            }
 
             genre.setMusicTracks(attachedMusicTracks);
 
@@ -121,10 +153,18 @@ public class GenreService extends BaseService<Genre> {
         if (genre.getFavoriteUsers() != null &&
             !genre.getFavoriteUsers().isEmpty()) {
 
-            List<UserProfile> attachedFavoriteUsers = genre.getFavoriteUsers().stream()
-            .map(item -> favoriteUsersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedFavoriteUsers = new ArrayList<>();
+            for (UserProfile item : genre.getFavoriteUsers()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = favoriteUsersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedFavoriteUsers.add(existingItem);
+                } else {
+
+                    UserProfile newItem = favoriteUsersRepository.save(item);
+                    attachedFavoriteUsers.add(newItem);
+                }
+            }
 
             genre.setFavoriteUsers(attachedFavoriteUsers);
 
@@ -135,10 +175,18 @@ public class GenreService extends BaseService<Genre> {
         if (genre.getVideoGames() != null &&
             !genre.getVideoGames().isEmpty()) {
 
-            List<VideoGame> attachedVideoGames = genre.getVideoGames().stream()
-            .map(item -> videoGamesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId())))
-            .toList();
+            List<VideoGame> attachedVideoGames = new ArrayList<>();
+            for (VideoGame item : genre.getVideoGames()) {
+                if (item.getId() != null) {
+                    VideoGame existingItem = videoGamesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("VideoGame not found with id " + item.getId()));
+                    attachedVideoGames.add(existingItem);
+                } else {
+
+                    VideoGame newItem = videoGamesRepository.save(item);
+                    attachedVideoGames.add(newItem);
+                }
+            }
 
             genre.setVideoGames(attachedVideoGames);
 
@@ -149,10 +197,18 @@ public class GenreService extends BaseService<Genre> {
         if (genre.getPodcasts() != null &&
             !genre.getPodcasts().isEmpty()) {
 
-            List<Podcast> attachedPodcasts = genre.getPodcasts().stream()
-            .map(item -> podcastsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId())))
-            .toList();
+            List<Podcast> attachedPodcasts = new ArrayList<>();
+            for (Podcast item : genre.getPodcasts()) {
+                if (item.getId() != null) {
+                    Podcast existingItem = podcastsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Podcast not found with id " + item.getId()));
+                    attachedPodcasts.add(existingItem);
+                } else {
+
+                    Podcast newItem = podcastsRepository.save(item);
+                    attachedPodcasts.add(newItem);
+                }
+            }
 
             genre.setPodcasts(attachedPodcasts);
 
@@ -163,10 +219,18 @@ public class GenreService extends BaseService<Genre> {
         if (genre.getAlbums() != null &&
             !genre.getAlbums().isEmpty()) {
 
-            List<Album> attachedAlbums = genre.getAlbums().stream()
-            .map(item -> albumsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Album not found with id " + item.getId())))
-            .toList();
+            List<Album> attachedAlbums = new ArrayList<>();
+            for (Album item : genre.getAlbums()) {
+                if (item.getId() != null) {
+                    Album existingItem = albumsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Album not found with id " + item.getId()));
+                    attachedAlbums.add(existingItem);
+                } else {
+
+                    Album newItem = albumsRepository.save(item);
+                    attachedAlbums.add(newItem);
+                }
+            }
 
             genre.setAlbums(attachedAlbums);
 
@@ -175,18 +239,21 @@ public class GenreService extends BaseService<Genre> {
         }
         
     // ---------- ManyToOne ----------
-        if (genre.getCategory() != null &&
-            genre.getCategory().getId() != null) {
-
-            MusicGenreCategory existingCategory = categoryRepository.findById(
-                genre.getCategory().getId()
-            ).orElseThrow(() -> new RuntimeException("MusicGenreCategory not found"));
-
-            genre.setCategory(existingCategory);
+        if (genre.getCategory() != null) {
+            if (genre.getCategory().getId() != null) {
+                MusicGenreCategory existingCategory = categoryRepository.findById(
+                    genre.getCategory().getId()
+                ).orElseThrow(() -> new RuntimeException("MusicGenreCategory not found with id "
+                    + genre.getCategory().getId()));
+                genre.setCategory(existingCategory);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MusicGenreCategory newCategory = categoryRepository.save(genre.getCategory());
+                genre.setCategory(newCategory);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return genreRepository.save(genre);
 }
 
@@ -358,7 +425,6 @@ public class GenreService extends BaseService<Genre> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return genreRepository.save(existing);
 }
     @Transactional
@@ -373,7 +439,6 @@ public class GenreService extends BaseService<Genre> {
             for (Movie item : new ArrayList<>(entity.getMovies())) {
                 
                 item.getGenres().remove(entity); // retire côté inverse
-                
             }
             entity.getMovies().clear(); // puis vide côté courant
         }
@@ -382,7 +447,6 @@ public class GenreService extends BaseService<Genre> {
             for (TVShow item : new ArrayList<>(entity.getTvShows())) {
                 
                 item.getGenres().remove(entity); // retire côté inverse
-                
             }
             entity.getTvShows().clear(); // puis vide côté courant
         }
@@ -391,7 +455,6 @@ public class GenreService extends BaseService<Genre> {
             for (Book item : new ArrayList<>(entity.getBookGenres())) {
                 
                 item.getGenres().remove(entity); // retire côté inverse
-                
             }
             entity.getBookGenres().clear(); // puis vide côté courant
         }
@@ -400,7 +463,6 @@ public class GenreService extends BaseService<Genre> {
             for (MusicTrack item : new ArrayList<>(entity.getMusicTracks())) {
                 
                 item.getGenres().remove(entity); // retire côté inverse
-                
             }
             entity.getMusicTracks().clear(); // puis vide côté courant
         }
@@ -409,7 +471,6 @@ public class GenreService extends BaseService<Genre> {
             for (UserProfile item : new ArrayList<>(entity.getFavoriteUsers())) {
                 
                 item.getFavoriteGenres().remove(entity); // retire côté inverse
-                
             }
             entity.getFavoriteUsers().clear(); // puis vide côté courant
         }
@@ -418,7 +479,6 @@ public class GenreService extends BaseService<Genre> {
             for (VideoGame item : new ArrayList<>(entity.getVideoGames())) {
                 
                 item.getGenres().remove(entity); // retire côté inverse
-                
             }
             entity.getVideoGames().clear(); // puis vide côté courant
         }
@@ -427,7 +487,6 @@ public class GenreService extends BaseService<Genre> {
             for (Podcast item : new ArrayList<>(entity.getPodcasts())) {
                 
                 item.getGenres().remove(entity); // retire côté inverse
-                
             }
             entity.getPodcasts().clear(); // puis vide côté courant
         }
@@ -436,7 +495,6 @@ public class GenreService extends BaseService<Genre> {
             for (Album item : new ArrayList<>(entity.getAlbums())) {
                 
                 item.getGenres().remove(entity); // retire côté inverse
-                
             }
             entity.getAlbums().clear(); // puis vide côté courant
         }

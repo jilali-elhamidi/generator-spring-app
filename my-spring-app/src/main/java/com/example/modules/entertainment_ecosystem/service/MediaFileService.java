@@ -33,18 +33,20 @@ public class MediaFileService extends BaseService<MediaFile> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (mediafile.getReview() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            mediafile.setReview(
-                reviewRepository.findById(mediafile.getReview().getId())
-                    .orElseThrow(() -> new RuntimeException("review not found"))
-            );
-            
+            if (mediafile.getReview().getId() != null) {
+                Review existingReview = reviewRepository.findById(mediafile.getReview().getId())
+                    .orElseThrow(() -> new RuntimeException("Review not found with id "
+                        + mediafile.getReview().getId()));
+                mediafile.setReview(existingReview);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Review newReview = reviewRepository.save(mediafile.getReview());
+                mediafile.setReview(newReview);
+            }
+
             mediafile.getReview().setMediaFile(mediafile);
         }
         
-
     return mediafileRepository.save(mediafile);
 }
 
@@ -61,21 +63,16 @@ public class MediaFileService extends BaseService<MediaFile> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-            if (mediafileRequest.getReview() != null &&
-            mediafileRequest.getReview().getId() != null) {
+        if (mediafileRequest.getReview() != null &&mediafileRequest.getReview().getId() != null) {
 
-            Review review = reviewRepository.findById(
-                mediafileRequest.getReview().getId()
-            ).orElseThrow(() -> new RuntimeException("Review not found"));
+        Review review = reviewRepository.findById(mediafileRequest.getReview().getId())
+                .orElseThrow(() -> new RuntimeException("Review not found"));
 
-            existing.setReview(review);
-
-            
-            review.setMediaFile(existing);
-            
-        }
+        existing.setReview(review);
+        review.setMediaFile(existing);
         
-
+        }
+    
     return mediafileRepository.save(existing);
 }
     @Transactional

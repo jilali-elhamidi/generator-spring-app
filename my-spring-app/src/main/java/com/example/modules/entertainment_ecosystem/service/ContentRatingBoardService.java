@@ -49,7 +49,6 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return contentratingboardRepository.save(contentratingboard);
 }
 
@@ -83,7 +82,6 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return contentratingboardRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
     // --- Dissocier OneToMany ---
         if (entity.getRatings() != null) {
             for (var child : entity.getRatings()) {
-                
-                child.setBoard(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setBoard(null);
             }
             entity.getRatings().clear();
         }

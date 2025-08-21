@@ -49,7 +49,6 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return tvshowstudioRepository.save(tvshowstudio);
 }
 
@@ -83,7 +82,6 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return tvshowstudioRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
     // --- Dissocier OneToMany ---
         if (entity.getTvShows() != null) {
             for (var child : entity.getTvShows()) {
-                
-                child.setTvShowStudio(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setTvShowStudio(null);
             }
             entity.getTvShows().clear();
         }

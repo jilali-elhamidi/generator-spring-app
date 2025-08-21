@@ -56,30 +56,36 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (merchandiseorder.getUser() != null &&
-            merchandiseorder.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                merchandiseorder.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            merchandiseorder.setUser(existingUser);
+        if (merchandiseorder.getUser() != null) {
+            if (merchandiseorder.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    merchandiseorder.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + merchandiseorder.getUser().getId()));
+                merchandiseorder.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(merchandiseorder.getUser());
+                merchandiseorder.setUser(newUser);
+            }
         }
         
     // ---------- OneToOne ----------
         if (merchandiseorder.getShippingDetails() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            merchandiseorder.setShippingDetails(
-                shippingDetailsRepository.findById(merchandiseorder.getShippingDetails().getId())
-                    .orElseThrow(() -> new RuntimeException("shippingDetails not found"))
-            );
-            
+            if (merchandiseorder.getShippingDetails().getId() != null) {
+                MerchandiseShipping existingShippingDetails = shippingDetailsRepository.findById(merchandiseorder.getShippingDetails().getId())
+                    .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found with id "
+                        + merchandiseorder.getShippingDetails().getId()));
+                merchandiseorder.setShippingDetails(existingShippingDetails);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                MerchandiseShipping newShippingDetails = shippingDetailsRepository.save(merchandiseorder.getShippingDetails());
+                merchandiseorder.setShippingDetails(newShippingDetails);
+            }
+
             merchandiseorder.getShippingDetails().setOrder(merchandiseorder);
         }
         
-
     return merchandiseorderRepository.save(merchandiseorder);
 }
 
@@ -125,21 +131,15 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (merchandiseorderRequest.getShippingDetails() != null &&
-            merchandiseorderRequest.getShippingDetails().getId() != null) {
+        if (merchandiseorderRequest.getShippingDetails() != null &&merchandiseorderRequest.getShippingDetails().getId() != null) {
 
-            MerchandiseShipping shippingDetails = shippingDetailsRepository.findById(
-                merchandiseorderRequest.getShippingDetails().getId()
-            ).orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
+        MerchandiseShipping shippingDetails = shippingDetailsRepository.findById(merchandiseorderRequest.getShippingDetails().getId())
+                .orElseThrow(() -> new RuntimeException("MerchandiseShipping not found"));
 
-            existing.setShippingDetails(shippingDetails);
-
-            
-            shippingDetails.setOrder(existing);
-            
+        existing.setShippingDetails(shippingDetails);
+        shippingDetails.setOrder(existing);
         }
-        
-
+    
     return merchandiseorderRepository.save(existing);
 }
     @Transactional
@@ -151,9 +151,8 @@ public class MerchandiseOrderService extends BaseService<MerchandiseOrder> {
     // --- Dissocier OneToMany ---
         if (entity.getItems() != null) {
             for (var child : entity.getItems()) {
-                
-                child.setOrder(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setOrder(null);
             }
             entity.getItems().clear();
         }

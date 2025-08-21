@@ -49,7 +49,6 @@ public class ContentLicenseTypeService extends BaseService<ContentLicenseType> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return contentlicensetypeRepository.save(contentlicensetype);
 }
 
@@ -83,7 +82,6 @@ public class ContentLicenseTypeService extends BaseService<ContentLicenseType> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return contentlicensetypeRepository.save(existing);
 }
     @Transactional
@@ -95,9 +93,8 @@ public class ContentLicenseTypeService extends BaseService<ContentLicenseType> {
     // --- Dissocier OneToMany ---
         if (entity.getLicenses() != null) {
             for (var child : entity.getLicenses()) {
-                
-                child.setLicenseType(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setLicenseType(null);
             }
             entity.getLicenses().clear();
         }

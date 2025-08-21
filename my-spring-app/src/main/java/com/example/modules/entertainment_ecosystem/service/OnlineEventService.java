@@ -41,10 +41,18 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
         if (onlineevent.getAttendees() != null &&
             !onlineevent.getAttendees().isEmpty()) {
 
-            List<UserProfile> attachedAttendees = onlineevent.getAttendees().stream()
-            .map(item -> attendeesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedAttendees = new ArrayList<>();
+            for (UserProfile item : onlineevent.getAttendees()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = attendeesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedAttendees.add(existingItem);
+                } else {
+
+                    UserProfile newItem = attendeesRepository.save(item);
+                    attachedAttendees.add(newItem);
+                }
+            }
 
             onlineevent.setAttendees(attachedAttendees);
 
@@ -53,28 +61,35 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
         }
         
     // ---------- ManyToOne ----------
-        if (onlineevent.getHost() != null &&
-            onlineevent.getHost().getId() != null) {
-
-            UserProfile existingHost = hostRepository.findById(
-                onlineevent.getHost().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            onlineevent.setHost(existingHost);
+        if (onlineevent.getHost() != null) {
+            if (onlineevent.getHost().getId() != null) {
+                UserProfile existingHost = hostRepository.findById(
+                    onlineevent.getHost().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + onlineevent.getHost().getId()));
+                onlineevent.setHost(existingHost);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newHost = hostRepository.save(onlineevent.getHost());
+                onlineevent.setHost(newHost);
+            }
         }
         
-        if (onlineevent.getType() != null &&
-            onlineevent.getType().getId() != null) {
-
-            OnlineEventType existingType = typeRepository.findById(
-                onlineevent.getType().getId()
-            ).orElseThrow(() -> new RuntimeException("OnlineEventType not found"));
-
-            onlineevent.setType(existingType);
+        if (onlineevent.getType() != null) {
+            if (onlineevent.getType().getId() != null) {
+                OnlineEventType existingType = typeRepository.findById(
+                    onlineevent.getType().getId()
+                ).orElseThrow(() -> new RuntimeException("OnlineEventType not found with id "
+                    + onlineevent.getType().getId()));
+                onlineevent.setType(existingType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                OnlineEventType newType = typeRepository.save(onlineevent.getType());
+                onlineevent.setType(newType);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return onlineeventRepository.save(onlineevent);
 }
 
@@ -135,7 +150,6 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
         
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return onlineeventRepository.save(existing);
 }
     @Transactional
@@ -150,7 +164,6 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
             for (UserProfile item : new ArrayList<>(entity.getAttendees())) {
                 
                 item.getAttendedOnlineEvents().remove(entity); // retire côté inverse
-                
             }
             entity.getAttendees().clear(); // puis vide côté courant
         }

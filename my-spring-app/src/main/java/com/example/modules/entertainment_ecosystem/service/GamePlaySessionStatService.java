@@ -31,18 +31,21 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (gameplaysessionstat.getGamePlaySession() != null &&
-            gameplaysessionstat.getGamePlaySession().getId() != null) {
-
-            GamePlaySession existingGamePlaySession = gamePlaySessionRepository.findById(
-                gameplaysessionstat.getGamePlaySession().getId()
-            ).orElseThrow(() -> new RuntimeException("GamePlaySession not found"));
-
-            gameplaysessionstat.setGamePlaySession(existingGamePlaySession);
+        if (gameplaysessionstat.getGamePlaySession() != null) {
+            if (gameplaysessionstat.getGamePlaySession().getId() != null) {
+                GamePlaySession existingGamePlaySession = gamePlaySessionRepository.findById(
+                    gameplaysessionstat.getGamePlaySession().getId()
+                ).orElseThrow(() -> new RuntimeException("GamePlaySession not found with id "
+                    + gameplaysessionstat.getGamePlaySession().getId()));
+                gameplaysessionstat.setGamePlaySession(existingGamePlaySession);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                GamePlaySession newGamePlaySession = gamePlaySessionRepository.save(gameplaysessionstat.getGamePlaySession());
+                gameplaysessionstat.setGamePlaySession(newGamePlaySession);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return gameplaysessionstatRepository.save(gameplaysessionstat);
 }
 
@@ -71,7 +74,6 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return gameplaysessionstatRepository.save(existing);
 }
     @Transactional

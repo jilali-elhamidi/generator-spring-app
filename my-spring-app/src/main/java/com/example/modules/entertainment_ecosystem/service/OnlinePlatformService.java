@@ -49,7 +49,6 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return onlineplatformRepository.save(onlineplatform);
 }
 
@@ -82,7 +81,6 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return onlineplatformRepository.save(existing);
 }
     @Transactional
@@ -94,9 +92,8 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
     // --- Dissocier OneToMany ---
         if (entity.getStreams() != null) {
             for (var child : entity.getStreams()) {
-                
-                child.setOnlinePlatform(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setOnlinePlatform(null);
             }
             entity.getStreams().clear();
         }

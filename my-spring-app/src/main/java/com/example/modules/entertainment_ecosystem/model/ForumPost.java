@@ -29,6 +29,7 @@ public class ForumPost extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 1, max = 2000)
+        @Column(unique = true, nullable = false)
     private String content;
 
     @NotNull

@@ -131,60 +131,78 @@ public class ReviewService extends BaseService<Review> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (review.getUser() != null &&
-            review.getUser().getId() != null) {
-
-            UserProfile existingUser = userRepository.findById(
-                review.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            review.setUser(existingUser);
+        if (review.getUser() != null) {
+            if (review.getUser().getId() != null) {
+                UserProfile existingUser = userRepository.findById(
+                    review.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + review.getUser().getId()));
+                review.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser = userRepository.save(review.getUser());
+                review.setUser(newUser);
+            }
         }
         
-        if (review.getMovie() != null &&
-            review.getMovie().getId() != null) {
-
-            Movie existingMovie = movieRepository.findById(
-                review.getMovie().getId()
-            ).orElseThrow(() -> new RuntimeException("Movie not found"));
-
-            review.setMovie(existingMovie);
+        if (review.getMovie() != null) {
+            if (review.getMovie().getId() != null) {
+                Movie existingMovie = movieRepository.findById(
+                    review.getMovie().getId()
+                ).orElseThrow(() -> new RuntimeException("Movie not found with id "
+                    + review.getMovie().getId()));
+                review.setMovie(existingMovie);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Movie newMovie = movieRepository.save(review.getMovie());
+                review.setMovie(newMovie);
+            }
         }
         
-        if (review.getBook() != null &&
-            review.getBook().getId() != null) {
-
-            Book existingBook = bookRepository.findById(
-                review.getBook().getId()
-            ).orElseThrow(() -> new RuntimeException("Book not found"));
-
-            review.setBook(existingBook);
+        if (review.getBook() != null) {
+            if (review.getBook().getId() != null) {
+                Book existingBook = bookRepository.findById(
+                    review.getBook().getId()
+                ).orElseThrow(() -> new RuntimeException("Book not found with id "
+                    + review.getBook().getId()));
+                review.setBook(existingBook);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Book newBook = bookRepository.save(review.getBook());
+                review.setBook(newBook);
+            }
         }
         
-        if (review.getVideoGame() != null &&
-            review.getVideoGame().getId() != null) {
-
-            VideoGame existingVideoGame = videoGameRepository.findById(
-                review.getVideoGame().getId()
-            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-
-            review.setVideoGame(existingVideoGame);
+        if (review.getVideoGame() != null) {
+            if (review.getVideoGame().getId() != null) {
+                VideoGame existingVideoGame = videoGameRepository.findById(
+                    review.getVideoGame().getId()
+                ).orElseThrow(() -> new RuntimeException("VideoGame not found with id "
+                    + review.getVideoGame().getId()));
+                review.setVideoGame(existingVideoGame);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                VideoGame newVideoGame = videoGameRepository.save(review.getVideoGame());
+                review.setVideoGame(newVideoGame);
+            }
         }
         
     // ---------- OneToOne ----------
         if (review.getMediaFile() != null) {
-            
-            
-                // Vérifier si l'entité est déjà persistée
-            review.setMediaFile(
-                mediaFileRepository.findById(review.getMediaFile().getId())
-                    .orElseThrow(() -> new RuntimeException("mediaFile not found"))
-            );
-            
+            if (review.getMediaFile().getId() != null) {
+                MediaFile existingMediaFile = mediaFileRepository.findById(review.getMediaFile().getId())
+                    .orElseThrow(() -> new RuntimeException("MediaFile not found with id "
+                        + review.getMediaFile().getId()));
+                review.setMediaFile(existingMediaFile);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                MediaFile newMediaFile = mediaFileRepository.save(review.getMediaFile());
+                review.setMediaFile(newMediaFile);
+            }
+
             review.getMediaFile().setReview(review);
         }
         
-
     return reviewRepository.save(review);
 }
 
@@ -318,21 +336,15 @@ public class ReviewService extends BaseService<Review> {
         }
         
     // ---------- Relations OneToOne ----------
-            if (reviewRequest.getMediaFile() != null &&
-            reviewRequest.getMediaFile().getId() != null) {
+        if (reviewRequest.getMediaFile() != null &&reviewRequest.getMediaFile().getId() != null) {
 
-            MediaFile mediaFile = mediaFileRepository.findById(
-                reviewRequest.getMediaFile().getId()
-            ).orElseThrow(() -> new RuntimeException("MediaFile not found"));
+        MediaFile mediaFile = mediaFileRepository.findById(reviewRequest.getMediaFile().getId())
+                .orElseThrow(() -> new RuntimeException("MediaFile not found"));
 
-            existing.setMediaFile(mediaFile);
-
-            
-            mediaFile.setReview(existing);
-            
+        existing.setMediaFile(mediaFile);
+        mediaFile.setReview(existing);
         }
-        
-
+    
     return reviewRepository.save(existing);
 }
     @Transactional
@@ -344,36 +356,32 @@ public class ReviewService extends BaseService<Review> {
     // --- Dissocier OneToMany ---
         if (entity.getReviewComments() != null) {
             for (var child : entity.getReviewComments()) {
-                
-                child.setReview(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setReview(null);
             }
             entity.getReviewComments().clear();
         }
         
         if (entity.getRatings() != null) {
             for (var child : entity.getRatings()) {
-                
-                child.setReview(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setReview(null);
             }
             entity.getRatings().clear();
         }
         
         if (entity.getLikes() != null) {
             for (var child : entity.getLikes()) {
-                
-                child.setReview(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setReview(null);
             }
             entity.getLikes().clear();
         }
         
         if (entity.getReportedContent() != null) {
             for (var child : entity.getReportedContent()) {
-                
-                child.setReview(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setReview(null);
             }
             entity.getReportedContent().clear();
         }

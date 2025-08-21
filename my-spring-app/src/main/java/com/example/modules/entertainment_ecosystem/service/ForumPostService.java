@@ -81,38 +81,49 @@ public class ForumPostService extends BaseService<ForumPost> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (forumpost.getAuthor() != null &&
-            forumpost.getAuthor().getId() != null) {
-
-            UserProfile existingAuthor = authorRepository.findById(
-                forumpost.getAuthor().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            forumpost.setAuthor(existingAuthor);
+        if (forumpost.getAuthor() != null) {
+            if (forumpost.getAuthor().getId() != null) {
+                UserProfile existingAuthor = authorRepository.findById(
+                    forumpost.getAuthor().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + forumpost.getAuthor().getId()));
+                forumpost.setAuthor(existingAuthor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newAuthor = authorRepository.save(forumpost.getAuthor());
+                forumpost.setAuthor(newAuthor);
+            }
         }
         
-        if (forumpost.getThread() != null &&
-            forumpost.getThread().getId() != null) {
-
-            ForumThread existingThread = threadRepository.findById(
-                forumpost.getThread().getId()
-            ).orElseThrow(() -> new RuntimeException("ForumThread not found"));
-
-            forumpost.setThread(existingThread);
+        if (forumpost.getThread() != null) {
+            if (forumpost.getThread().getId() != null) {
+                ForumThread existingThread = threadRepository.findById(
+                    forumpost.getThread().getId()
+                ).orElseThrow(() -> new RuntimeException("ForumThread not found with id "
+                    + forumpost.getThread().getId()));
+                forumpost.setThread(existingThread);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ForumThread newThread = threadRepository.save(forumpost.getThread());
+                forumpost.setThread(newThread);
+            }
         }
         
-        if (forumpost.getParentPost() != null &&
-            forumpost.getParentPost().getId() != null) {
-
-            ForumPost existingParentPost = parentPostRepository.findById(
-                forumpost.getParentPost().getId()
-            ).orElseThrow(() -> new RuntimeException("ForumPost not found"));
-
-            forumpost.setParentPost(existingParentPost);
+        if (forumpost.getParentPost() != null) {
+            if (forumpost.getParentPost().getId() != null) {
+                ForumPost existingParentPost = parentPostRepository.findById(
+                    forumpost.getParentPost().getId()
+                ).orElseThrow(() -> new RuntimeException("ForumPost not found with id "
+                    + forumpost.getParentPost().getId()));
+                forumpost.setParentPost(existingParentPost);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ForumPost newParentPost = parentPostRepository.save(forumpost.getParentPost());
+                forumpost.setParentPost(newParentPost);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return forumpostRepository.save(forumpost);
 }
 
@@ -199,7 +210,6 @@ public class ForumPostService extends BaseService<ForumPost> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return forumpostRepository.save(existing);
 }
     @Transactional
@@ -211,18 +221,16 @@ public class ForumPostService extends BaseService<ForumPost> {
     // --- Dissocier OneToMany ---
         if (entity.getReplies() != null) {
             for (var child : entity.getReplies()) {
-                
-                child.setParentPost(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setParentPost(null);
             }
             entity.getReplies().clear();
         }
         
         if (entity.getReportedContent() != null) {
             for (var child : entity.getReportedContent()) {
-                
-                child.setForumPost(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setForumPost(null);
             }
             entity.getReportedContent().clear();
         }

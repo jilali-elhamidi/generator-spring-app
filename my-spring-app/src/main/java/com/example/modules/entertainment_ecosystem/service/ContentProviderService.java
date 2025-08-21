@@ -112,7 +112,6 @@ public class ContentProviderService extends BaseService<ContentProvider> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return contentproviderRepository.save(contentprovider);
 }
 
@@ -197,7 +196,6 @@ public class ContentProviderService extends BaseService<ContentProvider> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return contentproviderRepository.save(existing);
 }
     @Transactional
@@ -209,36 +207,32 @@ public class ContentProviderService extends BaseService<ContentProvider> {
     // --- Dissocier OneToMany ---
         if (entity.getProvidedMovies() != null) {
             for (var child : entity.getProvidedMovies()) {
-                
-                child.setProvider(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setProvider(null);
             }
             entity.getProvidedMovies().clear();
         }
         
         if (entity.getProvidedTvShows() != null) {
             for (var child : entity.getProvidedTvShows()) {
-                
-                child.setProvider(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setProvider(null);
             }
             entity.getProvidedTvShows().clear();
         }
         
         if (entity.getProvidedMusicTracks() != null) {
             for (var child : entity.getProvidedMusicTracks()) {
-                
-                child.setProvider(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setProvider(null);
             }
             entity.getProvidedMusicTracks().clear();
         }
         
         if (entity.getProvidedPodcasts() != null) {
             for (var child : entity.getProvidedPodcasts()) {
-                
-                child.setProvider(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setProvider(null);
             }
             entity.getProvidedPodcasts().clear();
         }

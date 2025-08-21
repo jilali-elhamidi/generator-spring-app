@@ -29,6 +29,7 @@ public class ContentRatingAgeGroup extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 1, max = 20)
+        @Column(unique = true, nullable = false)
     private String ageGroup;
 
     @Size(max = 200)

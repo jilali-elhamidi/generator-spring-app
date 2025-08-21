@@ -56,28 +56,35 @@ public class LiveStreamService extends BaseService<LiveStream> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (livestream.getHost() != null &&
-            livestream.getHost().getId() != null) {
-
-            UserProfile existingHost = hostRepository.findById(
-                livestream.getHost().getId()
-            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
-
-            livestream.setHost(existingHost);
+        if (livestream.getHost() != null) {
+            if (livestream.getHost().getId() != null) {
+                UserProfile existingHost = hostRepository.findById(
+                    livestream.getHost().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + livestream.getHost().getId()));
+                livestream.setHost(existingHost);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newHost = hostRepository.save(livestream.getHost());
+                livestream.setHost(newHost);
+            }
         }
         
-        if (livestream.getGame() != null &&
-            livestream.getGame().getId() != null) {
-
-            VideoGame existingGame = gameRepository.findById(
-                livestream.getGame().getId()
-            ).orElseThrow(() -> new RuntimeException("VideoGame not found"));
-
-            livestream.setGame(existingGame);
+        if (livestream.getGame() != null) {
+            if (livestream.getGame().getId() != null) {
+                VideoGame existingGame = gameRepository.findById(
+                    livestream.getGame().getId()
+                ).orElseThrow(() -> new RuntimeException("VideoGame not found with id "
+                    + livestream.getGame().getId()));
+                livestream.setGame(existingGame);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                VideoGame newGame = gameRepository.save(livestream.getGame());
+                livestream.setGame(newGame);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return livestreamRepository.save(livestream);
 }
 
@@ -136,7 +143,6 @@ public class LiveStreamService extends BaseService<LiveStream> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return livestreamRepository.save(existing);
 }
     @Transactional
@@ -148,9 +154,8 @@ public class LiveStreamService extends BaseService<LiveStream> {
     // --- Dissocier OneToMany ---
         if (entity.getViewers() != null) {
             for (var child : entity.getViewers()) {
-                
-                child.setLiveStream(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setLiveStream(null);
             }
             entity.getViewers().clear();
         }

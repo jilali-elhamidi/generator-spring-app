@@ -352,10 +352,18 @@ public class ArtistService extends BaseService<Artist> {
         if (artist.getFavoriteArtists() != null &&
             !artist.getFavoriteArtists().isEmpty()) {
 
-            List<UserProfile> attachedFavoriteArtists = artist.getFavoriteArtists().stream()
-            .map(item -> favoriteArtistsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId())))
-            .toList();
+            List<UserProfile> attachedFavoriteArtists = new ArrayList<>();
+            for (UserProfile item : artist.getFavoriteArtists()) {
+                if (item.getId() != null) {
+                    UserProfile existingItem = favoriteArtistsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("UserProfile not found with id " + item.getId()));
+                    attachedFavoriteArtists.add(existingItem);
+                } else {
+
+                    UserProfile newItem = favoriteArtistsRepository.save(item);
+                    attachedFavoriteArtists.add(newItem);
+                }
+            }
 
             artist.setFavoriteArtists(attachedFavoriteArtists);
 
@@ -366,10 +374,18 @@ public class ArtistService extends BaseService<Artist> {
         if (artist.getParticipatedInEvents() != null &&
             !artist.getParticipatedInEvents().isEmpty()) {
 
-            List<LiveEvent> attachedParticipatedInEvents = artist.getParticipatedInEvents().stream()
-            .map(item -> participatedInEventsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("LiveEvent not found with id " + item.getId())))
-            .toList();
+            List<LiveEvent> attachedParticipatedInEvents = new ArrayList<>();
+            for (LiveEvent item : artist.getParticipatedInEvents()) {
+                if (item.getId() != null) {
+                    LiveEvent existingItem = participatedInEventsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("LiveEvent not found with id " + item.getId()));
+                    attachedParticipatedInEvents.add(existingItem);
+                } else {
+
+                    LiveEvent newItem = participatedInEventsRepository.save(item);
+                    attachedParticipatedInEvents.add(newItem);
+                }
+            }
 
             artist.setParticipatedInEvents(attachedParticipatedInEvents);
 
@@ -380,10 +396,18 @@ public class ArtistService extends BaseService<Artist> {
         if (artist.getActedInMovies() != null &&
             !artist.getActedInMovies().isEmpty()) {
 
-            List<Movie> attachedActedInMovies = artist.getActedInMovies().stream()
-            .map(item -> actedInMoviesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId())))
-            .toList();
+            List<Movie> attachedActedInMovies = new ArrayList<>();
+            for (Movie item : artist.getActedInMovies()) {
+                if (item.getId() != null) {
+                    Movie existingItem = actedInMoviesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Movie not found with id " + item.getId()));
+                    attachedActedInMovies.add(existingItem);
+                } else {
+
+                    Movie newItem = actedInMoviesRepository.save(item);
+                    attachedActedInMovies.add(newItem);
+                }
+            }
 
             artist.setActedInMovies(attachedActedInMovies);
 
@@ -394,10 +418,18 @@ public class ArtistService extends BaseService<Artist> {
         if (artist.getActedInShows() != null &&
             !artist.getActedInShows().isEmpty()) {
 
-            List<TVShow> attachedActedInShows = artist.getActedInShows().stream()
-            .map(item -> actedInShowsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId())))
-            .toList();
+            List<TVShow> attachedActedInShows = new ArrayList<>();
+            for (TVShow item : artist.getActedInShows()) {
+                if (item.getId() != null) {
+                    TVShow existingItem = actedInShowsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TVShow not found with id " + item.getId()));
+                    attachedActedInShows.add(existingItem);
+                } else {
+
+                    TVShow newItem = actedInShowsRepository.save(item);
+                    attachedActedInShows.add(newItem);
+                }
+            }
 
             artist.setActedInShows(attachedActedInShows);
 
@@ -408,10 +440,18 @@ public class ArtistService extends BaseService<Artist> {
         if (artist.getGroups() != null &&
             !artist.getGroups().isEmpty()) {
 
-            List<ArtistGroup> attachedGroups = artist.getGroups().stream()
-            .map(item -> groupsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("ArtistGroup not found with id " + item.getId())))
-            .toList();
+            List<ArtistGroup> attachedGroups = new ArrayList<>();
+            for (ArtistGroup item : artist.getGroups()) {
+                if (item.getId() != null) {
+                    ArtistGroup existingItem = groupsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("ArtistGroup not found with id " + item.getId()));
+                    attachedGroups.add(existingItem);
+                } else {
+
+                    ArtistGroup newItem = groupsRepository.save(item);
+                    attachedGroups.add(newItem);
+                }
+            }
 
             artist.setGroups(attachedGroups);
 
@@ -420,18 +460,21 @@ public class ArtistService extends BaseService<Artist> {
         }
         
     // ---------- ManyToOne ----------
-        if (artist.getManager() != null &&
-            artist.getManager().getId() != null) {
-
-            Manager existingManager = managerRepository.findById(
-                artist.getManager().getId()
-            ).orElseThrow(() -> new RuntimeException("Manager not found"));
-
-            artist.setManager(existingManager);
+        if (artist.getManager() != null) {
+            if (artist.getManager().getId() != null) {
+                Manager existingManager = managerRepository.findById(
+                    artist.getManager().getId()
+                ).orElseThrow(() -> new RuntimeException("Manager not found with id "
+                    + artist.getManager().getId()));
+                artist.setManager(existingManager);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Manager newManager = managerRepository.save(artist.getManager());
+                artist.setManager(newManager);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return artistRepository.save(artist);
 }
 
@@ -807,7 +850,6 @@ public class ArtistService extends BaseService<Artist> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return artistRepository.save(existing);
 }
     @Transactional
@@ -819,135 +861,120 @@ public class ArtistService extends BaseService<Artist> {
     // --- Dissocier OneToMany ---
         if (entity.getComposedMusic() != null) {
             for (var child : entity.getComposedMusic()) {
-                
-                child.setArtist(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setArtist(null);
             }
             entity.getComposedMusic().clear();
         }
         
         if (entity.getAlbums() != null) {
             for (var child : entity.getAlbums()) {
-                
-                child.setArtist(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setArtist(null);
             }
             entity.getAlbums().clear();
         }
         
         if (entity.getBooksAuthored() != null) {
             for (var child : entity.getBooksAuthored()) {
-                
-                child.setAuthor(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAuthor(null);
             }
             entity.getBooksAuthored().clear();
         }
         
         if (entity.getHostedPodcasts() != null) {
             for (var child : entity.getHostedPodcasts()) {
-                
-                child.setHost(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setHost(null);
             }
             entity.getHostedPodcasts().clear();
         }
         
         if (entity.getManagedMerchandise() != null) {
             for (var child : entity.getManagedMerchandise()) {
-                
-                child.setArtist(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setArtist(null);
             }
             entity.getManagedMerchandise().clear();
         }
         
         if (entity.getManagedGames() != null) {
             for (var child : entity.getManagedGames()) {
-                
-                child.setDeveloper(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setDeveloper(null);
             }
             entity.getManagedGames().clear();
         }
         
         if (entity.getAwards() != null) {
             for (var child : entity.getAwards()) {
-                
-                child.setArtist(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setArtist(null);
             }
             entity.getAwards().clear();
         }
         
         if (entity.getDirectedMovies() != null) {
             for (var child : entity.getDirectedMovies()) {
-                
-                child.setDirector(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setDirector(null);
             }
             entity.getDirectedMovies().clear();
         }
         
         if (entity.getDirectedShows() != null) {
             for (var child : entity.getDirectedShows()) {
-                
-                child.setDirector(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setDirector(null);
             }
             entity.getDirectedShows().clear();
         }
         
         if (entity.getManagedAssets() != null) {
             for (var child : entity.getManagedAssets()) {
-                
-                child.setArtist(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setArtist(null);
             }
             entity.getManagedAssets().clear();
         }
         
         if (entity.getSocialMediaLinks() != null) {
             for (var child : entity.getSocialMediaLinks()) {
-                
-                child.setArtist(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setArtist(null);
             }
             entity.getSocialMediaLinks().clear();
         }
         
         if (entity.getEpisodeCredits() != null) {
             for (var child : entity.getEpisodeCredits()) {
-                
-                child.setArtist(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setArtist(null);
             }
             entity.getEpisodeCredits().clear();
         }
         
         if (entity.getAuthoredAudiobooks() != null) {
             for (var child : entity.getAuthoredAudiobooks()) {
-                
-                child.setAuthor(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setAuthor(null);
             }
             entity.getAuthoredAudiobooks().clear();
         }
         
         if (entity.getDirectedMusicVideos() != null) {
             for (var child : entity.getDirectedMusicVideos()) {
-                
-                child.setDirector(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setDirector(null);
             }
             entity.getDirectedMusicVideos().clear();
         }
         
         if (entity.getTours() != null) {
             for (var child : entity.getTours()) {
-                
-                child.setArtist(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setArtist(null);
             }
             entity.getTours().clear();
         }
@@ -957,7 +984,6 @@ public class ArtistService extends BaseService<Artist> {
             for (UserProfile item : new ArrayList<>(entity.getFavoriteArtists())) {
                 
                 item.getFavoriteArtists().remove(entity); // retire côté inverse
-                
             }
             entity.getFavoriteArtists().clear(); // puis vide côté courant
         }
@@ -966,7 +992,6 @@ public class ArtistService extends BaseService<Artist> {
             for (LiveEvent item : new ArrayList<>(entity.getParticipatedInEvents())) {
                 
                 item.getPerformers().remove(entity); // retire côté inverse
-                
             }
             entity.getParticipatedInEvents().clear(); // puis vide côté courant
         }
@@ -975,7 +1000,6 @@ public class ArtistService extends BaseService<Artist> {
             for (Movie item : new ArrayList<>(entity.getActedInMovies())) {
                 
                 item.getCast().remove(entity); // retire côté inverse
-                
             }
             entity.getActedInMovies().clear(); // puis vide côté courant
         }
@@ -984,7 +1008,6 @@ public class ArtistService extends BaseService<Artist> {
             for (TVShow item : new ArrayList<>(entity.getActedInShows())) {
                 
                 item.getCast().remove(entity); // retire côté inverse
-                
             }
             entity.getActedInShows().clear(); // puis vide côté courant
         }
@@ -993,7 +1016,6 @@ public class ArtistService extends BaseService<Artist> {
             for (ArtistGroup item : new ArrayList<>(entity.getGroups())) {
                 
                 item.getMembers().remove(entity); // retire côté inverse
-                
             }
             entity.getGroups().clear(); // puis vide côté courant
         }
