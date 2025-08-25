@@ -872,4 +872,10 @@ public class MovieService extends BaseService<Movie> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Movie> saveAll(List<Movie> movieList) {
+
+        return movieRepository.saveAll(movieList);
+    }
+
 }

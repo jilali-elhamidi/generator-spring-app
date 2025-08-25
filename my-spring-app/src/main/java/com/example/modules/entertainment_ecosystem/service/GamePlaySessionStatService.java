@@ -93,4 +93,10 @@ public class GamePlaySessionStatService extends BaseService<GamePlaySessionStat>
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<GamePlaySessionStat> saveAll(List<GamePlaySessionStat> gameplaysessionstatList) {
+
+        return gameplaysessionstatRepository.saveAll(gameplaysessionstatList);
+    }
+
 }

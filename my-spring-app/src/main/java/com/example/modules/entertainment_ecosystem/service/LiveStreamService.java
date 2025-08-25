@@ -174,4 +174,10 @@ public class LiveStreamService extends BaseService<LiveStream> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<LiveStream> saveAll(List<LiveStream> livestreamList) {
+
+        return livestreamRepository.saveAll(livestreamList);
+    }
+
 }

@@ -92,4 +92,10 @@ public class InvoiceService extends BaseService<Invoice> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Invoice> saveAll(List<Invoice> invoiceList) {
+
+        return invoiceRepository.saveAll(invoiceList);
+    }
+
 }

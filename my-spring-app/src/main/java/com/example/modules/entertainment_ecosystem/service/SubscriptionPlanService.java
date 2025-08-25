@@ -271,4 +271,10 @@ public class SubscriptionPlanService extends BaseService<SubscriptionPlan> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<SubscriptionPlan> saveAll(List<SubscriptionPlan> subscriptionplanList) {
+
+        return subscriptionplanRepository.saveAll(subscriptionplanList);
+    }
+
 }

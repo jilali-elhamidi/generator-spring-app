@@ -55,6 +55,19 @@ public class AddressController {
         return ResponseEntity.created(location).body(addressMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<AddressDto>> createAllAddresss(
+            @Valid @RequestBody List<AddressDto> addressDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Address> entities = addressMapper.toEntityList(addressDtoList);
+        List<Address> savedEntities = addressService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/addresss").build().toUri();
+
+        return ResponseEntity.created(location).body(addressMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AddressDto> updateAddress(
             @PathVariable Long id,

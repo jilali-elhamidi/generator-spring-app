@@ -29,6 +29,7 @@ public class Payment extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(max = 50)
+    @Column(unique = true, nullable = false)
     private String method;
 
     @NotNull

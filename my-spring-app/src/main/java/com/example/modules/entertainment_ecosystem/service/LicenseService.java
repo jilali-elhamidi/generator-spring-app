@@ -93,4 +93,10 @@ public class LicenseService extends BaseService<License> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<License> saveAll(List<License> licenseList) {
+
+        return licenseRepository.saveAll(licenseList);
+    }
+
 }

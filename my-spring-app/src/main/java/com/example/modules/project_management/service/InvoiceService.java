@@ -35,24 +35,32 @@ public class InvoiceService extends BaseService<Invoice> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (invoice.getProject() != null &&
-            invoice.getProject().getId() != null) {
-
-            Project existingProject = projectRepository.findById(
-                invoice.getProject().getId()
-            ).orElseThrow(() -> new RuntimeException("Project not found"));
-
-            invoice.setProject(existingProject);
+        if (invoice.getProject() != null) {
+            if (invoice.getProject().getId() != null) {
+                Project existingProject = projectRepository.findById(
+                    invoice.getProject().getId()
+                ).orElseThrow(() -> new RuntimeException("Project not found with id "
+                    + invoice.getProject().getId()));
+                invoice.setProject(existingProject);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Project newProject = projectRepository.save(invoice.getProject());
+                invoice.setProject(newProject);
+            }
         }
         
-        if (invoice.getClient() != null &&
-            invoice.getClient().getId() != null) {
-
-            Client existingClient = clientRepository.findById(
-                invoice.getClient().getId()
-            ).orElseThrow(() -> new RuntimeException("Client not found"));
-
-            invoice.setClient(existingClient);
+        if (invoice.getClient() != null) {
+            if (invoice.getClient().getId() != null) {
+                Client existingClient = clientRepository.findById(
+                    invoice.getClient().getId()
+                ).orElseThrow(() -> new RuntimeException("Client not found with id "
+                    + invoice.getClient().getId()));
+                invoice.setClient(existingClient);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Client newClient = clientRepository.save(invoice.getClient());
+                invoice.setClient(newClient);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -120,4 +128,10 @@ public class InvoiceService extends BaseService<Invoice> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Invoice> saveAll(List<Invoice> invoiceList) {
+
+        return invoiceRepository.saveAll(invoiceList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class UserController {
         return ResponseEntity.created(location).body(userMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserDto>> createAllUsers(
+            @Valid @RequestBody List<UserDto> userDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<User> entities = userMapper.toEntityList(userDtoList);
+        List<User> savedEntities = userService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/users").build().toUri();
+
+        return ResponseEntity.created(location).body(userMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(
             @PathVariable Long id,

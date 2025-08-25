@@ -35,24 +35,32 @@ public class CommentService extends BaseService<Comment> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (comment.getAuthor() != null &&
-            comment.getAuthor().getId() != null) {
-
-            TeamMember existingAuthor = authorRepository.findById(
-                comment.getAuthor().getId()
-            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-
-            comment.setAuthor(existingAuthor);
+        if (comment.getAuthor() != null) {
+            if (comment.getAuthor().getId() != null) {
+                TeamMember existingAuthor = authorRepository.findById(
+                    comment.getAuthor().getId()
+                ).orElseThrow(() -> new RuntimeException("TeamMember not found with id "
+                    + comment.getAuthor().getId()));
+                comment.setAuthor(existingAuthor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TeamMember newAuthor = authorRepository.save(comment.getAuthor());
+                comment.setAuthor(newAuthor);
+            }
         }
         
-        if (comment.getTask() != null &&
-            comment.getTask().getId() != null) {
-
-            Task existingTask = taskRepository.findById(
-                comment.getTask().getId()
-            ).orElseThrow(() -> new RuntimeException("Task not found"));
-
-            comment.setTask(existingTask);
+        if (comment.getTask() != null) {
+            if (comment.getTask().getId() != null) {
+                Task existingTask = taskRepository.findById(
+                    comment.getTask().getId()
+                ).orElseThrow(() -> new RuntimeException("Task not found with id "
+                    + comment.getTask().getId()));
+                comment.setTask(existingTask);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Task newTask = taskRepository.save(comment.getTask());
+                comment.setTask(newTask);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -119,4 +127,10 @@ public class CommentService extends BaseService<Comment> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Comment> saveAll(List<Comment> commentList) {
+
+        return commentRepository.saveAll(commentList);
+    }
+
 }

@@ -29,6 +29,7 @@ public class Client extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 2, max = 150)
+    @Column(unique = true, nullable = false)
     private String companyName;
 
     @NotNull

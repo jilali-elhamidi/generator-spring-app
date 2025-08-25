@@ -106,4 +106,10 @@ public class ConcertVenueService extends BaseService<ConcertVenue> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ConcertVenue> saveAll(List<ConcertVenue> concertvenueList) {
+
+        return concertvenueRepository.saveAll(concertvenueList);
+    }
+
 }

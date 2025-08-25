@@ -29,7 +29,7 @@ public class UserLevel extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Min(1)
-        @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private Integer levelNumber;
 
     @NotNull

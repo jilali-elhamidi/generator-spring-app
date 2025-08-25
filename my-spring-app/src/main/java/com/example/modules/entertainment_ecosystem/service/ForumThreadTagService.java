@@ -110,4 +110,10 @@ public class ForumThreadTagService extends BaseService<ForumThreadTag> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ForumThreadTag> saveAll(List<ForumThreadTag> forumthreadtagList) {
+
+        return forumthreadtagRepository.saveAll(forumthreadtagList);
+    }
+
 }

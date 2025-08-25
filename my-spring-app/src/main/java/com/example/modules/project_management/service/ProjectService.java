@@ -108,10 +108,18 @@ public class ProjectService extends BaseService<Project> {
         if (project.getTeamMembers() != null &&
             !project.getTeamMembers().isEmpty()) {
 
-            List<TeamMember> attachedTeamMembers = project.getTeamMembers().stream()
-            .map(item -> teamMembersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("TeamMember not found with id " + item.getId())))
-            .toList();
+            List<TeamMember> attachedTeamMembers = new ArrayList<>();
+            for (TeamMember item : project.getTeamMembers()) {
+                if (item.getId() != null) {
+                    TeamMember existingItem = teamMembersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("TeamMember not found with id " + item.getId()));
+                    attachedTeamMembers.add(existingItem);
+                } else {
+
+                    TeamMember newItem = teamMembersRepository.save(item);
+                    attachedTeamMembers.add(newItem);
+                }
+            }
 
             project.setTeamMembers(attachedTeamMembers);
 
@@ -120,34 +128,46 @@ public class ProjectService extends BaseService<Project> {
         }
         
     // ---------- ManyToOne ----------
-        if (project.getProjectManager() != null &&
-            project.getProjectManager().getId() != null) {
-
-            TeamMember existingProjectManager = projectManagerRepository.findById(
-                project.getProjectManager().getId()
-            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-
-            project.setProjectManager(existingProjectManager);
+        if (project.getProjectManager() != null) {
+            if (project.getProjectManager().getId() != null) {
+                TeamMember existingProjectManager = projectManagerRepository.findById(
+                    project.getProjectManager().getId()
+                ).orElseThrow(() -> new RuntimeException("TeamMember not found with id "
+                    + project.getProjectManager().getId()));
+                project.setProjectManager(existingProjectManager);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TeamMember newProjectManager = projectManagerRepository.save(project.getProjectManager());
+                project.setProjectManager(newProjectManager);
+            }
         }
         
-        if (project.getClient() != null &&
-            project.getClient().getId() != null) {
-
-            Client existingClient = clientRepository.findById(
-                project.getClient().getId()
-            ).orElseThrow(() -> new RuntimeException("Client not found"));
-
-            project.setClient(existingClient);
+        if (project.getClient() != null) {
+            if (project.getClient().getId() != null) {
+                Client existingClient = clientRepository.findById(
+                    project.getClient().getId()
+                ).orElseThrow(() -> new RuntimeException("Client not found with id "
+                    + project.getClient().getId()));
+                project.setClient(existingClient);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Client newClient = clientRepository.save(project.getClient());
+                project.setClient(newClient);
+            }
         }
         
-        if (project.getTeam() != null &&
-            project.getTeam().getId() != null) {
-
-            Team existingTeam = teamRepository.findById(
-                project.getTeam().getId()
-            ).orElseThrow(() -> new RuntimeException("Team not found"));
-
-            project.setTeam(existingTeam);
+        if (project.getTeam() != null) {
+            if (project.getTeam().getId() != null) {
+                Team existingTeam = teamRepository.findById(
+                    project.getTeam().getId()
+                ).orElseThrow(() -> new RuntimeException("Team not found with id "
+                    + project.getTeam().getId()));
+                project.setTeam(existingTeam);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Team newTeam = teamRepository.save(project.getTeam());
+                project.setTeam(newTeam);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -334,4 +354,10 @@ public class ProjectService extends BaseService<Project> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Project> saveAll(List<Project> projectList) {
+
+        return projectRepository.saveAll(projectList);
+    }
+
 }

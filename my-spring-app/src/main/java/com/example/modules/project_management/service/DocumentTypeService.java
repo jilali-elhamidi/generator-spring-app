@@ -104,4 +104,10 @@ public class DocumentTypeService extends BaseService<DocumentType> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<DocumentType> saveAll(List<DocumentType> documenttypeList) {
+
+        return documenttypeRepository.saveAll(documenttypeList);
+    }
+
 }

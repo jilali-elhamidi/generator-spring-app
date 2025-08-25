@@ -60,32 +60,48 @@ public class OrderService extends BaseService<Order> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (order.getUser() != null &&
-            order.getUser().getId() != null) {
-
-            User existingUser = userRepository.findById(
-                order.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("User not found"));
-
-            order.setUser(existingUser);
+        if (order.getUser() != null) {
+            if (order.getUser().getId() != null) {
+                User existingUser = userRepository.findById(
+                    order.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("User not found with id "
+                    + order.getUser().getId()));
+                order.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                User newUser = userRepository.save(order.getUser());
+                order.setUser(newUser);
+            }
         }
         
     // ---------- OneToOne ----------
         if (order.getPayment() != null) {
+            if (order.getPayment().getId() != null) {
+                Payment existingPayment = paymentRepository.findById(order.getPayment().getId())
+                    .orElseThrow(() -> new RuntimeException("Payment not found with id "
+                        + order.getPayment().getId()));
+                order.setPayment(existingPayment);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Payment newPayment = paymentRepository.save(order.getPayment());
+                order.setPayment(newPayment);
+            }
 
-            order.setPayment(
-                paymentRepository.findById(order.getPayment().getId())
-                    .orElseThrow(() -> new RuntimeException("payment not found"))
-            );
             order.getPayment().setOrder(order);
         }
         
         if (order.getShipment() != null) {
+            if (order.getShipment().getId() != null) {
+                Shipment existingShipment = shipmentRepository.findById(order.getShipment().getId())
+                    .orElseThrow(() -> new RuntimeException("Shipment not found with id "
+                        + order.getShipment().getId()));
+                order.setShipment(existingShipment);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Shipment newShipment = shipmentRepository.save(order.getShipment());
+                order.setShipment(newShipment);
+            }
 
-            order.setShipment(
-                shipmentRepository.findById(order.getShipment().getId())
-                    .orElseThrow(() -> new RuntimeException("shipment not found"))
-            );
             order.getShipment().setOrder(order);
         }
         
@@ -189,4 +205,10 @@ public class OrderService extends BaseService<Order> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Order> saveAll(List<Order> orderList) {
+
+        return orderRepository.saveAll(orderList);
+    }
+
 }

@@ -94,4 +94,10 @@ public class UserActivityLogService extends BaseService<UserActivityLog> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserActivityLog> saveAll(List<UserActivityLog> useractivitylogList) {
+
+        return useractivitylogRepository.saveAll(useractivitylogList);
+    }
+
 }

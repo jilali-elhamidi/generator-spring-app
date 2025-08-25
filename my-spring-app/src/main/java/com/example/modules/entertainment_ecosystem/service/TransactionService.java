@@ -162,4 +162,10 @@ public class TransactionService extends BaseService<Transaction> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Transaction> saveAll(List<Transaction> transactionList) {
+
+        return transactionRepository.saveAll(transactionList);
+    }
+
 }

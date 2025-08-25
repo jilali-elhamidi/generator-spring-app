@@ -55,6 +55,19 @@ public class UserActivityLogController {
         return ResponseEntity.created(location).body(useractivitylogMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserActivityLogDto>> createAllUserActivityLogs(
+            @Valid @RequestBody List<UserActivityLogDto> useractivitylogDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserActivityLog> entities = useractivitylogMapper.toEntityList(useractivitylogDtoList);
+        List<UserActivityLog> savedEntities = useractivitylogService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/useractivitylogs").build().toUri();
+
+        return ResponseEntity.created(location).body(useractivitylogMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserActivityLogDto> updateUserActivityLog(
             @PathVariable Long id,

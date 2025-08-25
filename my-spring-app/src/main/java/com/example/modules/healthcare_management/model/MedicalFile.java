@@ -29,6 +29,7 @@ public class MedicalFile extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(max = 255)
+    @Column(unique = true, nullable = false)
     private String fileUrl;
 
     @NotNull

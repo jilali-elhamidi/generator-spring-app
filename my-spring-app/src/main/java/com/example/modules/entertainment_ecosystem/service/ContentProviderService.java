@@ -243,4 +243,10 @@ public class ContentProviderService extends BaseService<ContentProvider> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ContentProvider> saveAll(List<ContentProvider> contentproviderList) {
+
+        return contentproviderRepository.saveAll(contentproviderList);
+    }
+
 }

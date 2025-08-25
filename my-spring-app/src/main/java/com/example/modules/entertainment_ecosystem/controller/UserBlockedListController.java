@@ -55,6 +55,19 @@ public class UserBlockedListController {
         return ResponseEntity.created(location).body(userblockedlistMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserBlockedListDto>> createAllUserBlockedLists(
+            @Valid @RequestBody List<UserBlockedListDto> userblockedlistDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserBlockedList> entities = userblockedlistMapper.toEntityList(userblockedlistDtoList);
+        List<UserBlockedList> savedEntities = userblockedlistService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userblockedlists").build().toUri();
+
+        return ResponseEntity.created(location).body(userblockedlistMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserBlockedListDto> updateUserBlockedList(
             @PathVariable Long id,

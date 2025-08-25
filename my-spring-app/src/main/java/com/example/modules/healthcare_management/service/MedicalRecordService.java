@@ -56,24 +56,32 @@ public class MedicalRecordService extends BaseService<MedicalRecord> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (medicalrecord.getPatient() != null &&
-            medicalrecord.getPatient().getId() != null) {
-
-            Patient existingPatient = patientRepository.findById(
-                medicalrecord.getPatient().getId()
-            ).orElseThrow(() -> new RuntimeException("Patient not found"));
-
-            medicalrecord.setPatient(existingPatient);
+        if (medicalrecord.getPatient() != null) {
+            if (medicalrecord.getPatient().getId() != null) {
+                Patient existingPatient = patientRepository.findById(
+                    medicalrecord.getPatient().getId()
+                ).orElseThrow(() -> new RuntimeException("Patient not found with id "
+                    + medicalrecord.getPatient().getId()));
+                medicalrecord.setPatient(existingPatient);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Patient newPatient = patientRepository.save(medicalrecord.getPatient());
+                medicalrecord.setPatient(newPatient);
+            }
         }
         
-        if (medicalrecord.getDoctor() != null &&
-            medicalrecord.getDoctor().getId() != null) {
-
-            Doctor existingDoctor = doctorRepository.findById(
-                medicalrecord.getDoctor().getId()
-            ).orElseThrow(() -> new RuntimeException("Doctor not found"));
-
-            medicalrecord.setDoctor(existingDoctor);
+        if (medicalrecord.getDoctor() != null) {
+            if (medicalrecord.getDoctor().getId() != null) {
+                Doctor existingDoctor = doctorRepository.findById(
+                    medicalrecord.getDoctor().getId()
+                ).orElseThrow(() -> new RuntimeException("Doctor not found with id "
+                    + medicalrecord.getDoctor().getId()));
+                medicalrecord.setDoctor(existingDoctor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Doctor newDoctor = doctorRepository.save(medicalrecord.getDoctor());
+                medicalrecord.setDoctor(newDoctor);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -166,4 +174,10 @@ public class MedicalRecordService extends BaseService<MedicalRecord> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MedicalRecord> saveAll(List<MedicalRecord> medicalrecordList) {
+
+        return medicalrecordRepository.saveAll(medicalrecordList);
+    }
+
 }

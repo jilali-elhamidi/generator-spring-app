@@ -105,4 +105,10 @@ public class GameCurrencyService extends BaseService<GameCurrency> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<GameCurrency> saveAll(List<GameCurrency> gamecurrencyList) {
+
+        return gamecurrencyRepository.saveAll(gamecurrencyList);
+    }
+
 }

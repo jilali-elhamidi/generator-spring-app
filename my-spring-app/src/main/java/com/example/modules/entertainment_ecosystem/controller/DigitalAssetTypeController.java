@@ -55,6 +55,19 @@ public class DigitalAssetTypeController {
         return ResponseEntity.created(location).body(digitalassettypeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<DigitalAssetTypeDto>> createAllDigitalAssetTypes(
+            @Valid @RequestBody List<DigitalAssetTypeDto> digitalassettypeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<DigitalAssetType> entities = digitalassettypeMapper.toEntityList(digitalassettypeDtoList);
+        List<DigitalAssetType> savedEntities = digitalassettypeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/digitalassettypes").build().toUri();
+
+        return ResponseEntity.created(location).body(digitalassettypeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DigitalAssetTypeDto> updateDigitalAssetType(
             @PathVariable Long id,

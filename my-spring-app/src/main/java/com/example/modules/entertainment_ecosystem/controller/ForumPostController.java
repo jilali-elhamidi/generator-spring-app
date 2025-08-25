@@ -55,6 +55,19 @@ public class ForumPostController {
         return ResponseEntity.created(location).body(forumpostMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ForumPostDto>> createAllForumPosts(
+            @Valid @RequestBody List<ForumPostDto> forumpostDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ForumPost> entities = forumpostMapper.toEntityList(forumpostDtoList);
+        List<ForumPost> savedEntities = forumpostService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/forumposts").build().toUri();
+
+        return ResponseEntity.created(location).body(forumpostMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ForumPostDto> updateForumPost(
             @PathVariable Long id,

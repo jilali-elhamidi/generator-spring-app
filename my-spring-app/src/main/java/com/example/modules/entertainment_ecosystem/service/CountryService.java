@@ -105,4 +105,10 @@ public class CountryService extends BaseService<Country> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Country> saveAll(List<Country> countryList) {
+
+        return countryRepository.saveAll(countryList);
+    }
+
 }

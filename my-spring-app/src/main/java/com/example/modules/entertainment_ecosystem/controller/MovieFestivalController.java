@@ -55,6 +55,19 @@ public class MovieFestivalController {
         return ResponseEntity.created(location).body(moviefestivalMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MovieFestivalDto>> createAllMovieFestivals(
+            @Valid @RequestBody List<MovieFestivalDto> moviefestivalDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MovieFestival> entities = moviefestivalMapper.toEntityList(moviefestivalDtoList);
+        List<MovieFestival> savedEntities = moviefestivalService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/moviefestivals").build().toUri();
+
+        return ResponseEntity.created(location).body(moviefestivalMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MovieFestivalDto> updateMovieFestival(
             @PathVariable Long id,

@@ -162,4 +162,10 @@ public class ReportedContentService extends BaseService<ReportedContent> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ReportedContent> saveAll(List<ReportedContent> reportedcontentList) {
+
+        return reportedcontentRepository.saveAll(reportedcontentList);
+    }
+
 }

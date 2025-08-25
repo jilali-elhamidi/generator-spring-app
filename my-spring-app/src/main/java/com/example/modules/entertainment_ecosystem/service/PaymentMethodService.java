@@ -105,4 +105,10 @@ public class PaymentMethodService extends BaseService<PaymentMethod> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<PaymentMethod> saveAll(List<PaymentMethod> paymentmethodList) {
+
+        return paymentmethodRepository.saveAll(paymentmethodList);
+    }
+
 }

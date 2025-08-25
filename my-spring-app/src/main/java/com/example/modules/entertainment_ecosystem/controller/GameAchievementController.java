@@ -55,6 +55,19 @@ public class GameAchievementController {
         return ResponseEntity.created(location).body(gameachievementMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GameAchievementDto>> createAllGameAchievements(
+            @Valid @RequestBody List<GameAchievementDto> gameachievementDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<GameAchievement> entities = gameachievementMapper.toEntityList(gameachievementDtoList);
+        List<GameAchievement> savedEntities = gameachievementService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/gameachievements").build().toUri();
+
+        return ResponseEntity.created(location).body(gameachievementMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GameAchievementDto> updateGameAchievement(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class GameReviewCommentController {
         return ResponseEntity.created(location).body(gamereviewcommentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GameReviewCommentDto>> createAllGameReviewComments(
+            @Valid @RequestBody List<GameReviewCommentDto> gamereviewcommentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<GameReviewComment> entities = gamereviewcommentMapper.toEntityList(gamereviewcommentDtoList);
+        List<GameReviewComment> savedEntities = gamereviewcommentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/gamereviewcomments").build().toUri();
+
+        return ResponseEntity.created(location).body(gamereviewcommentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GameReviewCommentDto> updateGameReviewComment(
             @PathVariable Long id,

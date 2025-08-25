@@ -225,4 +225,10 @@ public class AlbumService extends BaseService<Album> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Album> saveAll(List<Album> albumList) {
+
+        return albumRepository.saveAll(albumList);
+    }
+
 }

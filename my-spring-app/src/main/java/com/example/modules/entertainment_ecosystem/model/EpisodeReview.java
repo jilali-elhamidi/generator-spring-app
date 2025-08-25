@@ -30,7 +30,7 @@ public class EpisodeReview extends BaseEntity {
     @NotNull
     @Min(1)
     @Max(10)
-        @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private Integer rating;
 
     @Size(max = 500)

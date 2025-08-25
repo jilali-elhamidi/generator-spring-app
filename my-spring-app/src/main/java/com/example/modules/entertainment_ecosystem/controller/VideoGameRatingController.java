@@ -55,6 +55,19 @@ public class VideoGameRatingController {
         return ResponseEntity.created(location).body(videogameratingMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<VideoGameRatingDto>> createAllVideoGameRatings(
+            @Valid @RequestBody List<VideoGameRatingDto> videogameratingDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<VideoGameRating> entities = videogameratingMapper.toEntityList(videogameratingDtoList);
+        List<VideoGameRating> savedEntities = videogameratingService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/videogameratings").build().toUri();
+
+        return ResponseEntity.created(location).body(videogameratingMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<VideoGameRatingDto> updateVideoGameRating(
             @PathVariable Long id,

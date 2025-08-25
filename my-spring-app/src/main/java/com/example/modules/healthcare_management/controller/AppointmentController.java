@@ -55,6 +55,19 @@ public class AppointmentController {
         return ResponseEntity.created(location).body(appointmentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<AppointmentDto>> createAllAppointments(
+            @Valid @RequestBody List<AppointmentDto> appointmentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Appointment> entities = appointmentMapper.toEntityList(appointmentDtoList);
+        List<Appointment> savedEntities = appointmentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/appointments").build().toUri();
+
+        return ResponseEntity.created(location).body(appointmentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AppointmentDto> updateAppointment(
             @PathVariable Long id,

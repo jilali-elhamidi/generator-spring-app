@@ -55,6 +55,19 @@ public class ReviewCommentController {
         return ResponseEntity.created(location).body(reviewcommentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ReviewCommentDto>> createAllReviewComments(
+            @Valid @RequestBody List<ReviewCommentDto> reviewcommentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ReviewComment> entities = reviewcommentMapper.toEntityList(reviewcommentDtoList);
+        List<ReviewComment> savedEntities = reviewcommentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/reviewcomments").build().toUri();
+
+        return ResponseEntity.created(location).body(reviewcommentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ReviewCommentDto> updateReviewComment(
             @PathVariable Long id,

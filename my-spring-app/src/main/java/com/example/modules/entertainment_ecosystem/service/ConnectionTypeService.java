@@ -104,4 +104,10 @@ public class ConnectionTypeService extends BaseService<ConnectionType> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ConnectionType> saveAll(List<ConnectionType> connectiontypeList) {
+
+        return connectiontypeRepository.saveAll(connectiontypeList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class NotificationTypeController {
         return ResponseEntity.created(location).body(notificationtypeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<NotificationTypeDto>> createAllNotificationTypes(
+            @Valid @RequestBody List<NotificationTypeDto> notificationtypeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<NotificationType> entities = notificationtypeMapper.toEntityList(notificationtypeDtoList);
+        List<NotificationType> savedEntities = notificationtypeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/notificationtypes").build().toUri();
+
+        return ResponseEntity.created(location).body(notificationtypeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<NotificationTypeDto> updateNotificationType(
             @PathVariable Long id,

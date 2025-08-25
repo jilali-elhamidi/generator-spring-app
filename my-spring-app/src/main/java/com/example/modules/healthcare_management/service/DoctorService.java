@@ -73,14 +73,18 @@ public class DoctorService extends BaseService<Doctor> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (doctor.getDepartment() != null &&
-            doctor.getDepartment().getId() != null) {
-
-            Department existingDepartment = departmentRepository.findById(
-                doctor.getDepartment().getId()
-            ).orElseThrow(() -> new RuntimeException("Department not found"));
-
-            doctor.setDepartment(existingDepartment);
+        if (doctor.getDepartment() != null) {
+            if (doctor.getDepartment().getId() != null) {
+                Department existingDepartment = departmentRepository.findById(
+                    doctor.getDepartment().getId()
+                ).orElseThrow(() -> new RuntimeException("Department not found with id "
+                    + doctor.getDepartment().getId()));
+                doctor.setDepartment(existingDepartment);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Department newDepartment = departmentRepository.save(doctor.getDepartment());
+                doctor.setDepartment(newDepartment);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -184,4 +188,10 @@ public class DoctorService extends BaseService<Doctor> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Doctor> saveAll(List<Doctor> doctorList) {
+
+        return doctorRepository.saveAll(doctorList);
+    }
+
 }

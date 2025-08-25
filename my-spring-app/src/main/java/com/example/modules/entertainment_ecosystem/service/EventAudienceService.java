@@ -92,4 +92,10 @@ public class EventAudienceService extends BaseService<EventAudience> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<EventAudience> saveAll(List<EventAudience> eventaudienceList) {
+
+        return eventaudienceRepository.saveAll(eventaudienceList);
+    }
+
 }

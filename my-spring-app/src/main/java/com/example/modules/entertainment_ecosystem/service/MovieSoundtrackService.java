@@ -138,4 +138,10 @@ public class MovieSoundtrackService extends BaseService<MovieSoundtrack> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MovieSoundtrack> saveAll(List<MovieSoundtrack> moviesoundtrackList) {
+
+        return moviesoundtrackRepository.saveAll(moviesoundtrackList);
+    }
+
 }

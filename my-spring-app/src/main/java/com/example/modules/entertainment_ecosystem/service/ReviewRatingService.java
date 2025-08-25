@@ -127,4 +127,10 @@ public class ReviewRatingService extends BaseService<ReviewRating> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ReviewRating> saveAll(List<ReviewRating> reviewratingList) {
+
+        return reviewratingRepository.saveAll(reviewratingList);
+    }
+
 }

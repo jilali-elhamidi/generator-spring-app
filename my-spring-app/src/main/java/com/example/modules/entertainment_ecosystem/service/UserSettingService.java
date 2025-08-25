@@ -93,4 +93,10 @@ public class UserSettingService extends BaseService<UserSetting> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserSetting> saveAll(List<UserSetting> usersettingList) {
+
+        return usersettingRepository.saveAll(usersettingList);
+    }
+
 }

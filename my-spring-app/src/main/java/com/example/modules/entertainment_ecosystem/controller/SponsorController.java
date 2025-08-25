@@ -55,6 +55,19 @@ public class SponsorController {
         return ResponseEntity.created(location).body(sponsorMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<SponsorDto>> createAllSponsors(
+            @Valid @RequestBody List<SponsorDto> sponsorDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Sponsor> entities = sponsorMapper.toEntityList(sponsorDtoList);
+        List<Sponsor> savedEntities = sponsorService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/sponsors").build().toUri();
+
+        return ResponseEntity.created(location).body(sponsorMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SponsorDto> updateSponsor(
             @PathVariable Long id,

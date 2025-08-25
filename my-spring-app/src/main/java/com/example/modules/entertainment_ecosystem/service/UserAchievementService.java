@@ -126,4 +126,10 @@ public class UserAchievementService extends BaseService<UserAchievement> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserAchievement> saveAll(List<UserAchievement> userachievementList) {
+
+        return userachievementRepository.saveAll(userachievementList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class CategoryController {
         return ResponseEntity.created(location).body(categoryMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<CategoryDto>> createAllCategorys(
+            @Valid @RequestBody List<CategoryDto> categoryDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Category> entities = categoryMapper.toEntityList(categoryDtoList);
+        List<Category> savedEntities = categoryService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/categorys").build().toUri();
+
+        return ResponseEntity.created(location).body(categoryMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<CategoryDto> updateCategory(
             @PathVariable Long id,

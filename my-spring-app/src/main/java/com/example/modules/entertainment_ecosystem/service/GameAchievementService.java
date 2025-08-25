@@ -140,4 +140,10 @@ public class GameAchievementService extends BaseService<GameAchievement> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<GameAchievement> saveAll(List<GameAchievement> gameachievementList) {
+
+        return gameachievementRepository.saveAll(gameachievementList);
+    }
+
 }

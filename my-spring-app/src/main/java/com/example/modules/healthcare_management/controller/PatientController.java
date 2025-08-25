@@ -55,6 +55,19 @@ public class PatientController {
         return ResponseEntity.created(location).body(patientMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<PatientDto>> createAllPatients(
+            @Valid @RequestBody List<PatientDto> patientDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Patient> entities = patientMapper.toEntityList(patientDtoList);
+        List<Patient> savedEntities = patientService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/patients").build().toUri();
+
+        return ResponseEntity.created(location).body(patientMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<PatientDto> updatePatient(
             @PathVariable Long id,

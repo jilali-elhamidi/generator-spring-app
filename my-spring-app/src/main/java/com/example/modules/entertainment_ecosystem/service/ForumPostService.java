@@ -253,4 +253,10 @@ public class ForumPostService extends BaseService<ForumPost> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ForumPost> saveAll(List<ForumPost> forumpostList) {
+
+        return forumpostRepository.saveAll(forumpostList);
+    }
+
 }

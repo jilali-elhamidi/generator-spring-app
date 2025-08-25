@@ -55,6 +55,19 @@ public class SubscriptionFeatureController {
         return ResponseEntity.created(location).body(subscriptionfeatureMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<SubscriptionFeatureDto>> createAllSubscriptionFeatures(
+            @Valid @RequestBody List<SubscriptionFeatureDto> subscriptionfeatureDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<SubscriptionFeature> entities = subscriptionfeatureMapper.toEntityList(subscriptionfeatureDtoList);
+        List<SubscriptionFeature> savedEntities = subscriptionfeatureService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/subscriptionfeatures").build().toUri();
+
+        return ResponseEntity.created(location).body(subscriptionfeatureMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SubscriptionFeatureDto> updateSubscriptionFeature(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class MovieSoundtrackController {
         return ResponseEntity.created(location).body(moviesoundtrackMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MovieSoundtrackDto>> createAllMovieSoundtracks(
+            @Valid @RequestBody List<MovieSoundtrackDto> moviesoundtrackDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MovieSoundtrack> entities = moviesoundtrackMapper.toEntityList(moviesoundtrackDtoList);
+        List<MovieSoundtrack> savedEntities = moviesoundtrackService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/moviesoundtracks").build().toUri();
+
+        return ResponseEntity.created(location).body(moviesoundtrackMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MovieSoundtrackDto> updateMovieSoundtrack(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class UserPlaylistItemController {
         return ResponseEntity.created(location).body(userplaylistitemMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserPlaylistItemDto>> createAllUserPlaylistItems(
+            @Valid @RequestBody List<UserPlaylistItemDto> userplaylistitemDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserPlaylistItem> entities = userplaylistitemMapper.toEntityList(userplaylistitemDtoList);
+        List<UserPlaylistItem> savedEntities = userplaylistitemService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userplaylistitems").build().toUri();
+
+        return ResponseEntity.created(location).body(userplaylistitemMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserPlaylistItemDto> updateUserPlaylistItem(
             @PathVariable Long id,

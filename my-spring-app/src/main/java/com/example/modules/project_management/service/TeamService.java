@@ -75,11 +75,17 @@ public class TeamService extends BaseService<Team> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (team.getTeamLead() != null) {
+            if (team.getTeamLead().getId() != null) {
+                TeamMember existingTeamLead = teamLeadRepository.findById(team.getTeamLead().getId())
+                    .orElseThrow(() -> new RuntimeException("TeamMember not found with id "
+                        + team.getTeamLead().getId()));
+                team.setTeamLead(existingTeamLead);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                TeamMember newTeamLead = teamLeadRepository.save(team.getTeamLead());
+                team.setTeamLead(newTeamLead);
+            }
 
-            team.setTeamLead(
-                teamLeadRepository.findById(team.getTeamLead().getId())
-                    .orElseThrow(() -> new RuntimeException("teamLead not found"))
-            );
             team.getTeamLead().setManagedTeam(team);
         }
         
@@ -178,4 +184,10 @@ public class TeamService extends BaseService<Team> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Team> saveAll(List<Team> teamList) {
+
+        return teamRepository.saveAll(teamList);
+    }
+
 }

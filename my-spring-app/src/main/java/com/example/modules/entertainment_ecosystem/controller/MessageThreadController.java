@@ -55,6 +55,19 @@ public class MessageThreadController {
         return ResponseEntity.created(location).body(messagethreadMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MessageThreadDto>> createAllMessageThreads(
+            @Valid @RequestBody List<MessageThreadDto> messagethreadDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MessageThread> entities = messagethreadMapper.toEntityList(messagethreadDtoList);
+        List<MessageThread> savedEntities = messagethreadService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/messagethreads").build().toUri();
+
+        return ResponseEntity.created(location).body(messagethreadMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MessageThreadDto> updateMessageThread(
             @PathVariable Long id,

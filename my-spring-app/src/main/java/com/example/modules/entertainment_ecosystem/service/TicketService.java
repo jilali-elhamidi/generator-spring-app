@@ -230,4 +230,10 @@ public class TicketService extends BaseService<Ticket> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Ticket> saveAll(List<Ticket> ticketList) {
+
+        return ticketRepository.saveAll(ticketList);
+    }
+
 }

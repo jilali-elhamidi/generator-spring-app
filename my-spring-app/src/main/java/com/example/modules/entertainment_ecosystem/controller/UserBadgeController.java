@@ -55,6 +55,19 @@ public class UserBadgeController {
         return ResponseEntity.created(location).body(userbadgeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserBadgeDto>> createAllUserBadges(
+            @Valid @RequestBody List<UserBadgeDto> userbadgeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserBadge> entities = userbadgeMapper.toEntityList(userbadgeDtoList);
+        List<UserBadge> savedEntities = userbadgeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userbadges").build().toUri();
+
+        return ResponseEntity.created(location).body(userbadgeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserBadgeDto> updateUserBadge(
             @PathVariable Long id,

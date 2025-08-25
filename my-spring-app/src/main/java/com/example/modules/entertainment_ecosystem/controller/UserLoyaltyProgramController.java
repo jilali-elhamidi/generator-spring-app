@@ -55,6 +55,19 @@ public class UserLoyaltyProgramController {
         return ResponseEntity.created(location).body(userloyaltyprogramMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserLoyaltyProgramDto>> createAllUserLoyaltyPrograms(
+            @Valid @RequestBody List<UserLoyaltyProgramDto> userloyaltyprogramDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserLoyaltyProgram> entities = userloyaltyprogramMapper.toEntityList(userloyaltyprogramDtoList);
+        List<UserLoyaltyProgram> savedEntities = userloyaltyprogramService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userloyaltyprograms").build().toUri();
+
+        return ResponseEntity.created(location).body(userloyaltyprogramMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserLoyaltyProgramDto> updateUserLoyaltyProgram(
             @PathVariable Long id,

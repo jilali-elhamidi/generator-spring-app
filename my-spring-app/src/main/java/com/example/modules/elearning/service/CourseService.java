@@ -52,18 +52,21 @@ public class CourseService extends BaseService<Course> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (course.getInstructor() != null &&
-            course.getInstructor().getId() != null) {
-
-            Instructor existingInstructor = instructorRepository.findById(
-                course.getInstructor().getId()
-            ).orElseThrow(() -> new RuntimeException("Instructor not found"));
-
-            course.setInstructor(existingInstructor);
+        if (course.getInstructor() != null) {
+            if (course.getInstructor().getId() != null) {
+                Instructor existingInstructor = instructorRepository.findById(
+                    course.getInstructor().getId()
+                ).orElseThrow(() -> new RuntimeException("Instructor not found with id "
+                    + course.getInstructor().getId()));
+                course.setInstructor(existingInstructor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Instructor newInstructor = instructorRepository.save(course.getInstructor());
+                course.setInstructor(newInstructor);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return courseRepository.save(course);
 }
 
@@ -111,7 +114,6 @@ public class CourseService extends BaseService<Course> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return courseRepository.save(existing);
 }
     @Transactional
@@ -123,9 +125,8 @@ public class CourseService extends BaseService<Course> {
     // --- Dissocier OneToMany ---
         if (entity.getLessons() != null) {
             for (var child : entity.getLessons()) {
-                
-                child.setCourse(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setCourse(null);
             }
             entity.getLessons().clear();
         }
@@ -140,4 +141,10 @@ public class CourseService extends BaseService<Course> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Course> saveAll(List<Course> courseList) {
+
+        return courseRepository.saveAll(courseList);
+    }
+
 }

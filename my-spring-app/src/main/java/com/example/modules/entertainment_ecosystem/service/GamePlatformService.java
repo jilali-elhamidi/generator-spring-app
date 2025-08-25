@@ -144,4 +144,10 @@ public class GamePlatformService extends BaseService<GamePlatform> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<GamePlatform> saveAll(List<GamePlatform> gameplatformList) {
+
+        return gameplatformRepository.saveAll(gameplatformList);
+    }
+
 }

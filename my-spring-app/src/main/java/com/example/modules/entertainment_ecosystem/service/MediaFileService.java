@@ -93,4 +93,10 @@ public class MediaFileService extends BaseService<MediaFile> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MediaFile> saveAll(List<MediaFile> mediafileList) {
+
+        return mediafileRepository.saveAll(mediafileList);
+    }
+
 }

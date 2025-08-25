@@ -29,6 +29,7 @@ public class Address extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 5, max = 100)
+    @Column(unique = true, nullable = false)
     private String street;
 
     @NotNull

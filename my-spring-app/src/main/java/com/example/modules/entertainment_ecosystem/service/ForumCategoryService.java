@@ -236,4 +236,10 @@ public class ForumCategoryService extends BaseService<ForumCategory> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ForumCategory> saveAll(List<ForumCategory> forumcategoryList) {
+
+        return forumcategoryRepository.saveAll(forumcategoryList);
+    }
+
 }

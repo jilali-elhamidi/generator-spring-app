@@ -29,6 +29,7 @@ public class Room extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(max = 10)
+    @Column(unique = true, nullable = false)
     private String roomNumber;
 
     @NotNull

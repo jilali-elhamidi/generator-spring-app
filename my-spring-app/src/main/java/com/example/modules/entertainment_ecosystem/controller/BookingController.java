@@ -55,6 +55,19 @@ public class BookingController {
         return ResponseEntity.created(location).body(bookingMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<BookingDto>> createAllBookings(
+            @Valid @RequestBody List<BookingDto> bookingDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Booking> entities = bookingMapper.toEntityList(bookingDtoList);
+        List<Booking> savedEntities = bookingService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/bookings").build().toUri();
+
+        return ResponseEntity.created(location).body(bookingMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<BookingDto> updateBooking(
             @PathVariable Long id,

@@ -105,4 +105,10 @@ public class TVShowStudioService extends BaseService<TVShowStudio> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<TVShowStudio> saveAll(List<TVShowStudio> tvshowstudioList) {
+
+        return tvshowstudioRepository.saveAll(tvshowstudioList);
+    }
+
 }

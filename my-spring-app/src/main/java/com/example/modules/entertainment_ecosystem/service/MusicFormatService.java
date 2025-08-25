@@ -110,4 +110,10 @@ public class MusicFormatService extends BaseService<MusicFormat> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MusicFormat> saveAll(List<MusicFormat> musicformatList) {
+
+        return musicformatRepository.saveAll(musicformatList);
+    }
+
 }

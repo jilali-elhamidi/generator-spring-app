@@ -55,6 +55,19 @@ public class AttachmentController {
         return ResponseEntity.created(location).body(attachmentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<AttachmentDto>> createAllAttachments(
+            @Valid @RequestBody List<AttachmentDto> attachmentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Attachment> entities = attachmentMapper.toEntityList(attachmentDtoList);
+        List<Attachment> savedEntities = attachmentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/attachments").build().toUri();
+
+        return ResponseEntity.created(location).body(attachmentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AttachmentDto> updateAttachment(
             @PathVariable Long id,

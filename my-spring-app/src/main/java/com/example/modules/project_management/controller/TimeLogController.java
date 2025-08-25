@@ -55,6 +55,19 @@ public class TimeLogController {
         return ResponseEntity.created(location).body(timelogMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TimeLogDto>> createAllTimeLogs(
+            @Valid @RequestBody List<TimeLogDto> timelogDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<TimeLog> entities = timelogMapper.toEntityList(timelogDtoList);
+        List<TimeLog> savedEntities = timelogService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/timelogs").build().toUri();
+
+        return ResponseEntity.created(location).body(timelogMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TimeLogDto> updateTimeLog(
             @PathVariable Long id,

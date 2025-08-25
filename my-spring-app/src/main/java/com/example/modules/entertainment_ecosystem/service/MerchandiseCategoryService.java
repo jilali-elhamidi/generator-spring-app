@@ -104,4 +104,10 @@ public class MerchandiseCategoryService extends BaseService<MerchandiseCategory>
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MerchandiseCategory> saveAll(List<MerchandiseCategory> merchandisecategoryList) {
+
+        return merchandisecategoryRepository.saveAll(merchandisecategoryList);
+    }
+
 }

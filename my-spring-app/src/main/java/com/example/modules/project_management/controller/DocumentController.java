@@ -55,6 +55,19 @@ public class DocumentController {
         return ResponseEntity.created(location).body(documentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<DocumentDto>> createAllDocuments(
+            @Valid @RequestBody List<DocumentDto> documentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Document> entities = documentMapper.toEntityList(documentDtoList);
+        List<Document> savedEntities = documentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/documents").build().toUri();
+
+        return ResponseEntity.created(location).body(documentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DocumentDto> updateDocument(
             @PathVariable Long id,

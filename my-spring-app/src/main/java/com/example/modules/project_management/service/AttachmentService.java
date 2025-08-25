@@ -35,24 +35,32 @@ public class AttachmentService extends BaseService<Attachment> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (attachment.getTask() != null &&
-            attachment.getTask().getId() != null) {
-
-            Task existingTask = taskRepository.findById(
-                attachment.getTask().getId()
-            ).orElseThrow(() -> new RuntimeException("Task not found"));
-
-            attachment.setTask(existingTask);
+        if (attachment.getTask() != null) {
+            if (attachment.getTask().getId() != null) {
+                Task existingTask = taskRepository.findById(
+                    attachment.getTask().getId()
+                ).orElseThrow(() -> new RuntimeException("Task not found with id "
+                    + attachment.getTask().getId()));
+                attachment.setTask(existingTask);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Task newTask = taskRepository.save(attachment.getTask());
+                attachment.setTask(newTask);
+            }
         }
         
-        if (attachment.getUploadedBy() != null &&
-            attachment.getUploadedBy().getId() != null) {
-
-            TeamMember existingUploadedBy = uploadedByRepository.findById(
-                attachment.getUploadedBy().getId()
-            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-
-            attachment.setUploadedBy(existingUploadedBy);
+        if (attachment.getUploadedBy() != null) {
+            if (attachment.getUploadedBy().getId() != null) {
+                TeamMember existingUploadedBy = uploadedByRepository.findById(
+                    attachment.getUploadedBy().getId()
+                ).orElseThrow(() -> new RuntimeException("TeamMember not found with id "
+                    + attachment.getUploadedBy().getId()));
+                attachment.setUploadedBy(existingUploadedBy);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TeamMember newUploadedBy = uploadedByRepository.save(attachment.getUploadedBy());
+                attachment.setUploadedBy(newUploadedBy);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -120,4 +128,10 @@ public class AttachmentService extends BaseService<Attachment> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Attachment> saveAll(List<Attachment> attachmentList) {
+
+        return attachmentRepository.saveAll(attachmentList);
+    }
+
 }

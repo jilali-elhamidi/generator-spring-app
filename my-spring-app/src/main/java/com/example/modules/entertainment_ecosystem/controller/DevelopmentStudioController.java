@@ -55,6 +55,19 @@ public class DevelopmentStudioController {
         return ResponseEntity.created(location).body(developmentstudioMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<DevelopmentStudioDto>> createAllDevelopmentStudios(
+            @Valid @RequestBody List<DevelopmentStudioDto> developmentstudioDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<DevelopmentStudio> entities = developmentstudioMapper.toEntityList(developmentstudioDtoList);
+        List<DevelopmentStudio> savedEntities = developmentstudioService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/developmentstudios").build().toUri();
+
+        return ResponseEntity.created(location).body(developmentstudioMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DevelopmentStudioDto> updateDevelopmentStudio(
             @PathVariable Long id,

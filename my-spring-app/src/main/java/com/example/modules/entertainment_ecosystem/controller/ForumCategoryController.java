@@ -55,6 +55,19 @@ public class ForumCategoryController {
         return ResponseEntity.created(location).body(forumcategoryMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ForumCategoryDto>> createAllForumCategorys(
+            @Valid @RequestBody List<ForumCategoryDto> forumcategoryDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ForumCategory> entities = forumcategoryMapper.toEntityList(forumcategoryDtoList);
+        List<ForumCategory> savedEntities = forumcategoryService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/forumcategorys").build().toUri();
+
+        return ResponseEntity.created(location).body(forumcategoryMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ForumCategoryDto> updateForumCategory(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class GroupController {
         return ResponseEntity.created(location).body(groupMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GroupDto>> createAllGroups(
+            @Valid @RequestBody List<GroupDto> groupDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Group> entities = groupMapper.toEntityList(groupDtoList);
+        List<Group> savedEntities = groupService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/groups").build().toUri();
+
+        return ResponseEntity.created(location).body(groupMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GroupDto> updateGroup(
             @PathVariable Long id,

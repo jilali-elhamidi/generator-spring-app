@@ -140,4 +140,10 @@ public class GameExpansionPackService extends BaseService<GameExpansionPack> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<GameExpansionPack> saveAll(List<GameExpansionPack> gameexpansionpackList) {
+
+        return gameexpansionpackRepository.saveAll(gameexpansionpackList);
+    }
+
 }

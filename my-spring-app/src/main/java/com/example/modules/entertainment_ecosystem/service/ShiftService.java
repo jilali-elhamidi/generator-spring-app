@@ -94,4 +94,10 @@ public class ShiftService extends BaseService<Shift> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Shift> saveAll(List<Shift> shiftList) {
+
+        return shiftRepository.saveAll(shiftList);
+    }
+
 }

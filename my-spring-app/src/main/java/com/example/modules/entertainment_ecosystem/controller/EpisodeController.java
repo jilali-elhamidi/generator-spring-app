@@ -55,6 +55,19 @@ public class EpisodeController {
         return ResponseEntity.created(location).body(episodeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<EpisodeDto>> createAllEpisodes(
+            @Valid @RequestBody List<EpisodeDto> episodeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Episode> entities = episodeMapper.toEntityList(episodeDtoList);
+        List<Episode> savedEntities = episodeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/episodes").build().toUri();
+
+        return ResponseEntity.created(location).body(episodeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<EpisodeDto> updateEpisode(
             @PathVariable Long id,

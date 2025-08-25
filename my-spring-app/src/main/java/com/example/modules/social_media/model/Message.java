@@ -29,6 +29,7 @@ public class Message extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 1, max = 500)
+    @Column(unique = true, nullable = false)
     private String content;
 
     @NotNull

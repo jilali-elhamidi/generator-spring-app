@@ -227,4 +227,10 @@ public class PublisherService extends BaseService<Publisher> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Publisher> saveAll(List<Publisher> publisherList) {
+
+        return publisherRepository.saveAll(publisherList);
+    }
+
 }

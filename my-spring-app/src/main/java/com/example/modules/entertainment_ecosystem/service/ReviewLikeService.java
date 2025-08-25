@@ -126,4 +126,10 @@ public class ReviewLikeService extends BaseService<ReviewLike> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ReviewLike> saveAll(List<ReviewLike> reviewlikeList) {
+
+        return reviewlikeRepository.saveAll(reviewlikeList);
+    }
+
 }

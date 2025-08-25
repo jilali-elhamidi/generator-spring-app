@@ -58,10 +58,18 @@ public class GroupService extends BaseService<Group> {
         if (group.getMembers() != null &&
             !group.getMembers().isEmpty()) {
 
-            List<Profile> attachedMembers = group.getMembers().stream()
-            .map(item -> membersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Profile not found with id " + item.getId())))
-            .toList();
+            List<Profile> attachedMembers = new ArrayList<>();
+            for (Profile item : group.getMembers()) {
+                if (item.getId() != null) {
+                    Profile existingItem = membersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Profile not found with id " + item.getId()));
+                    attachedMembers.add(existingItem);
+                } else {
+
+                    Profile newItem = membersRepository.save(item);
+                    attachedMembers.add(newItem);
+                }
+            }
 
             group.setMembers(attachedMembers);
 
@@ -70,14 +78,18 @@ public class GroupService extends BaseService<Group> {
         }
         
     // ---------- ManyToOne ----------
-        if (group.getOwner() != null &&
-            group.getOwner().getId() != null) {
-
-            Profile existingOwner = ownerRepository.findById(
-                group.getOwner().getId()
-            ).orElseThrow(() -> new RuntimeException("Profile not found"));
-
-            group.setOwner(existingOwner);
+        if (group.getOwner() != null) {
+            if (group.getOwner().getId() != null) {
+                Profile existingOwner = ownerRepository.findById(
+                    group.getOwner().getId()
+                ).orElseThrow(() -> new RuntimeException("Profile not found with id "
+                    + group.getOwner().getId()));
+                group.setOwner(existingOwner);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Profile newOwner = ownerRepository.save(group.getOwner());
+                group.setOwner(newOwner);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -179,4 +191,10 @@ public class GroupService extends BaseService<Group> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Group> saveAll(List<Group> groupList) {
+
+        return groupRepository.saveAll(groupList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class ArtistGroupController {
         return ResponseEntity.created(location).body(artistgroupMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ArtistGroupDto>> createAllArtistGroups(
+            @Valid @RequestBody List<ArtistGroupDto> artistgroupDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ArtistGroup> entities = artistgroupMapper.toEntityList(artistgroupDtoList);
+        List<ArtistGroup> savedEntities = artistgroupService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/artistgroups").build().toUri();
+
+        return ResponseEntity.created(location).body(artistgroupMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ArtistGroupDto> updateArtistGroup(
             @PathVariable Long id,

@@ -247,4 +247,10 @@ public class PatientService extends BaseService<Patient> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Patient> saveAll(List<Patient> patientList) {
+
+        return patientRepository.saveAll(patientList);
+    }
+
 }

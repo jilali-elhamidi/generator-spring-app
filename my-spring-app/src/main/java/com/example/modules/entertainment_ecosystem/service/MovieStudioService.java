@@ -105,4 +105,10 @@ public class MovieStudioService extends BaseService<MovieStudio> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MovieStudio> saveAll(List<MovieStudio> moviestudioList) {
+
+        return moviestudioRepository.saveAll(moviestudioList);
+    }
+
 }

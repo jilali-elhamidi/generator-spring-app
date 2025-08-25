@@ -55,6 +55,19 @@ public class OnlineEventTypeController {
         return ResponseEntity.created(location).body(onlineeventtypeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<OnlineEventTypeDto>> createAllOnlineEventTypes(
+            @Valid @RequestBody List<OnlineEventTypeDto> onlineeventtypeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<OnlineEventType> entities = onlineeventtypeMapper.toEntityList(onlineeventtypeDtoList);
+        List<OnlineEventType> savedEntities = onlineeventtypeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/onlineeventtypes").build().toUri();
+
+        return ResponseEntity.created(location).body(onlineeventtypeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<OnlineEventTypeDto> updateOnlineEventType(
             @PathVariable Long id,

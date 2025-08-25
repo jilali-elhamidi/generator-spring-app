@@ -126,4 +126,10 @@ public class UserBlockedListService extends BaseService<UserBlockedList> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserBlockedList> saveAll(List<UserBlockedList> userblockedlistList) {
+
+        return userblockedlistRepository.saveAll(userblockedlistList);
+    }
+
 }

@@ -33,10 +33,18 @@ public class TagService extends BaseService<Tag> {
         if (tag.getTasks() != null &&
             !tag.getTasks().isEmpty()) {
 
-            List<Task> attachedTasks = tag.getTasks().stream()
-            .map(item -> tasksRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Task not found with id " + item.getId())))
-            .toList();
+            List<Task> attachedTasks = new ArrayList<>();
+            for (Task item : tag.getTasks()) {
+                if (item.getId() != null) {
+                    Task existingItem = tasksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Task not found with id " + item.getId()));
+                    attachedTasks.add(existingItem);
+                } else {
+
+                    Task newItem = tasksRepository.save(item);
+                    attachedTasks.add(newItem);
+                }
+            }
 
             tag.setTasks(attachedTasks);
 
@@ -102,4 +110,10 @@ public class TagService extends BaseService<Tag> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Tag> saveAll(List<Tag> tagList) {
+
+        return tagRepository.saveAll(tagList);
+    }
+
 }

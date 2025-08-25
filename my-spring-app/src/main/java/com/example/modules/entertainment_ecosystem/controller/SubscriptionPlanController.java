@@ -55,6 +55,19 @@ public class SubscriptionPlanController {
         return ResponseEntity.created(location).body(subscriptionplanMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<SubscriptionPlanDto>> createAllSubscriptionPlans(
+            @Valid @RequestBody List<SubscriptionPlanDto> subscriptionplanDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<SubscriptionPlan> entities = subscriptionplanMapper.toEntityList(subscriptionplanDtoList);
+        List<SubscriptionPlan> savedEntities = subscriptionplanService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/subscriptionplans").build().toUri();
+
+        return ResponseEntity.created(location).body(subscriptionplanMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SubscriptionPlanDto> updateSubscriptionPlan(
             @PathVariable Long id,

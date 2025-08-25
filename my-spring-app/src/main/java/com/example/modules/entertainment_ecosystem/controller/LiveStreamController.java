@@ -55,6 +55,19 @@ public class LiveStreamController {
         return ResponseEntity.created(location).body(livestreamMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<LiveStreamDto>> createAllLiveStreams(
+            @Valid @RequestBody List<LiveStreamDto> livestreamDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<LiveStream> entities = livestreamMapper.toEntityList(livestreamDtoList);
+        List<LiveStream> savedEntities = livestreamService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/livestreams").build().toUri();
+
+        return ResponseEntity.created(location).body(livestreamMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<LiveStreamDto> updateLiveStream(
             @PathVariable Long id,

@@ -49,7 +49,6 @@ public class InstructorService extends BaseService<Instructor> {
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
-
     return instructorRepository.save(instructor);
 }
 
@@ -86,7 +85,6 @@ public class InstructorService extends BaseService<Instructor> {
         }
         
     // ---------- Relations OneToOne ----------
-
     return instructorRepository.save(existing);
 }
     @Transactional
@@ -98,9 +96,8 @@ public class InstructorService extends BaseService<Instructor> {
     // --- Dissocier OneToMany ---
         if (entity.getCourses() != null) {
             for (var child : entity.getCourses()) {
-                
-                child.setInstructor(null); // retirer la référence inverse
-                
+                // retirer la référence inverse
+                child.setInstructor(null);
             }
             entity.getCourses().clear();
         }
@@ -111,4 +108,10 @@ public class InstructorService extends BaseService<Instructor> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Instructor> saveAll(List<Instructor> instructorList) {
+
+        return instructorRepository.saveAll(instructorList);
+    }
+
 }

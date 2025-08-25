@@ -52,14 +52,18 @@ public class InvoiceService extends BaseService<Invoice> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (invoice.getPatient() != null &&
-            invoice.getPatient().getId() != null) {
-
-            Patient existingPatient = patientRepository.findById(
-                invoice.getPatient().getId()
-            ).orElseThrow(() -> new RuntimeException("Patient not found"));
-
-            invoice.setPatient(existingPatient);
+        if (invoice.getPatient() != null) {
+            if (invoice.getPatient().getId() != null) {
+                Patient existingPatient = patientRepository.findById(
+                    invoice.getPatient().getId()
+                ).orElseThrow(() -> new RuntimeException("Patient not found with id "
+                    + invoice.getPatient().getId()));
+                invoice.setPatient(existingPatient);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Patient newPatient = patientRepository.save(invoice.getPatient());
+                invoice.setPatient(newPatient);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -136,4 +140,10 @@ public class InvoiceService extends BaseService<Invoice> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Invoice> saveAll(List<Invoice> invoiceList) {
+
+        return invoiceRepository.saveAll(invoiceList);
+    }
+
 }

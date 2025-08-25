@@ -55,6 +55,19 @@ public class ClientController {
         return ResponseEntity.created(location).body(clientMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ClientDto>> createAllClients(
+            @Valid @RequestBody List<ClientDto> clientDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Client> entities = clientMapper.toEntityList(clientDtoList);
+        List<Client> savedEntities = clientService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/clients").build().toUri();
+
+        return ResponseEntity.created(location).body(clientMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ClientDto> updateClient(
             @PathVariable Long id,

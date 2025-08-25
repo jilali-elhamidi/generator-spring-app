@@ -39,34 +39,46 @@ public class DocumentService extends BaseService<Document> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (document.getProject() != null &&
-            document.getProject().getId() != null) {
-
-            Project existingProject = projectRepository.findById(
-                document.getProject().getId()
-            ).orElseThrow(() -> new RuntimeException("Project not found"));
-
-            document.setProject(existingProject);
+        if (document.getProject() != null) {
+            if (document.getProject().getId() != null) {
+                Project existingProject = projectRepository.findById(
+                    document.getProject().getId()
+                ).orElseThrow(() -> new RuntimeException("Project not found with id "
+                    + document.getProject().getId()));
+                document.setProject(existingProject);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Project newProject = projectRepository.save(document.getProject());
+                document.setProject(newProject);
+            }
         }
         
-        if (document.getUploadedBy() != null &&
-            document.getUploadedBy().getId() != null) {
-
-            TeamMember existingUploadedBy = uploadedByRepository.findById(
-                document.getUploadedBy().getId()
-            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-
-            document.setUploadedBy(existingUploadedBy);
+        if (document.getUploadedBy() != null) {
+            if (document.getUploadedBy().getId() != null) {
+                TeamMember existingUploadedBy = uploadedByRepository.findById(
+                    document.getUploadedBy().getId()
+                ).orElseThrow(() -> new RuntimeException("TeamMember not found with id "
+                    + document.getUploadedBy().getId()));
+                document.setUploadedBy(existingUploadedBy);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TeamMember newUploadedBy = uploadedByRepository.save(document.getUploadedBy());
+                document.setUploadedBy(newUploadedBy);
+            }
         }
         
-        if (document.getType() != null &&
-            document.getType().getId() != null) {
-
-            DocumentType existingType = typeRepository.findById(
-                document.getType().getId()
-            ).orElseThrow(() -> new RuntimeException("DocumentType not found"));
-
-            document.setType(existingType);
+        if (document.getType() != null) {
+            if (document.getType().getId() != null) {
+                DocumentType existingType = typeRepository.findById(
+                    document.getType().getId()
+                ).orElseThrow(() -> new RuntimeException("DocumentType not found with id "
+                    + document.getType().getId()));
+                document.setType(existingType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                DocumentType newType = typeRepository.save(document.getType());
+                document.setType(newType);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -150,4 +162,10 @@ public class DocumentService extends BaseService<Document> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Document> saveAll(List<Document> documentList) {
+
+        return documentRepository.saveAll(documentList);
+    }
+
 }

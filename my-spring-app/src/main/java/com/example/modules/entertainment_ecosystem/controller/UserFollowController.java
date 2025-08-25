@@ -55,6 +55,19 @@ public class UserFollowController {
         return ResponseEntity.created(location).body(userfollowMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserFollowDto>> createAllUserFollows(
+            @Valid @RequestBody List<UserFollowDto> userfollowDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserFollow> entities = userfollowMapper.toEntityList(userfollowDtoList);
+        List<UserFollow> savedEntities = userfollowService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userfollows").build().toUri();
+
+        return ResponseEntity.created(location).body(userfollowMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserFollowDto> updateUserFollow(
             @PathVariable Long id,

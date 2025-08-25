@@ -28,7 +28,7 @@ public class GameTransaction extends BaseEntity {
 
     // === Attributs simples ===
     @NotNull
-        @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private Double amount;
 
     @NotNull

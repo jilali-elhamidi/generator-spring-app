@@ -55,6 +55,19 @@ public class FeatureFlagController {
         return ResponseEntity.created(location).body(featureflagMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<FeatureFlagDto>> createAllFeatureFlags(
+            @Valid @RequestBody List<FeatureFlagDto> featureflagDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<FeatureFlag> entities = featureflagMapper.toEntityList(featureflagDtoList);
+        List<FeatureFlag> savedEntities = featureflagService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/featureflags").build().toUri();
+
+        return ResponseEntity.created(location).body(featureflagMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<FeatureFlagDto> updateFeatureFlag(
             @PathVariable Long id,

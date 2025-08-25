@@ -93,4 +93,10 @@ public class MovieMerchandiseService extends BaseService<MovieMerchandise> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MovieMerchandise> saveAll(List<MovieMerchandise> moviemerchandiseList) {
+
+        return moviemerchandiseRepository.saveAll(moviemerchandiseList);
+    }
+
 }

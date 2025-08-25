@@ -55,6 +55,19 @@ public class TagController {
         return ResponseEntity.created(location).body(tagMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TagDto>> createAllTags(
+            @Valid @RequestBody List<TagDto> tagDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Tag> entities = tagMapper.toEntityList(tagDtoList);
+        List<Tag> savedEntities = tagService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/tags").build().toUri();
+
+        return ResponseEntity.created(location).body(tagMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TagDto> updateTag(
             @PathVariable Long id,

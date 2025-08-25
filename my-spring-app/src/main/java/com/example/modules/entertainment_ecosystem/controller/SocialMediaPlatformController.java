@@ -55,6 +55,19 @@ public class SocialMediaPlatformController {
         return ResponseEntity.created(location).body(socialmediaplatformMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<SocialMediaPlatformDto>> createAllSocialMediaPlatforms(
+            @Valid @RequestBody List<SocialMediaPlatformDto> socialmediaplatformDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<SocialMediaPlatform> entities = socialmediaplatformMapper.toEntityList(socialmediaplatformDtoList);
+        List<SocialMediaPlatform> savedEntities = socialmediaplatformService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/socialmediaplatforms").build().toUri();
+
+        return ResponseEntity.created(location).body(socialmediaplatformMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SocialMediaPlatformDto> updateSocialMediaPlatform(
             @PathVariable Long id,

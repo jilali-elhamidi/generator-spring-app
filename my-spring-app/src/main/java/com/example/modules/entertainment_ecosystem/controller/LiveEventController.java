@@ -55,6 +55,19 @@ public class LiveEventController {
         return ResponseEntity.created(location).body(liveeventMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<LiveEventDto>> createAllLiveEvents(
+            @Valid @RequestBody List<LiveEventDto> liveeventDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<LiveEvent> entities = liveeventMapper.toEntityList(liveeventDtoList);
+        List<LiveEvent> savedEntities = liveeventService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/liveevents").build().toUri();
+
+        return ResponseEntity.created(location).body(liveeventMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<LiveEventDto> updateLiveEvent(
             @PathVariable Long id,

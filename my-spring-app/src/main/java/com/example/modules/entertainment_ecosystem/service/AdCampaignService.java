@@ -193,4 +193,10 @@ public class AdCampaignService extends BaseService<AdCampaign> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<AdCampaign> saveAll(List<AdCampaign> adcampaignList) {
+
+        return adcampaignRepository.saveAll(adcampaignList);
+    }
+
 }

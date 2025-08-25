@@ -55,6 +55,19 @@ public class MusicGenreCategoryController {
         return ResponseEntity.created(location).body(musicgenrecategoryMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MusicGenreCategoryDto>> createAllMusicGenreCategorys(
+            @Valid @RequestBody List<MusicGenreCategoryDto> musicgenrecategoryDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MusicGenreCategory> entities = musicgenrecategoryMapper.toEntityList(musicgenrecategoryDtoList);
+        List<MusicGenreCategory> savedEntities = musicgenrecategoryService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/musicgenrecategorys").build().toUri();
+
+        return ResponseEntity.created(location).body(musicgenrecategoryMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MusicGenreCategoryDto> updateMusicGenreCategory(
             @PathVariable Long id,

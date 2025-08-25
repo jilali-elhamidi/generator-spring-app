@@ -265,4 +265,10 @@ public class GameReviewService extends BaseService<GameReview> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<GameReview> saveAll(List<GameReview> gamereviewList) {
+
+        return gamereviewRepository.saveAll(gamereviewList);
+    }
+
 }

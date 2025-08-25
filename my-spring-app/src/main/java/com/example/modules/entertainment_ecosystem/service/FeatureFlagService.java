@@ -112,4 +112,10 @@ public class FeatureFlagService extends BaseService<FeatureFlag> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<FeatureFlag> saveAll(List<FeatureFlag> featureflagList) {
+
+        return featureflagRepository.saveAll(featureflagList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class ContentLicenseTypeController {
         return ResponseEntity.created(location).body(contentlicensetypeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ContentLicenseTypeDto>> createAllContentLicenseTypes(
+            @Valid @RequestBody List<ContentLicenseTypeDto> contentlicensetypeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ContentLicenseType> entities = contentlicensetypeMapper.toEntityList(contentlicensetypeDtoList);
+        List<ContentLicenseType> savedEntities = contentlicensetypeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/contentlicensetypes").build().toUri();
+
+        return ResponseEntity.created(location).body(contentlicensetypeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ContentLicenseTypeDto> updateContentLicenseType(
             @PathVariable Long id,

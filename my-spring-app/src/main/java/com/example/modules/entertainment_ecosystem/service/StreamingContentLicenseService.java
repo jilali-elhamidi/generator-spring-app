@@ -230,4 +230,10 @@ public class StreamingContentLicenseService extends BaseService<StreamingContent
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<StreamingContentLicense> saveAll(List<StreamingContentLicense> streamingcontentlicenseList) {
+
+        return streamingcontentlicenseRepository.saveAll(streamingcontentlicenseList);
+    }
+
 }

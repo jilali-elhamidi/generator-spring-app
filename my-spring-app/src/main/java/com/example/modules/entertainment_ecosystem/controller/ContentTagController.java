@@ -55,6 +55,19 @@ public class ContentTagController {
         return ResponseEntity.created(location).body(contenttagMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ContentTagDto>> createAllContentTags(
+            @Valid @RequestBody List<ContentTagDto> contenttagDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ContentTag> entities = contenttagMapper.toEntityList(contenttagDtoList);
+        List<ContentTag> savedEntities = contenttagService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/contenttags").build().toUri();
+
+        return ResponseEntity.created(location).body(contenttagMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ContentTagDto> updateContentTag(
             @PathVariable Long id,

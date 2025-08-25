@@ -55,6 +55,19 @@ public class TeamMemberController {
         return ResponseEntity.created(location).body(teammemberMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TeamMemberDto>> createAllTeamMembers(
+            @Valid @RequestBody List<TeamMemberDto> teammemberDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<TeamMember> entities = teammemberMapper.toEntityList(teammemberDtoList);
+        List<TeamMember> savedEntities = teammemberService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/teammembers").build().toUri();
+
+        return ResponseEntity.created(location).body(teammemberMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TeamMemberDto> updateTeamMember(
             @PathVariable Long id,

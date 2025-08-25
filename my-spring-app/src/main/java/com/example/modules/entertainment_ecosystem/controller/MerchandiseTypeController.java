@@ -55,6 +55,19 @@ public class MerchandiseTypeController {
         return ResponseEntity.created(location).body(merchandisetypeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MerchandiseTypeDto>> createAllMerchandiseTypes(
+            @Valid @RequestBody List<MerchandiseTypeDto> merchandisetypeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MerchandiseType> entities = merchandisetypeMapper.toEntityList(merchandisetypeDtoList);
+        List<MerchandiseType> savedEntities = merchandisetypeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/merchandisetypes").build().toUri();
+
+        return ResponseEntity.created(location).body(merchandisetypeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MerchandiseTypeDto> updateMerchandiseType(
             @PathVariable Long id,

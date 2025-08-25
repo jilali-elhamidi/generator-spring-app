@@ -92,4 +92,10 @@ public class UserLoyaltyProgramService extends BaseService<UserLoyaltyProgram> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserLoyaltyProgram> saveAll(List<UserLoyaltyProgram> userloyaltyprogramList) {
+
+        return userloyaltyprogramRepository.saveAll(userloyaltyprogramList);
+    }
+
 }

@@ -41,10 +41,18 @@ public class PrescriptionService extends BaseService<Prescription> {
         if (prescription.getMedications() != null &&
             !prescription.getMedications().isEmpty()) {
 
-            List<Medication> attachedMedications = prescription.getMedications().stream()
-            .map(item -> medicationsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Medication not found with id " + item.getId())))
-            .toList();
+            List<Medication> attachedMedications = new ArrayList<>();
+            for (Medication item : prescription.getMedications()) {
+                if (item.getId() != null) {
+                    Medication existingItem = medicationsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Medication not found with id " + item.getId()));
+                    attachedMedications.add(existingItem);
+                } else {
+
+                    Medication newItem = medicationsRepository.save(item);
+                    attachedMedications.add(newItem);
+                }
+            }
 
             prescription.setMedications(attachedMedications);
 
@@ -53,24 +61,32 @@ public class PrescriptionService extends BaseService<Prescription> {
         }
         
     // ---------- ManyToOne ----------
-        if (prescription.getPatient() != null &&
-            prescription.getPatient().getId() != null) {
-
-            Patient existingPatient = patientRepository.findById(
-                prescription.getPatient().getId()
-            ).orElseThrow(() -> new RuntimeException("Patient not found"));
-
-            prescription.setPatient(existingPatient);
+        if (prescription.getPatient() != null) {
+            if (prescription.getPatient().getId() != null) {
+                Patient existingPatient = patientRepository.findById(
+                    prescription.getPatient().getId()
+                ).orElseThrow(() -> new RuntimeException("Patient not found with id "
+                    + prescription.getPatient().getId()));
+                prescription.setPatient(existingPatient);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Patient newPatient = patientRepository.save(prescription.getPatient());
+                prescription.setPatient(newPatient);
+            }
         }
         
-        if (prescription.getDoctor() != null &&
-            prescription.getDoctor().getId() != null) {
-
-            Doctor existingDoctor = doctorRepository.findById(
-                prescription.getDoctor().getId()
-            ).orElseThrow(() -> new RuntimeException("Doctor not found"));
-
-            prescription.setDoctor(existingDoctor);
+        if (prescription.getDoctor() != null) {
+            if (prescription.getDoctor().getId() != null) {
+                Doctor existingDoctor = doctorRepository.findById(
+                    prescription.getDoctor().getId()
+                ).orElseThrow(() -> new RuntimeException("Doctor not found with id "
+                    + prescription.getDoctor().getId()));
+                prescription.setDoctor(existingDoctor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Doctor newDoctor = doctorRepository.save(prescription.getDoctor());
+                prescription.setDoctor(newDoctor);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -163,4 +179,10 @@ public class PrescriptionService extends BaseService<Prescription> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Prescription> saveAll(List<Prescription> prescriptionList) {
+
+        return prescriptionRepository.saveAll(prescriptionList);
+    }
+
 }

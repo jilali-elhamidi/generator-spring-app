@@ -127,4 +127,10 @@ public class MerchandiseOrderItemService extends BaseService<MerchandiseOrderIte
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MerchandiseOrderItem> saveAll(List<MerchandiseOrderItem> merchandiseorderitemList) {
+
+        return merchandiseorderitemRepository.saveAll(merchandiseorderitemList);
+    }
+
 }

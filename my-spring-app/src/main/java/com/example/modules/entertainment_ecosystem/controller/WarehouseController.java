@@ -55,6 +55,19 @@ public class WarehouseController {
         return ResponseEntity.created(location).body(warehouseMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<WarehouseDto>> createAllWarehouses(
+            @Valid @RequestBody List<WarehouseDto> warehouseDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Warehouse> entities = warehouseMapper.toEntityList(warehouseDtoList);
+        List<Warehouse> savedEntities = warehouseService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/warehouses").build().toUri();
+
+        return ResponseEntity.created(location).body(warehouseMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<WarehouseDto> updateWarehouse(
             @PathVariable Long id,

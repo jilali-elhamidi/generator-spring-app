@@ -55,6 +55,19 @@ public class ReimbursementController {
         return ResponseEntity.created(location).body(reimbursementMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ReimbursementDto>> createAllReimbursements(
+            @Valid @RequestBody List<ReimbursementDto> reimbursementDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Reimbursement> entities = reimbursementMapper.toEntityList(reimbursementDtoList);
+        List<Reimbursement> savedEntities = reimbursementService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/reimbursements").build().toUri();
+
+        return ResponseEntity.created(location).body(reimbursementMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ReimbursementDto> updateReimbursement(
             @PathVariable Long id,

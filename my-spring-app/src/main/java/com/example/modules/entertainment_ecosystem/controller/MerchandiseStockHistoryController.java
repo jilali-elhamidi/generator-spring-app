@@ -55,6 +55,19 @@ public class MerchandiseStockHistoryController {
         return ResponseEntity.created(location).body(merchandisestockhistoryMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MerchandiseStockHistoryDto>> createAllMerchandiseStockHistorys(
+            @Valid @RequestBody List<MerchandiseStockHistoryDto> merchandisestockhistoryDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MerchandiseStockHistory> entities = merchandisestockhistoryMapper.toEntityList(merchandisestockhistoryDtoList);
+        List<MerchandiseStockHistory> savedEntities = merchandisestockhistoryService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/merchandisestockhistorys").build().toUri();
+
+        return ResponseEntity.created(location).body(merchandisestockhistoryMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MerchandiseStockHistoryDto> updateMerchandiseStockHistory(
             @PathVariable Long id,

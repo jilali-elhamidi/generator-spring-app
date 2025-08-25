@@ -55,6 +55,19 @@ public class PaymentController {
         return ResponseEntity.created(location).body(paymentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<PaymentDto>> createAllPayments(
+            @Valid @RequestBody List<PaymentDto> paymentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Payment> entities = paymentMapper.toEntityList(paymentDtoList);
+        List<Payment> savedEntities = paymentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/payments").build().toUri();
+
+        return ResponseEntity.created(location).body(paymentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<PaymentDto> updatePayment(
             @PathVariable Long id,

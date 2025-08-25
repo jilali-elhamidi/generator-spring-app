@@ -105,4 +105,10 @@ public class NotificationTypeService extends BaseService<NotificationType> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<NotificationType> saveAll(List<NotificationType> notificationtypeList) {
+
+        return notificationtypeRepository.saveAll(notificationtypeList);
+    }
+
 }

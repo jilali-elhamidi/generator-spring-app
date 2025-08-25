@@ -111,4 +111,10 @@ public class SubscriptionFeatureService extends BaseService<SubscriptionFeature>
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<SubscriptionFeature> saveAll(List<SubscriptionFeature> subscriptionfeatureList) {
+
+        return subscriptionfeatureRepository.saveAll(subscriptionfeatureList);
+    }
+
 }

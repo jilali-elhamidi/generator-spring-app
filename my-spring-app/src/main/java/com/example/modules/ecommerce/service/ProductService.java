@@ -31,14 +31,18 @@ public class ProductService extends BaseService<Product> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (product.getCategory() != null &&
-            product.getCategory().getId() != null) {
-
-            Category existingCategory = categoryRepository.findById(
-                product.getCategory().getId()
-            ).orElseThrow(() -> new RuntimeException("Category not found"));
-
-            product.setCategory(existingCategory);
+        if (product.getCategory() != null) {
+            if (product.getCategory().getId() != null) {
+                Category existingCategory = categoryRepository.findById(
+                    product.getCategory().getId()
+                ).orElseThrow(() -> new RuntimeException("Category not found with id "
+                    + product.getCategory().getId()));
+                product.setCategory(existingCategory);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Category newCategory = categoryRepository.save(product.getCategory());
+                product.setCategory(newCategory);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -91,4 +95,10 @@ public class ProductService extends BaseService<Product> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Product> saveAll(List<Product> productList) {
+
+        return productRepository.saveAll(productList);
+    }
+
 }

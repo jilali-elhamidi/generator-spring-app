@@ -140,4 +140,10 @@ public class TourService extends BaseService<Tour> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Tour> saveAll(List<Tour> tourList) {
+
+        return tourRepository.saveAll(tourList);
+    }
+
 }

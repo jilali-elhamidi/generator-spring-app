@@ -31,18 +31,21 @@ public class LessonService extends BaseService<Lesson> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (lesson.getCourse() != null &&
-            lesson.getCourse().getId() != null) {
-
-            Course existingCourse = courseRepository.findById(
-                lesson.getCourse().getId()
-            ).orElseThrow(() -> new RuntimeException("Course not found"));
-
-            lesson.setCourse(existingCourse);
+        if (lesson.getCourse() != null) {
+            if (lesson.getCourse().getId() != null) {
+                Course existingCourse = courseRepository.findById(
+                    lesson.getCourse().getId()
+                ).orElseThrow(() -> new RuntimeException("Course not found with id "
+                    + lesson.getCourse().getId()));
+                lesson.setCourse(existingCourse);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Course newCourse = courseRepository.save(lesson.getCourse());
+                lesson.setCourse(newCourse);
+            }
         }
         
     // ---------- OneToOne ----------
-
     return lessonRepository.save(lesson);
 }
 
@@ -73,7 +76,6 @@ public class LessonService extends BaseService<Lesson> {
     // ---------- Relations ManyToOne ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
-
     return lessonRepository.save(existing);
 }
     @Transactional
@@ -93,4 +95,10 @@ public class LessonService extends BaseService<Lesson> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Lesson> saveAll(List<Lesson> lessonList) {
+
+        return lessonRepository.saveAll(lessonList);
+    }
+
 }

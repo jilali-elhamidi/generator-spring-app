@@ -31,14 +31,18 @@ public class NotificationService extends BaseService<Notification> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (notification.getRecipient() != null &&
-            notification.getRecipient().getId() != null) {
-
-            Profile existingRecipient = recipientRepository.findById(
-                notification.getRecipient().getId()
-            ).orElseThrow(() -> new RuntimeException("Profile not found"));
-
-            notification.setRecipient(existingRecipient);
+        if (notification.getRecipient() != null) {
+            if (notification.getRecipient().getId() != null) {
+                Profile existingRecipient = recipientRepository.findById(
+                    notification.getRecipient().getId()
+                ).orElseThrow(() -> new RuntimeException("Profile not found with id "
+                    + notification.getRecipient().getId()));
+                notification.setRecipient(existingRecipient);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Profile newRecipient = recipientRepository.save(notification.getRecipient());
+                notification.setRecipient(newRecipient);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -91,4 +95,10 @@ public class NotificationService extends BaseService<Notification> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Notification> saveAll(List<Notification> notificationList) {
+
+        return notificationRepository.saveAll(notificationList);
+    }
+
 }

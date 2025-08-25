@@ -55,6 +55,19 @@ public class VideoGameController {
         return ResponseEntity.created(location).body(videogameMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<VideoGameDto>> createAllVideoGames(
+            @Valid @RequestBody List<VideoGameDto> videogameDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<VideoGame> entities = videogameMapper.toEntityList(videogameDtoList);
+        List<VideoGame> savedEntities = videogameService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/videogames").build().toUri();
+
+        return ResponseEntity.created(location).body(videogameMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<VideoGameDto> updateVideoGame(
             @PathVariable Long id,

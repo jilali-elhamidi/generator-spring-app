@@ -93,4 +93,10 @@ public class UserPreferenceService extends BaseService<UserPreference> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserPreference> saveAll(List<UserPreference> userpreferenceList) {
+
+        return userpreferenceRepository.saveAll(userpreferenceList);
+    }
+
 }

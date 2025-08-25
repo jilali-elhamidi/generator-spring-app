@@ -55,6 +55,19 @@ public class GameReviewController {
         return ResponseEntity.created(location).body(gamereviewMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GameReviewDto>> createAllGameReviews(
+            @Valid @RequestBody List<GameReviewDto> gamereviewDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<GameReview> entities = gamereviewMapper.toEntityList(gamereviewDtoList);
+        List<GameReview> savedEntities = gamereviewService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/gamereviews").build().toUri();
+
+        return ResponseEntity.created(location).body(gamereviewMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GameReviewDto> updateGameReview(
             @PathVariable Long id,

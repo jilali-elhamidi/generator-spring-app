@@ -55,6 +55,19 @@ public class ShiftController {
         return ResponseEntity.created(location).body(shiftMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ShiftDto>> createAllShifts(
+            @Valid @RequestBody List<ShiftDto> shiftDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Shift> entities = shiftMapper.toEntityList(shiftDtoList);
+        List<Shift> savedEntities = shiftService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/shifts").build().toUri();
+
+        return ResponseEntity.created(location).body(shiftMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ShiftDto> updateShift(
             @PathVariable Long id,

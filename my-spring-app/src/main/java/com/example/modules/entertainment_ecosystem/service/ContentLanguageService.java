@@ -215,4 +215,10 @@ public class ContentLanguageService extends BaseService<ContentLanguage> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ContentLanguage> saveAll(List<ContentLanguage> contentlanguageList) {
+
+        return contentlanguageRepository.saveAll(contentlanguageList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class OrderController {
         return ResponseEntity.created(location).body(orderMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<OrderDto>> createAllOrders(
+            @Valid @RequestBody List<OrderDto> orderDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Order> entities = orderMapper.toEntityList(orderDtoList);
+        List<Order> savedEntities = orderService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/orders").build().toUri();
+
+        return ResponseEntity.created(location).body(orderMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<OrderDto> updateOrder(
             @PathVariable Long id,

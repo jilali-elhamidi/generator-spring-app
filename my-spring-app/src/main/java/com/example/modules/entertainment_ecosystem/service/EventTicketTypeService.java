@@ -139,4 +139,10 @@ public class EventTicketTypeService extends BaseService<EventTicketType> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<EventTicketType> saveAll(List<EventTicketType> eventtickettypeList) {
+
+        return eventtickettypeRepository.saveAll(eventtickettypeList);
+    }
+
 }

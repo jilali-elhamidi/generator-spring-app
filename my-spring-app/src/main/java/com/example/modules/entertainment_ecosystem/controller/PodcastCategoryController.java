@@ -55,6 +55,19 @@ public class PodcastCategoryController {
         return ResponseEntity.created(location).body(podcastcategoryMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<PodcastCategoryDto>> createAllPodcastCategorys(
+            @Valid @RequestBody List<PodcastCategoryDto> podcastcategoryDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<PodcastCategory> entities = podcastcategoryMapper.toEntityList(podcastcategoryDtoList);
+        List<PodcastCategory> savedEntities = podcastcategoryService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/podcastcategorys").build().toUri();
+
+        return ResponseEntity.created(location).body(podcastcategoryMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<PodcastCategoryDto> updatePodcastCategory(
             @PathVariable Long id,

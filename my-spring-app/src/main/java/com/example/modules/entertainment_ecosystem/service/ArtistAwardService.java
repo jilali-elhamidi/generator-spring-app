@@ -93,4 +93,10 @@ public class ArtistAwardService extends BaseService<ArtistAward> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ArtistAward> saveAll(List<ArtistAward> artistawardList) {
+
+        return artistawardRepository.saveAll(artistawardList);
+    }
+
 }

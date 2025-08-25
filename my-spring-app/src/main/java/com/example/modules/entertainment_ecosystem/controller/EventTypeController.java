@@ -55,6 +55,19 @@ public class EventTypeController {
         return ResponseEntity.created(location).body(eventtypeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<EventTypeDto>> createAllEventTypes(
+            @Valid @RequestBody List<EventTypeDto> eventtypeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<EventType> entities = eventtypeMapper.toEntityList(eventtypeDtoList);
+        List<EventType> savedEntities = eventtypeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/eventtypes").build().toUri();
+
+        return ResponseEntity.created(location).body(eventtypeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<EventTypeDto> updateEventType(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class AdCampaignController {
         return ResponseEntity.created(location).body(adcampaignMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<AdCampaignDto>> createAllAdCampaigns(
+            @Valid @RequestBody List<AdCampaignDto> adcampaignDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<AdCampaign> entities = adcampaignMapper.toEntityList(adcampaignDtoList);
+        List<AdCampaign> savedEntities = adcampaignService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/adcampaigns").build().toUri();
+
+        return ResponseEntity.created(location).body(adcampaignMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AdCampaignDto> updateAdCampaign(
             @PathVariable Long id,

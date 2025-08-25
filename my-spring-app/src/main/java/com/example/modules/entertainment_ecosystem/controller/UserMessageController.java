@@ -55,6 +55,19 @@ public class UserMessageController {
         return ResponseEntity.created(location).body(usermessageMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserMessageDto>> createAllUserMessages(
+            @Valid @RequestBody List<UserMessageDto> usermessageDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserMessage> entities = usermessageMapper.toEntityList(usermessageDtoList);
+        List<UserMessage> savedEntities = usermessageService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/usermessages").build().toUri();
+
+        return ResponseEntity.created(location).body(usermessageMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserMessageDto> updateUserMessage(
             @PathVariable Long id,

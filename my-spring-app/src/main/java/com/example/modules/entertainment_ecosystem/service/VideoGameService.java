@@ -878,4 +878,10 @@ public class VideoGameService extends BaseService<VideoGame> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<VideoGame> saveAll(List<VideoGame> videogameList) {
+
+        return videogameRepository.saveAll(videogameList);
+    }
+
 }

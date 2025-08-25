@@ -55,6 +55,19 @@ public class GamePlatformController {
         return ResponseEntity.created(location).body(gameplatformMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GamePlatformDto>> createAllGamePlatforms(
+            @Valid @RequestBody List<GamePlatformDto> gameplatformDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<GamePlatform> entities = gameplatformMapper.toEntityList(gameplatformDtoList);
+        List<GamePlatform> savedEntities = gameplatformService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/gameplatforms").build().toUri();
+
+        return ResponseEntity.created(location).body(gameplatformMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GamePlatformDto> updateGamePlatform(
             @PathVariable Long id,

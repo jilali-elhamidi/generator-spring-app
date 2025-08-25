@@ -55,6 +55,19 @@ public class ReportedContentController {
         return ResponseEntity.created(location).body(reportedcontentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ReportedContentDto>> createAllReportedContents(
+            @Valid @RequestBody List<ReportedContentDto> reportedcontentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ReportedContent> entities = reportedcontentMapper.toEntityList(reportedcontentDtoList);
+        List<ReportedContent> savedEntities = reportedcontentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/reportedcontents").build().toUri();
+
+        return ResponseEntity.created(location).body(reportedcontentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ReportedContentDto> updateReportedContent(
             @PathVariable Long id,

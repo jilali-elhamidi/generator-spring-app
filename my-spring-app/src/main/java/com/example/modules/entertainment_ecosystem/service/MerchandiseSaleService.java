@@ -127,4 +127,10 @@ public class MerchandiseSaleService extends BaseService<MerchandiseSale> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MerchandiseSale> saveAll(List<MerchandiseSale> merchandisesaleList) {
+
+        return merchandisesaleRepository.saveAll(merchandisesaleList);
+    }
+
 }

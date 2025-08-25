@@ -55,6 +55,19 @@ public class EventAudienceController {
         return ResponseEntity.created(location).body(eventaudienceMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<EventAudienceDto>> createAllEventAudiences(
+            @Valid @RequestBody List<EventAudienceDto> eventaudienceDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<EventAudience> entities = eventaudienceMapper.toEntityList(eventaudienceDtoList);
+        List<EventAudience> savedEntities = eventaudienceService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/eventaudiences").build().toUri();
+
+        return ResponseEntity.created(location).body(eventaudienceMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<EventAudienceDto> updateEventAudience(
             @PathVariable Long id,

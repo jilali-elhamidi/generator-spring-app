@@ -128,4 +128,10 @@ public class MusicVideoService extends BaseService<MusicVideo> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MusicVideo> saveAll(List<MusicVideo> musicvideoList) {
+
+        return musicvideoRepository.saveAll(musicvideoList);
+    }
+
 }

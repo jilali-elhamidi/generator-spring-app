@@ -157,4 +157,10 @@ public class MessageThreadService extends BaseService<MessageThread> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MessageThread> saveAll(List<MessageThread> messagethreadList) {
+
+        return messagethreadRepository.saveAll(messagethreadList);
+    }
+
 }

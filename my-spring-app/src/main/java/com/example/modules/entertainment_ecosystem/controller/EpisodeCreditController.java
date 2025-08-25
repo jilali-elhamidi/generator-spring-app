@@ -55,6 +55,19 @@ public class EpisodeCreditController {
         return ResponseEntity.created(location).body(episodecreditMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<EpisodeCreditDto>> createAllEpisodeCredits(
+            @Valid @RequestBody List<EpisodeCreditDto> episodecreditDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<EpisodeCredit> entities = episodecreditMapper.toEntityList(episodecreditDtoList);
+        List<EpisodeCredit> savedEntities = episodecreditService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/episodecredits").build().toUri();
+
+        return ResponseEntity.created(location).body(episodecreditMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<EpisodeCreditDto> updateEpisodeCredit(
             @PathVariable Long id,

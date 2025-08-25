@@ -55,6 +55,19 @@ public class LicenseController {
         return ResponseEntity.created(location).body(licenseMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<LicenseDto>> createAllLicenses(
+            @Valid @RequestBody List<LicenseDto> licenseDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<License> entities = licenseMapper.toEntityList(licenseDtoList);
+        List<License> savedEntities = licenseService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/licenses").build().toUri();
+
+        return ResponseEntity.created(location).body(licenseMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<LicenseDto> updateLicense(
             @PathVariable Long id,

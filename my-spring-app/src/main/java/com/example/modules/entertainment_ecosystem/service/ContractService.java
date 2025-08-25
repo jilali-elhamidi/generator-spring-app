@@ -93,4 +93,10 @@ public class ContractService extends BaseService<Contract> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Contract> saveAll(List<Contract> contractList) {
+
+        return contractRepository.saveAll(contractList);
+    }
+
 }

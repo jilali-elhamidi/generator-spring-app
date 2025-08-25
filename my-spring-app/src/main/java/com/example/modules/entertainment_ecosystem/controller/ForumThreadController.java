@@ -55,6 +55,19 @@ public class ForumThreadController {
         return ResponseEntity.created(location).body(forumthreadMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ForumThreadDto>> createAllForumThreads(
+            @Valid @RequestBody List<ForumThreadDto> forumthreadDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ForumThread> entities = forumthreadMapper.toEntityList(forumthreadDtoList);
+        List<ForumThread> savedEntities = forumthreadService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/forumthreads").build().toUri();
+
+        return ResponseEntity.created(location).body(forumthreadMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ForumThreadDto> updateForumThread(
             @PathVariable Long id,

@@ -198,4 +198,10 @@ public class SponsorService extends BaseService<Sponsor> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Sponsor> saveAll(List<Sponsor> sponsorList) {
+
+        return sponsorRepository.saveAll(sponsorList);
+    }
+
 }

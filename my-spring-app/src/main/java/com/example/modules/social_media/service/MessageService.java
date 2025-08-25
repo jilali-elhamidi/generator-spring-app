@@ -35,24 +35,32 @@ public class MessageService extends BaseService<Message> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (message.getSender() != null &&
-            message.getSender().getId() != null) {
-
-            Profile existingSender = senderRepository.findById(
-                message.getSender().getId()
-            ).orElseThrow(() -> new RuntimeException("Profile not found"));
-
-            message.setSender(existingSender);
+        if (message.getSender() != null) {
+            if (message.getSender().getId() != null) {
+                Profile existingSender = senderRepository.findById(
+                    message.getSender().getId()
+                ).orElseThrow(() -> new RuntimeException("Profile not found with id "
+                    + message.getSender().getId()));
+                message.setSender(existingSender);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Profile newSender = senderRepository.save(message.getSender());
+                message.setSender(newSender);
+            }
         }
         
-        if (message.getRecipient() != null &&
-            message.getRecipient().getId() != null) {
-
-            Profile existingRecipient = recipientRepository.findById(
-                message.getRecipient().getId()
-            ).orElseThrow(() -> new RuntimeException("Profile not found"));
-
-            message.setRecipient(existingRecipient);
+        if (message.getRecipient() != null) {
+            if (message.getRecipient().getId() != null) {
+                Profile existingRecipient = recipientRepository.findById(
+                    message.getRecipient().getId()
+                ).orElseThrow(() -> new RuntimeException("Profile not found with id "
+                    + message.getRecipient().getId()));
+                message.setRecipient(existingRecipient);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Profile newRecipient = recipientRepository.save(message.getRecipient());
+                message.setRecipient(newRecipient);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -120,4 +128,10 @@ public class MessageService extends BaseService<Message> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Message> saveAll(List<Message> messageList) {
+
+        return messageRepository.saveAll(messageList);
+    }
+
 }

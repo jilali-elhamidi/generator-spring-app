@@ -140,4 +140,10 @@ public class PlaylistService extends BaseService<Playlist> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Playlist> saveAll(List<Playlist> playlistList) {
+
+        return playlistRepository.saveAll(playlistList);
+    }
+
 }

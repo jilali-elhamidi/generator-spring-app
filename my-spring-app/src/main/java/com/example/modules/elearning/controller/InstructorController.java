@@ -55,6 +55,19 @@ public class InstructorController {
         return ResponseEntity.created(location).body(instructorMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<InstructorDto>> createAllInstructors(
+            @Valid @RequestBody List<InstructorDto> instructorDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Instructor> entities = instructorMapper.toEntityList(instructorDtoList);
+        List<Instructor> savedEntities = instructorService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/instructors").build().toUri();
+
+        return ResponseEntity.created(location).body(instructorMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<InstructorDto> updateInstructor(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class ForumModeratorController {
         return ResponseEntity.created(location).body(forummoderatorMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ForumModeratorDto>> createAllForumModerators(
+            @Valid @RequestBody List<ForumModeratorDto> forummoderatorDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ForumModerator> entities = forummoderatorMapper.toEntityList(forummoderatorDtoList);
+        List<ForumModerator> savedEntities = forummoderatorService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/forummoderators").build().toUri();
+
+        return ResponseEntity.created(location).body(forummoderatorMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ForumModeratorDto> updateForumModerator(
             @PathVariable Long id,

@@ -104,4 +104,10 @@ public class EventTypeService extends BaseService<EventType> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<EventType> saveAll(List<EventType> eventtypeList) {
+
+        return eventtypeRepository.saveAll(eventtypeList);
+    }
+
 }

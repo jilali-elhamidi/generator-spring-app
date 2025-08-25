@@ -55,6 +55,19 @@ public class GameCurrencyController {
         return ResponseEntity.created(location).body(gamecurrencyMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GameCurrencyDto>> createAllGameCurrencys(
+            @Valid @RequestBody List<GameCurrencyDto> gamecurrencyDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<GameCurrency> entities = gamecurrencyMapper.toEntityList(gamecurrencyDtoList);
+        List<GameCurrency> savedEntities = gamecurrencyService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/gamecurrencys").build().toUri();
+
+        return ResponseEntity.created(location).body(gamecurrencyMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GameCurrencyDto> updateGameCurrency(
             @PathVariable Long id,

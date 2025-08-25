@@ -55,6 +55,19 @@ public class MusicLabelController {
         return ResponseEntity.created(location).body(musiclabelMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MusicLabelDto>> createAllMusicLabels(
+            @Valid @RequestBody List<MusicLabelDto> musiclabelDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MusicLabel> entities = musiclabelMapper.toEntityList(musiclabelDtoList);
+        List<MusicLabel> savedEntities = musiclabelService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/musiclabels").build().toUri();
+
+        return ResponseEntity.created(location).body(musiclabelMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MusicLabelDto> updateMusicLabel(
             @PathVariable Long id,

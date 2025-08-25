@@ -262,4 +262,10 @@ public class DigitalPurchaseService extends BaseService<DigitalPurchase> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<DigitalPurchase> saveAll(List<DigitalPurchase> digitalpurchaseList) {
+
+        return digitalpurchaseRepository.saveAll(digitalpurchaseList);
+    }
+
 }

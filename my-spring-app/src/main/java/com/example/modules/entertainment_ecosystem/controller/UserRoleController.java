@@ -55,6 +55,19 @@ public class UserRoleController {
         return ResponseEntity.created(location).body(userroleMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserRoleDto>> createAllUserRoles(
+            @Valid @RequestBody List<UserRoleDto> userroleDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserRole> entities = userroleMapper.toEntityList(userroleDtoList);
+        List<UserRole> savedEntities = userroleService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userroles").build().toUri();
+
+        return ResponseEntity.created(location).body(userroleMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserRoleDto> updateUserRole(
             @PathVariable Long id,

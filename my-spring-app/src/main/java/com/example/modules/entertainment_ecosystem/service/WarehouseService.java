@@ -105,4 +105,10 @@ public class WarehouseService extends BaseService<Warehouse> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Warehouse> saveAll(List<Warehouse> warehouseList) {
+
+        return warehouseRepository.saveAll(warehouseList);
+    }
+
 }

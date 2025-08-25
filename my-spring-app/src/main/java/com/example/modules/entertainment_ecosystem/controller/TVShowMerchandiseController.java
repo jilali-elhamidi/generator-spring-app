@@ -55,6 +55,19 @@ public class TVShowMerchandiseController {
         return ResponseEntity.created(location).body(tvshowmerchandiseMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TVShowMerchandiseDto>> createAllTVShowMerchandises(
+            @Valid @RequestBody List<TVShowMerchandiseDto> tvshowmerchandiseDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<TVShowMerchandise> entities = tvshowmerchandiseMapper.toEntityList(tvshowmerchandiseDtoList);
+        List<TVShowMerchandise> savedEntities = tvshowmerchandiseService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/tvshowmerchandises").build().toUri();
+
+        return ResponseEntity.created(location).body(tvshowmerchandiseMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TVShowMerchandiseDto> updateTVShowMerchandise(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class DocumentTypeController {
         return ResponseEntity.created(location).body(documenttypeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<DocumentTypeDto>> createAllDocumentTypes(
+            @Valid @RequestBody List<DocumentTypeDto> documenttypeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<DocumentType> entities = documenttypeMapper.toEntityList(documenttypeDtoList);
+        List<DocumentType> savedEntities = documenttypeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/documenttypes").build().toUri();
+
+        return ResponseEntity.created(location).body(documenttypeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DocumentTypeDto> updateDocumentType(
             @PathVariable Long id,

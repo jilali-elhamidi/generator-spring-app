@@ -55,6 +55,19 @@ public class OnlinePlatformController {
         return ResponseEntity.created(location).body(onlineplatformMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<OnlinePlatformDto>> createAllOnlinePlatforms(
+            @Valid @RequestBody List<OnlinePlatformDto> onlineplatformDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<OnlinePlatform> entities = onlineplatformMapper.toEntityList(onlineplatformDtoList);
+        List<OnlinePlatform> savedEntities = onlineplatformService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/onlineplatforms").build().toUri();
+
+        return ResponseEntity.created(location).body(onlineplatformMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<OnlinePlatformDto> updateOnlinePlatform(
             @PathVariable Long id,

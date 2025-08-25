@@ -207,4 +207,10 @@ public class GameReviewCommentService extends BaseService<GameReviewComment> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<GameReviewComment> saveAll(List<GameReviewComment> gamereviewcommentList) {
+
+        return gamereviewcommentRepository.saveAll(gamereviewcommentList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class MerchandiseShippingMethodController {
         return ResponseEntity.created(location).body(merchandiseshippingmethodMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MerchandiseShippingMethodDto>> createAllMerchandiseShippingMethods(
+            @Valid @RequestBody List<MerchandiseShippingMethodDto> merchandiseshippingmethodDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MerchandiseShippingMethod> entities = merchandiseshippingmethodMapper.toEntityList(merchandiseshippingmethodDtoList);
+        List<MerchandiseShippingMethod> savedEntities = merchandiseshippingmethodService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/merchandiseshippingmethods").build().toUri();
+
+        return ResponseEntity.created(location).body(merchandiseshippingmethodMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MerchandiseShippingMethodDto> updateMerchandiseShippingMethod(
             @PathVariable Long id,

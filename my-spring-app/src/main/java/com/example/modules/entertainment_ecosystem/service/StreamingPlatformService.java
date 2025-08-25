@@ -329,4 +329,10 @@ public class StreamingPlatformService extends BaseService<StreamingPlatform> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<StreamingPlatform> saveAll(List<StreamingPlatform> streamingplatformList) {
+
+        return streamingplatformRepository.saveAll(streamingplatformList);
+    }
+
 }

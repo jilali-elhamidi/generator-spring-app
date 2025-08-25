@@ -55,6 +55,19 @@ public class ContentRatingAgeGroupController {
         return ResponseEntity.created(location).body(contentratingagegroupMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ContentRatingAgeGroupDto>> createAllContentRatingAgeGroups(
+            @Valid @RequestBody List<ContentRatingAgeGroupDto> contentratingagegroupDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ContentRatingAgeGroup> entities = contentratingagegroupMapper.toEntityList(contentratingagegroupDtoList);
+        List<ContentRatingAgeGroup> savedEntities = contentratingagegroupService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/contentratingagegroups").build().toUri();
+
+        return ResponseEntity.created(location).body(contentratingagegroupMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ContentRatingAgeGroupDto> updateContentRatingAgeGroup(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class TransactionController {
         return ResponseEntity.created(location).body(transactionMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TransactionDto>> createAllTransactions(
+            @Valid @RequestBody List<TransactionDto> transactionDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Transaction> entities = transactionMapper.toEntityList(transactionDtoList);
+        List<Transaction> savedEntities = transactionService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/transactions").build().toUri();
+
+        return ResponseEntity.created(location).body(transactionMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TransactionDto> updateTransaction(
             @PathVariable Long id,

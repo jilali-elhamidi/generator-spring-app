@@ -55,6 +55,19 @@ public class AchievementController {
         return ResponseEntity.created(location).body(achievementMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<AchievementDto>> createAllAchievements(
+            @Valid @RequestBody List<AchievementDto> achievementDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Achievement> entities = achievementMapper.toEntityList(achievementDtoList);
+        List<Achievement> savedEntities = achievementService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/achievements").build().toUri();
+
+        return ResponseEntity.created(location).body(achievementMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AchievementDto> updateAchievement(
             @PathVariable Long id,

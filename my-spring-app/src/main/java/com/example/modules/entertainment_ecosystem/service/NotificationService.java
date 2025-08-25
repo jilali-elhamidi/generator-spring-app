@@ -129,4 +129,10 @@ public class NotificationService extends BaseService<Notification> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Notification> saveAll(List<Notification> notificationList) {
+
+        return notificationRepository.saveAll(notificationList);
+    }
+
 }

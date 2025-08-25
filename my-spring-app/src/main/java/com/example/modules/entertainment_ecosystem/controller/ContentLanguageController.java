@@ -55,6 +55,19 @@ public class ContentLanguageController {
         return ResponseEntity.created(location).body(contentlanguageMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ContentLanguageDto>> createAllContentLanguages(
+            @Valid @RequestBody List<ContentLanguageDto> contentlanguageDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ContentLanguage> entities = contentlanguageMapper.toEntityList(contentlanguageDtoList);
+        List<ContentLanguage> savedEntities = contentlanguageService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/contentlanguages").build().toUri();
+
+        return ResponseEntity.created(location).body(contentlanguageMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ContentLanguageDto> updateContentLanguage(
             @PathVariable Long id,

@@ -104,4 +104,10 @@ public class TicketStatusService extends BaseService<TicketStatus> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<TicketStatus> saveAll(List<TicketStatus> ticketstatusList) {
+
+        return ticketstatusRepository.saveAll(ticketstatusList);
+    }
+
 }

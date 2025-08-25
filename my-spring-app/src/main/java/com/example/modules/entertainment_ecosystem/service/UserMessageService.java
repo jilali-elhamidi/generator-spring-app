@@ -163,4 +163,10 @@ public class UserMessageService extends BaseService<UserMessage> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserMessage> saveAll(List<UserMessage> usermessageList) {
+
+        return usermessageRepository.saveAll(usermessageList);
+    }
+
 }

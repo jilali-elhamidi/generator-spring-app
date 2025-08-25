@@ -94,4 +94,10 @@ public class AdPlacementService extends BaseService<AdPlacement> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<AdPlacement> saveAll(List<AdPlacement> adplacementList) {
+
+        return adplacementRepository.saveAll(adplacementList);
+    }
+
 }

@@ -29,6 +29,7 @@ public class Profile extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 3, max = 50)
+    @Column(unique = true, nullable = false)
     private String name;
 
     @Size(max = 255)

@@ -35,24 +35,32 @@ public class SubtaskService extends BaseService<Subtask> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (subtask.getParentTask() != null &&
-            subtask.getParentTask().getId() != null) {
-
-            Task existingParentTask = parentTaskRepository.findById(
-                subtask.getParentTask().getId()
-            ).orElseThrow(() -> new RuntimeException("Task not found"));
-
-            subtask.setParentTask(existingParentTask);
+        if (subtask.getParentTask() != null) {
+            if (subtask.getParentTask().getId() != null) {
+                Task existingParentTask = parentTaskRepository.findById(
+                    subtask.getParentTask().getId()
+                ).orElseThrow(() -> new RuntimeException("Task not found with id "
+                    + subtask.getParentTask().getId()));
+                subtask.setParentTask(existingParentTask);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Task newParentTask = parentTaskRepository.save(subtask.getParentTask());
+                subtask.setParentTask(newParentTask);
+            }
         }
         
-        if (subtask.getAssignee() != null &&
-            subtask.getAssignee().getId() != null) {
-
-            TeamMember existingAssignee = assigneeRepository.findById(
-                subtask.getAssignee().getId()
-            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-
-            subtask.setAssignee(existingAssignee);
+        if (subtask.getAssignee() != null) {
+            if (subtask.getAssignee().getId() != null) {
+                TeamMember existingAssignee = assigneeRepository.findById(
+                    subtask.getAssignee().getId()
+                ).orElseThrow(() -> new RuntimeException("TeamMember not found with id "
+                    + subtask.getAssignee().getId()));
+                subtask.setAssignee(existingAssignee);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TeamMember newAssignee = assigneeRepository.save(subtask.getAssignee());
+                subtask.setAssignee(newAssignee);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -119,4 +127,10 @@ public class SubtaskService extends BaseService<Subtask> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Subtask> saveAll(List<Subtask> subtaskList) {
+
+        return subtaskRepository.saveAll(subtaskList);
+    }
+
 }

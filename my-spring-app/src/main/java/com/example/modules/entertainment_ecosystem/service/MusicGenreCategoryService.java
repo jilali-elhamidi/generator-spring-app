@@ -104,4 +104,10 @@ public class MusicGenreCategoryService extends BaseService<MusicGenreCategory> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MusicGenreCategory> saveAll(List<MusicGenreCategory> musicgenrecategoryList) {
+
+        return musicgenrecategoryRepository.saveAll(musicgenrecategoryList);
+    }
+
 }

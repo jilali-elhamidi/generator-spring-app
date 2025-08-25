@@ -221,4 +221,10 @@ public class EmployeeService extends BaseService<Employee> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Employee> saveAll(List<Employee> employeeList) {
+
+        return employeeRepository.saveAll(employeeList);
+    }
+
 }

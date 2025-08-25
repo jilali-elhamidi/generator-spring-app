@@ -55,6 +55,19 @@ public class AlbumController {
         return ResponseEntity.created(location).body(albumMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<AlbumDto>> createAllAlbums(
+            @Valid @RequestBody List<AlbumDto> albumDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Album> entities = albumMapper.toEntityList(albumDtoList);
+        List<Album> savedEntities = albumService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/albums").build().toUri();
+
+        return ResponseEntity.created(location).body(albumMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AlbumDto> updateAlbum(
             @PathVariable Long id,

@@ -83,10 +83,18 @@ public class PostService extends BaseService<Post> {
         if (post.getTags() != null &&
             !post.getTags().isEmpty()) {
 
-            List<Tag> attachedTags = post.getTags().stream()
-            .map(item -> tagsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Tag not found with id " + item.getId())))
-            .toList();
+            List<Tag> attachedTags = new ArrayList<>();
+            for (Tag item : post.getTags()) {
+                if (item.getId() != null) {
+                    Tag existingItem = tagsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Tag not found with id " + item.getId()));
+                    attachedTags.add(existingItem);
+                } else {
+
+                    Tag newItem = tagsRepository.save(item);
+                    attachedTags.add(newItem);
+                }
+            }
 
             post.setTags(attachedTags);
 
@@ -95,24 +103,32 @@ public class PostService extends BaseService<Post> {
         }
         
     // ---------- ManyToOne ----------
-        if (post.getAuthor() != null &&
-            post.getAuthor().getId() != null) {
-
-            Profile existingAuthor = authorRepository.findById(
-                post.getAuthor().getId()
-            ).orElseThrow(() -> new RuntimeException("Profile not found"));
-
-            post.setAuthor(existingAuthor);
+        if (post.getAuthor() != null) {
+            if (post.getAuthor().getId() != null) {
+                Profile existingAuthor = authorRepository.findById(
+                    post.getAuthor().getId()
+                ).orElseThrow(() -> new RuntimeException("Profile not found with id "
+                    + post.getAuthor().getId()));
+                post.setAuthor(existingAuthor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Profile newAuthor = authorRepository.save(post.getAuthor());
+                post.setAuthor(newAuthor);
+            }
         }
         
-        if (post.getGroup() != null &&
-            post.getGroup().getId() != null) {
-
-            Group existingGroup = groupRepository.findById(
-                post.getGroup().getId()
-            ).orElseThrow(() -> new RuntimeException("Group not found"));
-
-            post.setGroup(existingGroup);
+        if (post.getGroup() != null) {
+            if (post.getGroup().getId() != null) {
+                Group existingGroup = groupRepository.findById(
+                    post.getGroup().getId()
+                ).orElseThrow(() -> new RuntimeException("Group not found with id "
+                    + post.getGroup().getId()));
+                post.setGroup(existingGroup);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Group newGroup = groupRepository.save(post.getGroup());
+                post.setGroup(newGroup);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -255,4 +271,10 @@ public class PostService extends BaseService<Post> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Post> saveAll(List<Post> postList) {
+
+        return postRepository.saveAll(postList);
+    }
+
 }

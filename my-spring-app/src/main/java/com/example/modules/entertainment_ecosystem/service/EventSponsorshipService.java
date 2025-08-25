@@ -161,4 +161,10 @@ public class EventSponsorshipService extends BaseService<EventSponsorship> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<EventSponsorship> saveAll(List<EventSponsorship> eventsponsorshipList) {
+
+        return eventsponsorshipRepository.saveAll(eventsponsorshipList);
+    }
+
 }

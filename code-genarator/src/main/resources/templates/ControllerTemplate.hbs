@@ -55,6 +55,19 @@ public class {{entityName}}Controller {
         return ResponseEntity.created(location).body({{entityNameLowercase}}Mapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<{{entityName}}Dto>> createAll{{entityName}}s(
+            @Valid @RequestBody List<{{entityName}}Dto> {{entityNameLowercase}}DtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<{{entityName}}> entities = {{entityNameLowercase}}Mapper.toEntityList({{entityNameLowercase}}DtoList);
+        List<{{entityName}}> savedEntities = {{entityNameLowercase}}Service.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/{{entityNameLowercase}}s").build().toUri();
+
+        return ResponseEntity.created(location).body({{entityNameLowercase}}Mapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<{{entityName}}Dto> update{{entityName}}(
             @PathVariable Long id,

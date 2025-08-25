@@ -536,4 +536,10 @@ public class MusicTrackService extends BaseService<MusicTrack> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MusicTrack> saveAll(List<MusicTrack> musictrackList) {
+
+        return musictrackRepository.saveAll(musictrackList);
+    }
+
 }

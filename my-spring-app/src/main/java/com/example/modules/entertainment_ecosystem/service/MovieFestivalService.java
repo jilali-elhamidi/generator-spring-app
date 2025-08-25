@@ -113,4 +113,10 @@ public class MovieFestivalService extends BaseService<MovieFestival> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MovieFestival> saveAll(List<MovieFestival> moviefestivalList) {
+
+        return moviefestivalRepository.saveAll(moviefestivalList);
+    }
+
 }

@@ -105,4 +105,10 @@ public class EmployeeRoleService extends BaseService<EmployeeRole> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<EmployeeRole> saveAll(List<EmployeeRole> employeeroleList) {
+
+        return employeeroleRepository.saveAll(employeeroleList);
+    }
+
 }

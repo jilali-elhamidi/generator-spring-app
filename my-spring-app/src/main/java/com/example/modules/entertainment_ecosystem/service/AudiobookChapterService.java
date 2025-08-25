@@ -94,4 +94,10 @@ public class AudiobookChapterService extends BaseService<AudiobookChapter> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<AudiobookChapter> saveAll(List<AudiobookChapter> audiobookchapterList) {
+
+        return audiobookchapterRepository.saveAll(audiobookchapterList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class GameSessionController {
         return ResponseEntity.created(location).body(gamesessionMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GameSessionDto>> createAllGameSessions(
+            @Valid @RequestBody List<GameSessionDto> gamesessionDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<GameSession> entities = gamesessionMapper.toEntityList(gamesessionDtoList);
+        List<GameSession> savedEntities = gamesessionService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/gamesessions").build().toUri();
+
+        return ResponseEntity.created(location).body(gamesessionMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GameSessionDto> updateGameSession(
             @PathVariable Long id,

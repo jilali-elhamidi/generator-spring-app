@@ -105,4 +105,10 @@ public class DepartmentService extends BaseService<Department> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Department> saveAll(List<Department> departmentList) {
+
+        return departmentRepository.saveAll(departmentList);
+    }
+
 }

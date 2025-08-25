@@ -29,6 +29,7 @@ public class Document extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 2, max = 200)
+    @Column(unique = true, nullable = false)
     private String title;
 
     @NotNull

@@ -104,4 +104,10 @@ public class OnlineEventTypeService extends BaseService<OnlineEventType> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<OnlineEventType> saveAll(List<OnlineEventType> onlineeventtypeList) {
+
+        return onlineeventtypeRepository.saveAll(onlineeventtypeList);
+    }
+
 }

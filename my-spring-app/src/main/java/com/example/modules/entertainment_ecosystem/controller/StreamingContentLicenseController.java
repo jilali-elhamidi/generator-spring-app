@@ -55,6 +55,19 @@ public class StreamingContentLicenseController {
         return ResponseEntity.created(location).body(streamingcontentlicenseMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<StreamingContentLicenseDto>> createAllStreamingContentLicenses(
+            @Valid @RequestBody List<StreamingContentLicenseDto> streamingcontentlicenseDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<StreamingContentLicense> entities = streamingcontentlicenseMapper.toEntityList(streamingcontentlicenseDtoList);
+        List<StreamingContentLicense> savedEntities = streamingcontentlicenseService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/streamingcontentlicenses").build().toUri();
+
+        return ResponseEntity.created(location).body(streamingcontentlicenseMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<StreamingContentLicenseDto> updateStreamingContentLicense(
             @PathVariable Long id,

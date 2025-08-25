@@ -55,6 +55,19 @@ public class StreamingPlatformController {
         return ResponseEntity.created(location).body(streamingplatformMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<StreamingPlatformDto>> createAllStreamingPlatforms(
+            @Valid @RequestBody List<StreamingPlatformDto> streamingplatformDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<StreamingPlatform> entities = streamingplatformMapper.toEntityList(streamingplatformDtoList);
+        List<StreamingPlatform> savedEntities = streamingplatformService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/streamingplatforms").build().toUri();
+
+        return ResponseEntity.created(location).body(streamingplatformMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<StreamingPlatformDto> updateStreamingPlatform(
             @PathVariable Long id,

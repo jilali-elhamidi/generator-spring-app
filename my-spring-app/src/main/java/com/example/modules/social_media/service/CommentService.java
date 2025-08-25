@@ -60,34 +60,46 @@ public class CommentService extends BaseService<Comment> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (comment.getAuthor() != null &&
-            comment.getAuthor().getId() != null) {
-
-            Profile existingAuthor = authorRepository.findById(
-                comment.getAuthor().getId()
-            ).orElseThrow(() -> new RuntimeException("Profile not found"));
-
-            comment.setAuthor(existingAuthor);
+        if (comment.getAuthor() != null) {
+            if (comment.getAuthor().getId() != null) {
+                Profile existingAuthor = authorRepository.findById(
+                    comment.getAuthor().getId()
+                ).orElseThrow(() -> new RuntimeException("Profile not found with id "
+                    + comment.getAuthor().getId()));
+                comment.setAuthor(existingAuthor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Profile newAuthor = authorRepository.save(comment.getAuthor());
+                comment.setAuthor(newAuthor);
+            }
         }
         
-        if (comment.getPost() != null &&
-            comment.getPost().getId() != null) {
-
-            Post existingPost = postRepository.findById(
-                comment.getPost().getId()
-            ).orElseThrow(() -> new RuntimeException("Post not found"));
-
-            comment.setPost(existingPost);
+        if (comment.getPost() != null) {
+            if (comment.getPost().getId() != null) {
+                Post existingPost = postRepository.findById(
+                    comment.getPost().getId()
+                ).orElseThrow(() -> new RuntimeException("Post not found with id "
+                    + comment.getPost().getId()));
+                comment.setPost(existingPost);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Post newPost = postRepository.save(comment.getPost());
+                comment.setPost(newPost);
+            }
         }
         
-        if (comment.getParentComment() != null &&
-            comment.getParentComment().getId() != null) {
-
-            Comment existingParentComment = parentCommentRepository.findById(
-                comment.getParentComment().getId()
-            ).orElseThrow(() -> new RuntimeException("Comment not found"));
-
-            comment.setParentComment(existingParentComment);
+        if (comment.getParentComment() != null) {
+            if (comment.getParentComment().getId() != null) {
+                Comment existingParentComment = parentCommentRepository.findById(
+                    comment.getParentComment().getId()
+                ).orElseThrow(() -> new RuntimeException("Comment not found with id "
+                    + comment.getParentComment().getId()));
+                comment.setParentComment(existingParentComment);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Comment newParentComment = parentCommentRepository.save(comment.getParentComment());
+                comment.setParentComment(newParentComment);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -195,4 +207,10 @@ public class CommentService extends BaseService<Comment> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Comment> saveAll(List<Comment> commentList) {
+
+        return commentRepository.saveAll(commentList);
+    }
+
 }

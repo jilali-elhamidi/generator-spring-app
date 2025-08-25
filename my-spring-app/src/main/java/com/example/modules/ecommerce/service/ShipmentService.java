@@ -33,11 +33,17 @@ public class ShipmentService extends BaseService<Shipment> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (shipment.getOrder() != null) {
+            if (shipment.getOrder().getId() != null) {
+                Order existingOrder = orderRepository.findById(shipment.getOrder().getId())
+                    .orElseThrow(() -> new RuntimeException("Order not found with id "
+                        + shipment.getOrder().getId()));
+                shipment.setOrder(existingOrder);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Order newOrder = orderRepository.save(shipment.getOrder());
+                shipment.setOrder(newOrder);
+            }
 
-            shipment.setOrder(
-                orderRepository.findById(shipment.getOrder().getId())
-                    .orElseThrow(() -> new RuntimeException("order not found"))
-            );
             shipment.getOrder().setShipment(shipment);
         }
         
@@ -88,4 +94,10 @@ public class ShipmentService extends BaseService<Shipment> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Shipment> saveAll(List<Shipment> shipmentList) {
+
+        return shipmentRepository.saveAll(shipmentList);
+    }
+
 }

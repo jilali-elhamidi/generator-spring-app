@@ -55,6 +55,19 @@ public class ConnectionTypeController {
         return ResponseEntity.created(location).body(connectiontypeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ConnectionTypeDto>> createAllConnectionTypes(
+            @Valid @RequestBody List<ConnectionTypeDto> connectiontypeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ConnectionType> entities = connectiontypeMapper.toEntityList(connectiontypeDtoList);
+        List<ConnectionType> savedEntities = connectiontypeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/connectiontypes").build().toUri();
+
+        return ResponseEntity.created(location).body(connectiontypeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ConnectionTypeDto> updateConnectionType(
             @PathVariable Long id,

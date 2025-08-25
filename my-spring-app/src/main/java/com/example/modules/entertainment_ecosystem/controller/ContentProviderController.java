@@ -55,6 +55,19 @@ public class ContentProviderController {
         return ResponseEntity.created(location).body(contentproviderMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ContentProviderDto>> createAllContentProviders(
+            @Valid @RequestBody List<ContentProviderDto> contentproviderDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ContentProvider> entities = contentproviderMapper.toEntityList(contentproviderDtoList);
+        List<ContentProvider> savedEntities = contentproviderService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/contentproviders").build().toUri();
+
+        return ResponseEntity.created(location).body(contentproviderMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ContentProviderDto> updateContentProvider(
             @PathVariable Long id,

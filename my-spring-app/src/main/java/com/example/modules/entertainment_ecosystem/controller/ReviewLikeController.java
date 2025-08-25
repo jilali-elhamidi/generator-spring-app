@@ -55,6 +55,19 @@ public class ReviewLikeController {
         return ResponseEntity.created(location).body(reviewlikeMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ReviewLikeDto>> createAllReviewLikes(
+            @Valid @RequestBody List<ReviewLikeDto> reviewlikeDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ReviewLike> entities = reviewlikeMapper.toEntityList(reviewlikeDtoList);
+        List<ReviewLike> savedEntities = reviewlikeService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/reviewlikes").build().toUri();
+
+        return ResponseEntity.created(location).body(reviewlikeMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ReviewLikeDto> updateReviewLike(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class ArtistAwardController {
         return ResponseEntity.created(location).body(artistawardMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ArtistAwardDto>> createAllArtistAwards(
+            @Valid @RequestBody List<ArtistAwardDto> artistawardDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ArtistAward> entities = artistawardMapper.toEntityList(artistawardDtoList);
+        List<ArtistAward> savedEntities = artistawardService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/artistawards").build().toUri();
+
+        return ResponseEntity.created(location).body(artistawardMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ArtistAwardDto> updateArtistAward(
             @PathVariable Long id,

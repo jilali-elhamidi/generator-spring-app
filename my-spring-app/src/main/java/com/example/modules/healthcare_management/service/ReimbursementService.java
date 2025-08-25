@@ -31,14 +31,18 @@ public class ReimbursementService extends BaseService<Reimbursement> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (reimbursement.getInvoice() != null &&
-            reimbursement.getInvoice().getId() != null) {
-
-            Invoice existingInvoice = invoiceRepository.findById(
-                reimbursement.getInvoice().getId()
-            ).orElseThrow(() -> new RuntimeException("Invoice not found"));
-
-            reimbursement.setInvoice(existingInvoice);
+        if (reimbursement.getInvoice() != null) {
+            if (reimbursement.getInvoice().getId() != null) {
+                Invoice existingInvoice = invoiceRepository.findById(
+                    reimbursement.getInvoice().getId()
+                ).orElseThrow(() -> new RuntimeException("Invoice not found with id "
+                    + reimbursement.getInvoice().getId()));
+                reimbursement.setInvoice(existingInvoice);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Invoice newInvoice = invoiceRepository.save(reimbursement.getInvoice());
+                reimbursement.setInvoice(newInvoice);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -90,4 +94,10 @@ public class ReimbursementService extends BaseService<Reimbursement> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Reimbursement> saveAll(List<Reimbursement> reimbursementList) {
+
+        return reimbursementRepository.saveAll(reimbursementList);
+    }
+
 }

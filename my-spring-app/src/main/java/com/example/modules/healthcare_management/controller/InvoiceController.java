@@ -55,6 +55,19 @@ public class InvoiceController {
         return ResponseEntity.created(location).body(invoiceMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<InvoiceDto>> createAllInvoices(
+            @Valid @RequestBody List<InvoiceDto> invoiceDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Invoice> entities = invoiceMapper.toEntityList(invoiceDtoList);
+        List<Invoice> savedEntities = invoiceService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/invoices").build().toUri();
+
+        return ResponseEntity.created(location).body(invoiceMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<InvoiceDto> updateInvoice(
             @PathVariable Long id,

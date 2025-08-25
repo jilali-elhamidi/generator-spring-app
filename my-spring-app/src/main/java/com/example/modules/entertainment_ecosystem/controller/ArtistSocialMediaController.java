@@ -55,6 +55,19 @@ public class ArtistSocialMediaController {
         return ResponseEntity.created(location).body(artistsocialmediaMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ArtistSocialMediaDto>> createAllArtistSocialMedias(
+            @Valid @RequestBody List<ArtistSocialMediaDto> artistsocialmediaDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ArtistSocialMedia> entities = artistsocialmediaMapper.toEntityList(artistsocialmediaDtoList);
+        List<ArtistSocialMedia> savedEntities = artistsocialmediaService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/artistsocialmedias").build().toUri();
+
+        return ResponseEntity.created(location).body(artistsocialmediaMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ArtistSocialMediaDto> updateArtistSocialMedia(
             @PathVariable Long id,

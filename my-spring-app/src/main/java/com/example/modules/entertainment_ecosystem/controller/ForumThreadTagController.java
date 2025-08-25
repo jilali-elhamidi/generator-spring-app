@@ -55,6 +55,19 @@ public class ForumThreadTagController {
         return ResponseEntity.created(location).body(forumthreadtagMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ForumThreadTagDto>> createAllForumThreadTags(
+            @Valid @RequestBody List<ForumThreadTagDto> forumthreadtagDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ForumThreadTag> entities = forumthreadtagMapper.toEntityList(forumthreadtagDtoList);
+        List<ForumThreadTag> savedEntities = forumthreadtagService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/forumthreadtags").build().toUri();
+
+        return ResponseEntity.created(location).body(forumthreadtagMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ForumThreadTagDto> updateForumThreadTag(
             @PathVariable Long id,

@@ -52,14 +52,18 @@ public class MilestoneService extends BaseService<Milestone> {
     
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (milestone.getProject() != null &&
-            milestone.getProject().getId() != null) {
-
-            Project existingProject = projectRepository.findById(
-                milestone.getProject().getId()
-            ).orElseThrow(() -> new RuntimeException("Project not found"));
-
-            milestone.setProject(existingProject);
+        if (milestone.getProject() != null) {
+            if (milestone.getProject().getId() != null) {
+                Project existingProject = projectRepository.findById(
+                    milestone.getProject().getId()
+                ).orElseThrow(() -> new RuntimeException("Project not found with id "
+                    + milestone.getProject().getId()));
+                milestone.setProject(existingProject);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Project newProject = projectRepository.save(milestone.getProject());
+                milestone.setProject(newProject);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -136,4 +140,10 @@ public class MilestoneService extends BaseService<Milestone> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Milestone> saveAll(List<Milestone> milestoneList) {
+
+        return milestoneRepository.saveAll(milestoneList);
+    }
+
 }

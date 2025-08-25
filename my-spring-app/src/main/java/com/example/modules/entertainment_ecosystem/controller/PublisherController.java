@@ -55,6 +55,19 @@ public class PublisherController {
         return ResponseEntity.created(location).body(publisherMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<PublisherDto>> createAllPublishers(
+            @Valid @RequestBody List<PublisherDto> publisherDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Publisher> entities = publisherMapper.toEntityList(publisherDtoList);
+        List<Publisher> savedEntities = publisherService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/publishers").build().toUri();
+
+        return ResponseEntity.created(location).body(publisherMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<PublisherDto> updatePublisher(
             @PathVariable Long id,

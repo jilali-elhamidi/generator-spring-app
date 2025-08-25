@@ -55,6 +55,19 @@ public class ConcertVenueController {
         return ResponseEntity.created(location).body(concertvenueMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ConcertVenueDto>> createAllConcertVenues(
+            @Valid @RequestBody List<ConcertVenueDto> concertvenueDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ConcertVenue> entities = concertvenueMapper.toEntityList(concertvenueDtoList);
+        List<ConcertVenue> savedEntities = concertvenueService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/concertvenues").build().toUri();
+
+        return ResponseEntity.created(location).body(concertvenueMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ConcertVenueDto> updateConcertVenue(
             @PathVariable Long id,

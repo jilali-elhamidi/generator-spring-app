@@ -104,4 +104,10 @@ public class OnlinePlatformService extends BaseService<OnlinePlatform> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<OnlinePlatform> saveAll(List<OnlinePlatform> onlineplatformList) {
+
+        return onlineplatformRepository.saveAll(onlineplatformList);
+    }
+
 }

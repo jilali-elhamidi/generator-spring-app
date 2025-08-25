@@ -129,10 +129,18 @@ public class TaskService extends BaseService<Task> {
         if (task.getTags() != null &&
             !task.getTags().isEmpty()) {
 
-            List<Tag> attachedTags = task.getTags().stream()
-            .map(item -> tagsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Tag not found with id " + item.getId())))
-            .toList();
+            List<Tag> attachedTags = new ArrayList<>();
+            for (Tag item : task.getTags()) {
+                if (item.getId() != null) {
+                    Tag existingItem = tagsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Tag not found with id " + item.getId()));
+                    attachedTags.add(existingItem);
+                } else {
+
+                    Tag newItem = tagsRepository.save(item);
+                    attachedTags.add(newItem);
+                }
+            }
 
             task.setTags(attachedTags);
 
@@ -141,34 +149,46 @@ public class TaskService extends BaseService<Task> {
         }
         
     // ---------- ManyToOne ----------
-        if (task.getProject() != null &&
-            task.getProject().getId() != null) {
-
-            Project existingProject = projectRepository.findById(
-                task.getProject().getId()
-            ).orElseThrow(() -> new RuntimeException("Project not found"));
-
-            task.setProject(existingProject);
+        if (task.getProject() != null) {
+            if (task.getProject().getId() != null) {
+                Project existingProject = projectRepository.findById(
+                    task.getProject().getId()
+                ).orElseThrow(() -> new RuntimeException("Project not found with id "
+                    + task.getProject().getId()));
+                task.setProject(existingProject);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Project newProject = projectRepository.save(task.getProject());
+                task.setProject(newProject);
+            }
         }
         
-        if (task.getAssignee() != null &&
-            task.getAssignee().getId() != null) {
-
-            TeamMember existingAssignee = assigneeRepository.findById(
-                task.getAssignee().getId()
-            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-
-            task.setAssignee(existingAssignee);
+        if (task.getAssignee() != null) {
+            if (task.getAssignee().getId() != null) {
+                TeamMember existingAssignee = assigneeRepository.findById(
+                    task.getAssignee().getId()
+                ).orElseThrow(() -> new RuntimeException("TeamMember not found with id "
+                    + task.getAssignee().getId()));
+                task.setAssignee(existingAssignee);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TeamMember newAssignee = assigneeRepository.save(task.getAssignee());
+                task.setAssignee(newAssignee);
+            }
         }
         
-        if (task.getMilestone() != null &&
-            task.getMilestone().getId() != null) {
-
-            Milestone existingMilestone = milestoneRepository.findById(
-                task.getMilestone().getId()
-            ).orElseThrow(() -> new RuntimeException("Milestone not found"));
-
-            task.setMilestone(existingMilestone);
+        if (task.getMilestone() != null) {
+            if (task.getMilestone().getId() != null) {
+                Milestone existingMilestone = milestoneRepository.findById(
+                    task.getMilestone().getId()
+                ).orElseThrow(() -> new RuntimeException("Milestone not found with id "
+                    + task.getMilestone().getId()));
+                task.setMilestone(existingMilestone);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Milestone newMilestone = milestoneRepository.save(task.getMilestone());
+                task.setMilestone(newMilestone);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -380,4 +400,10 @@ public class TaskService extends BaseService<Task> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Task> saveAll(List<Task> taskList) {
+
+        return taskRepository.saveAll(taskList);
+    }
+
 }

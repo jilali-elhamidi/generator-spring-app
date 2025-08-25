@@ -55,6 +55,19 @@ public class PostController {
         return ResponseEntity.created(location).body(postMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<PostDto>> createAllPosts(
+            @Valid @RequestBody List<PostDto> postDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Post> entities = postMapper.toEntityList(postDtoList);
+        List<Post> savedEntities = postService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/posts").build().toUri();
+
+        return ResponseEntity.created(location).body(postMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<PostDto> updatePost(
             @PathVariable Long id,

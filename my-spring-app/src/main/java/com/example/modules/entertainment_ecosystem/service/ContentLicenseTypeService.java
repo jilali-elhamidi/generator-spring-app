@@ -105,4 +105,10 @@ public class ContentLicenseTypeService extends BaseService<ContentLicenseType> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ContentLicenseType> saveAll(List<ContentLicenseType> contentlicensetypeList) {
+
+        return contentlicensetypeRepository.saveAll(contentlicensetypeList);
+    }
+
 }

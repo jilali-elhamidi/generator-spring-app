@@ -29,6 +29,7 @@ public class Medication extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(max = 100)
+    @Column(unique = true, nullable = false)
     private String name;
 
     @Size(max = 50)

@@ -29,6 +29,7 @@ public class Project extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 5, max = 200)
+    @Column(unique = true, nullable = false)
     private String projectName;
 
     @Size(max = 1000)

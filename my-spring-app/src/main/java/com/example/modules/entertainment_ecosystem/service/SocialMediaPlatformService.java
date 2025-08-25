@@ -105,4 +105,10 @@ public class SocialMediaPlatformService extends BaseService<SocialMediaPlatform>
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<SocialMediaPlatform> saveAll(List<SocialMediaPlatform> socialmediaplatformList) {
+
+        return socialmediaplatformRepository.saveAll(socialmediaplatformList);
+    }
+
 }

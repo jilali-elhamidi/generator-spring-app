@@ -35,24 +35,32 @@ public class OrderItemService extends BaseService<OrderItem> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (orderitem.getProduct() != null &&
-            orderitem.getProduct().getId() != null) {
-
-            Product existingProduct = productRepository.findById(
-                orderitem.getProduct().getId()
-            ).orElseThrow(() -> new RuntimeException("Product not found"));
-
-            orderitem.setProduct(existingProduct);
+        if (orderitem.getProduct() != null) {
+            if (orderitem.getProduct().getId() != null) {
+                Product existingProduct = productRepository.findById(
+                    orderitem.getProduct().getId()
+                ).orElseThrow(() -> new RuntimeException("Product not found with id "
+                    + orderitem.getProduct().getId()));
+                orderitem.setProduct(existingProduct);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Product newProduct = productRepository.save(orderitem.getProduct());
+                orderitem.setProduct(newProduct);
+            }
         }
         
-        if (orderitem.getOrder() != null &&
-            orderitem.getOrder().getId() != null) {
-
-            Order existingOrder = orderRepository.findById(
-                orderitem.getOrder().getId()
-            ).orElseThrow(() -> new RuntimeException("Order not found"));
-
-            orderitem.setOrder(existingOrder);
+        if (orderitem.getOrder() != null) {
+            if (orderitem.getOrder().getId() != null) {
+                Order existingOrder = orderRepository.findById(
+                    orderitem.getOrder().getId()
+                ).orElseThrow(() -> new RuntimeException("Order not found with id "
+                    + orderitem.getOrder().getId()));
+                orderitem.setOrder(existingOrder);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Order newOrder = orderRepository.save(orderitem.getOrder());
+                orderitem.setOrder(newOrder);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -119,4 +127,10 @@ public class OrderItemService extends BaseService<OrderItem> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<OrderItem> saveAll(List<OrderItem> orderitemList) {
+
+        return orderitemRepository.saveAll(orderitemList);
+    }
+
 }

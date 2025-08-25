@@ -126,4 +126,10 @@ public class ArtistSocialMediaService extends BaseService<ArtistSocialMedia> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ArtistSocialMedia> saveAll(List<ArtistSocialMedia> artistsocialmediaList) {
+
+        return artistsocialmediaRepository.saveAll(artistsocialmediaList);
+    }
+
 }

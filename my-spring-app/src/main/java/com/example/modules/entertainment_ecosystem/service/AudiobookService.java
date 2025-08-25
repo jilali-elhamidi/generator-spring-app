@@ -175,4 +175,10 @@ public class AudiobookService extends BaseService<Audiobook> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Audiobook> saveAll(List<Audiobook> audiobookList) {
+
+        return audiobookRepository.saveAll(audiobookList);
+    }
+
 }

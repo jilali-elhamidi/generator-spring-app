@@ -55,6 +55,19 @@ public class MedicalFileController {
         return ResponseEntity.created(location).body(medicalfileMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MedicalFileDto>> createAllMedicalFiles(
+            @Valid @RequestBody List<MedicalFileDto> medicalfileDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MedicalFile> entities = medicalfileMapper.toEntityList(medicalfileDtoList);
+        List<MedicalFile> savedEntities = medicalfileService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/medicalfiles").build().toUri();
+
+        return ResponseEntity.created(location).body(medicalfileMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MedicalFileDto> updateMedicalFile(
             @PathVariable Long id,

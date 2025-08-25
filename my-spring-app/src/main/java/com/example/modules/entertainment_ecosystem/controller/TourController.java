@@ -55,6 +55,19 @@ public class TourController {
         return ResponseEntity.created(location).body(tourMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TourDto>> createAllTours(
+            @Valid @RequestBody List<TourDto> tourDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Tour> entities = tourMapper.toEntityList(tourDtoList);
+        List<Tour> savedEntities = tourService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/tours").build().toUri();
+
+        return ResponseEntity.created(location).body(tourMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TourDto> updateTour(
             @PathVariable Long id,

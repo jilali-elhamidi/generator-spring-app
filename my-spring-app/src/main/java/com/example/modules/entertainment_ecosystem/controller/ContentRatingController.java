@@ -55,6 +55,19 @@ public class ContentRatingController {
         return ResponseEntity.created(location).body(contentratingMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ContentRatingDto>> createAllContentRatings(
+            @Valid @RequestBody List<ContentRatingDto> contentratingDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ContentRating> entities = contentratingMapper.toEntityList(contentratingDtoList);
+        List<ContentRating> savedEntities = contentratingService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/contentratings").build().toUri();
+
+        return ResponseEntity.created(location).body(contentratingMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ContentRatingDto> updateContentRating(
             @PathVariable Long id,

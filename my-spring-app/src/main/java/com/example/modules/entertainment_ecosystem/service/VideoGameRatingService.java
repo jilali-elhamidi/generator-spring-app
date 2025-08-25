@@ -93,4 +93,10 @@ public class VideoGameRatingService extends BaseService<VideoGameRating> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<VideoGameRating> saveAll(List<VideoGameRating> videogameratingList) {
+
+        return videogameratingRepository.saveAll(videogameratingList);
+    }
+
 }

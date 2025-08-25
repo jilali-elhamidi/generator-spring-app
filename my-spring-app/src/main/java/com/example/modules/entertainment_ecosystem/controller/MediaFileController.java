@@ -55,6 +55,19 @@ public class MediaFileController {
         return ResponseEntity.created(location).body(mediafileMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MediaFileDto>> createAllMediaFiles(
+            @Valid @RequestBody List<MediaFileDto> mediafileDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MediaFile> entities = mediafileMapper.toEntityList(mediafileDtoList);
+        List<MediaFile> savedEntities = mediafileService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/mediafiles").build().toUri();
+
+        return ResponseEntity.created(location).body(mediafileMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MediaFileDto> updateMediaFile(
             @PathVariable Long id,

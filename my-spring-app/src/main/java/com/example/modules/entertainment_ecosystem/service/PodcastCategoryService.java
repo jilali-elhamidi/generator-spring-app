@@ -110,4 +110,10 @@ public class PodcastCategoryService extends BaseService<PodcastCategory> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<PodcastCategory> saveAll(List<PodcastCategory> podcastcategoryList) {
+
+        return podcastcategoryRepository.saveAll(podcastcategoryList);
+    }
+
 }

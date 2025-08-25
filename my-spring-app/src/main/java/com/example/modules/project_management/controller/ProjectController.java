@@ -55,6 +55,19 @@ public class ProjectController {
         return ResponseEntity.created(location).body(projectMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ProjectDto>> createAllProjects(
+            @Valid @RequestBody List<ProjectDto> projectDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Project> entities = projectMapper.toEntityList(projectDtoList);
+        List<Project> savedEntities = projectService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/projects").build().toUri();
+
+        return ResponseEntity.created(location).body(projectMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ProjectDto> updateProject(
             @PathVariable Long id,

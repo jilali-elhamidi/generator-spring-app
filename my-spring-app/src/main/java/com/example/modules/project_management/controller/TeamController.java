@@ -55,6 +55,19 @@ public class TeamController {
         return ResponseEntity.created(location).body(teamMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TeamDto>> createAllTeams(
+            @Valid @RequestBody List<TeamDto> teamDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Team> entities = teamMapper.toEntityList(teamDtoList);
+        List<Team> savedEntities = teamService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/teams").build().toUri();
+
+        return ResponseEntity.created(location).body(teamMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TeamDto> updateTeam(
             @PathVariable Long id,

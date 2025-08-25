@@ -33,10 +33,18 @@ public class RoleService extends BaseService<Role> {
         if (role.getProfiles() != null &&
             !role.getProfiles().isEmpty()) {
 
-            List<Profile> attachedProfiles = role.getProfiles().stream()
-            .map(item -> profilesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Profile not found with id " + item.getId())))
-            .toList();
+            List<Profile> attachedProfiles = new ArrayList<>();
+            for (Profile item : role.getProfiles()) {
+                if (item.getId() != null) {
+                    Profile existingItem = profilesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Profile not found with id " + item.getId()));
+                    attachedProfiles.add(existingItem);
+                } else {
+
+                    Profile newItem = profilesRepository.save(item);
+                    attachedProfiles.add(newItem);
+                }
+            }
 
             role.setProfiles(attachedProfiles);
 
@@ -102,4 +110,10 @@ public class RoleService extends BaseService<Role> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Role> saveAll(List<Role> roleList) {
+
+        return roleRepository.saveAll(roleList);
+    }
+
 }

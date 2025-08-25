@@ -55,6 +55,19 @@ public class AdPlacementController {
         return ResponseEntity.created(location).body(adplacementMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<AdPlacementDto>> createAllAdPlacements(
+            @Valid @RequestBody List<AdPlacementDto> adplacementDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<AdPlacement> entities = adplacementMapper.toEntityList(adplacementDtoList);
+        List<AdPlacement> savedEntities = adplacementService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/adplacements").build().toUri();
+
+        return ResponseEntity.created(location).body(adplacementMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AdPlacementDto> updateAdPlacement(
             @PathVariable Long id,

@@ -29,7 +29,7 @@ public class Ticket extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 5, max = 20)
-        @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String ticketNumber;
 
     @NotNull

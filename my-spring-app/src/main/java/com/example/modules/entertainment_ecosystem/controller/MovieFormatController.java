@@ -55,6 +55,19 @@ public class MovieFormatController {
         return ResponseEntity.created(location).body(movieformatMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MovieFormatDto>> createAllMovieFormats(
+            @Valid @RequestBody List<MovieFormatDto> movieformatDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MovieFormat> entities = movieformatMapper.toEntityList(movieformatDtoList);
+        List<MovieFormat> savedEntities = movieformatService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/movieformats").build().toUri();
+
+        return ResponseEntity.created(location).body(movieformatMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MovieFormatDto> updateMovieFormat(
             @PathVariable Long id,

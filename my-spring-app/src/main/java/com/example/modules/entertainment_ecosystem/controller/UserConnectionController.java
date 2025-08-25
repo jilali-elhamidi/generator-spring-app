@@ -55,6 +55,19 @@ public class UserConnectionController {
         return ResponseEntity.created(location).body(userconnectionMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserConnectionDto>> createAllUserConnections(
+            @Valid @RequestBody List<UserConnectionDto> userconnectionDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserConnection> entities = userconnectionMapper.toEntityList(userconnectionDtoList);
+        List<UserConnection> savedEntities = userconnectionService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userconnections").build().toUri();
+
+        return ResponseEntity.created(location).body(userconnectionMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserConnectionDto> updateUserConnection(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class UserPreferenceController {
         return ResponseEntity.created(location).body(userpreferenceMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserPreferenceDto>> createAllUserPreferences(
+            @Valid @RequestBody List<UserPreferenceDto> userpreferenceDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserPreference> entities = userpreferenceMapper.toEntityList(userpreferenceDtoList);
+        List<UserPreference> savedEntities = userpreferenceService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userpreferences").build().toUri();
+
+        return ResponseEntity.created(location).body(userpreferenceMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserPreferenceDto> updateUserPreference(
             @PathVariable Long id,

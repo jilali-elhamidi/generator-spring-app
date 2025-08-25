@@ -29,7 +29,7 @@ public class MusicGenreCategory extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 2, max = 50)
-        @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String name;
 
 

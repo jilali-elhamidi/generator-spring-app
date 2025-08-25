@@ -105,4 +105,10 @@ public class ContentRatingAgeGroupService extends BaseService<ContentRatingAgeGr
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ContentRatingAgeGroup> saveAll(List<ContentRatingAgeGroup> contentratingagegroupList) {
+
+        return contentratingagegroupRepository.saveAll(contentratingagegroupList);
+    }
+
 }

@@ -145,4 +145,10 @@ public class PodcastGuestService extends BaseService<PodcastGuest> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<PodcastGuest> saveAll(List<PodcastGuest> podcastguestList) {
+
+        return podcastguestRepository.saveAll(podcastguestList);
+    }
+
 }

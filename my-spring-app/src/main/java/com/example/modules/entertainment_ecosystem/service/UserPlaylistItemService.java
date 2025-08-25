@@ -160,4 +160,10 @@ public class UserPlaylistItemService extends BaseService<UserPlaylistItem> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserPlaylistItem> saveAll(List<UserPlaylistItem> userplaylistitemList) {
+
+        return userplaylistitemRepository.saveAll(userplaylistitemList);
+    }
+
 }

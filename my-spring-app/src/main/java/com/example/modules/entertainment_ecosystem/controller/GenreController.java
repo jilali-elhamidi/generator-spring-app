@@ -55,6 +55,19 @@ public class GenreController {
         return ResponseEntity.created(location).body(genreMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GenreDto>> createAllGenres(
+            @Valid @RequestBody List<GenreDto> genreDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Genre> entities = genreMapper.toEntityList(genreDtoList);
+        List<Genre> savedEntities = genreService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/genres").build().toUri();
+
+        return ResponseEntity.created(location).body(genreMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GenreDto> updateGenre(
             @PathVariable Long id,

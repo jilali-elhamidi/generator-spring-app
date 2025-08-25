@@ -55,6 +55,19 @@ public class ManagerController {
         return ResponseEntity.created(location).body(managerMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ManagerDto>> createAllManagers(
+            @Valid @RequestBody List<ManagerDto> managerDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Manager> entities = managerMapper.toEntityList(managerDtoList);
+        List<Manager> savedEntities = managerService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/managers").build().toUri();
+
+        return ResponseEntity.created(location).body(managerMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ManagerDto> updateManager(
             @PathVariable Long id,

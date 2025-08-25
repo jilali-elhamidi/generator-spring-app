@@ -55,6 +55,19 @@ public class AudiobookController {
         return ResponseEntity.created(location).body(audiobookMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<AudiobookDto>> createAllAudiobooks(
+            @Valid @RequestBody List<AudiobookDto> audiobookDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Audiobook> entities = audiobookMapper.toEntityList(audiobookDtoList);
+        List<Audiobook> savedEntities = audiobookService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/audiobooks").build().toUri();
+
+        return ResponseEntity.created(location).body(audiobookMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AudiobookDto> updateAudiobook(
             @PathVariable Long id,

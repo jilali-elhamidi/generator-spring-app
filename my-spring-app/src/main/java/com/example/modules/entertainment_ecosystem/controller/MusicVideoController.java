@@ -55,6 +55,19 @@ public class MusicVideoController {
         return ResponseEntity.created(location).body(musicvideoMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MusicVideoDto>> createAllMusicVideos(
+            @Valid @RequestBody List<MusicVideoDto> musicvideoDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MusicVideo> entities = musicvideoMapper.toEntityList(musicvideoDtoList);
+        List<MusicVideo> savedEntities = musicvideoService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/musicvideos").build().toUri();
+
+        return ResponseEntity.created(location).body(musicvideoMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MusicVideoDto> updateMusicVideo(
             @PathVariable Long id,

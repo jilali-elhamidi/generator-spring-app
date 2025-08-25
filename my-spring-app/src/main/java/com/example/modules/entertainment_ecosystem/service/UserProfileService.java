@@ -2854,4 +2854,10 @@ public class UserProfileService extends BaseService<UserProfile> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserProfile> saveAll(List<UserProfile> userprofileList) {
+
+        return userprofileRepository.saveAll(userprofileList);
+    }
+
 }

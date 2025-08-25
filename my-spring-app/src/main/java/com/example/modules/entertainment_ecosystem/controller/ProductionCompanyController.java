@@ -55,6 +55,19 @@ public class ProductionCompanyController {
         return ResponseEntity.created(location).body(productioncompanyMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ProductionCompanyDto>> createAllProductionCompanys(
+            @Valid @RequestBody List<ProductionCompanyDto> productioncompanyDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<ProductionCompany> entities = productioncompanyMapper.toEntityList(productioncompanyDtoList);
+        List<ProductionCompany> savedEntities = productioncompanyService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/productioncompanys").build().toUri();
+
+        return ResponseEntity.created(location).body(productioncompanyMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ProductionCompanyDto> updateProductionCompany(
             @PathVariable Long id,

@@ -29,7 +29,7 @@ public class UserMessage extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 1, max = 100)
-        @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String subject;
 
     @NotNull

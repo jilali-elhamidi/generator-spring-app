@@ -150,10 +150,18 @@ public class ProfileService extends BaseService<Profile> {
         if (profile.getFollowers() != null &&
             !profile.getFollowers().isEmpty()) {
 
-            List<Profile> attachedFollowers = profile.getFollowers().stream()
-            .map(item -> followersRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Profile not found with id " + item.getId())))
-            .toList();
+            List<Profile> attachedFollowers = new ArrayList<>();
+            for (Profile item : profile.getFollowers()) {
+                if (item.getId() != null) {
+                    Profile existingItem = followersRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Profile not found with id " + item.getId()));
+                    attachedFollowers.add(existingItem);
+                } else {
+
+                    Profile newItem = followersRepository.save(item);
+                    attachedFollowers.add(newItem);
+                }
+            }
 
             profile.setFollowers(attachedFollowers);
 
@@ -164,10 +172,18 @@ public class ProfileService extends BaseService<Profile> {
         if (profile.getFollowing() != null &&
             !profile.getFollowing().isEmpty()) {
 
-            List<Profile> attachedFollowing = profile.getFollowing().stream()
-            .map(item -> followingRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Profile not found with id " + item.getId())))
-            .toList();
+            List<Profile> attachedFollowing = new ArrayList<>();
+            for (Profile item : profile.getFollowing()) {
+                if (item.getId() != null) {
+                    Profile existingItem = followingRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Profile not found with id " + item.getId()));
+                    attachedFollowing.add(existingItem);
+                } else {
+
+                    Profile newItem = followingRepository.save(item);
+                    attachedFollowing.add(newItem);
+                }
+            }
 
             profile.setFollowing(attachedFollowing);
 
@@ -178,10 +194,18 @@ public class ProfileService extends BaseService<Profile> {
         if (profile.getRoles() != null &&
             !profile.getRoles().isEmpty()) {
 
-            List<Role> attachedRoles = profile.getRoles().stream()
-            .map(item -> rolesRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Role not found with id " + item.getId())))
-            .toList();
+            List<Role> attachedRoles = new ArrayList<>();
+            for (Role item : profile.getRoles()) {
+                if (item.getId() != null) {
+                    Role existingItem = rolesRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Role not found with id " + item.getId()));
+                    attachedRoles.add(existingItem);
+                } else {
+
+                    Role newItem = rolesRepository.save(item);
+                    attachedRoles.add(newItem);
+                }
+            }
 
             profile.setRoles(attachedRoles);
 
@@ -192,10 +216,18 @@ public class ProfileService extends BaseService<Profile> {
         if (profile.getGroups() != null &&
             !profile.getGroups().isEmpty()) {
 
-            List<Group> attachedGroups = profile.getGroups().stream()
-            .map(item -> groupsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Group not found with id " + item.getId())))
-            .toList();
+            List<Group> attachedGroups = new ArrayList<>();
+            for (Group item : profile.getGroups()) {
+                if (item.getId() != null) {
+                    Group existingItem = groupsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Group not found with id " + item.getId()));
+                    attachedGroups.add(existingItem);
+                } else {
+
+                    Group newItem = groupsRepository.save(item);
+                    attachedGroups.add(newItem);
+                }
+            }
 
             profile.setGroups(attachedGroups);
 
@@ -468,4 +500,10 @@ public class ProfileService extends BaseService<Profile> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Profile> saveAll(List<Profile> profileList) {
+
+        return profileRepository.saveAll(profileList);
+    }
+
 }

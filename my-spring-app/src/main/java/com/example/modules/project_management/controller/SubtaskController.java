@@ -55,6 +55,19 @@ public class SubtaskController {
         return ResponseEntity.created(location).body(subtaskMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<SubtaskDto>> createAllSubtasks(
+            @Valid @RequestBody List<SubtaskDto> subtaskDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Subtask> entities = subtaskMapper.toEntityList(subtaskDtoList);
+        List<Subtask> savedEntities = subtaskService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/subtasks").build().toUri();
+
+        return ResponseEntity.created(location).body(subtaskMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SubtaskDto> updateSubtask(
             @PathVariable Long id,

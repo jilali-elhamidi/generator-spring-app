@@ -35,24 +35,32 @@ public class TimeLogService extends BaseService<TimeLog> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (timelog.getTask() != null &&
-            timelog.getTask().getId() != null) {
-
-            Task existingTask = taskRepository.findById(
-                timelog.getTask().getId()
-            ).orElseThrow(() -> new RuntimeException("Task not found"));
-
-            timelog.setTask(existingTask);
+        if (timelog.getTask() != null) {
+            if (timelog.getTask().getId() != null) {
+                Task existingTask = taskRepository.findById(
+                    timelog.getTask().getId()
+                ).orElseThrow(() -> new RuntimeException("Task not found with id "
+                    + timelog.getTask().getId()));
+                timelog.setTask(existingTask);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Task newTask = taskRepository.save(timelog.getTask());
+                timelog.setTask(newTask);
+            }
         }
         
-        if (timelog.getUser() != null &&
-            timelog.getUser().getId() != null) {
-
-            TeamMember existingUser = userRepository.findById(
-                timelog.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("TeamMember not found"));
-
-            timelog.setUser(existingUser);
+        if (timelog.getUser() != null) {
+            if (timelog.getUser().getId() != null) {
+                TeamMember existingUser = userRepository.findById(
+                    timelog.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("TeamMember not found with id "
+                    + timelog.getUser().getId()));
+                timelog.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                TeamMember newUser = userRepository.save(timelog.getUser());
+                timelog.setUser(newUser);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -120,4 +128,10 @@ public class TimeLogService extends BaseService<TimeLog> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<TimeLog> saveAll(List<TimeLog> timelogList) {
+
+        return timelogRepository.saveAll(timelogList);
+    }
+
 }

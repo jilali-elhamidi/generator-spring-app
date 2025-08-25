@@ -30,7 +30,7 @@ public class ReviewRating extends BaseEntity {
     @NotNull
     @Min(1)
     @Max(5)
-        @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private Integer score;
 
     @NotNull

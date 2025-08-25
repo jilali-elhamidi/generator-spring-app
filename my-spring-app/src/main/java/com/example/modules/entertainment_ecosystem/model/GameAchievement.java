@@ -29,7 +29,7 @@ public class GameAchievement extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 2, max = 100)
-        @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String name;
 
     @NotNull

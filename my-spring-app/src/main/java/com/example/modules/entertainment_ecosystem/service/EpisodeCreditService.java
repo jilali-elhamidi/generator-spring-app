@@ -126,4 +126,10 @@ public class EpisodeCreditService extends BaseService<EpisodeCredit> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<EpisodeCredit> saveAll(List<EpisodeCredit> episodecreditList) {
+
+        return episodecreditRepository.saveAll(episodecreditList);
+    }
+
 }

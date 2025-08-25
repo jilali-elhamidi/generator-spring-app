@@ -55,6 +55,19 @@ public class MusicTrackController {
         return ResponseEntity.created(location).body(musictrackMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MusicTrackDto>> createAllMusicTracks(
+            @Valid @RequestBody List<MusicTrackDto> musictrackDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MusicTrack> entities = musictrackMapper.toEntityList(musictrackDtoList);
+        List<MusicTrack> savedEntities = musictrackService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/musictracks").build().toUri();
+
+        return ResponseEntity.created(location).body(musictrackMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MusicTrackDto> updateMusicTrack(
             @PathVariable Long id,

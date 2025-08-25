@@ -138,4 +138,10 @@ public class BookingService extends BaseService<Booking> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Booking> saveAll(List<Booking> bookingList) {
+
+        return bookingRepository.saveAll(bookingList);
+    }
+
 }

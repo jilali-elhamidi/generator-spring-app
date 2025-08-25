@@ -55,6 +55,19 @@ public class ShipmentController {
         return ResponseEntity.created(location).body(shipmentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ShipmentDto>> createAllShipments(
+            @Valid @RequestBody List<ShipmentDto> shipmentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Shipment> entities = shipmentMapper.toEntityList(shipmentDtoList);
+        List<Shipment> savedEntities = shipmentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/shipments").build().toUri();
+
+        return ResponseEntity.created(location).body(shipmentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ShipmentDto> updateShipment(
             @PathVariable Long id,

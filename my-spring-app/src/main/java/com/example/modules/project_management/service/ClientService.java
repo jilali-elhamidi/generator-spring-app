@@ -153,4 +153,10 @@ public class ClientService extends BaseService<Client> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Client> saveAll(List<Client> clientList) {
+
+        return clientRepository.saveAll(clientList);
+    }
+
 }

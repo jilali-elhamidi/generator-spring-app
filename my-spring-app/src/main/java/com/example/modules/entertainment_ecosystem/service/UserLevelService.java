@@ -106,4 +106,10 @@ public class UserLevelService extends BaseService<UserLevel> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserLevel> saveAll(List<UserLevel> userlevelList) {
+
+        return userlevelRepository.saveAll(userlevelList);
+    }
+
 }

@@ -413,4 +413,10 @@ public class ReviewService extends BaseService<Review> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Review> saveAll(List<Review> reviewList) {
+
+        return reviewRepository.saveAll(reviewList);
+    }
+
 }

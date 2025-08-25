@@ -55,6 +55,19 @@ public class PaymentMethodController {
         return ResponseEntity.created(location).body(paymentmethodMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<PaymentMethodDto>> createAllPaymentMethods(
+            @Valid @RequestBody List<PaymentMethodDto> paymentmethodDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<PaymentMethod> entities = paymentmethodMapper.toEntityList(paymentmethodDtoList);
+        List<PaymentMethod> savedEntities = paymentmethodService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/paymentmethods").build().toUri();
+
+        return ResponseEntity.created(location).body(paymentmethodMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<PaymentMethodDto> updatePaymentMethod(
             @PathVariable Long id,

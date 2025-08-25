@@ -29,6 +29,7 @@ public class Task extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 3, max = 150)
+    @Column(unique = true, nullable = false)
     private String title;
 
     @Size(max = 500)

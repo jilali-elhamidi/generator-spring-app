@@ -55,6 +55,19 @@ public class GameExpansionPackController {
         return ResponseEntity.created(location).body(gameexpansionpackMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GameExpansionPackDto>> createAllGameExpansionPacks(
+            @Valid @RequestBody List<GameExpansionPackDto> gameexpansionpackDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<GameExpansionPack> entities = gameexpansionpackMapper.toEntityList(gameexpansionpackDtoList);
+        List<GameExpansionPack> savedEntities = gameexpansionpackService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/gameexpansionpacks").build().toUri();
+
+        return ResponseEntity.created(location).body(gameexpansionpackMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GameExpansionPackDto> updateGameExpansionPack(
             @PathVariable Long id,

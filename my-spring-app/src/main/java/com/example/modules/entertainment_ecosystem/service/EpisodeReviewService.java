@@ -128,4 +128,10 @@ public class EpisodeReviewService extends BaseService<EpisodeReview> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<EpisodeReview> saveAll(List<EpisodeReview> episodereviewList) {
+
+        return episodereviewRepository.saveAll(episodereviewList);
+    }
+
 }

@@ -650,4 +650,10 @@ public class MerchandiseService extends BaseService<Merchandise> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Merchandise> saveAll(List<Merchandise> merchandiseList) {
+
+        return merchandiseRepository.saveAll(merchandiseList);
+    }
+
 }

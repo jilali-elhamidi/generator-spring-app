@@ -31,14 +31,18 @@ public class AddressService extends BaseService<Address> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (address.getUser() != null &&
-            address.getUser().getId() != null) {
-
-            User existingUser = userRepository.findById(
-                address.getUser().getId()
-            ).orElseThrow(() -> new RuntimeException("User not found"));
-
-            address.setUser(existingUser);
+        if (address.getUser() != null) {
+            if (address.getUser().getId() != null) {
+                User existingUser = userRepository.findById(
+                    address.getUser().getId()
+                ).orElseThrow(() -> new RuntimeException("User not found with id "
+                    + address.getUser().getId()));
+                address.setUser(existingUser);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                User newUser = userRepository.save(address.getUser());
+                address.setUser(newUser);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -91,4 +95,10 @@ public class AddressService extends BaseService<Address> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Address> saveAll(List<Address> addressList) {
+
+        return addressRepository.saveAll(addressList);
+    }
+
 }

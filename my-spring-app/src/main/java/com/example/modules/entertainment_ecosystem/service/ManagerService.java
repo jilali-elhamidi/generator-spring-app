@@ -105,4 +105,10 @@ public class ManagerService extends BaseService<Manager> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Manager> saveAll(List<Manager> managerList) {
+
+        return managerRepository.saveAll(managerList);
+    }
+
 }

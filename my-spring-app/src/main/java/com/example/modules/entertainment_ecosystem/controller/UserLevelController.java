@@ -55,6 +55,19 @@ public class UserLevelController {
         return ResponseEntity.created(location).body(userlevelMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserLevelDto>> createAllUserLevels(
+            @Valid @RequestBody List<UserLevelDto> userlevelDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserLevel> entities = userlevelMapper.toEntityList(userlevelDtoList);
+        List<UserLevel> savedEntities = userlevelService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userlevels").build().toUri();
+
+        return ResponseEntity.created(location).body(userlevelMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserLevelDto> updateUserLevel(
             @PathVariable Long id,

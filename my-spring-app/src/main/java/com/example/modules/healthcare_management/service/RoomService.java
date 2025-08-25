@@ -106,4 +106,10 @@ public class RoomService extends BaseService<Room> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Room> saveAll(List<Room> roomList) {
+
+        return roomRepository.saveAll(roomList);
+    }
+
 }

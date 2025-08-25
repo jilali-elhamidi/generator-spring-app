@@ -106,4 +106,10 @@ public class MerchandiseShippingMethodService extends BaseService<MerchandiseShi
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MerchandiseShippingMethod> saveAll(List<MerchandiseShippingMethod> merchandiseshippingmethodList) {
+
+        return merchandiseshippingmethodRepository.saveAll(merchandiseshippingmethodList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class CommentController {
         return ResponseEntity.created(location).body(commentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<CommentDto>> createAllComments(
+            @Valid @RequestBody List<CommentDto> commentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Comment> entities = commentMapper.toEntityList(commentDtoList);
+        List<Comment> savedEntities = commentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/comments").build().toUri();
+
+        return ResponseEntity.created(location).body(commentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<CommentDto> updateComment(
             @PathVariable Long id,

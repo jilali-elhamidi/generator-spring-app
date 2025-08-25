@@ -31,14 +31,18 @@ public class MedicalFileService extends BaseService<MedicalFile> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (medicalfile.getRecord() != null &&
-            medicalfile.getRecord().getId() != null) {
-
-            MedicalRecord existingRecord = recordRepository.findById(
-                medicalfile.getRecord().getId()
-            ).orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
-
-            medicalfile.setRecord(existingRecord);
+        if (medicalfile.getRecord() != null) {
+            if (medicalfile.getRecord().getId() != null) {
+                MedicalRecord existingRecord = recordRepository.findById(
+                    medicalfile.getRecord().getId()
+                ).orElseThrow(() -> new RuntimeException("MedicalRecord not found with id "
+                    + medicalfile.getRecord().getId()));
+                medicalfile.setRecord(existingRecord);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                MedicalRecord newRecord = recordRepository.save(medicalfile.getRecord());
+                medicalfile.setRecord(newRecord);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -89,4 +93,10 @@ public class MedicalFileService extends BaseService<MedicalFile> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MedicalFile> saveAll(List<MedicalFile> medicalfileList) {
+
+        return medicalfileRepository.saveAll(medicalfileList);
+    }
+
 }

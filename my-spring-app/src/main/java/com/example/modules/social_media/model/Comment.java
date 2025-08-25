@@ -29,6 +29,7 @@ public class Comment extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 1, max = 255)
+    @Column(unique = true, nullable = false)
     private String content;
 
     @NotNull

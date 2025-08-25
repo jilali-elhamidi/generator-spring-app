@@ -55,6 +55,19 @@ public class DepartmentController {
         return ResponseEntity.created(location).body(departmentMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<DepartmentDto>> createAllDepartments(
+            @Valid @RequestBody List<DepartmentDto> departmentDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Department> entities = departmentMapper.toEntityList(departmentDtoList);
+        List<Department> savedEntities = departmentService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/departments").build().toUri();
+
+        return ResponseEntity.created(location).body(departmentMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DepartmentDto> updateDepartment(
             @PathVariable Long id,

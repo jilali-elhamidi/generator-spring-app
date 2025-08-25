@@ -55,6 +55,19 @@ public class DigitalPurchaseController {
         return ResponseEntity.created(location).body(digitalpurchaseMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<DigitalPurchaseDto>> createAllDigitalPurchases(
+            @Valid @RequestBody List<DigitalPurchaseDto> digitalpurchaseDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<DigitalPurchase> entities = digitalpurchaseMapper.toEntityList(digitalpurchaseDtoList);
+        List<DigitalPurchase> savedEntities = digitalpurchaseService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/digitalpurchases").build().toUri();
+
+        return ResponseEntity.created(location).body(digitalpurchaseMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DigitalPurchaseDto> updateDigitalPurchase(
             @PathVariable Long id,

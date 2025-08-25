@@ -138,4 +138,10 @@ public class SeasonService extends BaseService<Season> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Season> saveAll(List<Season> seasonList) {
+
+        return seasonRepository.saveAll(seasonList);
+    }
+
 }

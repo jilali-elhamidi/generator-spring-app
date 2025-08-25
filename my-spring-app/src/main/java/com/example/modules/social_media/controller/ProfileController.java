@@ -55,6 +55,19 @@ public class ProfileController {
         return ResponseEntity.created(location).body(profileMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ProfileDto>> createAllProfiles(
+            @Valid @RequestBody List<ProfileDto> profileDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Profile> entities = profileMapper.toEntityList(profileDtoList);
+        List<Profile> savedEntities = profileService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/profiles").build().toUri();
+
+        return ResponseEntity.created(location).body(profileMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ProfileDto> updateProfile(
             @PathVariable Long id,

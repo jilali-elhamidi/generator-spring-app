@@ -55,6 +55,19 @@ public class TaskController {
         return ResponseEntity.created(location).body(taskMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TaskDto>> createAllTasks(
+            @Valid @RequestBody List<TaskDto> taskDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Task> entities = taskMapper.toEntityList(taskDtoList);
+        List<Task> savedEntities = taskService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/tasks").build().toUri();
+
+        return ResponseEntity.created(location).body(taskMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TaskDto> updateTask(
             @PathVariable Long id,

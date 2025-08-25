@@ -93,4 +93,10 @@ public class MerchandiseShippingStatusService extends BaseService<MerchandiseShi
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MerchandiseShippingStatus> saveAll(List<MerchandiseShippingStatus> merchandiseshippingstatusList) {
+
+        return merchandiseshippingstatusRepository.saveAll(merchandiseshippingstatusList);
+    }
+
 }

@@ -111,4 +111,10 @@ public class ArtistGroupService extends BaseService<ArtistGroup> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ArtistGroup> saveAll(List<ArtistGroup> artistgroupList) {
+
+        return artistgroupRepository.saveAll(artistgroupList);
+    }
+
 }

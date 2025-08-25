@@ -160,4 +160,10 @@ public class UserConnectionService extends BaseService<UserConnection> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserConnection> saveAll(List<UserConnection> userconnectionList) {
+
+        return userconnectionRepository.saveAll(userconnectionList);
+    }
+
 }

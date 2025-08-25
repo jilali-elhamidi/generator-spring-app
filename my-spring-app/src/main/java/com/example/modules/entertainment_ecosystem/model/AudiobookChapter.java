@@ -29,7 +29,7 @@ public class AudiobookChapter extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 2, max = 255)
-        @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     private String title;
 
     @NotNull

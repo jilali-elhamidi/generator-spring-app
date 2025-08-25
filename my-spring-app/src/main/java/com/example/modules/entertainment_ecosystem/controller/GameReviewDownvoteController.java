@@ -55,6 +55,19 @@ public class GameReviewDownvoteController {
         return ResponseEntity.created(location).body(gamereviewdownvoteMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GameReviewDownvoteDto>> createAllGameReviewDownvotes(
+            @Valid @RequestBody List<GameReviewDownvoteDto> gamereviewdownvoteDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<GameReviewDownvote> entities = gamereviewdownvoteMapper.toEntityList(gamereviewdownvoteDtoList);
+        List<GameReviewDownvote> savedEntities = gamereviewdownvoteService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/gamereviewdownvotes").build().toUri();
+
+        return ResponseEntity.created(location).body(gamereviewdownvoteMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GameReviewDownvoteDto> updateGameReviewDownvote(
             @PathVariable Long id,

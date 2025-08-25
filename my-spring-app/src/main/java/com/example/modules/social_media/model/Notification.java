@@ -29,6 +29,7 @@ public class Notification extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 2, max = 30)
+    @Column(unique = true, nullable = false)
     private String type;
 
     @NotNull

@@ -55,6 +55,19 @@ public class TicketController {
         return ResponseEntity.created(location).body(ticketMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TicketDto>> createAllTickets(
+            @Valid @RequestBody List<TicketDto> ticketDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Ticket> entities = ticketMapper.toEntityList(ticketDtoList);
+        List<Ticket> savedEntities = ticketService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/tickets").build().toUri();
+
+        return ResponseEntity.created(location).body(ticketMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TicketDto> updateTicket(
             @PathVariable Long id,

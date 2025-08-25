@@ -55,6 +55,19 @@ public class TVShowStudioController {
         return ResponseEntity.created(location).body(tvshowstudioMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<TVShowStudioDto>> createAllTVShowStudios(
+            @Valid @RequestBody List<TVShowStudioDto> tvshowstudioDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<TVShowStudio> entities = tvshowstudioMapper.toEntityList(tvshowstudioDtoList);
+        List<TVShowStudio> savedEntities = tvshowstudioService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/tvshowstudios").build().toUri();
+
+        return ResponseEntity.created(location).body(tvshowstudioMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<TVShowStudioDto> updateTVShowStudio(
             @PathVariable Long id,

@@ -55,6 +55,19 @@ public class MilestoneController {
         return ResponseEntity.created(location).body(milestoneMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MilestoneDto>> createAllMilestones(
+            @Valid @RequestBody List<MilestoneDto> milestoneDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Milestone> entities = milestoneMapper.toEntityList(milestoneDtoList);
+        List<Milestone> savedEntities = milestoneService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/milestones").build().toUri();
+
+        return ResponseEntity.created(location).body(milestoneMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MilestoneDto> updateMilestone(
             @PathVariable Long id,

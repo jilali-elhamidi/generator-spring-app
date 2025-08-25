@@ -104,4 +104,10 @@ public class DevelopmentStudioService extends BaseService<DevelopmentStudio> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<DevelopmentStudio> saveAll(List<DevelopmentStudio> developmentstudioList) {
+
+        return developmentstudioRepository.saveAll(developmentstudioList);
+    }
+
 }

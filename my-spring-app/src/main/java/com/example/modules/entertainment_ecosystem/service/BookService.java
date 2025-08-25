@@ -313,4 +313,10 @@ public class BookService extends BaseService<Book> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Book> saveAll(List<Book> bookList) {
+
+        return bookRepository.saveAll(bookList);
+    }
+
 }

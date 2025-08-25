@@ -143,4 +143,10 @@ public class ForumModeratorService extends BaseService<ForumModerator> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ForumModerator> saveAll(List<ForumModerator> forummoderatorList) {
+
+        return forummoderatorRepository.saveAll(forummoderatorList);
+    }
+
 }

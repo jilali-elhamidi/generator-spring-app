@@ -104,4 +104,10 @@ public class MusicLabelService extends BaseService<MusicLabel> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MusicLabel> saveAll(List<MusicLabel> musiclabelList) {
+
+        return musiclabelRepository.saveAll(musiclabelList);
+    }
+
 }

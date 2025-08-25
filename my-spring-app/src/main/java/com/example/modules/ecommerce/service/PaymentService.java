@@ -33,11 +33,17 @@ public class PaymentService extends BaseService<Payment> {
     // ---------- ManyToOne ----------
     // ---------- OneToOne ----------
         if (payment.getOrder() != null) {
+            if (payment.getOrder().getId() != null) {
+                Order existingOrder = orderRepository.findById(payment.getOrder().getId())
+                    .orElseThrow(() -> new RuntimeException("Order not found with id "
+                        + payment.getOrder().getId()));
+                payment.setOrder(existingOrder);
+            } else {
+                // Nouvel objet → sauvegarde d'abord
+                Order newOrder = orderRepository.save(payment.getOrder());
+                payment.setOrder(newOrder);
+            }
 
-            payment.setOrder(
-                orderRepository.findById(payment.getOrder().getId())
-                    .orElseThrow(() -> new RuntimeException("order not found"))
-            );
             payment.getOrder().setPayment(payment);
         }
         
@@ -88,4 +94,10 @@ public class PaymentService extends BaseService<Payment> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Payment> saveAll(List<Payment> paymentList) {
+
+        return paymentRepository.saveAll(paymentList);
+    }
+
 }

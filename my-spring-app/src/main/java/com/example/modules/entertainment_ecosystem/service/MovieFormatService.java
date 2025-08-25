@@ -110,4 +110,10 @@ public class MovieFormatService extends BaseService<MovieFormat> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MovieFormat> saveAll(List<MovieFormat> movieformatList) {
+
+        return movieformatRepository.saveAll(movieformatList);
+    }
+
 }

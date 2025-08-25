@@ -105,4 +105,10 @@ public class CategoryService extends BaseService<Category> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Category> saveAll(List<Category> categoryList) {
+
+        return categoryRepository.saveAll(categoryList);
+    }
+
 }

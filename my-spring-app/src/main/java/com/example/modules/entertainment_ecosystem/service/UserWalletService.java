@@ -138,4 +138,10 @@ public class UserWalletService extends BaseService<UserWallet> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserWallet> saveAll(List<UserWallet> userwalletList) {
+
+        return userwalletRepository.saveAll(userwalletList);
+    }
+
 }

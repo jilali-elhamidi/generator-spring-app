@@ -33,10 +33,18 @@ public class MedicationService extends BaseService<Medication> {
         if (medication.getPrescriptions() != null &&
             !medication.getPrescriptions().isEmpty()) {
 
-            List<Prescription> attachedPrescriptions = medication.getPrescriptions().stream()
-            .map(item -> prescriptionsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Prescription not found with id " + item.getId())))
-            .toList();
+            List<Prescription> attachedPrescriptions = new ArrayList<>();
+            for (Prescription item : medication.getPrescriptions()) {
+                if (item.getId() != null) {
+                    Prescription existingItem = prescriptionsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Prescription not found with id " + item.getId()));
+                    attachedPrescriptions.add(existingItem);
+                } else {
+
+                    Prescription newItem = prescriptionsRepository.save(item);
+                    attachedPrescriptions.add(newItem);
+                }
+            }
 
             medication.setPrescriptions(attachedPrescriptions);
 
@@ -104,4 +112,10 @@ public class MedicationService extends BaseService<Medication> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Medication> saveAll(List<Medication> medicationList) {
+
+        return medicationRepository.saveAll(medicationList);
+    }
+
 }

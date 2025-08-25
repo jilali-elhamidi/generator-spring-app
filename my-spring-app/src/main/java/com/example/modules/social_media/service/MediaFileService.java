@@ -31,14 +31,18 @@ public class MediaFileService extends BaseService<MediaFile> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (mediafile.getPost() != null &&
-            mediafile.getPost().getId() != null) {
-
-            Post existingPost = postRepository.findById(
-                mediafile.getPost().getId()
-            ).orElseThrow(() -> new RuntimeException("Post not found"));
-
-            mediafile.setPost(existingPost);
+        if (mediafile.getPost() != null) {
+            if (mediafile.getPost().getId() != null) {
+                Post existingPost = postRepository.findById(
+                    mediafile.getPost().getId()
+                ).orElseThrow(() -> new RuntimeException("Post not found with id "
+                    + mediafile.getPost().getId()));
+                mediafile.setPost(existingPost);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Post newPost = postRepository.save(mediafile.getPost());
+                mediafile.setPost(newPost);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -89,4 +93,10 @@ public class MediaFileService extends BaseService<MediaFile> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MediaFile> saveAll(List<MediaFile> mediafileList) {
+
+        return mediafileRepository.saveAll(mediafileList);
+    }
+
 }

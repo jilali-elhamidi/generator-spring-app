@@ -127,4 +127,10 @@ public class UserRatingService extends BaseService<UserRating> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserRating> saveAll(List<UserRating> userratingList) {
+
+        return userratingRepository.saveAll(userratingList);
+    }
+
 }

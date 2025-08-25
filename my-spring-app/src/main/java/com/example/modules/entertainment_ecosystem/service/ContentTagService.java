@@ -266,4 +266,10 @@ public class ContentTagService extends BaseService<ContentTag> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ContentTag> saveAll(List<ContentTag> contenttagList) {
+
+        return contenttagRepository.saveAll(contenttagList);
+    }
+
 }

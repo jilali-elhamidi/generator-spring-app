@@ -33,10 +33,18 @@ public class TagService extends BaseService<Tag> {
         if (tag.getPosts() != null &&
             !tag.getPosts().isEmpty()) {
 
-            List<Post> attachedPosts = tag.getPosts().stream()
-            .map(item -> postsRepository.findById(item.getId())
-                .orElseThrow(() -> new RuntimeException("Post not found with id " + item.getId())))
-            .toList();
+            List<Post> attachedPosts = new ArrayList<>();
+            for (Post item : tag.getPosts()) {
+                if (item.getId() != null) {
+                    Post existingItem = postsRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Post not found with id " + item.getId()));
+                    attachedPosts.add(existingItem);
+                } else {
+
+                    Post newItem = postsRepository.save(item);
+                    attachedPosts.add(newItem);
+                }
+            }
 
             tag.setPosts(attachedPosts);
 
@@ -102,4 +110,10 @@ public class TagService extends BaseService<Tag> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Tag> saveAll(List<Tag> tagList) {
+
+        return tagRepository.saveAll(tagList);
+    }
+
 }

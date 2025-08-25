@@ -151,4 +151,10 @@ public class StreamingServiceService extends BaseService<StreamingService> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<StreamingService> saveAll(List<StreamingService> streamingserviceList) {
+
+        return streamingserviceRepository.saveAll(streamingserviceList);
+    }
+
 }

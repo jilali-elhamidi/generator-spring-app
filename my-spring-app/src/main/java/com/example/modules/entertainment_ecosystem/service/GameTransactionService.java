@@ -128,4 +128,10 @@ public class GameTransactionService extends BaseService<GameTransaction> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<GameTransaction> saveAll(List<GameTransaction> gametransactionList) {
+
+        return gametransactionRepository.saveAll(gametransactionList);
+    }
+
 }

@@ -55,6 +55,19 @@ public class MerchandiseReviewController {
         return ResponseEntity.created(location).body(merchandisereviewMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MerchandiseReviewDto>> createAllMerchandiseReviews(
+            @Valid @RequestBody List<MerchandiseReviewDto> merchandisereviewDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MerchandiseReview> entities = merchandisereviewMapper.toEntityList(merchandisereviewDtoList);
+        List<MerchandiseReview> savedEntities = merchandisereviewService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/merchandisereviews").build().toUri();
+
+        return ResponseEntity.created(location).body(merchandisereviewMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MerchandiseReviewDto> updateMerchandiseReview(
             @PathVariable Long id,

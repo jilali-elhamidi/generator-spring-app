@@ -126,4 +126,10 @@ public class UserFollowerService extends BaseService<UserFollower> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserFollower> saveAll(List<UserFollower> userfollowerList) {
+
+        return userfollowerRepository.saveAll(userfollowerList);
+    }
+
 }

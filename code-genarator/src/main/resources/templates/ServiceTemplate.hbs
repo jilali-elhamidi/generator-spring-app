@@ -264,4 +264,10 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<{{entityName}}> saveAll(List<{{entityName}}> {{entityNameLowercase}}List) {
+
+        return {{entityNameLowercase}}Repository.saveAll({{entityNameLowercase}}List);
+    }
+
 }

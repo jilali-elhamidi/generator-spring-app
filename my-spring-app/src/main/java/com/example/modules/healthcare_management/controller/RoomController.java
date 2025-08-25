@@ -55,6 +55,19 @@ public class RoomController {
         return ResponseEntity.created(location).body(roomMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<RoomDto>> createAllRooms(
+            @Valid @RequestBody List<RoomDto> roomDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Room> entities = roomMapper.toEntityList(roomDtoList);
+        List<Room> savedEntities = roomService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/rooms").build().toUri();
+
+        return ResponseEntity.created(location).body(roomMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<RoomDto> updateRoom(
             @PathVariable Long id,

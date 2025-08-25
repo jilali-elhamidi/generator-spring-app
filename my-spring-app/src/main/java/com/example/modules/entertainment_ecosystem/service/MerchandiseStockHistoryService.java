@@ -94,4 +94,10 @@ public class MerchandiseStockHistoryService extends BaseService<MerchandiseStock
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<MerchandiseStockHistory> saveAll(List<MerchandiseStockHistory> merchandisestockhistoryList) {
+
+        return merchandisestockhistoryRepository.saveAll(merchandisestockhistoryList);
+    }
+
 }

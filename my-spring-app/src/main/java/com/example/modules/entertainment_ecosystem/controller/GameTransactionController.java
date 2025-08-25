@@ -55,6 +55,19 @@ public class GameTransactionController {
         return ResponseEntity.created(location).body(gametransactionMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<GameTransactionDto>> createAllGameTransactions(
+            @Valid @RequestBody List<GameTransactionDto> gametransactionDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<GameTransaction> entities = gametransactionMapper.toEntityList(gametransactionDtoList);
+        List<GameTransaction> savedEntities = gametransactionService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/gametransactions").build().toUri();
+
+        return ResponseEntity.created(location).body(gametransactionMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<GameTransactionDto> updateGameTransaction(
             @PathVariable Long id,

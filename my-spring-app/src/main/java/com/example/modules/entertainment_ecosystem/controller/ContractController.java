@@ -55,6 +55,19 @@ public class ContractController {
         return ResponseEntity.created(location).body(contractMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ContractDto>> createAllContracts(
+            @Valid @RequestBody List<ContractDto> contractDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Contract> entities = contractMapper.toEntityList(contractDtoList);
+        List<Contract> savedEntities = contractService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/contracts").build().toUri();
+
+        return ResponseEntity.created(location).body(contractMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ContractDto> updateContract(
             @PathVariable Long id,

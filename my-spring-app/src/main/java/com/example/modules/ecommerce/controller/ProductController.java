@@ -55,6 +55,19 @@ public class ProductController {
         return ResponseEntity.created(location).body(productMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<ProductDto>> createAllProducts(
+            @Valid @RequestBody List<ProductDto> productDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Product> entities = productMapper.toEntityList(productDtoList);
+        List<Product> savedEntities = productService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/products").build().toUri();
+
+        return ResponseEntity.created(location).body(productMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(
             @PathVariable Long id,

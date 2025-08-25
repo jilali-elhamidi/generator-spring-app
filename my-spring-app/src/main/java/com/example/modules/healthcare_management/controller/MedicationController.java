@@ -55,6 +55,19 @@ public class MedicationController {
         return ResponseEntity.created(location).body(medicationMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MedicationDto>> createAllMedications(
+            @Valid @RequestBody List<MedicationDto> medicationDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Medication> entities = medicationMapper.toEntityList(medicationDtoList);
+        List<Medication> savedEntities = medicationService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/medications").build().toUri();
+
+        return ResponseEntity.created(location).body(medicationMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MedicationDto> updateMedication(
             @PathVariable Long id,

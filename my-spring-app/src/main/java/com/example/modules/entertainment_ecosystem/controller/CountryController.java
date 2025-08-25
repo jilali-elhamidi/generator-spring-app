@@ -55,6 +55,19 @@ public class CountryController {
         return ResponseEntity.created(location).body(countryMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<CountryDto>> createAllCountrys(
+            @Valid @RequestBody List<CountryDto> countryDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Country> entities = countryMapper.toEntityList(countryDtoList);
+        List<Country> savedEntities = countryService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/countrys").build().toUri();
+
+        return ResponseEntity.created(location).body(countryMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<CountryDto> updateCountry(
             @PathVariable Long id,

@@ -181,4 +181,10 @@ public class OnlineEventService extends BaseService<OnlineEvent> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<OnlineEvent> saveAll(List<OnlineEvent> onlineeventList) {
+
+        return onlineeventRepository.saveAll(onlineeventList);
+    }
+
 }

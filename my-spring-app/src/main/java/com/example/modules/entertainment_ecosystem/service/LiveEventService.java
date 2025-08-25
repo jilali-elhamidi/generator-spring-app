@@ -459,4 +459,10 @@ public class LiveEventService extends BaseService<LiveEvent> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<LiveEvent> saveAll(List<LiveEvent> liveeventList) {
+
+        return liveeventRepository.saveAll(liveeventList);
+    }
+
 }

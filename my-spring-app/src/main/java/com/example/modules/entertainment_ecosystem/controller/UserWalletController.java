@@ -55,6 +55,19 @@ public class UserWalletController {
         return ResponseEntity.created(location).body(userwalletMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<UserWalletDto>> createAllUserWallets(
+            @Valid @RequestBody List<UserWalletDto> userwalletDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<UserWallet> entities = userwalletMapper.toEntityList(userwalletDtoList);
+        List<UserWallet> savedEntities = userwalletService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/userwallets").build().toUri();
+
+        return ResponseEntity.created(location).body(userwalletMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<UserWalletDto> updateUserWallet(
             @PathVariable Long id,

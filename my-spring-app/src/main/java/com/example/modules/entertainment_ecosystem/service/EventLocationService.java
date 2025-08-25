@@ -139,4 +139,10 @@ public class EventLocationService extends BaseService<EventLocation> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<EventLocation> saveAll(List<EventLocation> eventlocationList) {
+
+        return eventlocationRepository.saveAll(eventlocationList);
+    }
+
 }

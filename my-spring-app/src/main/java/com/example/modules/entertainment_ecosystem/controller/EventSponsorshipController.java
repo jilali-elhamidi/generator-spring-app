@@ -55,6 +55,19 @@ public class EventSponsorshipController {
         return ResponseEntity.created(location).body(eventsponsorshipMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<EventSponsorshipDto>> createAllEventSponsorships(
+            @Valid @RequestBody List<EventSponsorshipDto> eventsponsorshipDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<EventSponsorship> entities = eventsponsorshipMapper.toEntityList(eventsponsorshipDtoList);
+        List<EventSponsorship> savedEntities = eventsponsorshipService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/eventsponsorships").build().toUri();
+
+        return ResponseEntity.created(location).body(eventsponsorshipMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<EventSponsorshipDto> updateEventSponsorship(
             @PathVariable Long id,

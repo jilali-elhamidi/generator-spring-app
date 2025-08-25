@@ -55,6 +55,19 @@ public class MovieStudioController {
         return ResponseEntity.created(location).body(moviestudioMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<MovieStudioDto>> createAllMovieStudios(
+            @Valid @RequestBody List<MovieStudioDto> moviestudioDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<MovieStudio> entities = moviestudioMapper.toEntityList(moviestudioDtoList);
+        List<MovieStudio> savedEntities = moviestudioService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/moviestudios").build().toUri();
+
+        return ResponseEntity.created(location).body(moviestudioMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<MovieStudioDto> updateMovieStudio(
             @PathVariable Long id,

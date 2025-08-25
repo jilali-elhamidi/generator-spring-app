@@ -161,4 +161,10 @@ public class DigitalAssetService extends BaseService<DigitalAsset> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<DigitalAsset> saveAll(List<DigitalAsset> digitalassetList) {
+
+        return digitalassetRepository.saveAll(digitalassetList);
+    }
+
 }

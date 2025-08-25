@@ -29,6 +29,7 @@ public class Tag extends BaseEntity {
     // === Attributs simples ===
     @NotNull
     @Size(min = 1, max = 50)
+    @Column(unique = true, nullable = false)
     private String name;
 
 

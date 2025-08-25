@@ -198,4 +198,10 @@ public class ProductionCompanyService extends BaseService<ProductionCompany> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ProductionCompany> saveAll(List<ProductionCompany> productioncompanyList) {
+
+        return productioncompanyRepository.saveAll(productioncompanyList);
+    }
+
 }

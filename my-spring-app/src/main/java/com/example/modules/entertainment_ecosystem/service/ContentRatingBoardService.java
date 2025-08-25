@@ -105,4 +105,10 @@ public class ContentRatingBoardService extends BaseService<ContentRatingBoard> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<ContentRatingBoard> saveAll(List<ContentRatingBoard> contentratingboardList) {
+
+        return contentratingboardRepository.saveAll(contentratingboardList);
+    }
+
 }

@@ -508,4 +508,10 @@ public class GenreService extends BaseService<Genre> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Genre> saveAll(List<Genre> genreList) {
+
+        return genreRepository.saveAll(genreList);
+    }
+
 }

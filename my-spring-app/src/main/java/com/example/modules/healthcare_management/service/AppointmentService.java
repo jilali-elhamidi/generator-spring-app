@@ -39,34 +39,46 @@ public class AppointmentService extends BaseService<Appointment> {
     // ---------- OneToMany ----------
     // ---------- ManyToMany ----------
     // ---------- ManyToOne ----------
-        if (appointment.getPatient() != null &&
-            appointment.getPatient().getId() != null) {
-
-            Patient existingPatient = patientRepository.findById(
-                appointment.getPatient().getId()
-            ).orElseThrow(() -> new RuntimeException("Patient not found"));
-
-            appointment.setPatient(existingPatient);
+        if (appointment.getPatient() != null) {
+            if (appointment.getPatient().getId() != null) {
+                Patient existingPatient = patientRepository.findById(
+                    appointment.getPatient().getId()
+                ).orElseThrow(() -> new RuntimeException("Patient not found with id "
+                    + appointment.getPatient().getId()));
+                appointment.setPatient(existingPatient);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Patient newPatient = patientRepository.save(appointment.getPatient());
+                appointment.setPatient(newPatient);
+            }
         }
         
-        if (appointment.getDoctor() != null &&
-            appointment.getDoctor().getId() != null) {
-
-            Doctor existingDoctor = doctorRepository.findById(
-                appointment.getDoctor().getId()
-            ).orElseThrow(() -> new RuntimeException("Doctor not found"));
-
-            appointment.setDoctor(existingDoctor);
+        if (appointment.getDoctor() != null) {
+            if (appointment.getDoctor().getId() != null) {
+                Doctor existingDoctor = doctorRepository.findById(
+                    appointment.getDoctor().getId()
+                ).orElseThrow(() -> new RuntimeException("Doctor not found with id "
+                    + appointment.getDoctor().getId()));
+                appointment.setDoctor(existingDoctor);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Doctor newDoctor = doctorRepository.save(appointment.getDoctor());
+                appointment.setDoctor(newDoctor);
+            }
         }
         
-        if (appointment.getRoom() != null &&
-            appointment.getRoom().getId() != null) {
-
-            Room existingRoom = roomRepository.findById(
-                appointment.getRoom().getId()
-            ).orElseThrow(() -> new RuntimeException("Room not found"));
-
-            appointment.setRoom(existingRoom);
+        if (appointment.getRoom() != null) {
+            if (appointment.getRoom().getId() != null) {
+                Room existingRoom = roomRepository.findById(
+                    appointment.getRoom().getId()
+                ).orElseThrow(() -> new RuntimeException("Room not found with id "
+                    + appointment.getRoom().getId()));
+                appointment.setRoom(existingRoom);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Room newRoom = roomRepository.save(appointment.getRoom());
+                appointment.setRoom(newRoom);
+            }
         }
         
     // ---------- OneToOne ----------
@@ -149,4 +161,10 @@ public class AppointmentService extends BaseService<Appointment> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<Appointment> saveAll(List<Appointment> appointmentList) {
+
+        return appointmentRepository.saveAll(appointmentList);
+    }
+
 }

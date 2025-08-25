@@ -635,4 +635,10 @@ public class TVShowService extends BaseService<TVShow> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<TVShow> saveAll(List<TVShow> tvshowList) {
+
+        return tvshowRepository.saveAll(tvshowList);
+    }
+
 }

@@ -152,4 +152,10 @@ public class UserService extends BaseService<User> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<User> saveAll(List<User> userList) {
+
+        return userRepository.saveAll(userList);
+    }
+
 }

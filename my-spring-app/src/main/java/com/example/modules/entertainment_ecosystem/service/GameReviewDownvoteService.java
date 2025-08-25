@@ -160,4 +160,10 @@ public class GameReviewDownvoteService extends BaseService<GameReviewDownvote> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<GameReviewDownvote> saveAll(List<GameReviewDownvote> gamereviewdownvoteList) {
+
+        return gamereviewdownvoteRepository.saveAll(gamereviewdownvoteList);
+    }
+
 }

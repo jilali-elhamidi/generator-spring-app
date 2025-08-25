@@ -112,4 +112,10 @@ public class UserBadgeService extends BaseService<UserBadge> {
         repository.delete(entity);
         return true;
     }
+    @Transactional
+    public List<UserBadge> saveAll(List<UserBadge> userbadgeList) {
+
+        return userbadgeRepository.saveAll(userbadgeList);
+    }
+
 }

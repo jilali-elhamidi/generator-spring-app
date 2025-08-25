@@ -55,6 +55,19 @@ public class SeasonController {
         return ResponseEntity.created(location).body(seasonMapper.toDto(saved));
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<SeasonDto>> createAllSeasons(
+            @Valid @RequestBody List<SeasonDto> seasonDtoList,
+            UriComponentsBuilder uriBuilder) {
+
+        List<Season> entities = seasonMapper.toEntityList(seasonDtoList);
+        List<Season> savedEntities = seasonService.saveAll(entities);
+
+        URI location = uriBuilder.path("/api/seasons").build().toUri();
+
+        return ResponseEntity.created(location).body(seasonMapper.toDtoList(savedEntities));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SeasonDto> updateSeason(
             @PathVariable Long id,
