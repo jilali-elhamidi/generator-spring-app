@@ -21,7 +21,11 @@ import java.util.stream.Collectors;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Arrays;
+{{#if hasDate}}
 import java.util.Date;
+import java.util.Calendar;
+{{/if}}
 
 @Service
 public class {{entityName}}Service extends BaseService<{{entityName}}> {
@@ -237,12 +241,62 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
                 String value = filters.get("{{name}}");
                 predicates.add(cb.like(cb.lower(root.get("{{name}}")), "%" + value.toLowerCase() + "%"));
             }
+            // IN pour String: key '{{name}}_in' = "val1,val2,..."
+            if (filters.containsKey("{{name}}_in")) {
+                java.util.List<String> values = Arrays.stream(filters.get("{{name}}_in").split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .map(String::toLowerCase)
+                        .collect(Collectors.toList());
+                if (!values.isEmpty()) {
+                    predicates.add(cb.lower(root.get("{{name}}")).in(values));
+                }
+            }
             {{~else if (eq type "Long")}}
             if (filters.containsKey("{{name}}")) {
                 try {
                     Long value = Long.parseLong(filters.get("{{name}}"));
                     predicates.add(cb.equal(root.get("{{name}}"), value));
                 } catch (NumberFormatException ignored) {}
+            }
+            // GREATER_THAN: '{{name}}_gt'
+            if (filters.containsKey("{{name}}_gt")) {
+                try {
+                    Long value = Long.parseLong(filters.get("{{name}}_gt"));
+                    predicates.add(cb.greaterThan(root.get("{{name}}"), value));
+                } catch (NumberFormatException ignored) {}
+            }
+            // LESS_THAN: '{{name}}_lt'
+            if (filters.containsKey("{{name}}_lt")) {
+                try {
+                    Long value = Long.parseLong(filters.get("{{name}}_lt"));
+                    predicates.add(cb.lessThan(root.get("{{name}}"), value));
+                } catch (NumberFormatException ignored) {}
+            }
+            // BETWEEN: '{{name}}_between' = "start,end"
+            if (filters.containsKey("{{name}}_between")) {
+                String raw = filters.get("{{name}}_between");
+                String[] parts = raw.split(",");
+                if (parts.length == 2) {
+                    try {
+                        Long start = Long.parseLong(parts[0].trim());
+                        Long end = Long.parseLong(parts[1].trim());
+                        predicates.add(cb.between(root.get("{{name}}"), start, end));
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            // IN: '{{name}}_in' = "1,2,3"
+            if (filters.containsKey("{{name}}_in")) {
+                java.util.List<Long> values = Arrays.stream(filters.get("{{name}}_in").split(","))
+                        .map(String::trim)
+                        .map(s -> {
+                            try { return Long.parseLong(s); } catch (Exception e) { return null; }
+                        })
+                        .filter(v -> v != null)
+                        .collect(Collectors.toList());
+                if (!values.isEmpty()) {
+                    predicates.add(root.get("{{name}}").in(values));
+                }
             }
             {{~else if (eq type "Integer")}}
             if (filters.containsKey("{{name}}")) {
@@ -251,12 +305,82 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
                     predicates.add(cb.equal(root.get("{{name}}"), value));
                 } catch (NumberFormatException ignored) {}
             }
+            if (filters.containsKey("{{name}}_gt")) {
+                try {
+                    Integer value = Integer.parseInt(filters.get("{{name}}_gt"));
+                    predicates.add(cb.greaterThan(root.get("{{name}}"), value));
+                } catch (NumberFormatException ignored) {}
+            }
+            if (filters.containsKey("{{name}}_lt")) {
+                try {
+                    Integer value = Integer.parseInt(filters.get("{{name}}_lt"));
+                    predicates.add(cb.lessThan(root.get("{{name}}"), value));
+                } catch (NumberFormatException ignored) {}
+            }
+            if (filters.containsKey("{{name}}_between")) {
+                String raw = filters.get("{{name}}_between");
+                String[] parts = raw.split(",");
+                if (parts.length == 2) {
+                    try {
+                        Integer start = Integer.parseInt(parts[0].trim());
+                        Integer end = Integer.parseInt(parts[1].trim());
+                        predicates.add(cb.between(root.get("{{name}}"), start, end));
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            if (filters.containsKey("{{name}}_in")) {
+                java.util.List<Integer> values = Arrays.stream(filters.get("{{name}}_in").split(","))
+                        .map(String::trim)
+                        .map(s -> {
+                            try { return Integer.parseInt(s); } catch (Exception e) { return null; }
+                        })
+                        .filter(v -> v != null)
+                        .collect(Collectors.toList());
+                if (!values.isEmpty()) {
+                    predicates.add(root.get("{{name}}").in(values));
+                }
+            }
             {{~else if (eq type "Double")}}
             if (filters.containsKey("{{name}}")) {
                 try {
                     Double value = Double.parseDouble(filters.get("{{name}}"));
                     predicates.add(cb.equal(root.get("{{name}}"), value));
                 } catch (NumberFormatException ignored) {}
+            }
+            if (filters.containsKey("{{name}}_gt")) {
+                try {
+                    Double value = Double.parseDouble(filters.get("{{name}}_gt"));
+                    predicates.add(cb.greaterThan(root.get("{{name}}"), value));
+                } catch (NumberFormatException ignored) {}
+            }
+            if (filters.containsKey("{{name}}_lt")) {
+                try {
+                    Double value = Double.parseDouble(filters.get("{{name}}_lt"));
+                    predicates.add(cb.lessThan(root.get("{{name}}"), value));
+                } catch (NumberFormatException ignored) {}
+            }
+            if (filters.containsKey("{{name}}_between")) {
+                String raw = filters.get("{{name}}_between");
+                String[] parts = raw.split(",");
+                if (parts.length == 2) {
+                    try {
+                        Double start = Double.parseDouble(parts[0].trim());
+                        Double end = Double.parseDouble(parts[1].trim());
+                        predicates.add(cb.between(root.get("{{name}}"), start, end));
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            if (filters.containsKey("{{name}}_in")) {
+                java.util.List<Double> values = Arrays.stream(filters.get("{{name}}_in").split(","))
+                        .map(String::trim)
+                        .map(s -> {
+                            try { return Double.parseDouble(s); } catch (Exception e) { return null; }
+                        })
+                        .filter(v -> v != null)
+                        .collect(Collectors.toList());
+                if (!values.isEmpty()) {
+                    predicates.add(root.get("{{name}}").in(values));
+                }
             }
             {{~else if (eq type "Boolean")}}
             if (filters.containsKey("{{name}}")) {
@@ -265,10 +389,53 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
             }
             {{~else if (eq type "Date")}}
             if (filters.containsKey("{{name}}")) {
+                String raw = filters.get("{{name}}");
                 try {
-                    Date value = new SimpleDateFormat("yyyy-MM-dd").parse(filters.get("{{name}}"));
-                    predicates.add(cb.equal(root.get("{{name}}"), value));
+                    Date value = parseDateFlexible(raw);
+                    // Si la valeur ressemble à une date seule (YYYY-MM-DD), filtrer sur toute la journée
+                    if (raw.length() <= 10) {
+                        Date start = startOfDay(value);
+                        Date end = endOfDay(value);
+                        predicates.add(cb.between(root.get("{{name}}"), start, end));
+                    } else {
+                        predicates.add(cb.equal(root.get("{{name}}"), value));
+                    }
                 } catch (ParseException ignored) {}
+            }
+            if (filters.containsKey("{{name}}_gt")) {
+                try {
+                    Date value = parseDateFlexible(filters.get("{{name}}_gt"));
+                    predicates.add(cb.greaterThan(root.get("{{name}}"), value));
+                } catch (ParseException ignored) {}
+            }
+            if (filters.containsKey("{{name}}_lt")) {
+                try {
+                    Date value = parseDateFlexible(filters.get("{{name}}_lt"));
+                    predicates.add(cb.lessThan(root.get("{{name}}"), value));
+                } catch (ParseException ignored) {}
+            }
+            if (filters.containsKey("{{name}}_between")) {
+                String raw = filters.get("{{name}}_between");
+                String[] parts = raw.split(",");
+                if (parts.length == 2) {
+                    try {
+                        Date start = parseDateFlexible(parts[0].trim());
+                        Date end = parseDateFlexible(parts[1].trim());
+                        predicates.add(cb.between(root.get("{{name}}"), start, end));
+                    } catch (ParseException ignored) {}
+                }
+            }
+            if (filters.containsKey("{{name}}_in")) {
+                java.util.List<Date> values = Arrays.stream(filters.get("{{name}}_in").split(","))
+                        .map(String::trim)
+                        .map(s -> {
+                            try { return parseDateFlexible(s); } catch (Exception e) { return null; }
+                        })
+                        .filter(v -> v != null)
+                        .collect(Collectors.toList());
+                if (!values.isEmpty()) {
+                    predicates.add(root.get("{{name}}").in(values));
+                }
             }
             {{/if}}
             {{~/each}}
@@ -278,6 +445,50 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
 
         return {{entityNameLowercase}}Repository.findAll(spec, pageable);
     }
+    
+    {{#if hasDate}}
+    // --- Helpers Date ---
+    private Date parseDateFlexible(String input) throws ParseException {
+        String[] patterns = new String[] {
+                "yyyy-MM-dd",
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                "yyyy-MM-dd'T'HH:mm:ssXXX",
+                "yyyy-MM-dd'T'HH:mm:ss",
+                "yyyy-MM-dd HH:mm:ss"
+        };
+        ParseException last = null;
+        for (String p : patterns) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(p);
+                sdf.setLenient(false);
+                return sdf.parse(input);
+            } catch (ParseException ex) {
+                last = ex;
+            }
+        }
+        throw last != null ? last : new ParseException("Unparseable date: " + input, 0);
+    }
+
+    private Date startOfDay(Date d) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        return c.getTime();
+    }
+
+    private Date endOfDay(Date d) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        c.set(Calendar.HOUR_OF_DAY, 23);
+        c.set(Calendar.MINUTE, 59);
+        c.set(Calendar.SECOND, 59);
+        c.set(Calendar.MILLISECOND, 999);
+        return c.getTime();
+    }
+    {{/if}}
     @Transactional
     public boolean deleteById(Long id) {
         Optional<{{entityName}}> entityOpt = repository.findById(id);
