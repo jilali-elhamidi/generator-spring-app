@@ -3,29 +3,38 @@ package com.example.modules.social_media.service;
 import com.example.core.service.BaseService;
 import com.example.modules.social_media.model.Notification;
 import com.example.modules.social_media.repository.NotificationRepository;
+
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.repository.ProfileRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class NotificationService extends BaseService<Notification> {
 
     protected final NotificationRepository notificationRepository;
-    private final ProfileRepository recipientRepository;
+    
+    protected final ProfileRepository recipientRepository;
+    
 
     public NotificationService(NotificationRepository repository, ProfileRepository recipientRepository)
     {
         super(repository);
         this.notificationRepository = repository;
+        
         this.recipientRepository = recipientRepository;
+        
     }
 
+    @Transactional
     @Override
     public Notification save(Notification notification) {
     // ---------- OneToMany ----------
@@ -49,7 +58,8 @@ public class NotificationService extends BaseService<Notification> {
     return notificationRepository.save(notification);
 }
 
-
+    @Transactional
+    @Override
     public Notification update(Long id, Notification notificationRequest) {
         Notification existing = notificationRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Notification not found"));
@@ -73,32 +83,30 @@ public class NotificationService extends BaseService<Notification> {
             existing.setRecipient(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return notificationRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Notification> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Notification> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Notification.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Notification> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Notification entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getRecipient() != null) {
-            entity.setRecipient(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Notification> saveAll(List<Notification> notificationList) {
-
-        return notificationRepository.saveAll(notificationList);
+        return super.saveAll(notificationList);
     }
 
 }

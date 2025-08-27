@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.PodcastGuestDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.PodcastGuestSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.PodcastGuest;
 import com.example.modules.entertainment_ecosystem.mapper.PodcastGuestMapper;
 import com.example.modules.entertainment_ecosystem.service.PodcastGuestService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing PodcastGuest entities.
+ */
 @RestController
 @RequestMapping("/api/podcastguests")
-public class PodcastGuestController {
-
-    private final PodcastGuestService podcastguestService;
-    private final PodcastGuestMapper podcastguestMapper;
+public class PodcastGuestController extends BaseController<PodcastGuest, PodcastGuestDto, PodcastGuestSimpleDto> {
 
     public PodcastGuestController(PodcastGuestService podcastguestService,
                                     PodcastGuestMapper podcastguestMapper) {
-        this.podcastguestService = podcastguestService;
-        this.podcastguestMapper = podcastguestMapper;
+        super(podcastguestService, podcastguestMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<PodcastGuestDto>> getAllPodcastGuests() {
-        List<PodcastGuest> entities = podcastguestService.findAll();
-        return ResponseEntity.ok(podcastguestMapper.toDtoList(entities));
+    public ResponseEntity<Page<PodcastGuestDto>> getAllPodcastGuests(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PodcastGuestDto>> searchPodcastGuests(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(PodcastGuest.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PodcastGuestDto> getPodcastGuestById(@PathVariable Long id) {
-        return podcastguestService.findById(id)
-                .map(podcastguestMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class PodcastGuestController {
             @Valid @RequestBody PodcastGuestDto podcastguestDto,
             UriComponentsBuilder uriBuilder) {
 
-        PodcastGuest entity = podcastguestMapper.toEntity(podcastguestDto);
-        PodcastGuest saved = podcastguestService.save(entity);
+        PodcastGuest entity = mapper.toEntity(podcastguestDto);
+        PodcastGuest saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/podcastguests/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/podcastguests/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(podcastguestMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class PodcastGuestController {
             @Valid @RequestBody List<PodcastGuestDto> podcastguestDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<PodcastGuest> entities = podcastguestMapper.toEntityList(podcastguestDtoList);
-        List<PodcastGuest> savedEntities = podcastguestService.saveAll(entities);
+        List<PodcastGuest> entities = mapper.toEntityList(podcastguestDtoList);
+        List<PodcastGuest> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/podcastguests").build().toUri();
 
-        return ResponseEntity.created(location).body(podcastguestMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class PodcastGuestController {
             @PathVariable Long id,
             @Valid @RequestBody PodcastGuestDto podcastguestDto) {
 
-
-        PodcastGuest entityToUpdate = podcastguestMapper.toEntity(podcastguestDto);
-        PodcastGuest updatedEntity = podcastguestService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(podcastguestMapper.toDto(updatedEntity));
+        PodcastGuest entityToUpdate = mapper.toEntity(podcastguestDto);
+        PodcastGuest updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePodcastGuest(@PathVariable Long id) {
-        boolean deleted = podcastguestService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

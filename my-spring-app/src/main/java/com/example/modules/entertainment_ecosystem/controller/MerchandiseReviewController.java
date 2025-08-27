@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.MerchandiseReviewDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseReviewSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseReview;
 import com.example.modules.entertainment_ecosystem.mapper.MerchandiseReviewMapper;
 import com.example.modules.entertainment_ecosystem.service.MerchandiseReviewService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing MerchandiseReview entities.
+ */
 @RestController
 @RequestMapping("/api/merchandisereviews")
-public class MerchandiseReviewController {
-
-    private final MerchandiseReviewService merchandisereviewService;
-    private final MerchandiseReviewMapper merchandisereviewMapper;
+public class MerchandiseReviewController extends BaseController<MerchandiseReview, MerchandiseReviewDto, MerchandiseReviewSimpleDto> {
 
     public MerchandiseReviewController(MerchandiseReviewService merchandisereviewService,
                                     MerchandiseReviewMapper merchandisereviewMapper) {
-        this.merchandisereviewService = merchandisereviewService;
-        this.merchandisereviewMapper = merchandisereviewMapper;
+        super(merchandisereviewService, merchandisereviewMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<MerchandiseReviewDto>> getAllMerchandiseReviews() {
-        List<MerchandiseReview> entities = merchandisereviewService.findAll();
-        return ResponseEntity.ok(merchandisereviewMapper.toDtoList(entities));
+    public ResponseEntity<Page<MerchandiseReviewDto>> getAllMerchandiseReviews(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<MerchandiseReviewDto>> searchMerchandiseReviews(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(MerchandiseReview.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MerchandiseReviewDto> getMerchandiseReviewById(@PathVariable Long id) {
-        return merchandisereviewService.findById(id)
-                .map(merchandisereviewMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class MerchandiseReviewController {
             @Valid @RequestBody MerchandiseReviewDto merchandisereviewDto,
             UriComponentsBuilder uriBuilder) {
 
-        MerchandiseReview entity = merchandisereviewMapper.toEntity(merchandisereviewDto);
-        MerchandiseReview saved = merchandisereviewService.save(entity);
+        MerchandiseReview entity = mapper.toEntity(merchandisereviewDto);
+        MerchandiseReview saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/merchandisereviews/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/merchandisereviews/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(merchandisereviewMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class MerchandiseReviewController {
             @Valid @RequestBody List<MerchandiseReviewDto> merchandisereviewDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<MerchandiseReview> entities = merchandisereviewMapper.toEntityList(merchandisereviewDtoList);
-        List<MerchandiseReview> savedEntities = merchandisereviewService.saveAll(entities);
+        List<MerchandiseReview> entities = mapper.toEntityList(merchandisereviewDtoList);
+        List<MerchandiseReview> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/merchandisereviews").build().toUri();
 
-        return ResponseEntity.created(location).body(merchandisereviewMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class MerchandiseReviewController {
             @PathVariable Long id,
             @Valid @RequestBody MerchandiseReviewDto merchandisereviewDto) {
 
-
-        MerchandiseReview entityToUpdate = merchandisereviewMapper.toEntity(merchandisereviewDto);
-        MerchandiseReview updatedEntity = merchandisereviewService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(merchandisereviewMapper.toDto(updatedEntity));
+        MerchandiseReview entityToUpdate = mapper.toEntity(merchandisereviewDto);
+        MerchandiseReview updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMerchandiseReview(@PathVariable Long id) {
-        boolean deleted = merchandisereviewService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

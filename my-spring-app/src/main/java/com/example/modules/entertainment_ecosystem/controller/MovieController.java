@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.MovieDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.MovieSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.Movie;
 import com.example.modules.entertainment_ecosystem.mapper.MovieMapper;
 import com.example.modules.entertainment_ecosystem.service.MovieService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Movie entities.
+ */
 @RestController
 @RequestMapping("/api/movies")
-public class MovieController {
-
-    private final MovieService movieService;
-    private final MovieMapper movieMapper;
+public class MovieController extends BaseController<Movie, MovieDto, MovieSimpleDto> {
 
     public MovieController(MovieService movieService,
                                     MovieMapper movieMapper) {
-        this.movieService = movieService;
-        this.movieMapper = movieMapper;
+        super(movieService, movieMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<MovieDto>> getAllMovies() {
-        List<Movie> entities = movieService.findAll();
-        return ResponseEntity.ok(movieMapper.toDtoList(entities));
+    public ResponseEntity<Page<MovieDto>> getAllMovies(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<MovieDto>> searchMovies(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Movie.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MovieDto> getMovieById(@PathVariable Long id) {
-        return movieService.findById(id)
-                .map(movieMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class MovieController {
             @Valid @RequestBody MovieDto movieDto,
             UriComponentsBuilder uriBuilder) {
 
-        Movie entity = movieMapper.toEntity(movieDto);
-        Movie saved = movieService.save(entity);
+        Movie entity = mapper.toEntity(movieDto);
+        Movie saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/movies/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/movies/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(movieMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class MovieController {
             @Valid @RequestBody List<MovieDto> movieDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Movie> entities = movieMapper.toEntityList(movieDtoList);
-        List<Movie> savedEntities = movieService.saveAll(entities);
+        List<Movie> entities = mapper.toEntityList(movieDtoList);
+        List<Movie> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/movies").build().toUri();
 
-        return ResponseEntity.created(location).body(movieMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class MovieController {
             @PathVariable Long id,
             @Valid @RequestBody MovieDto movieDto) {
 
-
-        Movie entityToUpdate = movieMapper.toEntity(movieDto);
-        Movie updatedEntity = movieService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(movieMapper.toDto(updatedEntity));
+        Movie entityToUpdate = mapper.toEntity(movieDto);
+        Movie updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
-        boolean deleted = movieService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

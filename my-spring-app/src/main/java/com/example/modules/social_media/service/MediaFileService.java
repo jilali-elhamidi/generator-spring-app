@@ -3,29 +3,38 @@ package com.example.modules.social_media.service;
 import com.example.core.service.BaseService;
 import com.example.modules.social_media.model.MediaFile;
 import com.example.modules.social_media.repository.MediaFileRepository;
+
 import com.example.modules.social_media.model.Post;
 import com.example.modules.social_media.repository.PostRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class MediaFileService extends BaseService<MediaFile> {
 
     protected final MediaFileRepository mediafileRepository;
-    private final PostRepository postRepository;
+    
+    protected final PostRepository postRepository;
+    
 
     public MediaFileService(MediaFileRepository repository, PostRepository postRepository)
     {
         super(repository);
         this.mediafileRepository = repository;
+        
         this.postRepository = postRepository;
+        
     }
 
+    @Transactional
     @Override
     public MediaFile save(MediaFile mediafile) {
     // ---------- OneToMany ----------
@@ -49,7 +58,8 @@ public class MediaFileService extends BaseService<MediaFile> {
     return mediafileRepository.save(mediafile);
 }
 
-
+    @Transactional
+    @Override
     public MediaFile update(Long id, MediaFile mediafileRequest) {
         MediaFile existing = mediafileRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("MediaFile not found"));
@@ -71,32 +81,30 @@ public class MediaFileService extends BaseService<MediaFile> {
             existing.setPost(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return mediafileRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<MediaFile> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<MediaFile> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(MediaFile.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<MediaFile> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        MediaFile entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getPost() != null) {
-            entity.setPost(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<MediaFile> saveAll(List<MediaFile> mediafileList) {
-
-        return mediafileRepository.saveAll(mediafileList);
+        return super.saveAll(mediafileList);
     }
 
 }

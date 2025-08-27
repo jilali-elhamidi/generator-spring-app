@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.NotificationDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.NotificationSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.Notification;
 import com.example.modules.entertainment_ecosystem.mapper.NotificationMapper;
 import com.example.modules.entertainment_ecosystem.service.NotificationService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Notification entities.
+ */
 @RestController
 @RequestMapping("/api/notifications")
-public class NotificationController {
-
-    private final NotificationService notificationService;
-    private final NotificationMapper notificationMapper;
+public class NotificationController extends BaseController<Notification, NotificationDto, NotificationSimpleDto> {
 
     public NotificationController(NotificationService notificationService,
                                     NotificationMapper notificationMapper) {
-        this.notificationService = notificationService;
-        this.notificationMapper = notificationMapper;
+        super(notificationService, notificationMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificationDto>> getAllNotifications() {
-        List<Notification> entities = notificationService.findAll();
-        return ResponseEntity.ok(notificationMapper.toDtoList(entities));
+    public ResponseEntity<Page<NotificationDto>> getAllNotifications(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<NotificationDto>> searchNotifications(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Notification.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<NotificationDto> getNotificationById(@PathVariable Long id) {
-        return notificationService.findById(id)
-                .map(notificationMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class NotificationController {
             @Valid @RequestBody NotificationDto notificationDto,
             UriComponentsBuilder uriBuilder) {
 
-        Notification entity = notificationMapper.toEntity(notificationDto);
-        Notification saved = notificationService.save(entity);
+        Notification entity = mapper.toEntity(notificationDto);
+        Notification saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/notifications/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/notifications/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(notificationMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class NotificationController {
             @Valid @RequestBody List<NotificationDto> notificationDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Notification> entities = notificationMapper.toEntityList(notificationDtoList);
-        List<Notification> savedEntities = notificationService.saveAll(entities);
+        List<Notification> entities = mapper.toEntityList(notificationDtoList);
+        List<Notification> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/notifications").build().toUri();
 
-        return ResponseEntity.created(location).body(notificationMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class NotificationController {
             @PathVariable Long id,
             @Valid @RequestBody NotificationDto notificationDto) {
 
-
-        Notification entityToUpdate = notificationMapper.toEntity(notificationDto);
-        Notification updatedEntity = notificationService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(notificationMapper.toDto(updatedEntity));
+        Notification entityToUpdate = mapper.toEntity(notificationDto);
+        Notification updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
-        boolean deleted = notificationService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

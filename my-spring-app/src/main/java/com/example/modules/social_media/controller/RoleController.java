@@ -1,42 +1,50 @@
 package com.example.modules.social_media.controller;
 
 import com.example.modules.social_media.dto.RoleDto;
+import com.example.modules.social_media.dtosimple.RoleSimpleDto;
 import com.example.modules.social_media.model.Role;
 import com.example.modules.social_media.mapper.RoleMapper;
 import com.example.modules.social_media.service.RoleService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Role entities.
+ */
 @RestController
 @RequestMapping("/api/roles")
-public class RoleController {
-
-    private final RoleService roleService;
-    private final RoleMapper roleMapper;
+public class RoleController extends BaseController<Role, RoleDto, RoleSimpleDto> {
 
     public RoleController(RoleService roleService,
                                     RoleMapper roleMapper) {
-        this.roleService = roleService;
-        this.roleMapper = roleMapper;
+        super(roleService, roleMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<RoleDto>> getAllRoles() {
-        List<Role> entities = roleService.findAll();
-        return ResponseEntity.ok(roleMapper.toDtoList(entities));
+    public ResponseEntity<Page<RoleDto>> getAllRoles(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<RoleDto>> searchRoles(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Role.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RoleDto> getRoleById(@PathVariable Long id) {
-        return roleService.findById(id)
-                .map(roleMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class RoleController {
             @Valid @RequestBody RoleDto roleDto,
             UriComponentsBuilder uriBuilder) {
 
-        Role entity = roleMapper.toEntity(roleDto);
-        Role saved = roleService.save(entity);
+        Role entity = mapper.toEntity(roleDto);
+        Role saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/roles/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/roles/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(roleMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class RoleController {
             @Valid @RequestBody List<RoleDto> roleDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Role> entities = roleMapper.toEntityList(roleDtoList);
-        List<Role> savedEntities = roleService.saveAll(entities);
+        List<Role> entities = mapper.toEntityList(roleDtoList);
+        List<Role> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/roles").build().toUri();
 
-        return ResponseEntity.created(location).body(roleMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class RoleController {
             @PathVariable Long id,
             @Valid @RequestBody RoleDto roleDto) {
 
-
-        Role entityToUpdate = roleMapper.toEntity(roleDto);
-        Role updatedEntity = roleService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(roleMapper.toDto(updatedEntity));
+        Role entityToUpdate = mapper.toEntity(roleDto);
+        Role updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRole(@PathVariable Long id) {
-        boolean deleted = roleService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

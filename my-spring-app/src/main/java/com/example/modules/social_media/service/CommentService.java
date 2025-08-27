@@ -3,41 +3,59 @@ package com.example.modules.social_media.service;
 import com.example.core.service.BaseService;
 import com.example.modules.social_media.model.Comment;
 import com.example.modules.social_media.repository.CommentRepository;
+
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.repository.ProfileRepository;
+
 import com.example.modules.social_media.model.Post;
 import com.example.modules.social_media.repository.PostRepository;
-import com.example.modules.social_media.model.Comment;
-import com.example.modules.social_media.repository.CommentRepository;
+
 import com.example.modules.social_media.model.Comment;
 import com.example.modules.social_media.repository.CommentRepository;
 
+import com.example.modules.social_media.model.Comment;
+import com.example.modules.social_media.repository.CommentRepository;
+
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService extends BaseService<Comment> {
 
     protected final CommentRepository commentRepository;
-    private final ProfileRepository authorRepository;
-    private final PostRepository postRepository;
-    private final CommentRepository parentCommentRepository;
-    private final CommentRepository repliesRepository;
+    
+    protected final ProfileRepository authorRepository;
+    
+    protected final PostRepository postRepository;
+    
+    protected final CommentRepository parentCommentRepository;
+    
+    protected final CommentRepository repliesRepository;
+    
 
     public CommentService(CommentRepository repository, ProfileRepository authorRepository, PostRepository postRepository, CommentRepository parentCommentRepository, CommentRepository repliesRepository)
     {
         super(repository);
         this.commentRepository = repository;
+        
         this.authorRepository = authorRepository;
+        
         this.postRepository = postRepository;
+        
         this.parentCommentRepository = parentCommentRepository;
+        
         this.repliesRepository = repliesRepository;
+        
     }
 
+    @Transactional
     @Override
     public Comment save(Comment comment) {
     // ---------- OneToMany ----------
@@ -106,7 +124,8 @@ public class CommentService extends BaseService<Comment> {
     return commentRepository.save(comment);
 }
 
-
+    @Transactional
+    @Override
     public Comment update(Long id, Comment commentRequest) {
         Comment existing = commentRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Comment not found"));
@@ -152,7 +171,7 @@ public class CommentService extends BaseService<Comment> {
             existing.setParentComment(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getReplies().clear();
 
@@ -174,43 +193,25 @@ public class CommentService extends BaseService<Comment> {
     // ---------- Relations OneToOne ----------
     return commentRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Comment> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Comment> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Comment.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Comment> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Comment entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getReplies() != null) {
-            for (var child : entity.getReplies()) {
-                // retirer la référence inverse
-                child.setParentComment(null);
-            }
-            entity.getReplies().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getAuthor() != null) {
-            entity.setAuthor(null);
-        }
-        
-        if (entity.getPost() != null) {
-            entity.setPost(null);
-        }
-        
-        if (entity.getParentComment() != null) {
-            entity.setParentComment(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Comment> saveAll(List<Comment> commentList) {
-
-        return commentRepository.saveAll(commentList);
+        return super.saveAll(commentList);
     }
 
 }

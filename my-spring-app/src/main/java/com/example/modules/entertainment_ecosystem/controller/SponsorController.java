@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.SponsorDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.SponsorSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.Sponsor;
 import com.example.modules.entertainment_ecosystem.mapper.SponsorMapper;
 import com.example.modules.entertainment_ecosystem.service.SponsorService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Sponsor entities.
+ */
 @RestController
 @RequestMapping("/api/sponsors")
-public class SponsorController {
-
-    private final SponsorService sponsorService;
-    private final SponsorMapper sponsorMapper;
+public class SponsorController extends BaseController<Sponsor, SponsorDto, SponsorSimpleDto> {
 
     public SponsorController(SponsorService sponsorService,
                                     SponsorMapper sponsorMapper) {
-        this.sponsorService = sponsorService;
-        this.sponsorMapper = sponsorMapper;
+        super(sponsorService, sponsorMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<SponsorDto>> getAllSponsors() {
-        List<Sponsor> entities = sponsorService.findAll();
-        return ResponseEntity.ok(sponsorMapper.toDtoList(entities));
+    public ResponseEntity<Page<SponsorDto>> getAllSponsors(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<SponsorDto>> searchSponsors(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Sponsor.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SponsorDto> getSponsorById(@PathVariable Long id) {
-        return sponsorService.findById(id)
-                .map(sponsorMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class SponsorController {
             @Valid @RequestBody SponsorDto sponsorDto,
             UriComponentsBuilder uriBuilder) {
 
-        Sponsor entity = sponsorMapper.toEntity(sponsorDto);
-        Sponsor saved = sponsorService.save(entity);
+        Sponsor entity = mapper.toEntity(sponsorDto);
+        Sponsor saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/sponsors/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/sponsors/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(sponsorMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class SponsorController {
             @Valid @RequestBody List<SponsorDto> sponsorDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Sponsor> entities = sponsorMapper.toEntityList(sponsorDtoList);
-        List<Sponsor> savedEntities = sponsorService.saveAll(entities);
+        List<Sponsor> entities = mapper.toEntityList(sponsorDtoList);
+        List<Sponsor> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/sponsors").build().toUri();
 
-        return ResponseEntity.created(location).body(sponsorMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class SponsorController {
             @PathVariable Long id,
             @Valid @RequestBody SponsorDto sponsorDto) {
 
-
-        Sponsor entityToUpdate = sponsorMapper.toEntity(sponsorDto);
-        Sponsor updatedEntity = sponsorService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(sponsorMapper.toDto(updatedEntity));
+        Sponsor entityToUpdate = mapper.toEntity(sponsorDto);
+        Sponsor updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSponsor(@PathVariable Long id) {
-        boolean deleted = sponsorService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

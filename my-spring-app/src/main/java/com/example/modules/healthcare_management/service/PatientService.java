@@ -3,41 +3,59 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Patient;
 import com.example.modules.healthcare_management.repository.PatientRepository;
+
 import com.example.modules.healthcare_management.model.MedicalRecord;
 import com.example.modules.healthcare_management.repository.MedicalRecordRepository;
+
 import com.example.modules.healthcare_management.model.Appointment;
 import com.example.modules.healthcare_management.repository.AppointmentRepository;
+
 import com.example.modules.healthcare_management.model.Prescription;
 import com.example.modules.healthcare_management.repository.PrescriptionRepository;
+
 import com.example.modules.healthcare_management.model.Invoice;
 import com.example.modules.healthcare_management.repository.InvoiceRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class PatientService extends BaseService<Patient> {
 
     protected final PatientRepository patientRepository;
-    private final MedicalRecordRepository medicalRecordsRepository;
-    private final AppointmentRepository appointmentsRepository;
-    private final PrescriptionRepository prescriptionsRepository;
-    private final InvoiceRepository invoicesRepository;
+    
+    protected final MedicalRecordRepository medicalRecordsRepository;
+    
+    protected final AppointmentRepository appointmentsRepository;
+    
+    protected final PrescriptionRepository prescriptionsRepository;
+    
+    protected final InvoiceRepository invoicesRepository;
+    
 
     public PatientService(PatientRepository repository, MedicalRecordRepository medicalRecordsRepository, AppointmentRepository appointmentsRepository, PrescriptionRepository prescriptionsRepository, InvoiceRepository invoicesRepository)
     {
         super(repository);
         this.patientRepository = repository;
+        
         this.medicalRecordsRepository = medicalRecordsRepository;
+        
         this.appointmentsRepository = appointmentsRepository;
+        
         this.prescriptionsRepository = prescriptionsRepository;
+        
         this.invoicesRepository = invoicesRepository;
+        
     }
 
+    @Transactional
     @Override
     public Patient save(Patient patient) {
     // ---------- OneToMany ----------
@@ -115,7 +133,8 @@ public class PatientService extends BaseService<Patient> {
     return patientRepository.save(patient);
 }
 
-
+    @Transactional
+    @Override
     public Patient update(Long id, Patient patientRequest) {
         Patient existing = patientRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Patient not found"));
@@ -129,7 +148,7 @@ public class PatientService extends BaseService<Patient> {
         existing.setPhoneNumber(patientRequest.getPhoneNumber());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getMedicalRecords().clear();
 
@@ -202,55 +221,25 @@ public class PatientService extends BaseService<Patient> {
     // ---------- Relations OneToOne ----------
     return patientRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Patient> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Patient> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Patient.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Patient> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Patient entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getMedicalRecords() != null) {
-            for (var child : entity.getMedicalRecords()) {
-                // retirer la référence inverse
-                child.setPatient(null);
-            }
-            entity.getMedicalRecords().clear();
-        }
-        
-        if (entity.getAppointments() != null) {
-            for (var child : entity.getAppointments()) {
-                // retirer la référence inverse
-                child.setPatient(null);
-            }
-            entity.getAppointments().clear();
-        }
-        
-        if (entity.getPrescriptions() != null) {
-            for (var child : entity.getPrescriptions()) {
-                // retirer la référence inverse
-                child.setPatient(null);
-            }
-            entity.getPrescriptions().clear();
-        }
-        
-        if (entity.getInvoices() != null) {
-            for (var child : entity.getInvoices()) {
-                // retirer la référence inverse
-                child.setPatient(null);
-            }
-            entity.getInvoices().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Patient> saveAll(List<Patient> patientList) {
-
-        return patientRepository.saveAll(patientList);
+        return super.saveAll(patientList);
     }
 
 }

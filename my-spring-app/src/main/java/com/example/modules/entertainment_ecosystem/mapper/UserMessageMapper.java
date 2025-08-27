@@ -3,30 +3,12 @@ package com.example.modules.entertainment_ecosystem.mapper;
 import com.example.modules.entertainment_ecosystem.model.UserMessage;
 import com.example.modules.entertainment_ecosystem.dto.UserMessageDto;
 import com.example.modules.entertainment_ecosystem.dtosimple.UserMessageSimpleDto;
-import org.mapstruct.InheritInverseConfiguration;
+import com.example.core.mapper.BaseMapper;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-import org.mapstruct.MappingTarget;
-import java.util.List;
 
-
+/**
+ * 
+ */
 @Mapper(componentModel = "spring")
-public interface UserMessageMapper {
-
-    UserMessageMapper INSTANCE = Mappers.getMapper(UserMessageMapper.class);
-
-    UserMessageDto toDto(UserMessage usermessage);
-
-    UserMessageSimpleDto toSimpleDto(UserMessage usermessage);
-
-    @InheritInverseConfiguration
-    UserMessage toEntity(UserMessageDto usermessageDto);
-
-    List<UserMessageDto> toDtoList(List<UserMessage> usermessageList);
-
-    List<UserMessage> toEntityList(List<UserMessageDto> usermessageDtoList);
-
-    void updateEntityFromDto(UserMessageDto dto, @MappingTarget UserMessage entity);
-
+public interface UserMessageMapper extends BaseMapper<UserMessage, UserMessageDto, UserMessageSimpleDto> {
 }

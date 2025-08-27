@@ -1,42 +1,50 @@
 package com.example.modules.social_media.controller;
 
 import com.example.modules.social_media.dto.ProfileDto;
+import com.example.modules.social_media.dtosimple.ProfileSimpleDto;
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.mapper.ProfileMapper;
 import com.example.modules.social_media.service.ProfileService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Profile entities.
+ */
 @RestController
 @RequestMapping("/api/profiles")
-public class ProfileController {
-
-    private final ProfileService profileService;
-    private final ProfileMapper profileMapper;
+public class ProfileController extends BaseController<Profile, ProfileDto, ProfileSimpleDto> {
 
     public ProfileController(ProfileService profileService,
                                     ProfileMapper profileMapper) {
-        this.profileService = profileService;
-        this.profileMapper = profileMapper;
+        super(profileService, profileMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<ProfileDto>> getAllProfiles() {
-        List<Profile> entities = profileService.findAll();
-        return ResponseEntity.ok(profileMapper.toDtoList(entities));
+    public ResponseEntity<Page<ProfileDto>> getAllProfiles(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProfileDto>> searchProfiles(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Profile.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProfileDto> getProfileById(@PathVariable Long id) {
-        return profileService.findById(id)
-                .map(profileMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class ProfileController {
             @Valid @RequestBody ProfileDto profileDto,
             UriComponentsBuilder uriBuilder) {
 
-        Profile entity = profileMapper.toEntity(profileDto);
-        Profile saved = profileService.save(entity);
+        Profile entity = mapper.toEntity(profileDto);
+        Profile saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/profiles/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/profiles/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(profileMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class ProfileController {
             @Valid @RequestBody List<ProfileDto> profileDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Profile> entities = profileMapper.toEntityList(profileDtoList);
-        List<Profile> savedEntities = profileService.saveAll(entities);
+        List<Profile> entities = mapper.toEntityList(profileDtoList);
+        List<Profile> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/profiles").build().toUri();
 
-        return ResponseEntity.created(location).body(profileMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class ProfileController {
             @PathVariable Long id,
             @Valid @RequestBody ProfileDto profileDto) {
 
-
-        Profile entityToUpdate = profileMapper.toEntity(profileDto);
-        Profile updatedEntity = profileService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(profileMapper.toDto(updatedEntity));
+        Profile entityToUpdate = mapper.toEntity(profileDto);
+        Profile updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProfile(@PathVariable Long id) {
-        boolean deleted = profileService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.UserFollowerDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.UserFollowerSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.UserFollower;
 import com.example.modules.entertainment_ecosystem.mapper.UserFollowerMapper;
 import com.example.modules.entertainment_ecosystem.service.UserFollowerService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing UserFollower entities.
+ */
 @RestController
 @RequestMapping("/api/userfollowers")
-public class UserFollowerController {
-
-    private final UserFollowerService userfollowerService;
-    private final UserFollowerMapper userfollowerMapper;
+public class UserFollowerController extends BaseController<UserFollower, UserFollowerDto, UserFollowerSimpleDto> {
 
     public UserFollowerController(UserFollowerService userfollowerService,
                                     UserFollowerMapper userfollowerMapper) {
-        this.userfollowerService = userfollowerService;
-        this.userfollowerMapper = userfollowerMapper;
+        super(userfollowerService, userfollowerMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserFollowerDto>> getAllUserFollowers() {
-        List<UserFollower> entities = userfollowerService.findAll();
-        return ResponseEntity.ok(userfollowerMapper.toDtoList(entities));
+    public ResponseEntity<Page<UserFollowerDto>> getAllUserFollowers(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserFollowerDto>> searchUserFollowers(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(UserFollower.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserFollowerDto> getUserFollowerById(@PathVariable Long id) {
-        return userfollowerService.findById(id)
-                .map(userfollowerMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class UserFollowerController {
             @Valid @RequestBody UserFollowerDto userfollowerDto,
             UriComponentsBuilder uriBuilder) {
 
-        UserFollower entity = userfollowerMapper.toEntity(userfollowerDto);
-        UserFollower saved = userfollowerService.save(entity);
+        UserFollower entity = mapper.toEntity(userfollowerDto);
+        UserFollower saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/userfollowers/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/userfollowers/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(userfollowerMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class UserFollowerController {
             @Valid @RequestBody List<UserFollowerDto> userfollowerDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<UserFollower> entities = userfollowerMapper.toEntityList(userfollowerDtoList);
-        List<UserFollower> savedEntities = userfollowerService.saveAll(entities);
+        List<UserFollower> entities = mapper.toEntityList(userfollowerDtoList);
+        List<UserFollower> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/userfollowers").build().toUri();
 
-        return ResponseEntity.created(location).body(userfollowerMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class UserFollowerController {
             @PathVariable Long id,
             @Valid @RequestBody UserFollowerDto userfollowerDto) {
 
-
-        UserFollower entityToUpdate = userfollowerMapper.toEntity(userfollowerDto);
-        UserFollower updatedEntity = userfollowerService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(userfollowerMapper.toDto(updatedEntity));
+        UserFollower entityToUpdate = mapper.toEntity(userfollowerDto);
+        UserFollower updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserFollower(@PathVariable Long id) {
-        boolean deleted = userfollowerService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

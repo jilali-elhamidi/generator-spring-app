@@ -3,29 +3,38 @@ package com.example.modules.ecommerce.service;
 import com.example.core.service.BaseService;
 import com.example.modules.ecommerce.model.Address;
 import com.example.modules.ecommerce.repository.AddressRepository;
+
 import com.example.modules.ecommerce.model.User;
 import com.example.modules.ecommerce.repository.UserRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class AddressService extends BaseService<Address> {
 
     protected final AddressRepository addressRepository;
-    private final UserRepository userRepository;
+    
+    protected final UserRepository userRepository;
+    
 
     public AddressService(AddressRepository repository, UserRepository userRepository)
     {
         super(repository);
         this.addressRepository = repository;
+        
         this.userRepository = userRepository;
+        
     }
 
+    @Transactional
     @Override
     public Address save(Address address) {
     // ---------- OneToMany ----------
@@ -49,7 +58,8 @@ public class AddressService extends BaseService<Address> {
     return addressRepository.save(address);
 }
 
-
+    @Transactional
+    @Override
     public Address update(Long id, Address addressRequest) {
         Address existing = addressRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Address not found"));
@@ -73,32 +83,30 @@ public class AddressService extends BaseService<Address> {
             existing.setUser(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return addressRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Address> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Address> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Address.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Address> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Address entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getUser() != null) {
-            entity.setUser(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Address> saveAll(List<Address> addressList) {
-
-        return addressRepository.saveAll(addressList);
+        return super.saveAll(addressList);
     }
 
 }

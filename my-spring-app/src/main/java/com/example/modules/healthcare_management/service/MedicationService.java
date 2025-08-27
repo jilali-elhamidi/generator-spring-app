@@ -3,29 +3,38 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Medication;
 import com.example.modules.healthcare_management.repository.MedicationRepository;
+
 import com.example.modules.healthcare_management.model.Prescription;
 import com.example.modules.healthcare_management.repository.PrescriptionRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class MedicationService extends BaseService<Medication> {
 
     protected final MedicationRepository medicationRepository;
-    private final PrescriptionRepository prescriptionsRepository;
+    
+    protected final PrescriptionRepository prescriptionsRepository;
+    
 
     public MedicationService(MedicationRepository repository, PrescriptionRepository prescriptionsRepository)
     {
         super(repository);
         this.medicationRepository = repository;
+        
         this.prescriptionsRepository = prescriptionsRepository;
+        
     }
 
+    @Transactional
     @Override
     public Medication save(Medication medication) {
     // ---------- OneToMany ----------
@@ -57,7 +66,8 @@ public class MedicationService extends BaseService<Medication> {
     return medicationRepository.save(medication);
 }
 
-
+    @Transactional
+    @Override
     public Medication update(Long id, Medication medicationRequest) {
         Medication existing = medicationRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Medication not found"));
@@ -68,7 +78,7 @@ public class MedicationService extends BaseService<Medication> {
         existing.setManufacturer(medicationRequest.getManufacturer());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         if (medicationRequest.getPrescriptions() != null) {
             existing.getPrescriptions().clear();
 
@@ -91,31 +101,25 @@ public class MedicationService extends BaseService<Medication> {
     // ---------- Relations OneToOne ----------
     return medicationRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Medication> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Medication> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Medication.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Medication> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Medication entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-        if (entity.getPrescriptions() != null) {
-            for (Prescription item : new ArrayList<>(entity.getPrescriptions())) {
-                
-                item.getMedications().remove(entity); // retire côté inverse
-            }
-            entity.getPrescriptions().clear(); // puis vide côté courant
-        }
-        
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Medication> saveAll(List<Medication> medicationList) {
-
-        return medicationRepository.saveAll(medicationList);
+        return super.saveAll(medicationList);
     }
 
 }

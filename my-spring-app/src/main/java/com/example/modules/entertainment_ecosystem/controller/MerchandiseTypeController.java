@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.MerchandiseTypeDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseTypeSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseType;
 import com.example.modules.entertainment_ecosystem.mapper.MerchandiseTypeMapper;
 import com.example.modules.entertainment_ecosystem.service.MerchandiseTypeService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing MerchandiseType entities.
+ */
 @RestController
 @RequestMapping("/api/merchandisetypes")
-public class MerchandiseTypeController {
-
-    private final MerchandiseTypeService merchandisetypeService;
-    private final MerchandiseTypeMapper merchandisetypeMapper;
+public class MerchandiseTypeController extends BaseController<MerchandiseType, MerchandiseTypeDto, MerchandiseTypeSimpleDto> {
 
     public MerchandiseTypeController(MerchandiseTypeService merchandisetypeService,
                                     MerchandiseTypeMapper merchandisetypeMapper) {
-        this.merchandisetypeService = merchandisetypeService;
-        this.merchandisetypeMapper = merchandisetypeMapper;
+        super(merchandisetypeService, merchandisetypeMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<MerchandiseTypeDto>> getAllMerchandiseTypes() {
-        List<MerchandiseType> entities = merchandisetypeService.findAll();
-        return ResponseEntity.ok(merchandisetypeMapper.toDtoList(entities));
+    public ResponseEntity<Page<MerchandiseTypeDto>> getAllMerchandiseTypes(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<MerchandiseTypeDto>> searchMerchandiseTypes(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(MerchandiseType.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MerchandiseTypeDto> getMerchandiseTypeById(@PathVariable Long id) {
-        return merchandisetypeService.findById(id)
-                .map(merchandisetypeMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class MerchandiseTypeController {
             @Valid @RequestBody MerchandiseTypeDto merchandisetypeDto,
             UriComponentsBuilder uriBuilder) {
 
-        MerchandiseType entity = merchandisetypeMapper.toEntity(merchandisetypeDto);
-        MerchandiseType saved = merchandisetypeService.save(entity);
+        MerchandiseType entity = mapper.toEntity(merchandisetypeDto);
+        MerchandiseType saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/merchandisetypes/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/merchandisetypes/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(merchandisetypeMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class MerchandiseTypeController {
             @Valid @RequestBody List<MerchandiseTypeDto> merchandisetypeDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<MerchandiseType> entities = merchandisetypeMapper.toEntityList(merchandisetypeDtoList);
-        List<MerchandiseType> savedEntities = merchandisetypeService.saveAll(entities);
+        List<MerchandiseType> entities = mapper.toEntityList(merchandisetypeDtoList);
+        List<MerchandiseType> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/merchandisetypes").build().toUri();
 
-        return ResponseEntity.created(location).body(merchandisetypeMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class MerchandiseTypeController {
             @PathVariable Long id,
             @Valid @RequestBody MerchandiseTypeDto merchandisetypeDto) {
 
-
-        MerchandiseType entityToUpdate = merchandisetypeMapper.toEntity(merchandisetypeDto);
-        MerchandiseType updatedEntity = merchandisetypeService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(merchandisetypeMapper.toDto(updatedEntity));
+        MerchandiseType entityToUpdate = mapper.toEntity(merchandisetypeDto);
+        MerchandiseType updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMerchandiseType(@PathVariable Long id) {
-        boolean deleted = merchandisetypeService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

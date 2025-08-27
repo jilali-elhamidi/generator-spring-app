@@ -3,37 +3,52 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Appointment;
 import com.example.modules.healthcare_management.repository.AppointmentRepository;
+
 import com.example.modules.healthcare_management.model.Patient;
 import com.example.modules.healthcare_management.repository.PatientRepository;
+
 import com.example.modules.healthcare_management.model.Doctor;
 import com.example.modules.healthcare_management.repository.DoctorRepository;
+
 import com.example.modules.healthcare_management.model.Room;
 import com.example.modules.healthcare_management.repository.RoomRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService extends BaseService<Appointment> {
 
     protected final AppointmentRepository appointmentRepository;
-    private final PatientRepository patientRepository;
-    private final DoctorRepository doctorRepository;
-    private final RoomRepository roomRepository;
+    
+    protected final PatientRepository patientRepository;
+    
+    protected final DoctorRepository doctorRepository;
+    
+    protected final RoomRepository roomRepository;
+    
 
     public AppointmentService(AppointmentRepository repository, PatientRepository patientRepository, DoctorRepository doctorRepository, RoomRepository roomRepository)
     {
         super(repository);
         this.appointmentRepository = repository;
+        
         this.patientRepository = patientRepository;
+        
         this.doctorRepository = doctorRepository;
+        
         this.roomRepository = roomRepository;
+        
     }
 
+    @Transactional
     @Override
     public Appointment save(Appointment appointment) {
     // ---------- OneToMany ----------
@@ -85,7 +100,8 @@ public class AppointmentService extends BaseService<Appointment> {
     return appointmentRepository.save(appointment);
 }
 
-
+    @Transactional
+    @Override
     public Appointment update(Long id, Appointment appointmentRequest) {
         Appointment existing = appointmentRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -131,40 +147,30 @@ public class AppointmentService extends BaseService<Appointment> {
             existing.setRoom(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return appointmentRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Appointment> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Appointment> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Appointment.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Appointment> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Appointment entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getPatient() != null) {
-            entity.setPatient(null);
-        }
-        
-        if (entity.getDoctor() != null) {
-            entity.setDoctor(null);
-        }
-        
-        if (entity.getRoom() != null) {
-            entity.setRoom(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Appointment> saveAll(List<Appointment> appointmentList) {
-
-        return appointmentRepository.saveAll(appointmentList);
+        return super.saveAll(appointmentList);
     }
 
 }

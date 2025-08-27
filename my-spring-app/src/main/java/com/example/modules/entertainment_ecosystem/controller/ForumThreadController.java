@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.ForumThreadDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.ForumThreadSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.ForumThread;
 import com.example.modules.entertainment_ecosystem.mapper.ForumThreadMapper;
 import com.example.modules.entertainment_ecosystem.service.ForumThreadService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing ForumThread entities.
+ */
 @RestController
 @RequestMapping("/api/forumthreads")
-public class ForumThreadController {
-
-    private final ForumThreadService forumthreadService;
-    private final ForumThreadMapper forumthreadMapper;
+public class ForumThreadController extends BaseController<ForumThread, ForumThreadDto, ForumThreadSimpleDto> {
 
     public ForumThreadController(ForumThreadService forumthreadService,
                                     ForumThreadMapper forumthreadMapper) {
-        this.forumthreadService = forumthreadService;
-        this.forumthreadMapper = forumthreadMapper;
+        super(forumthreadService, forumthreadMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<ForumThreadDto>> getAllForumThreads() {
-        List<ForumThread> entities = forumthreadService.findAll();
-        return ResponseEntity.ok(forumthreadMapper.toDtoList(entities));
+    public ResponseEntity<Page<ForumThreadDto>> getAllForumThreads(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ForumThreadDto>> searchForumThreads(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(ForumThread.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ForumThreadDto> getForumThreadById(@PathVariable Long id) {
-        return forumthreadService.findById(id)
-                .map(forumthreadMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class ForumThreadController {
             @Valid @RequestBody ForumThreadDto forumthreadDto,
             UriComponentsBuilder uriBuilder) {
 
-        ForumThread entity = forumthreadMapper.toEntity(forumthreadDto);
-        ForumThread saved = forumthreadService.save(entity);
+        ForumThread entity = mapper.toEntity(forumthreadDto);
+        ForumThread saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/forumthreads/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/forumthreads/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(forumthreadMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class ForumThreadController {
             @Valid @RequestBody List<ForumThreadDto> forumthreadDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<ForumThread> entities = forumthreadMapper.toEntityList(forumthreadDtoList);
-        List<ForumThread> savedEntities = forumthreadService.saveAll(entities);
+        List<ForumThread> entities = mapper.toEntityList(forumthreadDtoList);
+        List<ForumThread> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/forumthreads").build().toUri();
 
-        return ResponseEntity.created(location).body(forumthreadMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class ForumThreadController {
             @PathVariable Long id,
             @Valid @RequestBody ForumThreadDto forumthreadDto) {
 
-
-        ForumThread entityToUpdate = forumthreadMapper.toEntity(forumthreadDto);
-        ForumThread updatedEntity = forumthreadService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(forumthreadMapper.toDto(updatedEntity));
+        ForumThread entityToUpdate = mapper.toEntity(forumthreadDto);
+        ForumThread updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteForumThread(@PathVariable Long id) {
-        boolean deleted = forumthreadService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

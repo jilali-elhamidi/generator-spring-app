@@ -7,12 +7,8 @@ import jakarta.validation.constraints.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
-import java.util.Date;
-
-// === Jackson ===
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import java.util.Date;
 
 // === Lombok ===
 import lombok.Data;
@@ -22,8 +18,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "userfollower_tbl")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class UserFollower extends BaseEntity {
 
     // === Attributs simples ===

@@ -3,41 +3,59 @@ package com.example.modules.ecommerce.service;
 import com.example.core.service.BaseService;
 import com.example.modules.ecommerce.model.Order;
 import com.example.modules.ecommerce.repository.OrderRepository;
+
 import com.example.modules.ecommerce.model.User;
 import com.example.modules.ecommerce.repository.UserRepository;
+
 import com.example.modules.ecommerce.model.OrderItem;
 import com.example.modules.ecommerce.repository.OrderItemRepository;
+
 import com.example.modules.ecommerce.model.Payment;
 import com.example.modules.ecommerce.repository.PaymentRepository;
+
 import com.example.modules.ecommerce.model.Shipment;
 import com.example.modules.ecommerce.repository.ShipmentRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService extends BaseService<Order> {
 
     protected final OrderRepository orderRepository;
-    private final UserRepository userRepository;
-    private final OrderItemRepository orderItemsRepository;
-    private final PaymentRepository paymentRepository;
-    private final ShipmentRepository shipmentRepository;
+    
+    protected final UserRepository userRepository;
+    
+    protected final OrderItemRepository orderItemsRepository;
+    
+    protected final PaymentRepository paymentRepository;
+    
+    protected final ShipmentRepository shipmentRepository;
+    
 
     public OrderService(OrderRepository repository, UserRepository userRepository, OrderItemRepository orderItemsRepository, PaymentRepository paymentRepository, ShipmentRepository shipmentRepository)
     {
         super(repository);
         this.orderRepository = repository;
+        
         this.userRepository = userRepository;
+        
         this.orderItemsRepository = orderItemsRepository;
+        
         this.paymentRepository = paymentRepository;
+        
         this.shipmentRepository = shipmentRepository;
+        
     }
 
+    @Transactional
     @Override
     public Order save(Order order) {
     // ---------- OneToMany ----------
@@ -108,7 +126,8 @@ public class OrderService extends BaseService<Order> {
     return orderRepository.save(order);
 }
 
-
+    @Transactional
+    @Override
     public Order update(Long id, Order orderRequest) {
         Order existing = orderRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -130,7 +149,7 @@ public class OrderService extends BaseService<Order> {
             existing.setUser(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getOrderItems().clear();
 
@@ -170,45 +189,25 @@ public class OrderService extends BaseService<Order> {
     
     return orderRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Order> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Order> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Order.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Order> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Order entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getOrderItems() != null) {
-            for (var child : entity.getOrderItems()) {
-                // retirer la référence inverse
-                child.setOrder(null);
-            }
-            entity.getOrderItems().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-        if (entity.getPayment() != null) {
-            entity.getPayment().setOrder(null);
-            entity.setPayment(null);
-        }
-        
-        if (entity.getShipment() != null) {
-            entity.getShipment().setOrder(null);
-            entity.setShipment(null);
-        }
-        
-    // --- Dissocier ManyToOne ---
-        if (entity.getUser() != null) {
-            entity.setUser(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Order> saveAll(List<Order> orderList) {
-
-        return orderRepository.saveAll(orderList);
+        return super.saveAll(orderList);
     }
 
 }

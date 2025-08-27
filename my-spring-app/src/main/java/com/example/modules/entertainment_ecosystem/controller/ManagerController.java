@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.ManagerDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.ManagerSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.Manager;
 import com.example.modules.entertainment_ecosystem.mapper.ManagerMapper;
 import com.example.modules.entertainment_ecosystem.service.ManagerService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Manager entities.
+ */
 @RestController
 @RequestMapping("/api/managers")
-public class ManagerController {
-
-    private final ManagerService managerService;
-    private final ManagerMapper managerMapper;
+public class ManagerController extends BaseController<Manager, ManagerDto, ManagerSimpleDto> {
 
     public ManagerController(ManagerService managerService,
                                     ManagerMapper managerMapper) {
-        this.managerService = managerService;
-        this.managerMapper = managerMapper;
+        super(managerService, managerMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<ManagerDto>> getAllManagers() {
-        List<Manager> entities = managerService.findAll();
-        return ResponseEntity.ok(managerMapper.toDtoList(entities));
+    public ResponseEntity<Page<ManagerDto>> getAllManagers(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ManagerDto>> searchManagers(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Manager.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ManagerDto> getManagerById(@PathVariable Long id) {
-        return managerService.findById(id)
-                .map(managerMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class ManagerController {
             @Valid @RequestBody ManagerDto managerDto,
             UriComponentsBuilder uriBuilder) {
 
-        Manager entity = managerMapper.toEntity(managerDto);
-        Manager saved = managerService.save(entity);
+        Manager entity = mapper.toEntity(managerDto);
+        Manager saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/managers/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/managers/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(managerMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class ManagerController {
             @Valid @RequestBody List<ManagerDto> managerDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Manager> entities = managerMapper.toEntityList(managerDtoList);
-        List<Manager> savedEntities = managerService.saveAll(entities);
+        List<Manager> entities = mapper.toEntityList(managerDtoList);
+        List<Manager> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/managers").build().toUri();
 
-        return ResponseEntity.created(location).body(managerMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class ManagerController {
             @PathVariable Long id,
             @Valid @RequestBody ManagerDto managerDto) {
 
-
-        Manager entityToUpdate = managerMapper.toEntity(managerDto);
-        Manager updatedEntity = managerService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(managerMapper.toDto(updatedEntity));
+        Manager entityToUpdate = mapper.toEntity(managerDto);
+        Manager updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteManager(@PathVariable Long id) {
-        boolean deleted = managerService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

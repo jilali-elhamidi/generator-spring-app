@@ -1,42 +1,50 @@
 package com.example.modules.ecommerce.controller;
 
 import com.example.modules.ecommerce.dto.OrderItemDto;
+import com.example.modules.ecommerce.dtosimple.OrderItemSimpleDto;
 import com.example.modules.ecommerce.model.OrderItem;
 import com.example.modules.ecommerce.mapper.OrderItemMapper;
 import com.example.modules.ecommerce.service.OrderItemService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing OrderItem entities.
+ */
 @RestController
 @RequestMapping("/api/orderitems")
-public class OrderItemController {
-
-    private final OrderItemService orderitemService;
-    private final OrderItemMapper orderitemMapper;
+public class OrderItemController extends BaseController<OrderItem, OrderItemDto, OrderItemSimpleDto> {
 
     public OrderItemController(OrderItemService orderitemService,
                                     OrderItemMapper orderitemMapper) {
-        this.orderitemService = orderitemService;
-        this.orderitemMapper = orderitemMapper;
+        super(orderitemService, orderitemMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderItemDto>> getAllOrderItems() {
-        List<OrderItem> entities = orderitemService.findAll();
-        return ResponseEntity.ok(orderitemMapper.toDtoList(entities));
+    public ResponseEntity<Page<OrderItemDto>> getAllOrderItems(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<OrderItemDto>> searchOrderItems(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(OrderItem.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderItemDto> getOrderItemById(@PathVariable Long id) {
-        return orderitemService.findById(id)
-                .map(orderitemMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class OrderItemController {
             @Valid @RequestBody OrderItemDto orderitemDto,
             UriComponentsBuilder uriBuilder) {
 
-        OrderItem entity = orderitemMapper.toEntity(orderitemDto);
-        OrderItem saved = orderitemService.save(entity);
+        OrderItem entity = mapper.toEntity(orderitemDto);
+        OrderItem saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/orderitems/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/orderitems/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(orderitemMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class OrderItemController {
             @Valid @RequestBody List<OrderItemDto> orderitemDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<OrderItem> entities = orderitemMapper.toEntityList(orderitemDtoList);
-        List<OrderItem> savedEntities = orderitemService.saveAll(entities);
+        List<OrderItem> entities = mapper.toEntityList(orderitemDtoList);
+        List<OrderItem> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/orderitems").build().toUri();
 
-        return ResponseEntity.created(location).body(orderitemMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class OrderItemController {
             @PathVariable Long id,
             @Valid @RequestBody OrderItemDto orderitemDto) {
 
-
-        OrderItem entityToUpdate = orderitemMapper.toEntity(orderitemDto);
-        OrderItem updatedEntity = orderitemService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(orderitemMapper.toDto(updatedEntity));
+        OrderItem entityToUpdate = mapper.toEntity(orderitemDto);
+        OrderItem updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
-        boolean deleted = orderitemService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

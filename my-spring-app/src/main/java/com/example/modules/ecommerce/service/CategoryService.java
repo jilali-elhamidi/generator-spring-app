@@ -3,29 +3,38 @@ package com.example.modules.ecommerce.service;
 import com.example.core.service.BaseService;
 import com.example.modules.ecommerce.model.Category;
 import com.example.modules.ecommerce.repository.CategoryRepository;
+
 import com.example.modules.ecommerce.model.Product;
 import com.example.modules.ecommerce.repository.ProductRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService extends BaseService<Category> {
 
     protected final CategoryRepository categoryRepository;
-    private final ProductRepository productsRepository;
+    
+    protected final ProductRepository productsRepository;
+    
 
     public CategoryService(CategoryRepository repository, ProductRepository productsRepository)
     {
         super(repository);
         this.categoryRepository = repository;
+        
         this.productsRepository = productsRepository;
+        
     }
 
+    @Transactional
     @Override
     public Category save(Category category) {
     // ---------- OneToMany ----------
@@ -52,7 +61,8 @@ public class CategoryService extends BaseService<Category> {
     return categoryRepository.save(category);
 }
 
-
+    @Transactional
+    @Override
     public Category update(Long id, Category categoryRequest) {
         Category existing = categoryRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -62,7 +72,7 @@ public class CategoryService extends BaseService<Category> {
         existing.setDescription(categoryRequest.getDescription());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getProducts().clear();
 
@@ -84,31 +94,25 @@ public class CategoryService extends BaseService<Category> {
     // ---------- Relations OneToOne ----------
     return categoryRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Category> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Category> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Category.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Category> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Category entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getProducts() != null) {
-            for (var child : entity.getProducts()) {
-                // retirer la référence inverse
-                child.setCategory(null);
-            }
-            entity.getProducts().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Category> saveAll(List<Category> categoryList) {
-
-        return categoryRepository.saveAll(categoryList);
+        return super.saveAll(categoryList);
     }
 
 }

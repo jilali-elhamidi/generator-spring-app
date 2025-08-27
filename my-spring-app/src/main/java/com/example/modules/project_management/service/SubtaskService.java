@@ -3,33 +3,45 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.Subtask;
 import com.example.modules.project_management.repository.SubtaskRepository;
+
 import com.example.modules.project_management.model.Task;
 import com.example.modules.project_management.repository.TaskRepository;
+
 import com.example.modules.project_management.model.TeamMember;
 import com.example.modules.project_management.repository.TeamMemberRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class SubtaskService extends BaseService<Subtask> {
 
     protected final SubtaskRepository subtaskRepository;
-    private final TaskRepository parentTaskRepository;
-    private final TeamMemberRepository assigneeRepository;
+    
+    protected final TaskRepository parentTaskRepository;
+    
+    protected final TeamMemberRepository assigneeRepository;
+    
 
     public SubtaskService(SubtaskRepository repository, TaskRepository parentTaskRepository, TeamMemberRepository assigneeRepository)
     {
         super(repository);
         this.subtaskRepository = repository;
+        
         this.parentTaskRepository = parentTaskRepository;
+        
         this.assigneeRepository = assigneeRepository;
+        
     }
 
+    @Transactional
     @Override
     public Subtask save(Subtask subtask) {
     // ---------- OneToMany ----------
@@ -67,7 +79,8 @@ public class SubtaskService extends BaseService<Subtask> {
     return subtaskRepository.save(subtask);
 }
 
-
+    @Transactional
+    @Override
     public Subtask update(Long id, Subtask subtaskRequest) {
         Subtask existing = subtaskRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Subtask not found"));
@@ -101,36 +114,30 @@ public class SubtaskService extends BaseService<Subtask> {
             existing.setAssignee(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return subtaskRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Subtask> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Subtask> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Subtask.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Subtask> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Subtask entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getParentTask() != null) {
-            entity.setParentTask(null);
-        }
-        
-        if (entity.getAssignee() != null) {
-            entity.setAssignee(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Subtask> saveAll(List<Subtask> subtaskList) {
-
-        return subtaskRepository.saveAll(subtaskList);
+        return super.saveAll(subtaskList);
     }
 
 }

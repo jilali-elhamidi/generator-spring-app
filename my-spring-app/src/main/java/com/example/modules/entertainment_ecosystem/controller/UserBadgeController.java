@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.UserBadgeDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.UserBadgeSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.UserBadge;
 import com.example.modules.entertainment_ecosystem.mapper.UserBadgeMapper;
 import com.example.modules.entertainment_ecosystem.service.UserBadgeService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing UserBadge entities.
+ */
 @RestController
 @RequestMapping("/api/userbadges")
-public class UserBadgeController {
-
-    private final UserBadgeService userbadgeService;
-    private final UserBadgeMapper userbadgeMapper;
+public class UserBadgeController extends BaseController<UserBadge, UserBadgeDto, UserBadgeSimpleDto> {
 
     public UserBadgeController(UserBadgeService userbadgeService,
                                     UserBadgeMapper userbadgeMapper) {
-        this.userbadgeService = userbadgeService;
-        this.userbadgeMapper = userbadgeMapper;
+        super(userbadgeService, userbadgeMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserBadgeDto>> getAllUserBadges() {
-        List<UserBadge> entities = userbadgeService.findAll();
-        return ResponseEntity.ok(userbadgeMapper.toDtoList(entities));
+    public ResponseEntity<Page<UserBadgeDto>> getAllUserBadges(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserBadgeDto>> searchUserBadges(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(UserBadge.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserBadgeDto> getUserBadgeById(@PathVariable Long id) {
-        return userbadgeService.findById(id)
-                .map(userbadgeMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class UserBadgeController {
             @Valid @RequestBody UserBadgeDto userbadgeDto,
             UriComponentsBuilder uriBuilder) {
 
-        UserBadge entity = userbadgeMapper.toEntity(userbadgeDto);
-        UserBadge saved = userbadgeService.save(entity);
+        UserBadge entity = mapper.toEntity(userbadgeDto);
+        UserBadge saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/userbadges/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/userbadges/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(userbadgeMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class UserBadgeController {
             @Valid @RequestBody List<UserBadgeDto> userbadgeDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<UserBadge> entities = userbadgeMapper.toEntityList(userbadgeDtoList);
-        List<UserBadge> savedEntities = userbadgeService.saveAll(entities);
+        List<UserBadge> entities = mapper.toEntityList(userbadgeDtoList);
+        List<UserBadge> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/userbadges").build().toUri();
 
-        return ResponseEntity.created(location).body(userbadgeMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class UserBadgeController {
             @PathVariable Long id,
             @Valid @RequestBody UserBadgeDto userbadgeDto) {
 
-
-        UserBadge entityToUpdate = userbadgeMapper.toEntity(userbadgeDto);
-        UserBadge updatedEntity = userbadgeService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(userbadgeMapper.toDto(updatedEntity));
+        UserBadge entityToUpdate = mapper.toEntity(userbadgeDto);
+        UserBadge updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserBadge(@PathVariable Long id) {
-        boolean deleted = userbadgeService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

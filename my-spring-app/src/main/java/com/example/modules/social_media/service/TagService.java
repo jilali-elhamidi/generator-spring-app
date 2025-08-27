@@ -3,29 +3,38 @@ package com.example.modules.social_media.service;
 import com.example.core.service.BaseService;
 import com.example.modules.social_media.model.Tag;
 import com.example.modules.social_media.repository.TagRepository;
+
 import com.example.modules.social_media.model.Post;
 import com.example.modules.social_media.repository.PostRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class TagService extends BaseService<Tag> {
 
     protected final TagRepository tagRepository;
-    private final PostRepository postsRepository;
+    
+    protected final PostRepository postsRepository;
+    
 
     public TagService(TagRepository repository, PostRepository postsRepository)
     {
         super(repository);
         this.tagRepository = repository;
+        
         this.postsRepository = postsRepository;
+        
     }
 
+    @Transactional
     @Override
     public Tag save(Tag tag) {
     // ---------- OneToMany ----------
@@ -57,7 +66,8 @@ public class TagService extends BaseService<Tag> {
     return tagRepository.save(tag);
 }
 
-
+    @Transactional
+    @Override
     public Tag update(Long id, Tag tagRequest) {
         Tag existing = tagRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Tag not found"));
@@ -66,7 +76,7 @@ public class TagService extends BaseService<Tag> {
         existing.setName(tagRequest.getName());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         if (tagRequest.getPosts() != null) {
             existing.getPosts().clear();
 
@@ -89,31 +99,25 @@ public class TagService extends BaseService<Tag> {
     // ---------- Relations OneToOne ----------
     return tagRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Tag> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Tag> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Tag.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Tag> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Tag entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-        if (entity.getPosts() != null) {
-            for (Post item : new ArrayList<>(entity.getPosts())) {
-                
-                item.getTags().remove(entity); // retire côté inverse
-            }
-            entity.getPosts().clear(); // puis vide côté courant
-        }
-        
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Tag> saveAll(List<Tag> tagList) {
-
-        return tagRepository.saveAll(tagList);
+        return super.saveAll(tagList);
     }
 
 }

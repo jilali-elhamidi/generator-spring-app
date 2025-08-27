@@ -3,29 +3,38 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.MedicalFile;
 import com.example.modules.healthcare_management.repository.MedicalFileRepository;
+
 import com.example.modules.healthcare_management.model.MedicalRecord;
 import com.example.modules.healthcare_management.repository.MedicalRecordRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class MedicalFileService extends BaseService<MedicalFile> {
 
     protected final MedicalFileRepository medicalfileRepository;
-    private final MedicalRecordRepository recordRepository;
+    
+    protected final MedicalRecordRepository recordRepository;
+    
 
     public MedicalFileService(MedicalFileRepository repository, MedicalRecordRepository recordRepository)
     {
         super(repository);
         this.medicalfileRepository = repository;
+        
         this.recordRepository = recordRepository;
+        
     }
 
+    @Transactional
     @Override
     public MedicalFile save(MedicalFile medicalfile) {
     // ---------- OneToMany ----------
@@ -49,7 +58,8 @@ public class MedicalFileService extends BaseService<MedicalFile> {
     return medicalfileRepository.save(medicalfile);
 }
 
-
+    @Transactional
+    @Override
     public MedicalFile update(Long id, MedicalFile medicalfileRequest) {
         MedicalFile existing = medicalfileRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("MedicalFile not found"));
@@ -71,32 +81,30 @@ public class MedicalFileService extends BaseService<MedicalFile> {
             existing.setRecord(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return medicalfileRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<MedicalFile> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<MedicalFile> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(MedicalFile.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<MedicalFile> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        MedicalFile entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getRecord() != null) {
-            entity.setRecord(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<MedicalFile> saveAll(List<MedicalFile> medicalfileList) {
-
-        return medicalfileRepository.saveAll(medicalfileList);
+        return super.saveAll(medicalfileList);
     }
 
 }

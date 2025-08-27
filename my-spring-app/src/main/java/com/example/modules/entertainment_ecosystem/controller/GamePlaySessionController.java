@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.GamePlaySessionDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.GamePlaySessionSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.GamePlaySession;
 import com.example.modules.entertainment_ecosystem.mapper.GamePlaySessionMapper;
 import com.example.modules.entertainment_ecosystem.service.GamePlaySessionService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing GamePlaySession entities.
+ */
 @RestController
 @RequestMapping("/api/gameplaysessions")
-public class GamePlaySessionController {
-
-    private final GamePlaySessionService gameplaysessionService;
-    private final GamePlaySessionMapper gameplaysessionMapper;
+public class GamePlaySessionController extends BaseController<GamePlaySession, GamePlaySessionDto, GamePlaySessionSimpleDto> {
 
     public GamePlaySessionController(GamePlaySessionService gameplaysessionService,
                                     GamePlaySessionMapper gameplaysessionMapper) {
-        this.gameplaysessionService = gameplaysessionService;
-        this.gameplaysessionMapper = gameplaysessionMapper;
+        super(gameplaysessionService, gameplaysessionMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<GamePlaySessionDto>> getAllGamePlaySessions() {
-        List<GamePlaySession> entities = gameplaysessionService.findAll();
-        return ResponseEntity.ok(gameplaysessionMapper.toDtoList(entities));
+    public ResponseEntity<Page<GamePlaySessionDto>> getAllGamePlaySessions(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<GamePlaySessionDto>> searchGamePlaySessions(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(GamePlaySession.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<GamePlaySessionDto> getGamePlaySessionById(@PathVariable Long id) {
-        return gameplaysessionService.findById(id)
-                .map(gameplaysessionMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class GamePlaySessionController {
             @Valid @RequestBody GamePlaySessionDto gameplaysessionDto,
             UriComponentsBuilder uriBuilder) {
 
-        GamePlaySession entity = gameplaysessionMapper.toEntity(gameplaysessionDto);
-        GamePlaySession saved = gameplaysessionService.save(entity);
+        GamePlaySession entity = mapper.toEntity(gameplaysessionDto);
+        GamePlaySession saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/gameplaysessions/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/gameplaysessions/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(gameplaysessionMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class GamePlaySessionController {
             @Valid @RequestBody List<GamePlaySessionDto> gameplaysessionDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<GamePlaySession> entities = gameplaysessionMapper.toEntityList(gameplaysessionDtoList);
-        List<GamePlaySession> savedEntities = gameplaysessionService.saveAll(entities);
+        List<GamePlaySession> entities = mapper.toEntityList(gameplaysessionDtoList);
+        List<GamePlaySession> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/gameplaysessions").build().toUri();
 
-        return ResponseEntity.created(location).body(gameplaysessionMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class GamePlaySessionController {
             @PathVariable Long id,
             @Valid @RequestBody GamePlaySessionDto gameplaysessionDto) {
 
-
-        GamePlaySession entityToUpdate = gameplaysessionMapper.toEntity(gameplaysessionDto);
-        GamePlaySession updatedEntity = gameplaysessionService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(gameplaysessionMapper.toDto(updatedEntity));
+        GamePlaySession entityToUpdate = mapper.toEntity(gameplaysessionDto);
+        GamePlaySession updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGamePlaySession(@PathVariable Long id) {
-        boolean deleted = gameplaysessionService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

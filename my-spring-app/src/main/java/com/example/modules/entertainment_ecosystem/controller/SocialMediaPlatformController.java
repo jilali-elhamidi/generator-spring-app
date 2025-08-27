@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.SocialMediaPlatformDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.SocialMediaPlatformSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.SocialMediaPlatform;
 import com.example.modules.entertainment_ecosystem.mapper.SocialMediaPlatformMapper;
 import com.example.modules.entertainment_ecosystem.service.SocialMediaPlatformService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing SocialMediaPlatform entities.
+ */
 @RestController
 @RequestMapping("/api/socialmediaplatforms")
-public class SocialMediaPlatformController {
-
-    private final SocialMediaPlatformService socialmediaplatformService;
-    private final SocialMediaPlatformMapper socialmediaplatformMapper;
+public class SocialMediaPlatformController extends BaseController<SocialMediaPlatform, SocialMediaPlatformDto, SocialMediaPlatformSimpleDto> {
 
     public SocialMediaPlatformController(SocialMediaPlatformService socialmediaplatformService,
                                     SocialMediaPlatformMapper socialmediaplatformMapper) {
-        this.socialmediaplatformService = socialmediaplatformService;
-        this.socialmediaplatformMapper = socialmediaplatformMapper;
+        super(socialmediaplatformService, socialmediaplatformMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<SocialMediaPlatformDto>> getAllSocialMediaPlatforms() {
-        List<SocialMediaPlatform> entities = socialmediaplatformService.findAll();
-        return ResponseEntity.ok(socialmediaplatformMapper.toDtoList(entities));
+    public ResponseEntity<Page<SocialMediaPlatformDto>> getAllSocialMediaPlatforms(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<SocialMediaPlatformDto>> searchSocialMediaPlatforms(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(SocialMediaPlatform.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SocialMediaPlatformDto> getSocialMediaPlatformById(@PathVariable Long id) {
-        return socialmediaplatformService.findById(id)
-                .map(socialmediaplatformMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class SocialMediaPlatformController {
             @Valid @RequestBody SocialMediaPlatformDto socialmediaplatformDto,
             UriComponentsBuilder uriBuilder) {
 
-        SocialMediaPlatform entity = socialmediaplatformMapper.toEntity(socialmediaplatformDto);
-        SocialMediaPlatform saved = socialmediaplatformService.save(entity);
+        SocialMediaPlatform entity = mapper.toEntity(socialmediaplatformDto);
+        SocialMediaPlatform saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/socialmediaplatforms/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/socialmediaplatforms/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(socialmediaplatformMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class SocialMediaPlatformController {
             @Valid @RequestBody List<SocialMediaPlatformDto> socialmediaplatformDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<SocialMediaPlatform> entities = socialmediaplatformMapper.toEntityList(socialmediaplatformDtoList);
-        List<SocialMediaPlatform> savedEntities = socialmediaplatformService.saveAll(entities);
+        List<SocialMediaPlatform> entities = mapper.toEntityList(socialmediaplatformDtoList);
+        List<SocialMediaPlatform> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/socialmediaplatforms").build().toUri();
 
-        return ResponseEntity.created(location).body(socialmediaplatformMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class SocialMediaPlatformController {
             @PathVariable Long id,
             @Valid @RequestBody SocialMediaPlatformDto socialmediaplatformDto) {
 
-
-        SocialMediaPlatform entityToUpdate = socialmediaplatformMapper.toEntity(socialmediaplatformDto);
-        SocialMediaPlatform updatedEntity = socialmediaplatformService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(socialmediaplatformMapper.toDto(updatedEntity));
+        SocialMediaPlatform entityToUpdate = mapper.toEntity(socialmediaplatformDto);
+        SocialMediaPlatform updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSocialMediaPlatform(@PathVariable Long id) {
-        boolean deleted = socialmediaplatformService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -1,42 +1,50 @@
 package com.example.modules.social_media.controller;
 
 import com.example.modules.social_media.dto.PostDto;
+import com.example.modules.social_media.dtosimple.PostSimpleDto;
 import com.example.modules.social_media.model.Post;
 import com.example.modules.social_media.mapper.PostMapper;
 import com.example.modules.social_media.service.PostService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Post entities.
+ */
 @RestController
 @RequestMapping("/api/posts")
-public class PostController {
-
-    private final PostService postService;
-    private final PostMapper postMapper;
+public class PostController extends BaseController<Post, PostDto, PostSimpleDto> {
 
     public PostController(PostService postService,
                                     PostMapper postMapper) {
-        this.postService = postService;
-        this.postMapper = postMapper;
+        super(postService, postMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<PostDto>> getAllPosts() {
-        List<Post> entities = postService.findAll();
-        return ResponseEntity.ok(postMapper.toDtoList(entities));
+    public ResponseEntity<Page<PostDto>> getAllPosts(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PostDto>> searchPosts(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Post.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> getPostById(@PathVariable Long id) {
-        return postService.findById(id)
-                .map(postMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class PostController {
             @Valid @RequestBody PostDto postDto,
             UriComponentsBuilder uriBuilder) {
 
-        Post entity = postMapper.toEntity(postDto);
-        Post saved = postService.save(entity);
+        Post entity = mapper.toEntity(postDto);
+        Post saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/posts/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/posts/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(postMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class PostController {
             @Valid @RequestBody List<PostDto> postDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Post> entities = postMapper.toEntityList(postDtoList);
-        List<Post> savedEntities = postService.saveAll(entities);
+        List<Post> entities = mapper.toEntityList(postDtoList);
+        List<Post> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/posts").build().toUri();
 
-        return ResponseEntity.created(location).body(postMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class PostController {
             @PathVariable Long id,
             @Valid @RequestBody PostDto postDto) {
 
-
-        Post entityToUpdate = postMapper.toEntity(postDto);
-        Post updatedEntity = postService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(postMapper.toDto(updatedEntity));
+        Post entityToUpdate = mapper.toEntity(postDto);
+        Post updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        boolean deleted = postService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

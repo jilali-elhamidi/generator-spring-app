@@ -1,42 +1,50 @@
 package com.example.modules.elearning.controller;
 
 import com.example.modules.elearning.dto.LessonDto;
+import com.example.modules.elearning.dtosimple.LessonSimpleDto;
 import com.example.modules.elearning.model.Lesson;
 import com.example.modules.elearning.mapper.LessonMapper;
 import com.example.modules.elearning.service.LessonService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Lesson entities.
+ */
 @RestController
 @RequestMapping("/api/lessons")
-public class LessonController {
-
-    private final LessonService lessonService;
-    private final LessonMapper lessonMapper;
+public class LessonController extends BaseController<Lesson, LessonDto, LessonSimpleDto> {
 
     public LessonController(LessonService lessonService,
                                     LessonMapper lessonMapper) {
-        this.lessonService = lessonService;
-        this.lessonMapper = lessonMapper;
+        super(lessonService, lessonMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<LessonDto>> getAllLessons() {
-        List<Lesson> entities = lessonService.findAll();
-        return ResponseEntity.ok(lessonMapper.toDtoList(entities));
+    public ResponseEntity<Page<LessonDto>> getAllLessons(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<LessonDto>> searchLessons(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Lesson.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<LessonDto> getLessonById(@PathVariable Long id) {
-        return lessonService.findById(id)
-                .map(lessonMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class LessonController {
             @Valid @RequestBody LessonDto lessonDto,
             UriComponentsBuilder uriBuilder) {
 
-        Lesson entity = lessonMapper.toEntity(lessonDto);
-        Lesson saved = lessonService.save(entity);
+        Lesson entity = mapper.toEntity(lessonDto);
+        Lesson saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/lessons/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/lessons/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(lessonMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class LessonController {
             @Valid @RequestBody List<LessonDto> lessonDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Lesson> entities = lessonMapper.toEntityList(lessonDtoList);
-        List<Lesson> savedEntities = lessonService.saveAll(entities);
+        List<Lesson> entities = mapper.toEntityList(lessonDtoList);
+        List<Lesson> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/lessons").build().toUri();
 
-        return ResponseEntity.created(location).body(lessonMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class LessonController {
             @PathVariable Long id,
             @Valid @RequestBody LessonDto lessonDto) {
 
-
-        Lesson entityToUpdate = lessonMapper.toEntity(lessonDto);
-        Lesson updatedEntity = lessonService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(lessonMapper.toDto(updatedEntity));
+        Lesson entityToUpdate = mapper.toEntity(lessonDto);
+        Lesson updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLesson(@PathVariable Long id) {
-        boolean deleted = lessonService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -1,42 +1,50 @@
 package com.example.modules.project_management.controller;
 
 import com.example.modules.project_management.dto.TimeLogDto;
+import com.example.modules.project_management.dtosimple.TimeLogSimpleDto;
 import com.example.modules.project_management.model.TimeLog;
 import com.example.modules.project_management.mapper.TimeLogMapper;
 import com.example.modules.project_management.service.TimeLogService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing TimeLog entities.
+ */
 @RestController
 @RequestMapping("/api/timelogs")
-public class TimeLogController {
-
-    private final TimeLogService timelogService;
-    private final TimeLogMapper timelogMapper;
+public class TimeLogController extends BaseController<TimeLog, TimeLogDto, TimeLogSimpleDto> {
 
     public TimeLogController(TimeLogService timelogService,
                                     TimeLogMapper timelogMapper) {
-        this.timelogService = timelogService;
-        this.timelogMapper = timelogMapper;
+        super(timelogService, timelogMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<TimeLogDto>> getAllTimeLogs() {
-        List<TimeLog> entities = timelogService.findAll();
-        return ResponseEntity.ok(timelogMapper.toDtoList(entities));
+    public ResponseEntity<Page<TimeLogDto>> getAllTimeLogs(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<TimeLogDto>> searchTimeLogs(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(TimeLog.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TimeLogDto> getTimeLogById(@PathVariable Long id) {
-        return timelogService.findById(id)
-                .map(timelogMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class TimeLogController {
             @Valid @RequestBody TimeLogDto timelogDto,
             UriComponentsBuilder uriBuilder) {
 
-        TimeLog entity = timelogMapper.toEntity(timelogDto);
-        TimeLog saved = timelogService.save(entity);
+        TimeLog entity = mapper.toEntity(timelogDto);
+        TimeLog saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/timelogs/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/timelogs/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(timelogMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class TimeLogController {
             @Valid @RequestBody List<TimeLogDto> timelogDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<TimeLog> entities = timelogMapper.toEntityList(timelogDtoList);
-        List<TimeLog> savedEntities = timelogService.saveAll(entities);
+        List<TimeLog> entities = mapper.toEntityList(timelogDtoList);
+        List<TimeLog> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/timelogs").build().toUri();
 
-        return ResponseEntity.created(location).body(timelogMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class TimeLogController {
             @PathVariable Long id,
             @Valid @RequestBody TimeLogDto timelogDto) {
 
-
-        TimeLog entityToUpdate = timelogMapper.toEntity(timelogDto);
-        TimeLog updatedEntity = timelogService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(timelogMapper.toDto(updatedEntity));
+        TimeLog entityToUpdate = mapper.toEntity(timelogDto);
+        TimeLog updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTimeLog(@PathVariable Long id) {
-        boolean deleted = timelogService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

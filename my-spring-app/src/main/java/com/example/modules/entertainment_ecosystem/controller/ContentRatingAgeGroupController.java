@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.ContentRatingAgeGroupDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.ContentRatingAgeGroupSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.ContentRatingAgeGroup;
 import com.example.modules.entertainment_ecosystem.mapper.ContentRatingAgeGroupMapper;
 import com.example.modules.entertainment_ecosystem.service.ContentRatingAgeGroupService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing ContentRatingAgeGroup entities.
+ */
 @RestController
 @RequestMapping("/api/contentratingagegroups")
-public class ContentRatingAgeGroupController {
-
-    private final ContentRatingAgeGroupService contentratingagegroupService;
-    private final ContentRatingAgeGroupMapper contentratingagegroupMapper;
+public class ContentRatingAgeGroupController extends BaseController<ContentRatingAgeGroup, ContentRatingAgeGroupDto, ContentRatingAgeGroupSimpleDto> {
 
     public ContentRatingAgeGroupController(ContentRatingAgeGroupService contentratingagegroupService,
                                     ContentRatingAgeGroupMapper contentratingagegroupMapper) {
-        this.contentratingagegroupService = contentratingagegroupService;
-        this.contentratingagegroupMapper = contentratingagegroupMapper;
+        super(contentratingagegroupService, contentratingagegroupMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<ContentRatingAgeGroupDto>> getAllContentRatingAgeGroups() {
-        List<ContentRatingAgeGroup> entities = contentratingagegroupService.findAll();
-        return ResponseEntity.ok(contentratingagegroupMapper.toDtoList(entities));
+    public ResponseEntity<Page<ContentRatingAgeGroupDto>> getAllContentRatingAgeGroups(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ContentRatingAgeGroupDto>> searchContentRatingAgeGroups(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(ContentRatingAgeGroup.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ContentRatingAgeGroupDto> getContentRatingAgeGroupById(@PathVariable Long id) {
-        return contentratingagegroupService.findById(id)
-                .map(contentratingagegroupMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class ContentRatingAgeGroupController {
             @Valid @RequestBody ContentRatingAgeGroupDto contentratingagegroupDto,
             UriComponentsBuilder uriBuilder) {
 
-        ContentRatingAgeGroup entity = contentratingagegroupMapper.toEntity(contentratingagegroupDto);
-        ContentRatingAgeGroup saved = contentratingagegroupService.save(entity);
+        ContentRatingAgeGroup entity = mapper.toEntity(contentratingagegroupDto);
+        ContentRatingAgeGroup saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/contentratingagegroups/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/contentratingagegroups/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(contentratingagegroupMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class ContentRatingAgeGroupController {
             @Valid @RequestBody List<ContentRatingAgeGroupDto> contentratingagegroupDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<ContentRatingAgeGroup> entities = contentratingagegroupMapper.toEntityList(contentratingagegroupDtoList);
-        List<ContentRatingAgeGroup> savedEntities = contentratingagegroupService.saveAll(entities);
+        List<ContentRatingAgeGroup> entities = mapper.toEntityList(contentratingagegroupDtoList);
+        List<ContentRatingAgeGroup> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/contentratingagegroups").build().toUri();
 
-        return ResponseEntity.created(location).body(contentratingagegroupMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class ContentRatingAgeGroupController {
             @PathVariable Long id,
             @Valid @RequestBody ContentRatingAgeGroupDto contentratingagegroupDto) {
 
-
-        ContentRatingAgeGroup entityToUpdate = contentratingagegroupMapper.toEntity(contentratingagegroupDto);
-        ContentRatingAgeGroup updatedEntity = contentratingagegroupService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(contentratingagegroupMapper.toDto(updatedEntity));
+        ContentRatingAgeGroup entityToUpdate = mapper.toEntity(contentratingagegroupDto);
+        ContentRatingAgeGroup updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteContentRatingAgeGroup(@PathVariable Long id) {
-        boolean deleted = contentratingagegroupService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

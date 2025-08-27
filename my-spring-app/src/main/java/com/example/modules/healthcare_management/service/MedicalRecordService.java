@@ -3,37 +3,52 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.MedicalRecord;
 import com.example.modules.healthcare_management.repository.MedicalRecordRepository;
+
 import com.example.modules.healthcare_management.model.Patient;
 import com.example.modules.healthcare_management.repository.PatientRepository;
+
 import com.example.modules.healthcare_management.model.Doctor;
 import com.example.modules.healthcare_management.repository.DoctorRepository;
+
 import com.example.modules.healthcare_management.model.MedicalFile;
 import com.example.modules.healthcare_management.repository.MedicalFileRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class MedicalRecordService extends BaseService<MedicalRecord> {
 
     protected final MedicalRecordRepository medicalrecordRepository;
-    private final PatientRepository patientRepository;
-    private final DoctorRepository doctorRepository;
-    private final MedicalFileRepository attachmentsRepository;
+    
+    protected final PatientRepository patientRepository;
+    
+    protected final DoctorRepository doctorRepository;
+    
+    protected final MedicalFileRepository attachmentsRepository;
+    
 
     public MedicalRecordService(MedicalRecordRepository repository, PatientRepository patientRepository, DoctorRepository doctorRepository, MedicalFileRepository attachmentsRepository)
     {
         super(repository);
         this.medicalrecordRepository = repository;
+        
         this.patientRepository = patientRepository;
+        
         this.doctorRepository = doctorRepository;
+        
         this.attachmentsRepository = attachmentsRepository;
+        
     }
 
+    @Transactional
     @Override
     public MedicalRecord save(MedicalRecord medicalrecord) {
     // ---------- OneToMany ----------
@@ -88,7 +103,8 @@ public class MedicalRecordService extends BaseService<MedicalRecord> {
     return medicalrecordRepository.save(medicalrecord);
 }
 
-
+    @Transactional
+    @Override
     public MedicalRecord update(Long id, MedicalRecord medicalrecordRequest) {
         MedicalRecord existing = medicalrecordRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("MedicalRecord not found"));
@@ -123,7 +139,7 @@ public class MedicalRecordService extends BaseService<MedicalRecord> {
             existing.setDoctor(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getAttachments().clear();
 
@@ -145,39 +161,25 @@ public class MedicalRecordService extends BaseService<MedicalRecord> {
     // ---------- Relations OneToOne ----------
     return medicalrecordRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<MedicalRecord> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<MedicalRecord> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(MedicalRecord.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<MedicalRecord> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        MedicalRecord entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getAttachments() != null) {
-            for (var child : entity.getAttachments()) {
-                // retirer la référence inverse
-                child.setRecord(null);
-            }
-            entity.getAttachments().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getPatient() != null) {
-            entity.setPatient(null);
-        }
-        
-        if (entity.getDoctor() != null) {
-            entity.setDoctor(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<MedicalRecord> saveAll(List<MedicalRecord> medicalrecordList) {
-
-        return medicalrecordRepository.saveAll(medicalrecordList);
+        return super.saveAll(medicalrecordList);
     }
 
 }

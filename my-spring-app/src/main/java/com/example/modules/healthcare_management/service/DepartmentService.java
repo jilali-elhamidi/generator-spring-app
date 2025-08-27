@@ -3,29 +3,38 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Department;
 import com.example.modules.healthcare_management.repository.DepartmentRepository;
+
 import com.example.modules.healthcare_management.model.Doctor;
 import com.example.modules.healthcare_management.repository.DoctorRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class DepartmentService extends BaseService<Department> {
 
     protected final DepartmentRepository departmentRepository;
-    private final DoctorRepository doctorsRepository;
+    
+    protected final DoctorRepository doctorsRepository;
+    
 
     public DepartmentService(DepartmentRepository repository, DoctorRepository doctorsRepository)
     {
         super(repository);
         this.departmentRepository = repository;
+        
         this.doctorsRepository = doctorsRepository;
+        
     }
 
+    @Transactional
     @Override
     public Department save(Department department) {
     // ---------- OneToMany ----------
@@ -52,7 +61,8 @@ public class DepartmentService extends BaseService<Department> {
     return departmentRepository.save(department);
 }
 
-
+    @Transactional
+    @Override
     public Department update(Long id, Department departmentRequest) {
         Department existing = departmentRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Department not found"));
@@ -62,7 +72,7 @@ public class DepartmentService extends BaseService<Department> {
         existing.setDescription(departmentRequest.getDescription());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getDoctors().clear();
 
@@ -84,31 +94,25 @@ public class DepartmentService extends BaseService<Department> {
     // ---------- Relations OneToOne ----------
     return departmentRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Department> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Department> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Department.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Department> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Department entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getDoctors() != null) {
-            for (var child : entity.getDoctors()) {
-                // retirer la référence inverse
-                child.setDepartment(null);
-            }
-            entity.getDoctors().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Department> saveAll(List<Department> departmentList) {
-
-        return departmentRepository.saveAll(departmentList);
+        return super.saveAll(departmentList);
     }
 
 }

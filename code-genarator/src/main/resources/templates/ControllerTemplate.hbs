@@ -1,9 +1,11 @@
 package com.example.modules.{{module}}.controller;
 
 import com.example.modules.{{module}}.dto.{{entityName}}Dto;
+import com.example.modules.{{module}}.dtosimple.{{entityName}}SimpleDto;
 import com.example.modules.{{module}}.model.{{entityName}};
 import com.example.modules.{{module}}.mapper.{{entityName}}Mapper;
 import com.example.modules.{{module}}.service.{{entityName}}Service;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
@@ -15,24 +17,21 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Controller for managing {{entityName}} entities.
+ */
 @RestController
 @RequestMapping("/api/{{entityNameLowercase}}s")
-public class {{entityName}}Controller {
-
-    private final {{entityName}}Service {{entityNameLowercase}}Service;
-    private final {{entityName}}Mapper {{entityNameLowercase}}Mapper;
+public class {{entityName}}Controller extends BaseController<{{entityName}}, {{entityName}}Dto, {{entityName}}SimpleDto> {
 
     public {{entityName}}Controller({{entityName}}Service {{entityNameLowercase}}Service,
                                     {{entityName}}Mapper {{entityNameLowercase}}Mapper) {
-        this.{{entityNameLowercase}}Service = {{entityNameLowercase}}Service;
-        this.{{entityNameLowercase}}Mapper = {{entityNameLowercase}}Mapper;
+        super({{entityNameLowercase}}Service, {{entityNameLowercase}}Mapper);
     }
 
     @GetMapping
     public ResponseEntity<Page<{{entityName}}Dto>> getAll{{entityName}}s(Pageable pageable) {
-        Page<{{entityName}}> page = {{entityNameLowercase}}Service.findAll(pageable);
-        return ResponseEntity.ok(page.map({{entityNameLowercase}}Mapper::toDto));
+        return doGetAll(pageable);
     }
 
     @GetMapping("/search")
@@ -40,16 +39,12 @@ public class {{entityName}}Controller {
             @RequestParam Map<String, String> filters,
             Pageable pageable
     ) {
-        Page<{{entityName}}> page = {{entityNameLowercase}}Service.search(filters, pageable);
-        return ResponseEntity.ok(page.map({{entityNameLowercase}}Mapper::toDto));
+        return doSearch({{entityName}}.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<{{entityName}}Dto> get{{entityName}}ById(@PathVariable Long id) {
-        return {{entityNameLowercase}}Service.findById(id)
-                .map({{entityNameLowercase}}Mapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -57,15 +52,15 @@ public class {{entityName}}Controller {
             @Valid @RequestBody {{entityName}}Dto {{entityNameLowercase}}Dto,
             UriComponentsBuilder uriBuilder) {
 
-        {{entityName}} entity = {{entityNameLowercase}}Mapper.toEntity({{entityNameLowercase}}Dto);
-        {{entityName}} saved = {{entityNameLowercase}}Service.save(entity);
+        {{entityName}} entity = mapper.toEntity({{entityNameLowercase}}Dto);
+        {{entityName}} saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/{{entityNameLowercase}}s/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/{{entityNameLowercase}}s/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body({{entityNameLowercase}}Mapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -73,12 +68,12 @@ public class {{entityName}}Controller {
             @Valid @RequestBody List<{{entityName}}Dto> {{entityNameLowercase}}DtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<{{entityName}}> entities = {{entityNameLowercase}}Mapper.toEntityList({{entityNameLowercase}}DtoList);
-        List<{{entityName}}> savedEntities = {{entityNameLowercase}}Service.saveAll(entities);
+        List<{{entityName}}> entities = mapper.toEntityList({{entityNameLowercase}}DtoList);
+        List<{{entityName}}> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/{{entityNameLowercase}}s").build().toUri();
 
-        return ResponseEntity.created(location).body({{entityNameLowercase}}Mapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -86,21 +81,13 @@ public class {{entityName}}Controller {
             @PathVariable Long id,
             @Valid @RequestBody {{entityName}}Dto {{entityNameLowercase}}Dto) {
 
-
-        {{entityName}} entityToUpdate = {{entityNameLowercase}}Mapper.toEntity({{entityNameLowercase}}Dto);
-        {{entityName}} updatedEntity = {{entityNameLowercase}}Service.update(id, entityToUpdate);
-
-        return ResponseEntity.ok({{entityNameLowercase}}Mapper.toDto(updatedEntity));
+        {{entityName}} entityToUpdate = mapper.toEntity({{entityNameLowercase}}Dto);
+        {{entityName}} updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete{{entityName}}(@PathVariable Long id) {
-        boolean deleted = {{entityNameLowercase}}Service.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -3,30 +3,12 @@ package com.example.modules.entertainment_ecosystem.mapper;
 import com.example.modules.entertainment_ecosystem.model.DigitalPurchase;
 import com.example.modules.entertainment_ecosystem.dto.DigitalPurchaseDto;
 import com.example.modules.entertainment_ecosystem.dtosimple.DigitalPurchaseSimpleDto;
-import org.mapstruct.InheritInverseConfiguration;
+import com.example.core.mapper.BaseMapper;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-import org.mapstruct.MappingTarget;
-import java.util.List;
 
-
+/**
+ * 
+ */
 @Mapper(componentModel = "spring")
-public interface DigitalPurchaseMapper {
-
-    DigitalPurchaseMapper INSTANCE = Mappers.getMapper(DigitalPurchaseMapper.class);
-
-    DigitalPurchaseDto toDto(DigitalPurchase digitalpurchase);
-
-    DigitalPurchaseSimpleDto toSimpleDto(DigitalPurchase digitalpurchase);
-
-    @InheritInverseConfiguration
-    DigitalPurchase toEntity(DigitalPurchaseDto digitalpurchaseDto);
-
-    List<DigitalPurchaseDto> toDtoList(List<DigitalPurchase> digitalpurchaseList);
-
-    List<DigitalPurchase> toEntityList(List<DigitalPurchaseDto> digitalpurchaseDtoList);
-
-    void updateEntityFromDto(DigitalPurchaseDto dto, @MappingTarget DigitalPurchase entity);
-
+public interface DigitalPurchaseMapper extends BaseMapper<DigitalPurchase, DigitalPurchaseDto, DigitalPurchaseSimpleDto> {
 }

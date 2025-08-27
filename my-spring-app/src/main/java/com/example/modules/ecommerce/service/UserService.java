@@ -3,33 +3,45 @@ package com.example.modules.ecommerce.service;
 import com.example.core.service.BaseService;
 import com.example.modules.ecommerce.model.User;
 import com.example.modules.ecommerce.repository.UserRepository;
+
 import com.example.modules.ecommerce.model.Address;
 import com.example.modules.ecommerce.repository.AddressRepository;
+
 import com.example.modules.ecommerce.model.Order;
 import com.example.modules.ecommerce.repository.OrderRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService extends BaseService<User> {
 
     protected final UserRepository userRepository;
-    private final AddressRepository addressesRepository;
-    private final OrderRepository ordersRepository;
+    
+    protected final AddressRepository addressesRepository;
+    
+    protected final OrderRepository ordersRepository;
+    
 
     public UserService(UserRepository repository, AddressRepository addressesRepository, OrderRepository ordersRepository)
     {
         super(repository);
         this.userRepository = repository;
+        
         this.addressesRepository = addressesRepository;
+        
         this.ordersRepository = ordersRepository;
+        
     }
 
+    @Transactional
     @Override
     public User save(User user) {
     // ---------- OneToMany ----------
@@ -73,7 +85,8 @@ public class UserService extends BaseService<User> {
     return userRepository.save(user);
 }
 
-
+    @Transactional
+    @Override
     public User update(Long id, User userRequest) {
         User existing = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -84,7 +97,7 @@ public class UserService extends BaseService<User> {
         existing.setPhone(userRequest.getPhone());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getAddresses().clear();
 
@@ -123,39 +136,25 @@ public class UserService extends BaseService<User> {
     // ---------- Relations OneToOne ----------
     return userRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<User> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<User> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(User.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<User> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        User entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getAddresses() != null) {
-            for (var child : entity.getAddresses()) {
-                // retirer la référence inverse
-                child.setUser(null);
-            }
-            entity.getAddresses().clear();
-        }
-        
-        if (entity.getOrders() != null) {
-            for (var child : entity.getOrders()) {
-                // retirer la référence inverse
-                child.setUser(null);
-            }
-            entity.getOrders().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<User> saveAll(List<User> userList) {
-
-        return userRepository.saveAll(userList);
+        return super.saveAll(userList);
     }
 
 }

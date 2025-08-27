@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.EventAudienceDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.EventAudienceSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.EventAudience;
 import com.example.modules.entertainment_ecosystem.mapper.EventAudienceMapper;
 import com.example.modules.entertainment_ecosystem.service.EventAudienceService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing EventAudience entities.
+ */
 @RestController
 @RequestMapping("/api/eventaudiences")
-public class EventAudienceController {
-
-    private final EventAudienceService eventaudienceService;
-    private final EventAudienceMapper eventaudienceMapper;
+public class EventAudienceController extends BaseController<EventAudience, EventAudienceDto, EventAudienceSimpleDto> {
 
     public EventAudienceController(EventAudienceService eventaudienceService,
                                     EventAudienceMapper eventaudienceMapper) {
-        this.eventaudienceService = eventaudienceService;
-        this.eventaudienceMapper = eventaudienceMapper;
+        super(eventaudienceService, eventaudienceMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<EventAudienceDto>> getAllEventAudiences() {
-        List<EventAudience> entities = eventaudienceService.findAll();
-        return ResponseEntity.ok(eventaudienceMapper.toDtoList(entities));
+    public ResponseEntity<Page<EventAudienceDto>> getAllEventAudiences(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<EventAudienceDto>> searchEventAudiences(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(EventAudience.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EventAudienceDto> getEventAudienceById(@PathVariable Long id) {
-        return eventaudienceService.findById(id)
-                .map(eventaudienceMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class EventAudienceController {
             @Valid @RequestBody EventAudienceDto eventaudienceDto,
             UriComponentsBuilder uriBuilder) {
 
-        EventAudience entity = eventaudienceMapper.toEntity(eventaudienceDto);
-        EventAudience saved = eventaudienceService.save(entity);
+        EventAudience entity = mapper.toEntity(eventaudienceDto);
+        EventAudience saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/eventaudiences/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/eventaudiences/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(eventaudienceMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class EventAudienceController {
             @Valid @RequestBody List<EventAudienceDto> eventaudienceDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<EventAudience> entities = eventaudienceMapper.toEntityList(eventaudienceDtoList);
-        List<EventAudience> savedEntities = eventaudienceService.saveAll(entities);
+        List<EventAudience> entities = mapper.toEntityList(eventaudienceDtoList);
+        List<EventAudience> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/eventaudiences").build().toUri();
 
-        return ResponseEntity.created(location).body(eventaudienceMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class EventAudienceController {
             @PathVariable Long id,
             @Valid @RequestBody EventAudienceDto eventaudienceDto) {
 
-
-        EventAudience entityToUpdate = eventaudienceMapper.toEntity(eventaudienceDto);
-        EventAudience updatedEntity = eventaudienceService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(eventaudienceMapper.toDto(updatedEntity));
+        EventAudience entityToUpdate = mapper.toEntity(eventaudienceDto);
+        EventAudience updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEventAudience(@PathVariable Long id) {
-        boolean deleted = eventaudienceService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

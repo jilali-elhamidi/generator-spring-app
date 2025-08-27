@@ -3,29 +3,38 @@ package com.example.modules.social_media.service;
 import com.example.core.service.BaseService;
 import com.example.modules.social_media.model.Role;
 import com.example.modules.social_media.repository.RoleRepository;
+
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.repository.ProfileRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class RoleService extends BaseService<Role> {
 
     protected final RoleRepository roleRepository;
-    private final ProfileRepository profilesRepository;
+    
+    protected final ProfileRepository profilesRepository;
+    
 
     public RoleService(RoleRepository repository, ProfileRepository profilesRepository)
     {
         super(repository);
         this.roleRepository = repository;
+        
         this.profilesRepository = profilesRepository;
+        
     }
 
+    @Transactional
     @Override
     public Role save(Role role) {
     // ---------- OneToMany ----------
@@ -57,7 +66,8 @@ public class RoleService extends BaseService<Role> {
     return roleRepository.save(role);
 }
 
-
+    @Transactional
+    @Override
     public Role update(Long id, Role roleRequest) {
         Role existing = roleRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Role not found"));
@@ -66,7 +76,7 @@ public class RoleService extends BaseService<Role> {
         existing.setName(roleRequest.getName());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         if (roleRequest.getProfiles() != null) {
             existing.getProfiles().clear();
 
@@ -89,31 +99,25 @@ public class RoleService extends BaseService<Role> {
     // ---------- Relations OneToOne ----------
     return roleRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Role> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Role> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Role.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Role> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Role entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-        if (entity.getProfiles() != null) {
-            for (Profile item : new ArrayList<>(entity.getProfiles())) {
-                
-                item.getRoles().remove(entity); // retire côté inverse
-            }
-            entity.getProfiles().clear(); // puis vide côté courant
-        }
-        
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Role> saveAll(List<Role> roleList) {
-
-        return roleRepository.saveAll(roleList);
+        return super.saveAll(roleList);
     }
 
 }

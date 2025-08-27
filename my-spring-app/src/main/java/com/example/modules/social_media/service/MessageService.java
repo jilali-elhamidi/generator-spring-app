@@ -3,33 +3,45 @@ package com.example.modules.social_media.service;
 import com.example.core.service.BaseService;
 import com.example.modules.social_media.model.Message;
 import com.example.modules.social_media.repository.MessageRepository;
-import com.example.modules.social_media.model.Profile;
-import com.example.modules.social_media.repository.ProfileRepository;
+
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.repository.ProfileRepository;
 
+import com.example.modules.social_media.model.Profile;
+import com.example.modules.social_media.repository.ProfileRepository;
+
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService extends BaseService<Message> {
 
     protected final MessageRepository messageRepository;
-    private final ProfileRepository senderRepository;
-    private final ProfileRepository recipientRepository;
+    
+    protected final ProfileRepository senderRepository;
+    
+    protected final ProfileRepository recipientRepository;
+    
 
     public MessageService(MessageRepository repository, ProfileRepository senderRepository, ProfileRepository recipientRepository)
     {
         super(repository);
         this.messageRepository = repository;
+        
         this.senderRepository = senderRepository;
+        
         this.recipientRepository = recipientRepository;
+        
     }
 
+    @Transactional
     @Override
     public Message save(Message message) {
     // ---------- OneToMany ----------
@@ -67,7 +79,8 @@ public class MessageService extends BaseService<Message> {
     return messageRepository.save(message);
 }
 
-
+    @Transactional
+    @Override
     public Message update(Long id, Message messageRequest) {
         Message existing = messageRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Message not found"));
@@ -102,36 +115,30 @@ public class MessageService extends BaseService<Message> {
             existing.setRecipient(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return messageRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Message> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Message> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Message.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Message> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Message entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getSender() != null) {
-            entity.setSender(null);
-        }
-        
-        if (entity.getRecipient() != null) {
-            entity.setRecipient(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Message> saveAll(List<Message> messageList) {
-
-        return messageRepository.saveAll(messageList);
+        return super.saveAll(messageList);
     }
 
 }

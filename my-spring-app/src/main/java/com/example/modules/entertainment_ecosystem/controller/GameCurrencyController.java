@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.GameCurrencyDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.GameCurrencySimpleDto;
 import com.example.modules.entertainment_ecosystem.model.GameCurrency;
 import com.example.modules.entertainment_ecosystem.mapper.GameCurrencyMapper;
 import com.example.modules.entertainment_ecosystem.service.GameCurrencyService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing GameCurrency entities.
+ */
 @RestController
 @RequestMapping("/api/gamecurrencys")
-public class GameCurrencyController {
-
-    private final GameCurrencyService gamecurrencyService;
-    private final GameCurrencyMapper gamecurrencyMapper;
+public class GameCurrencyController extends BaseController<GameCurrency, GameCurrencyDto, GameCurrencySimpleDto> {
 
     public GameCurrencyController(GameCurrencyService gamecurrencyService,
                                     GameCurrencyMapper gamecurrencyMapper) {
-        this.gamecurrencyService = gamecurrencyService;
-        this.gamecurrencyMapper = gamecurrencyMapper;
+        super(gamecurrencyService, gamecurrencyMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<GameCurrencyDto>> getAllGameCurrencys() {
-        List<GameCurrency> entities = gamecurrencyService.findAll();
-        return ResponseEntity.ok(gamecurrencyMapper.toDtoList(entities));
+    public ResponseEntity<Page<GameCurrencyDto>> getAllGameCurrencys(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<GameCurrencyDto>> searchGameCurrencys(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(GameCurrency.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<GameCurrencyDto> getGameCurrencyById(@PathVariable Long id) {
-        return gamecurrencyService.findById(id)
-                .map(gamecurrencyMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class GameCurrencyController {
             @Valid @RequestBody GameCurrencyDto gamecurrencyDto,
             UriComponentsBuilder uriBuilder) {
 
-        GameCurrency entity = gamecurrencyMapper.toEntity(gamecurrencyDto);
-        GameCurrency saved = gamecurrencyService.save(entity);
+        GameCurrency entity = mapper.toEntity(gamecurrencyDto);
+        GameCurrency saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/gamecurrencys/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/gamecurrencys/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(gamecurrencyMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class GameCurrencyController {
             @Valid @RequestBody List<GameCurrencyDto> gamecurrencyDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<GameCurrency> entities = gamecurrencyMapper.toEntityList(gamecurrencyDtoList);
-        List<GameCurrency> savedEntities = gamecurrencyService.saveAll(entities);
+        List<GameCurrency> entities = mapper.toEntityList(gamecurrencyDtoList);
+        List<GameCurrency> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/gamecurrencys").build().toUri();
 
-        return ResponseEntity.created(location).body(gamecurrencyMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class GameCurrencyController {
             @PathVariable Long id,
             @Valid @RequestBody GameCurrencyDto gamecurrencyDto) {
 
-
-        GameCurrency entityToUpdate = gamecurrencyMapper.toEntity(gamecurrencyDto);
-        GameCurrency updatedEntity = gamecurrencyService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(gamecurrencyMapper.toDto(updatedEntity));
+        GameCurrency entityToUpdate = mapper.toEntity(gamecurrencyDto);
+        GameCurrency updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGameCurrency(@PathVariable Long id) {
-        boolean deleted = gamecurrencyService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

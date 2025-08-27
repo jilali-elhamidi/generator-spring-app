@@ -3,33 +3,45 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.Client;
 import com.example.modules.project_management.repository.ClientRepository;
+
 import com.example.modules.project_management.model.Project;
 import com.example.modules.project_management.repository.ProjectRepository;
+
 import com.example.modules.project_management.model.Invoice;
 import com.example.modules.project_management.repository.InvoiceRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class ClientService extends BaseService<Client> {
 
     protected final ClientRepository clientRepository;
-    private final ProjectRepository projectsRepository;
-    private final InvoiceRepository invoicesRepository;
+    
+    protected final ProjectRepository projectsRepository;
+    
+    protected final InvoiceRepository invoicesRepository;
+    
 
     public ClientService(ClientRepository repository, ProjectRepository projectsRepository, InvoiceRepository invoicesRepository)
     {
         super(repository);
         this.clientRepository = repository;
+        
         this.projectsRepository = projectsRepository;
+        
         this.invoicesRepository = invoicesRepository;
+        
     }
 
+    @Transactional
     @Override
     public Client save(Client client) {
     // ---------- OneToMany ----------
@@ -73,7 +85,8 @@ public class ClientService extends BaseService<Client> {
     return clientRepository.save(client);
 }
 
-
+    @Transactional
+    @Override
     public Client update(Long id, Client clientRequest) {
         Client existing = clientRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Client not found"));
@@ -85,7 +98,7 @@ public class ClientService extends BaseService<Client> {
         existing.setPhoneNumber(clientRequest.getPhoneNumber());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getProjects().clear();
 
@@ -124,39 +137,25 @@ public class ClientService extends BaseService<Client> {
     // ---------- Relations OneToOne ----------
     return clientRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Client> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Client> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Client.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Client> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Client entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getProjects() != null) {
-            for (var child : entity.getProjects()) {
-                // retirer la référence inverse
-                child.setClient(null);
-            }
-            entity.getProjects().clear();
-        }
-        
-        if (entity.getInvoices() != null) {
-            for (var child : entity.getInvoices()) {
-                // retirer la référence inverse
-                child.setClient(null);
-            }
-            entity.getInvoices().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Client> saveAll(List<Client> clientList) {
-
-        return clientRepository.saveAll(clientList);
+        return super.saveAll(clientList);
     }
 
 }

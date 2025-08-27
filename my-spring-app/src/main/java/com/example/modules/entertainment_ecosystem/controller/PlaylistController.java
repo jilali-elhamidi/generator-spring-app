@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.PlaylistDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.PlaylistSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.Playlist;
 import com.example.modules.entertainment_ecosystem.mapper.PlaylistMapper;
 import com.example.modules.entertainment_ecosystem.service.PlaylistService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Playlist entities.
+ */
 @RestController
 @RequestMapping("/api/playlists")
-public class PlaylistController {
-
-    private final PlaylistService playlistService;
-    private final PlaylistMapper playlistMapper;
+public class PlaylistController extends BaseController<Playlist, PlaylistDto, PlaylistSimpleDto> {
 
     public PlaylistController(PlaylistService playlistService,
                                     PlaylistMapper playlistMapper) {
-        this.playlistService = playlistService;
-        this.playlistMapper = playlistMapper;
+        super(playlistService, playlistMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<PlaylistDto>> getAllPlaylists() {
-        List<Playlist> entities = playlistService.findAll();
-        return ResponseEntity.ok(playlistMapper.toDtoList(entities));
+    public ResponseEntity<Page<PlaylistDto>> getAllPlaylists(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PlaylistDto>> searchPlaylists(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Playlist.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PlaylistDto> getPlaylistById(@PathVariable Long id) {
-        return playlistService.findById(id)
-                .map(playlistMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class PlaylistController {
             @Valid @RequestBody PlaylistDto playlistDto,
             UriComponentsBuilder uriBuilder) {
 
-        Playlist entity = playlistMapper.toEntity(playlistDto);
-        Playlist saved = playlistService.save(entity);
+        Playlist entity = mapper.toEntity(playlistDto);
+        Playlist saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/playlists/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/playlists/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(playlistMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class PlaylistController {
             @Valid @RequestBody List<PlaylistDto> playlistDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Playlist> entities = playlistMapper.toEntityList(playlistDtoList);
-        List<Playlist> savedEntities = playlistService.saveAll(entities);
+        List<Playlist> entities = mapper.toEntityList(playlistDtoList);
+        List<Playlist> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/playlists").build().toUri();
 
-        return ResponseEntity.created(location).body(playlistMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class PlaylistController {
             @PathVariable Long id,
             @Valid @RequestBody PlaylistDto playlistDto) {
 
-
-        Playlist entityToUpdate = playlistMapper.toEntity(playlistDto);
-        Playlist updatedEntity = playlistService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(playlistMapper.toDto(updatedEntity));
+        Playlist entityToUpdate = mapper.toEntity(playlistDto);
+        Playlist updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
-        boolean deleted = playlistService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -3,33 +3,45 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.Milestone;
 import com.example.modules.project_management.repository.MilestoneRepository;
+
 import com.example.modules.project_management.model.Project;
 import com.example.modules.project_management.repository.ProjectRepository;
+
 import com.example.modules.project_management.model.Task;
 import com.example.modules.project_management.repository.TaskRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class MilestoneService extends BaseService<Milestone> {
 
     protected final MilestoneRepository milestoneRepository;
-    private final ProjectRepository projectRepository;
-    private final TaskRepository relatedTasksRepository;
+    
+    protected final ProjectRepository projectRepository;
+    
+    protected final TaskRepository relatedTasksRepository;
+    
 
     public MilestoneService(MilestoneRepository repository, ProjectRepository projectRepository, TaskRepository relatedTasksRepository)
     {
         super(repository);
         this.milestoneRepository = repository;
+        
         this.projectRepository = projectRepository;
+        
         this.relatedTasksRepository = relatedTasksRepository;
+        
     }
 
+    @Transactional
     @Override
     public Milestone save(Milestone milestone) {
     // ---------- OneToMany ----------
@@ -70,7 +82,8 @@ public class MilestoneService extends BaseService<Milestone> {
     return milestoneRepository.save(milestone);
 }
 
-
+    @Transactional
+    @Override
     public Milestone update(Long id, Milestone milestoneRequest) {
         Milestone existing = milestoneRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Milestone not found"));
@@ -93,7 +106,7 @@ public class MilestoneService extends BaseService<Milestone> {
             existing.setProject(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getRelatedTasks().clear();
 
@@ -115,35 +128,25 @@ public class MilestoneService extends BaseService<Milestone> {
     // ---------- Relations OneToOne ----------
     return milestoneRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Milestone> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Milestone> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Milestone.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Milestone> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Milestone entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getRelatedTasks() != null) {
-            for (var child : entity.getRelatedTasks()) {
-                // retirer la référence inverse
-                child.setMilestone(null);
-            }
-            entity.getRelatedTasks().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getProject() != null) {
-            entity.setProject(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Milestone> saveAll(List<Milestone> milestoneList) {
-
-        return milestoneRepository.saveAll(milestoneList);
+        return super.saveAll(milestoneList);
     }
 
 }

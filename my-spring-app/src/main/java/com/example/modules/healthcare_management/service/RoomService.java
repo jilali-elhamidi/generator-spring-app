@@ -3,29 +3,38 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Room;
 import com.example.modules.healthcare_management.repository.RoomRepository;
+
 import com.example.modules.healthcare_management.model.Appointment;
 import com.example.modules.healthcare_management.repository.AppointmentRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class RoomService extends BaseService<Room> {
 
     protected final RoomRepository roomRepository;
-    private final AppointmentRepository appointmentsRepository;
+    
+    protected final AppointmentRepository appointmentsRepository;
+    
 
     public RoomService(RoomRepository repository, AppointmentRepository appointmentsRepository)
     {
         super(repository);
         this.roomRepository = repository;
+        
         this.appointmentsRepository = appointmentsRepository;
+        
     }
 
+    @Transactional
     @Override
     public Room save(Room room) {
     // ---------- OneToMany ----------
@@ -52,7 +61,8 @@ public class RoomService extends BaseService<Room> {
     return roomRepository.save(room);
 }
 
-
+    @Transactional
+    @Override
     public Room update(Long id, Room roomRequest) {
         Room existing = roomRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Room not found"));
@@ -63,7 +73,7 @@ public class RoomService extends BaseService<Room> {
         existing.setCapacity(roomRequest.getCapacity());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getAppointments().clear();
 
@@ -85,31 +95,25 @@ public class RoomService extends BaseService<Room> {
     // ---------- Relations OneToOne ----------
     return roomRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Room> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Room> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Room.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Room> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Room entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getAppointments() != null) {
-            for (var child : entity.getAppointments()) {
-                // retirer la référence inverse
-                child.setRoom(null);
-            }
-            entity.getAppointments().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Room> saveAll(List<Room> roomList) {
-
-        return roomRepository.saveAll(roomList);
+        return super.saveAll(roomList);
     }
 
 }

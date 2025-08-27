@@ -1,0 +1,175 @@
+package com.example.modules.entertainment_ecosystem.service;
+
+import com.example.core.service.BaseService;
+import com.example.modules.entertainment_ecosystem.model.UserConnection;
+import com.example.modules.entertainment_ecosystem.repository.UserConnectionRepository;
+
+import com.example.modules.entertainment_ecosystem.model.UserProfile;
+import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
+
+import com.example.modules.entertainment_ecosystem.model.UserProfile;
+import com.example.modules.entertainment_ecosystem.repository.UserProfileRepository;
+
+import com.example.modules.entertainment_ecosystem.model.ConnectionType;
+import com.example.modules.entertainment_ecosystem.repository.ConnectionTypeRepository;
+
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+@Service
+public class UserConnectionService extends BaseService<UserConnection> {
+
+    protected final UserConnectionRepository userconnectionRepository;
+    
+    protected final UserProfileRepository user1Repository;
+    
+    protected final UserProfileRepository user2Repository;
+    
+    protected final ConnectionTypeRepository typeRepository;
+    
+
+    public UserConnectionService(UserConnectionRepository repository, UserProfileRepository user1Repository, UserProfileRepository user2Repository, ConnectionTypeRepository typeRepository)
+    {
+        super(repository);
+        this.userconnectionRepository = repository;
+        
+        this.user1Repository = user1Repository;
+        
+        this.user2Repository = user2Repository;
+        
+        this.typeRepository = typeRepository;
+        
+    }
+
+    @Transactional
+    @Override
+    public UserConnection save(UserConnection userconnection) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (userconnection.getUser1() != null) {
+            if (userconnection.getUser1().getId() != null) {
+                UserProfile existingUser1 = user1Repository.findById(
+                    userconnection.getUser1().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userconnection.getUser1().getId()));
+                userconnection.setUser1(existingUser1);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser1 = user1Repository.save(userconnection.getUser1());
+                userconnection.setUser1(newUser1);
+            }
+        }
+        
+        if (userconnection.getUser2() != null) {
+            if (userconnection.getUser2().getId() != null) {
+                UserProfile existingUser2 = user2Repository.findById(
+                    userconnection.getUser2().getId()
+                ).orElseThrow(() -> new RuntimeException("UserProfile not found with id "
+                    + userconnection.getUser2().getId()));
+                userconnection.setUser2(existingUser2);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                UserProfile newUser2 = user2Repository.save(userconnection.getUser2());
+                userconnection.setUser2(newUser2);
+            }
+        }
+        
+        if (userconnection.getType() != null) {
+            if (userconnection.getType().getId() != null) {
+                ConnectionType existingType = typeRepository.findById(
+                    userconnection.getType().getId()
+                ).orElseThrow(() -> new RuntimeException("ConnectionType not found with id "
+                    + userconnection.getType().getId()));
+                userconnection.setType(existingType);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                ConnectionType newType = typeRepository.save(userconnection.getType());
+                userconnection.setType(newType);
+            }
+        }
+        
+    // ---------- OneToOne ----------
+    return userconnectionRepository.save(userconnection);
+}
+
+    @Transactional
+    @Override
+    public UserConnection update(Long id, UserConnection userconnectionRequest) {
+        UserConnection existing = userconnectionRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("UserConnection not found"));
+
+    // Copier les champs simples
+        existing.setConnectionDate(userconnectionRequest.getConnectionDate());
+
+    // ---------- Relations ManyToOne ----------
+        if (userconnectionRequest.getUser1() != null &&
+            userconnectionRequest.getUser1().getId() != null) {
+
+            UserProfile existingUser1 = user1Repository.findById(
+                userconnectionRequest.getUser1().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            existing.setUser1(existingUser1);
+        } else {
+            existing.setUser1(null);
+        }
+        
+        if (userconnectionRequest.getUser2() != null &&
+            userconnectionRequest.getUser2().getId() != null) {
+
+            UserProfile existingUser2 = user2Repository.findById(
+                userconnectionRequest.getUser2().getId()
+            ).orElseThrow(() -> new RuntimeException("UserProfile not found"));
+
+            existing.setUser2(existingUser2);
+        } else {
+            existing.setUser2(null);
+        }
+        
+        if (userconnectionRequest.getType() != null &&
+            userconnectionRequest.getType().getId() != null) {
+
+            ConnectionType existingType = typeRepository.findById(
+                userconnectionRequest.getType().getId()
+            ).orElseThrow(() -> new RuntimeException("ConnectionType not found"));
+
+            existing.setType(existingType);
+        } else {
+            existing.setType(null);
+        }
+        
+    // ---------- Relations ManyToMany ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return userconnectionRepository.save(existing);
+}
+
+    // Pagination simple
+    public Page<UserConnection> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<UserConnection> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(UserConnection.class, filters, pageable);
+    }
+
+    @Transactional
+    public boolean deleteById(Long id) {
+        return super.deleteById(id);
+    }
+
+    @Transactional
+    public List<UserConnection> saveAll(List<UserConnection> userconnectionList) {
+        return super.saveAll(userconnectionList);
+    }
+
+}

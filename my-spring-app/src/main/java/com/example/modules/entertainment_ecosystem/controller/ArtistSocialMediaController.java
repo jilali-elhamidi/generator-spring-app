@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.ArtistSocialMediaDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.ArtistSocialMediaSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.ArtistSocialMedia;
 import com.example.modules.entertainment_ecosystem.mapper.ArtistSocialMediaMapper;
 import com.example.modules.entertainment_ecosystem.service.ArtistSocialMediaService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing ArtistSocialMedia entities.
+ */
 @RestController
 @RequestMapping("/api/artistsocialmedias")
-public class ArtistSocialMediaController {
-
-    private final ArtistSocialMediaService artistsocialmediaService;
-    private final ArtistSocialMediaMapper artistsocialmediaMapper;
+public class ArtistSocialMediaController extends BaseController<ArtistSocialMedia, ArtistSocialMediaDto, ArtistSocialMediaSimpleDto> {
 
     public ArtistSocialMediaController(ArtistSocialMediaService artistsocialmediaService,
                                     ArtistSocialMediaMapper artistsocialmediaMapper) {
-        this.artistsocialmediaService = artistsocialmediaService;
-        this.artistsocialmediaMapper = artistsocialmediaMapper;
+        super(artistsocialmediaService, artistsocialmediaMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<ArtistSocialMediaDto>> getAllArtistSocialMedias() {
-        List<ArtistSocialMedia> entities = artistsocialmediaService.findAll();
-        return ResponseEntity.ok(artistsocialmediaMapper.toDtoList(entities));
+    public ResponseEntity<Page<ArtistSocialMediaDto>> getAllArtistSocialMedias(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ArtistSocialMediaDto>> searchArtistSocialMedias(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(ArtistSocialMedia.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ArtistSocialMediaDto> getArtistSocialMediaById(@PathVariable Long id) {
-        return artistsocialmediaService.findById(id)
-                .map(artistsocialmediaMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class ArtistSocialMediaController {
             @Valid @RequestBody ArtistSocialMediaDto artistsocialmediaDto,
             UriComponentsBuilder uriBuilder) {
 
-        ArtistSocialMedia entity = artistsocialmediaMapper.toEntity(artistsocialmediaDto);
-        ArtistSocialMedia saved = artistsocialmediaService.save(entity);
+        ArtistSocialMedia entity = mapper.toEntity(artistsocialmediaDto);
+        ArtistSocialMedia saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/artistsocialmedias/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/artistsocialmedias/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(artistsocialmediaMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class ArtistSocialMediaController {
             @Valid @RequestBody List<ArtistSocialMediaDto> artistsocialmediaDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<ArtistSocialMedia> entities = artistsocialmediaMapper.toEntityList(artistsocialmediaDtoList);
-        List<ArtistSocialMedia> savedEntities = artistsocialmediaService.saveAll(entities);
+        List<ArtistSocialMedia> entities = mapper.toEntityList(artistsocialmediaDtoList);
+        List<ArtistSocialMedia> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/artistsocialmedias").build().toUri();
 
-        return ResponseEntity.created(location).body(artistsocialmediaMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class ArtistSocialMediaController {
             @PathVariable Long id,
             @Valid @RequestBody ArtistSocialMediaDto artistsocialmediaDto) {
 
-
-        ArtistSocialMedia entityToUpdate = artistsocialmediaMapper.toEntity(artistsocialmediaDto);
-        ArtistSocialMedia updatedEntity = artistsocialmediaService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(artistsocialmediaMapper.toDto(updatedEntity));
+        ArtistSocialMedia entityToUpdate = mapper.toEntity(artistsocialmediaDto);
+        ArtistSocialMedia updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArtistSocialMedia(@PathVariable Long id) {
-        boolean deleted = artistsocialmediaService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

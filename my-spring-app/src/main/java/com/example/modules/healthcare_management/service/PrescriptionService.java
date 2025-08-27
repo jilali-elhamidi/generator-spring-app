@@ -3,37 +3,52 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Prescription;
 import com.example.modules.healthcare_management.repository.PrescriptionRepository;
+
 import com.example.modules.healthcare_management.model.Patient;
 import com.example.modules.healthcare_management.repository.PatientRepository;
+
 import com.example.modules.healthcare_management.model.Doctor;
 import com.example.modules.healthcare_management.repository.DoctorRepository;
+
 import com.example.modules.healthcare_management.model.Medication;
 import com.example.modules.healthcare_management.repository.MedicationRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class PrescriptionService extends BaseService<Prescription> {
 
     protected final PrescriptionRepository prescriptionRepository;
-    private final PatientRepository patientRepository;
-    private final DoctorRepository doctorRepository;
-    private final MedicationRepository medicationsRepository;
+    
+    protected final PatientRepository patientRepository;
+    
+    protected final DoctorRepository doctorRepository;
+    
+    protected final MedicationRepository medicationsRepository;
+    
 
     public PrescriptionService(PrescriptionRepository repository, PatientRepository patientRepository, DoctorRepository doctorRepository, MedicationRepository medicationsRepository)
     {
         super(repository);
         this.prescriptionRepository = repository;
+        
         this.patientRepository = patientRepository;
+        
         this.doctorRepository = doctorRepository;
+        
         this.medicationsRepository = medicationsRepository;
+        
     }
 
+    @Transactional
     @Override
     public Prescription save(Prescription prescription) {
     // ---------- OneToMany ----------
@@ -93,7 +108,8 @@ public class PrescriptionService extends BaseService<Prescription> {
     return prescriptionRepository.save(prescription);
 }
 
-
+    @Transactional
+    @Override
     public Prescription update(Long id, Prescription prescriptionRequest) {
         Prescription existing = prescriptionRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Prescription not found"));
@@ -127,7 +143,7 @@ public class PrescriptionService extends BaseService<Prescription> {
             existing.setDoctor(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         if (prescriptionRequest.getMedications() != null) {
             existing.getMedications().clear();
 
@@ -150,39 +166,25 @@ public class PrescriptionService extends BaseService<Prescription> {
     // ---------- Relations OneToOne ----------
     return prescriptionRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Prescription> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Prescription> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Prescription.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Prescription> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Prescription entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-        if (entity.getMedications() != null) {
-            for (Medication item : new ArrayList<>(entity.getMedications())) {
-                
-                item.getPrescriptions().remove(entity); // retire côté inverse
-            }
-            entity.getMedications().clear(); // puis vide côté courant
-        }
-        
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getPatient() != null) {
-            entity.setPatient(null);
-        }
-        
-        if (entity.getDoctor() != null) {
-            entity.setDoctor(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Prescription> saveAll(List<Prescription> prescriptionList) {
-
-        return prescriptionRepository.saveAll(prescriptionList);
+        return super.saveAll(prescriptionList);
     }
 
 }

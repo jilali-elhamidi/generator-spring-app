@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.MovieStudioDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.MovieStudioSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.MovieStudio;
 import com.example.modules.entertainment_ecosystem.mapper.MovieStudioMapper;
 import com.example.modules.entertainment_ecosystem.service.MovieStudioService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing MovieStudio entities.
+ */
 @RestController
 @RequestMapping("/api/moviestudios")
-public class MovieStudioController {
-
-    private final MovieStudioService moviestudioService;
-    private final MovieStudioMapper moviestudioMapper;
+public class MovieStudioController extends BaseController<MovieStudio, MovieStudioDto, MovieStudioSimpleDto> {
 
     public MovieStudioController(MovieStudioService moviestudioService,
                                     MovieStudioMapper moviestudioMapper) {
-        this.moviestudioService = moviestudioService;
-        this.moviestudioMapper = moviestudioMapper;
+        super(moviestudioService, moviestudioMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<MovieStudioDto>> getAllMovieStudios() {
-        List<MovieStudio> entities = moviestudioService.findAll();
-        return ResponseEntity.ok(moviestudioMapper.toDtoList(entities));
+    public ResponseEntity<Page<MovieStudioDto>> getAllMovieStudios(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<MovieStudioDto>> searchMovieStudios(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(MovieStudio.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MovieStudioDto> getMovieStudioById(@PathVariable Long id) {
-        return moviestudioService.findById(id)
-                .map(moviestudioMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class MovieStudioController {
             @Valid @RequestBody MovieStudioDto moviestudioDto,
             UriComponentsBuilder uriBuilder) {
 
-        MovieStudio entity = moviestudioMapper.toEntity(moviestudioDto);
-        MovieStudio saved = moviestudioService.save(entity);
+        MovieStudio entity = mapper.toEntity(moviestudioDto);
+        MovieStudio saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/moviestudios/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/moviestudios/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(moviestudioMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class MovieStudioController {
             @Valid @RequestBody List<MovieStudioDto> moviestudioDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<MovieStudio> entities = moviestudioMapper.toEntityList(moviestudioDtoList);
-        List<MovieStudio> savedEntities = moviestudioService.saveAll(entities);
+        List<MovieStudio> entities = mapper.toEntityList(moviestudioDtoList);
+        List<MovieStudio> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/moviestudios").build().toUri();
 
-        return ResponseEntity.created(location).body(moviestudioMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class MovieStudioController {
             @PathVariable Long id,
             @Valid @RequestBody MovieStudioDto moviestudioDto) {
 
-
-        MovieStudio entityToUpdate = moviestudioMapper.toEntity(moviestudioDto);
-        MovieStudio updatedEntity = moviestudioService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(moviestudioMapper.toDto(updatedEntity));
+        MovieStudio entityToUpdate = mapper.toEntity(moviestudioDto);
+        MovieStudio updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovieStudio(@PathVariable Long id) {
-        boolean deleted = moviestudioService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

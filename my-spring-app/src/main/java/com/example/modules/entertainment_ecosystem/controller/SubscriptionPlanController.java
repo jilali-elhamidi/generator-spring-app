@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.SubscriptionPlanDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.SubscriptionPlanSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.SubscriptionPlan;
 import com.example.modules.entertainment_ecosystem.mapper.SubscriptionPlanMapper;
 import com.example.modules.entertainment_ecosystem.service.SubscriptionPlanService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing SubscriptionPlan entities.
+ */
 @RestController
 @RequestMapping("/api/subscriptionplans")
-public class SubscriptionPlanController {
-
-    private final SubscriptionPlanService subscriptionplanService;
-    private final SubscriptionPlanMapper subscriptionplanMapper;
+public class SubscriptionPlanController extends BaseController<SubscriptionPlan, SubscriptionPlanDto, SubscriptionPlanSimpleDto> {
 
     public SubscriptionPlanController(SubscriptionPlanService subscriptionplanService,
                                     SubscriptionPlanMapper subscriptionplanMapper) {
-        this.subscriptionplanService = subscriptionplanService;
-        this.subscriptionplanMapper = subscriptionplanMapper;
+        super(subscriptionplanService, subscriptionplanMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<SubscriptionPlanDto>> getAllSubscriptionPlans() {
-        List<SubscriptionPlan> entities = subscriptionplanService.findAll();
-        return ResponseEntity.ok(subscriptionplanMapper.toDtoList(entities));
+    public ResponseEntity<Page<SubscriptionPlanDto>> getAllSubscriptionPlans(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<SubscriptionPlanDto>> searchSubscriptionPlans(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(SubscriptionPlan.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SubscriptionPlanDto> getSubscriptionPlanById(@PathVariable Long id) {
-        return subscriptionplanService.findById(id)
-                .map(subscriptionplanMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class SubscriptionPlanController {
             @Valid @RequestBody SubscriptionPlanDto subscriptionplanDto,
             UriComponentsBuilder uriBuilder) {
 
-        SubscriptionPlan entity = subscriptionplanMapper.toEntity(subscriptionplanDto);
-        SubscriptionPlan saved = subscriptionplanService.save(entity);
+        SubscriptionPlan entity = mapper.toEntity(subscriptionplanDto);
+        SubscriptionPlan saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/subscriptionplans/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/subscriptionplans/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(subscriptionplanMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class SubscriptionPlanController {
             @Valid @RequestBody List<SubscriptionPlanDto> subscriptionplanDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<SubscriptionPlan> entities = subscriptionplanMapper.toEntityList(subscriptionplanDtoList);
-        List<SubscriptionPlan> savedEntities = subscriptionplanService.saveAll(entities);
+        List<SubscriptionPlan> entities = mapper.toEntityList(subscriptionplanDtoList);
+        List<SubscriptionPlan> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/subscriptionplans").build().toUri();
 
-        return ResponseEntity.created(location).body(subscriptionplanMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class SubscriptionPlanController {
             @PathVariable Long id,
             @Valid @RequestBody SubscriptionPlanDto subscriptionplanDto) {
 
-
-        SubscriptionPlan entityToUpdate = subscriptionplanMapper.toEntity(subscriptionplanDto);
-        SubscriptionPlan updatedEntity = subscriptionplanService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(subscriptionplanMapper.toDto(updatedEntity));
+        SubscriptionPlan entityToUpdate = mapper.toEntity(subscriptionplanDto);
+        SubscriptionPlan updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSubscriptionPlan(@PathVariable Long id) {
-        boolean deleted = subscriptionplanService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

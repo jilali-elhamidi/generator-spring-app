@@ -3,37 +3,52 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Doctor;
 import com.example.modules.healthcare_management.repository.DoctorRepository;
+
 import com.example.modules.healthcare_management.model.Appointment;
 import com.example.modules.healthcare_management.repository.AppointmentRepository;
+
 import com.example.modules.healthcare_management.model.Prescription;
 import com.example.modules.healthcare_management.repository.PrescriptionRepository;
+
 import com.example.modules.healthcare_management.model.Department;
 import com.example.modules.healthcare_management.repository.DepartmentRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class DoctorService extends BaseService<Doctor> {
 
     protected final DoctorRepository doctorRepository;
-    private final AppointmentRepository appointmentsRepository;
-    private final PrescriptionRepository prescriptionsRepository;
-    private final DepartmentRepository departmentRepository;
+    
+    protected final AppointmentRepository appointmentsRepository;
+    
+    protected final PrescriptionRepository prescriptionsRepository;
+    
+    protected final DepartmentRepository departmentRepository;
+    
 
     public DoctorService(DoctorRepository repository, AppointmentRepository appointmentsRepository, PrescriptionRepository prescriptionsRepository, DepartmentRepository departmentRepository)
     {
         super(repository);
         this.doctorRepository = repository;
+        
         this.appointmentsRepository = appointmentsRepository;
+        
         this.prescriptionsRepository = prescriptionsRepository;
+        
         this.departmentRepository = departmentRepository;
+        
     }
 
+    @Transactional
     @Override
     public Doctor save(Doctor doctor) {
     // ---------- OneToMany ----------
@@ -91,7 +106,8 @@ public class DoctorService extends BaseService<Doctor> {
     return doctorRepository.save(doctor);
 }
 
-
+    @Transactional
+    @Override
     public Doctor update(Long id, Doctor doctorRequest) {
         Doctor existing = doctorRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Doctor not found"));
@@ -116,7 +132,7 @@ public class DoctorService extends BaseService<Doctor> {
             existing.setDepartment(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getAppointments().clear();
 
@@ -155,43 +171,25 @@ public class DoctorService extends BaseService<Doctor> {
     // ---------- Relations OneToOne ----------
     return doctorRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Doctor> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Doctor> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Doctor.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Doctor> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Doctor entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getAppointments() != null) {
-            for (var child : entity.getAppointments()) {
-                // retirer la référence inverse
-                child.setDoctor(null);
-            }
-            entity.getAppointments().clear();
-        }
-        
-        if (entity.getPrescriptions() != null) {
-            for (var child : entity.getPrescriptions()) {
-                // retirer la référence inverse
-                child.setDoctor(null);
-            }
-            entity.getPrescriptions().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getDepartment() != null) {
-            entity.setDepartment(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Doctor> saveAll(List<Doctor> doctorList) {
-
-        return doctorRepository.saveAll(doctorList);
+        return super.saveAll(doctorList);
     }
 
 }

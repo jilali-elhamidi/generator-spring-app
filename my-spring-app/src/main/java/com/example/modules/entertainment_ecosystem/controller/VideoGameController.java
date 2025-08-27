@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.VideoGameDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.VideoGameSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.VideoGame;
 import com.example.modules.entertainment_ecosystem.mapper.VideoGameMapper;
 import com.example.modules.entertainment_ecosystem.service.VideoGameService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing VideoGame entities.
+ */
 @RestController
 @RequestMapping("/api/videogames")
-public class VideoGameController {
-
-    private final VideoGameService videogameService;
-    private final VideoGameMapper videogameMapper;
+public class VideoGameController extends BaseController<VideoGame, VideoGameDto, VideoGameSimpleDto> {
 
     public VideoGameController(VideoGameService videogameService,
                                     VideoGameMapper videogameMapper) {
-        this.videogameService = videogameService;
-        this.videogameMapper = videogameMapper;
+        super(videogameService, videogameMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<VideoGameDto>> getAllVideoGames() {
-        List<VideoGame> entities = videogameService.findAll();
-        return ResponseEntity.ok(videogameMapper.toDtoList(entities));
+    public ResponseEntity<Page<VideoGameDto>> getAllVideoGames(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<VideoGameDto>> searchVideoGames(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(VideoGame.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<VideoGameDto> getVideoGameById(@PathVariable Long id) {
-        return videogameService.findById(id)
-                .map(videogameMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class VideoGameController {
             @Valid @RequestBody VideoGameDto videogameDto,
             UriComponentsBuilder uriBuilder) {
 
-        VideoGame entity = videogameMapper.toEntity(videogameDto);
-        VideoGame saved = videogameService.save(entity);
+        VideoGame entity = mapper.toEntity(videogameDto);
+        VideoGame saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/videogames/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/videogames/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(videogameMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class VideoGameController {
             @Valid @RequestBody List<VideoGameDto> videogameDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<VideoGame> entities = videogameMapper.toEntityList(videogameDtoList);
-        List<VideoGame> savedEntities = videogameService.saveAll(entities);
+        List<VideoGame> entities = mapper.toEntityList(videogameDtoList);
+        List<VideoGame> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/videogames").build().toUri();
 
-        return ResponseEntity.created(location).body(videogameMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class VideoGameController {
             @PathVariable Long id,
             @Valid @RequestBody VideoGameDto videogameDto) {
 
-
-        VideoGame entityToUpdate = videogameMapper.toEntity(videogameDto);
-        VideoGame updatedEntity = videogameService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(videogameMapper.toDto(updatedEntity));
+        VideoGame entityToUpdate = mapper.toEntity(videogameDto);
+        VideoGame updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVideoGame(@PathVariable Long id) {
-        boolean deleted = videogameService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

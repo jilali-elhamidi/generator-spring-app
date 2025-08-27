@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.TVShowStudioDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.TVShowStudioSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.TVShowStudio;
 import com.example.modules.entertainment_ecosystem.mapper.TVShowStudioMapper;
 import com.example.modules.entertainment_ecosystem.service.TVShowStudioService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing TVShowStudio entities.
+ */
 @RestController
 @RequestMapping("/api/tvshowstudios")
-public class TVShowStudioController {
-
-    private final TVShowStudioService tvshowstudioService;
-    private final TVShowStudioMapper tvshowstudioMapper;
+public class TVShowStudioController extends BaseController<TVShowStudio, TVShowStudioDto, TVShowStudioSimpleDto> {
 
     public TVShowStudioController(TVShowStudioService tvshowstudioService,
                                     TVShowStudioMapper tvshowstudioMapper) {
-        this.tvshowstudioService = tvshowstudioService;
-        this.tvshowstudioMapper = tvshowstudioMapper;
+        super(tvshowstudioService, tvshowstudioMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<TVShowStudioDto>> getAllTVShowStudios() {
-        List<TVShowStudio> entities = tvshowstudioService.findAll();
-        return ResponseEntity.ok(tvshowstudioMapper.toDtoList(entities));
+    public ResponseEntity<Page<TVShowStudioDto>> getAllTVShowStudios(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<TVShowStudioDto>> searchTVShowStudios(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(TVShowStudio.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TVShowStudioDto> getTVShowStudioById(@PathVariable Long id) {
-        return tvshowstudioService.findById(id)
-                .map(tvshowstudioMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class TVShowStudioController {
             @Valid @RequestBody TVShowStudioDto tvshowstudioDto,
             UriComponentsBuilder uriBuilder) {
 
-        TVShowStudio entity = tvshowstudioMapper.toEntity(tvshowstudioDto);
-        TVShowStudio saved = tvshowstudioService.save(entity);
+        TVShowStudio entity = mapper.toEntity(tvshowstudioDto);
+        TVShowStudio saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/tvshowstudios/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/tvshowstudios/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(tvshowstudioMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class TVShowStudioController {
             @Valid @RequestBody List<TVShowStudioDto> tvshowstudioDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<TVShowStudio> entities = tvshowstudioMapper.toEntityList(tvshowstudioDtoList);
-        List<TVShowStudio> savedEntities = tvshowstudioService.saveAll(entities);
+        List<TVShowStudio> entities = mapper.toEntityList(tvshowstudioDtoList);
+        List<TVShowStudio> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/tvshowstudios").build().toUri();
 
-        return ResponseEntity.created(location).body(tvshowstudioMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class TVShowStudioController {
             @PathVariable Long id,
             @Valid @RequestBody TVShowStudioDto tvshowstudioDto) {
 
-
-        TVShowStudio entityToUpdate = tvshowstudioMapper.toEntity(tvshowstudioDto);
-        TVShowStudio updatedEntity = tvshowstudioService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(tvshowstudioMapper.toDto(updatedEntity));
+        TVShowStudio entityToUpdate = mapper.toEntity(tvshowstudioDto);
+        TVShowStudio updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTVShowStudio(@PathVariable Long id) {
-        boolean deleted = tvshowstudioService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -1,0 +1,124 @@
+package com.example.modules.entertainment_ecosystem.service;
+
+import com.example.core.service.BaseService;
+import com.example.modules.entertainment_ecosystem.model.BookCharacter;
+import com.example.modules.entertainment_ecosystem.repository.BookCharacterRepository;
+
+import com.example.modules.entertainment_ecosystem.model.Book;
+import com.example.modules.entertainment_ecosystem.repository.BookRepository;
+
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+@Service
+public class BookCharacterService extends BaseService<BookCharacter> {
+
+    protected final BookCharacterRepository bookcharacterRepository;
+    
+    protected final BookRepository booksRepository;
+    
+
+    public BookCharacterService(BookCharacterRepository repository, BookRepository booksRepository)
+    {
+        super(repository);
+        this.bookcharacterRepository = repository;
+        
+        this.booksRepository = booksRepository;
+        
+    }
+
+    @Transactional
+    @Override
+    public BookCharacter save(BookCharacter bookcharacter) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+        if (bookcharacter.getBooks() != null &&
+            !bookcharacter.getBooks().isEmpty()) {
+
+            List<Book> attachedBooks = new ArrayList<>();
+            for (Book item : bookcharacter.getBooks()) {
+                if (item.getId() != null) {
+                    Book existingItem = booksRepository.findById(item.getId())
+                        .orElseThrow(() -> new RuntimeException("Book not found with id " + item.getId()));
+                    attachedBooks.add(existingItem);
+                } else {
+
+                    Book newItem = booksRepository.save(item);
+                    attachedBooks.add(newItem);
+                }
+            }
+
+            bookcharacter.setBooks(attachedBooks);
+
+            // côté propriétaire (Book → BookCharacter)
+            attachedBooks.forEach(it -> it.getCharacters().add(bookcharacter));
+        }
+        
+    // ---------- ManyToOne ----------
+    // ---------- OneToOne ----------
+    return bookcharacterRepository.save(bookcharacter);
+}
+
+    @Transactional
+    @Override
+    public BookCharacter update(Long id, BookCharacter bookcharacterRequest) {
+        BookCharacter existing = bookcharacterRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("BookCharacter not found"));
+
+    // Copier les champs simples
+        existing.setName(bookcharacterRequest.getName());
+        existing.setDescription(bookcharacterRequest.getDescription());
+
+    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
+        if (bookcharacterRequest.getBooks() != null) {
+            existing.getBooks().clear();
+
+            List<Book> booksList = bookcharacterRequest.getBooks().stream()
+                .map(item -> booksRepository.findById(item.getId())
+                    .orElseThrow(() -> new RuntimeException("Book not found")))
+                .collect(Collectors.toList());
+
+            existing.getBooks().addAll(booksList);
+
+            // Mettre à jour le côté inverse
+            booksList.forEach(it -> {
+                if (!it.getCharacters().contains(existing)) {
+                    it.getCharacters().add(existing);
+                }
+            });
+        }
+        
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return bookcharacterRepository.save(existing);
+}
+
+    // Pagination simple
+    public Page<BookCharacter> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<BookCharacter> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(BookCharacter.class, filters, pageable);
+    }
+
+    @Transactional
+    public boolean deleteById(Long id) {
+        return super.deleteById(id);
+    }
+
+    @Transactional
+    public List<BookCharacter> saveAll(List<BookCharacter> bookcharacterList) {
+        return super.saveAll(bookcharacterList);
+    }
+
+}

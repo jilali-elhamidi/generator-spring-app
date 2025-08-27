@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.CountryDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.CountrySimpleDto;
 import com.example.modules.entertainment_ecosystem.model.Country;
 import com.example.modules.entertainment_ecosystem.mapper.CountryMapper;
 import com.example.modules.entertainment_ecosystem.service.CountryService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Country entities.
+ */
 @RestController
 @RequestMapping("/api/countrys")
-public class CountryController {
-
-    private final CountryService countryService;
-    private final CountryMapper countryMapper;
+public class CountryController extends BaseController<Country, CountryDto, CountrySimpleDto> {
 
     public CountryController(CountryService countryService,
                                     CountryMapper countryMapper) {
-        this.countryService = countryService;
-        this.countryMapper = countryMapper;
+        super(countryService, countryMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<CountryDto>> getAllCountrys() {
-        List<Country> entities = countryService.findAll();
-        return ResponseEntity.ok(countryMapper.toDtoList(entities));
+    public ResponseEntity<Page<CountryDto>> getAllCountrys(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<CountryDto>> searchCountrys(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Country.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CountryDto> getCountryById(@PathVariable Long id) {
-        return countryService.findById(id)
-                .map(countryMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class CountryController {
             @Valid @RequestBody CountryDto countryDto,
             UriComponentsBuilder uriBuilder) {
 
-        Country entity = countryMapper.toEntity(countryDto);
-        Country saved = countryService.save(entity);
+        Country entity = mapper.toEntity(countryDto);
+        Country saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/countrys/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/countrys/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(countryMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class CountryController {
             @Valid @RequestBody List<CountryDto> countryDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Country> entities = countryMapper.toEntityList(countryDtoList);
-        List<Country> savedEntities = countryService.saveAll(entities);
+        List<Country> entities = mapper.toEntityList(countryDtoList);
+        List<Country> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/countrys").build().toUri();
 
-        return ResponseEntity.created(location).body(countryMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class CountryController {
             @PathVariable Long id,
             @Valid @RequestBody CountryDto countryDto) {
 
-
-        Country entityToUpdate = countryMapper.toEntity(countryDto);
-        Country updatedEntity = countryService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(countryMapper.toDto(updatedEntity));
+        Country entityToUpdate = mapper.toEntity(countryDto);
+        Country updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCountry(@PathVariable Long id) {
-        boolean deleted = countryService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

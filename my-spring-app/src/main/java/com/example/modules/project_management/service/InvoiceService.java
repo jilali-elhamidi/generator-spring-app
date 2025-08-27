@@ -3,33 +3,45 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.Invoice;
 import com.example.modules.project_management.repository.InvoiceRepository;
+
 import com.example.modules.project_management.model.Project;
 import com.example.modules.project_management.repository.ProjectRepository;
+
 import com.example.modules.project_management.model.Client;
 import com.example.modules.project_management.repository.ClientRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class InvoiceService extends BaseService<Invoice> {
 
     protected final InvoiceRepository invoiceRepository;
-    private final ProjectRepository projectRepository;
-    private final ClientRepository clientRepository;
+    
+    protected final ProjectRepository projectRepository;
+    
+    protected final ClientRepository clientRepository;
+    
 
     public InvoiceService(InvoiceRepository repository, ProjectRepository projectRepository, ClientRepository clientRepository)
     {
         super(repository);
         this.invoiceRepository = repository;
+        
         this.projectRepository = projectRepository;
+        
         this.clientRepository = clientRepository;
+        
     }
 
+    @Transactional
     @Override
     public Invoice save(Invoice invoice) {
     // ---------- OneToMany ----------
@@ -67,7 +79,8 @@ public class InvoiceService extends BaseService<Invoice> {
     return invoiceRepository.save(invoice);
 }
 
-
+    @Transactional
+    @Override
     public Invoice update(Long id, Invoice invoiceRequest) {
         Invoice existing = invoiceRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Invoice not found"));
@@ -102,36 +115,30 @@ public class InvoiceService extends BaseService<Invoice> {
             existing.setClient(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return invoiceRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Invoice> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Invoice> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Invoice.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Invoice> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Invoice entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getProject() != null) {
-            entity.setProject(null);
-        }
-        
-        if (entity.getClient() != null) {
-            entity.setClient(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Invoice> saveAll(List<Invoice> invoiceList) {
-
-        return invoiceRepository.saveAll(invoiceList);
+        return super.saveAll(invoiceList);
     }
 
 }

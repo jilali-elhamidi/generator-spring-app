@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.EventTicketTypeDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.EventTicketTypeSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.EventTicketType;
 import com.example.modules.entertainment_ecosystem.mapper.EventTicketTypeMapper;
 import com.example.modules.entertainment_ecosystem.service.EventTicketTypeService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing EventTicketType entities.
+ */
 @RestController
 @RequestMapping("/api/eventtickettypes")
-public class EventTicketTypeController {
-
-    private final EventTicketTypeService eventtickettypeService;
-    private final EventTicketTypeMapper eventtickettypeMapper;
+public class EventTicketTypeController extends BaseController<EventTicketType, EventTicketTypeDto, EventTicketTypeSimpleDto> {
 
     public EventTicketTypeController(EventTicketTypeService eventtickettypeService,
                                     EventTicketTypeMapper eventtickettypeMapper) {
-        this.eventtickettypeService = eventtickettypeService;
-        this.eventtickettypeMapper = eventtickettypeMapper;
+        super(eventtickettypeService, eventtickettypeMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<EventTicketTypeDto>> getAllEventTicketTypes() {
-        List<EventTicketType> entities = eventtickettypeService.findAll();
-        return ResponseEntity.ok(eventtickettypeMapper.toDtoList(entities));
+    public ResponseEntity<Page<EventTicketTypeDto>> getAllEventTicketTypes(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<EventTicketTypeDto>> searchEventTicketTypes(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(EventTicketType.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EventTicketTypeDto> getEventTicketTypeById(@PathVariable Long id) {
-        return eventtickettypeService.findById(id)
-                .map(eventtickettypeMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class EventTicketTypeController {
             @Valid @RequestBody EventTicketTypeDto eventtickettypeDto,
             UriComponentsBuilder uriBuilder) {
 
-        EventTicketType entity = eventtickettypeMapper.toEntity(eventtickettypeDto);
-        EventTicketType saved = eventtickettypeService.save(entity);
+        EventTicketType entity = mapper.toEntity(eventtickettypeDto);
+        EventTicketType saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/eventtickettypes/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/eventtickettypes/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(eventtickettypeMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class EventTicketTypeController {
             @Valid @RequestBody List<EventTicketTypeDto> eventtickettypeDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<EventTicketType> entities = eventtickettypeMapper.toEntityList(eventtickettypeDtoList);
-        List<EventTicketType> savedEntities = eventtickettypeService.saveAll(entities);
+        List<EventTicketType> entities = mapper.toEntityList(eventtickettypeDtoList);
+        List<EventTicketType> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/eventtickettypes").build().toUri();
 
-        return ResponseEntity.created(location).body(eventtickettypeMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class EventTicketTypeController {
             @PathVariable Long id,
             @Valid @RequestBody EventTicketTypeDto eventtickettypeDto) {
 
-
-        EventTicketType entityToUpdate = eventtickettypeMapper.toEntity(eventtickettypeDto);
-        EventTicketType updatedEntity = eventtickettypeService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(eventtickettypeMapper.toDto(updatedEntity));
+        EventTicketType entityToUpdate = mapper.toEntity(eventtickettypeDto);
+        EventTicketType updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEventTicketType(@PathVariable Long id) {
-        boolean deleted = eventtickettypeService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

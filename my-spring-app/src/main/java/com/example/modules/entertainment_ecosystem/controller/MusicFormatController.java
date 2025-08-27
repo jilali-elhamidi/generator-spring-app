@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.MusicFormatDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.MusicFormatSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.MusicFormat;
 import com.example.modules.entertainment_ecosystem.mapper.MusicFormatMapper;
 import com.example.modules.entertainment_ecosystem.service.MusicFormatService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing MusicFormat entities.
+ */
 @RestController
 @RequestMapping("/api/musicformats")
-public class MusicFormatController {
-
-    private final MusicFormatService musicformatService;
-    private final MusicFormatMapper musicformatMapper;
+public class MusicFormatController extends BaseController<MusicFormat, MusicFormatDto, MusicFormatSimpleDto> {
 
     public MusicFormatController(MusicFormatService musicformatService,
                                     MusicFormatMapper musicformatMapper) {
-        this.musicformatService = musicformatService;
-        this.musicformatMapper = musicformatMapper;
+        super(musicformatService, musicformatMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<MusicFormatDto>> getAllMusicFormats() {
-        List<MusicFormat> entities = musicformatService.findAll();
-        return ResponseEntity.ok(musicformatMapper.toDtoList(entities));
+    public ResponseEntity<Page<MusicFormatDto>> getAllMusicFormats(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<MusicFormatDto>> searchMusicFormats(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(MusicFormat.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MusicFormatDto> getMusicFormatById(@PathVariable Long id) {
-        return musicformatService.findById(id)
-                .map(musicformatMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class MusicFormatController {
             @Valid @RequestBody MusicFormatDto musicformatDto,
             UriComponentsBuilder uriBuilder) {
 
-        MusicFormat entity = musicformatMapper.toEntity(musicformatDto);
-        MusicFormat saved = musicformatService.save(entity);
+        MusicFormat entity = mapper.toEntity(musicformatDto);
+        MusicFormat saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/musicformats/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/musicformats/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(musicformatMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class MusicFormatController {
             @Valid @RequestBody List<MusicFormatDto> musicformatDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<MusicFormat> entities = musicformatMapper.toEntityList(musicformatDtoList);
-        List<MusicFormat> savedEntities = musicformatService.saveAll(entities);
+        List<MusicFormat> entities = mapper.toEntityList(musicformatDtoList);
+        List<MusicFormat> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/musicformats").build().toUri();
 
-        return ResponseEntity.created(location).body(musicformatMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class MusicFormatController {
             @PathVariable Long id,
             @Valid @RequestBody MusicFormatDto musicformatDto) {
 
-
-        MusicFormat entityToUpdate = musicformatMapper.toEntity(musicformatDto);
-        MusicFormat updatedEntity = musicformatService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(musicformatMapper.toDto(updatedEntity));
+        MusicFormat entityToUpdate = mapper.toEntity(musicformatDto);
+        MusicFormat updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMusicFormat(@PathVariable Long id) {
-        boolean deleted = musicformatService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

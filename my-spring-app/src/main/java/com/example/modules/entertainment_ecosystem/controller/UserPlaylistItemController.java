@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.UserPlaylistItemDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.UserPlaylistItemSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.UserPlaylistItem;
 import com.example.modules.entertainment_ecosystem.mapper.UserPlaylistItemMapper;
 import com.example.modules.entertainment_ecosystem.service.UserPlaylistItemService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing UserPlaylistItem entities.
+ */
 @RestController
 @RequestMapping("/api/userplaylistitems")
-public class UserPlaylistItemController {
-
-    private final UserPlaylistItemService userplaylistitemService;
-    private final UserPlaylistItemMapper userplaylistitemMapper;
+public class UserPlaylistItemController extends BaseController<UserPlaylistItem, UserPlaylistItemDto, UserPlaylistItemSimpleDto> {
 
     public UserPlaylistItemController(UserPlaylistItemService userplaylistitemService,
                                     UserPlaylistItemMapper userplaylistitemMapper) {
-        this.userplaylistitemService = userplaylistitemService;
-        this.userplaylistitemMapper = userplaylistitemMapper;
+        super(userplaylistitemService, userplaylistitemMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserPlaylistItemDto>> getAllUserPlaylistItems() {
-        List<UserPlaylistItem> entities = userplaylistitemService.findAll();
-        return ResponseEntity.ok(userplaylistitemMapper.toDtoList(entities));
+    public ResponseEntity<Page<UserPlaylistItemDto>> getAllUserPlaylistItems(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserPlaylistItemDto>> searchUserPlaylistItems(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(UserPlaylistItem.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserPlaylistItemDto> getUserPlaylistItemById(@PathVariable Long id) {
-        return userplaylistitemService.findById(id)
-                .map(userplaylistitemMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class UserPlaylistItemController {
             @Valid @RequestBody UserPlaylistItemDto userplaylistitemDto,
             UriComponentsBuilder uriBuilder) {
 
-        UserPlaylistItem entity = userplaylistitemMapper.toEntity(userplaylistitemDto);
-        UserPlaylistItem saved = userplaylistitemService.save(entity);
+        UserPlaylistItem entity = mapper.toEntity(userplaylistitemDto);
+        UserPlaylistItem saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/userplaylistitems/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/userplaylistitems/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(userplaylistitemMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class UserPlaylistItemController {
             @Valid @RequestBody List<UserPlaylistItemDto> userplaylistitemDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<UserPlaylistItem> entities = userplaylistitemMapper.toEntityList(userplaylistitemDtoList);
-        List<UserPlaylistItem> savedEntities = userplaylistitemService.saveAll(entities);
+        List<UserPlaylistItem> entities = mapper.toEntityList(userplaylistitemDtoList);
+        List<UserPlaylistItem> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/userplaylistitems").build().toUri();
 
-        return ResponseEntity.created(location).body(userplaylistitemMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class UserPlaylistItemController {
             @PathVariable Long id,
             @Valid @RequestBody UserPlaylistItemDto userplaylistitemDto) {
 
-
-        UserPlaylistItem entityToUpdate = userplaylistitemMapper.toEntity(userplaylistitemDto);
-        UserPlaylistItem updatedEntity = userplaylistitemService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(userplaylistitemMapper.toDto(updatedEntity));
+        UserPlaylistItem entityToUpdate = mapper.toEntity(userplaylistitemDto);
+        UserPlaylistItem updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserPlaylistItem(@PathVariable Long id) {
-        boolean deleted = userplaylistitemService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

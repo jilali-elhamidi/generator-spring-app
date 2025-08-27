@@ -1,42 +1,50 @@
 package com.example.modules.healthcare_management.controller;
 
 import com.example.modules.healthcare_management.dto.PatientDto;
+import com.example.modules.healthcare_management.dtosimple.PatientSimpleDto;
 import com.example.modules.healthcare_management.model.Patient;
 import com.example.modules.healthcare_management.mapper.PatientMapper;
 import com.example.modules.healthcare_management.service.PatientService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Patient entities.
+ */
 @RestController
 @RequestMapping("/api/patients")
-public class PatientController {
-
-    private final PatientService patientService;
-    private final PatientMapper patientMapper;
+public class PatientController extends BaseController<Patient, PatientDto, PatientSimpleDto> {
 
     public PatientController(PatientService patientService,
                                     PatientMapper patientMapper) {
-        this.patientService = patientService;
-        this.patientMapper = patientMapper;
+        super(patientService, patientMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<PatientDto>> getAllPatients() {
-        List<Patient> entities = patientService.findAll();
-        return ResponseEntity.ok(patientMapper.toDtoList(entities));
+    public ResponseEntity<Page<PatientDto>> getAllPatients(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PatientDto>> searchPatients(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Patient.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PatientDto> getPatientById(@PathVariable Long id) {
-        return patientService.findById(id)
-                .map(patientMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class PatientController {
             @Valid @RequestBody PatientDto patientDto,
             UriComponentsBuilder uriBuilder) {
 
-        Patient entity = patientMapper.toEntity(patientDto);
-        Patient saved = patientService.save(entity);
+        Patient entity = mapper.toEntity(patientDto);
+        Patient saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/patients/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/patients/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(patientMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class PatientController {
             @Valid @RequestBody List<PatientDto> patientDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Patient> entities = patientMapper.toEntityList(patientDtoList);
-        List<Patient> savedEntities = patientService.saveAll(entities);
+        List<Patient> entities = mapper.toEntityList(patientDtoList);
+        List<Patient> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/patients").build().toUri();
 
-        return ResponseEntity.created(location).body(patientMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class PatientController {
             @PathVariable Long id,
             @Valid @RequestBody PatientDto patientDto) {
 
-
-        Patient entityToUpdate = patientMapper.toEntity(patientDto);
-        Patient updatedEntity = patientService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(patientMapper.toDto(updatedEntity));
+        Patient entityToUpdate = mapper.toEntity(patientDto);
+        Patient updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
-        boolean deleted = patientService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

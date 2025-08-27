@@ -3,30 +3,12 @@ package com.example.modules.entertainment_ecosystem.mapper;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseSupplier;
 import com.example.modules.entertainment_ecosystem.dto.MerchandiseSupplierDto;
 import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseSupplierSimpleDto;
-import org.mapstruct.InheritInverseConfiguration;
+import com.example.core.mapper.BaseMapper;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-import org.mapstruct.MappingTarget;
-import java.util.List;
 
-
+/**
+ * 
+ */
 @Mapper(componentModel = "spring")
-public interface MerchandiseSupplierMapper {
-
-    MerchandiseSupplierMapper INSTANCE = Mappers.getMapper(MerchandiseSupplierMapper.class);
-
-    MerchandiseSupplierDto toDto(MerchandiseSupplier merchandisesupplier);
-
-    MerchandiseSupplierSimpleDto toSimpleDto(MerchandiseSupplier merchandisesupplier);
-
-    @InheritInverseConfiguration
-    MerchandiseSupplier toEntity(MerchandiseSupplierDto merchandisesupplierDto);
-
-    List<MerchandiseSupplierDto> toDtoList(List<MerchandiseSupplier> merchandisesupplierList);
-
-    List<MerchandiseSupplier> toEntityList(List<MerchandiseSupplierDto> merchandisesupplierDtoList);
-
-    void updateEntityFromDto(MerchandiseSupplierDto dto, @MappingTarget MerchandiseSupplier entity);
-
+public interface MerchandiseSupplierMapper extends BaseMapper<MerchandiseSupplier, MerchandiseSupplierDto, MerchandiseSupplierSimpleDto> {
 }

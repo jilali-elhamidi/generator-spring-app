@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.StreamingContentLicenseDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.StreamingContentLicenseSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.StreamingContentLicense;
 import com.example.modules.entertainment_ecosystem.mapper.StreamingContentLicenseMapper;
 import com.example.modules.entertainment_ecosystem.service.StreamingContentLicenseService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing StreamingContentLicense entities.
+ */
 @RestController
 @RequestMapping("/api/streamingcontentlicenses")
-public class StreamingContentLicenseController {
-
-    private final StreamingContentLicenseService streamingcontentlicenseService;
-    private final StreamingContentLicenseMapper streamingcontentlicenseMapper;
+public class StreamingContentLicenseController extends BaseController<StreamingContentLicense, StreamingContentLicenseDto, StreamingContentLicenseSimpleDto> {
 
     public StreamingContentLicenseController(StreamingContentLicenseService streamingcontentlicenseService,
                                     StreamingContentLicenseMapper streamingcontentlicenseMapper) {
-        this.streamingcontentlicenseService = streamingcontentlicenseService;
-        this.streamingcontentlicenseMapper = streamingcontentlicenseMapper;
+        super(streamingcontentlicenseService, streamingcontentlicenseMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<StreamingContentLicenseDto>> getAllStreamingContentLicenses() {
-        List<StreamingContentLicense> entities = streamingcontentlicenseService.findAll();
-        return ResponseEntity.ok(streamingcontentlicenseMapper.toDtoList(entities));
+    public ResponseEntity<Page<StreamingContentLicenseDto>> getAllStreamingContentLicenses(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<StreamingContentLicenseDto>> searchStreamingContentLicenses(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(StreamingContentLicense.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<StreamingContentLicenseDto> getStreamingContentLicenseById(@PathVariable Long id) {
-        return streamingcontentlicenseService.findById(id)
-                .map(streamingcontentlicenseMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class StreamingContentLicenseController {
             @Valid @RequestBody StreamingContentLicenseDto streamingcontentlicenseDto,
             UriComponentsBuilder uriBuilder) {
 
-        StreamingContentLicense entity = streamingcontentlicenseMapper.toEntity(streamingcontentlicenseDto);
-        StreamingContentLicense saved = streamingcontentlicenseService.save(entity);
+        StreamingContentLicense entity = mapper.toEntity(streamingcontentlicenseDto);
+        StreamingContentLicense saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/streamingcontentlicenses/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/streamingcontentlicenses/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(streamingcontentlicenseMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class StreamingContentLicenseController {
             @Valid @RequestBody List<StreamingContentLicenseDto> streamingcontentlicenseDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<StreamingContentLicense> entities = streamingcontentlicenseMapper.toEntityList(streamingcontentlicenseDtoList);
-        List<StreamingContentLicense> savedEntities = streamingcontentlicenseService.saveAll(entities);
+        List<StreamingContentLicense> entities = mapper.toEntityList(streamingcontentlicenseDtoList);
+        List<StreamingContentLicense> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/streamingcontentlicenses").build().toUri();
 
-        return ResponseEntity.created(location).body(streamingcontentlicenseMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class StreamingContentLicenseController {
             @PathVariable Long id,
             @Valid @RequestBody StreamingContentLicenseDto streamingcontentlicenseDto) {
 
-
-        StreamingContentLicense entityToUpdate = streamingcontentlicenseMapper.toEntity(streamingcontentlicenseDto);
-        StreamingContentLicense updatedEntity = streamingcontentlicenseService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(streamingcontentlicenseMapper.toDto(updatedEntity));
+        StreamingContentLicense entityToUpdate = mapper.toEntity(streamingcontentlicenseDto);
+        StreamingContentLicense updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStreamingContentLicense(@PathVariable Long id) {
-        boolean deleted = streamingcontentlicenseService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

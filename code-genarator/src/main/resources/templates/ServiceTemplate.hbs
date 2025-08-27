@@ -3,47 +3,38 @@ package com.example.modules.{{module}}.service;
 import com.example.core.service.BaseService;
 import com.example.modules.{{module}}.model.{{entityName}};
 import com.example.modules.{{module}}.repository.{{entityName}}Repository;
-{{~#each relationships}}
+{{#each relationships}}
 import com.example.modules.{{../module}}.model.{{type}};
 import com.example.modules.{{../module}}.repository.{{type}}Repository;
-{{~/each}}
+{{/each}}
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import jakarta.persistence.criteria.Predicate;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.Arrays;
-{{#if hasDate}}
-import java.util.Date;
-import java.util.Calendar;
-{{/if}}
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class {{entityName}}Service extends BaseService<{{entityName}}> {
 
     protected final {{entityName}}Repository {{entityNameLowercase}}Repository;
-{{~#each relationships}}
-    private final {{type}}Repository {{name}}Repository;
-{{~/each}}
+    {{#each relationships}}
+    protected final {{type}}Repository {{name}}Repository;
+    {{/each}}
 
-    public {{entityName}}Service({{entityName}}Repository repository {{~#each relationships}}, {{type}}Repository {{name}}Repository{{/each}})
+    public {{entityName}}Service({{entityName}}Repository repository{{#each relationships}}, {{type}}Repository {{name}}Repository{{/each}})
     {
         super(repository);
         this.{{entityNameLowercase}}Repository = repository;
-        {{~#each relationships}}
+        {{#each relationships}}
         this.{{name}}Repository = {{name}}Repository;
-        {{~/each}}
+        {{/each}}
     }
 
+    @Transactional
     @Override
     public {{entityName}} save({{entityName}} {{entityNameLowercase}}) {
     // ---------- OneToMany ----------
@@ -135,7 +126,8 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
     return {{entityNameLowercase}}Repository.save({{entityNameLowercase}});
 }
 
-
+    @Transactional
+    @Override
     public {{entityName}} update(Long id, {{entityName}} {{entityNameLowercase}}Request) {
         {{entityName}} existing = {{entityNameLowercase}}Repository.findById(id)
             .orElseThrow(() -> new RuntimeException("{{entityName}} not found"));
@@ -223,329 +215,25 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
     {{~/each}}
     return {{entityNameLowercase}}Repository.save(existing);
 }
-    
+
     // Pagination simple
     public Page<{{entityName}}> findAll(Pageable pageable) {
-        return {{entityNameLowercase}}Repository.findAll(pageable);
+        return super.findAll(pageable);
     }
 
-    // Recherche dynamique par Specifications + pagination
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
     public Page<{{entityName}}> search(Map<String, String> filters, Pageable pageable) {
-        Specification<{{entityName}}> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-
-            // Champs simples générés
-            {{~#each fields}}
-            {{~#if (eq type "String")}}
-            if (filters.containsKey("{{name}}")) {
-                String value = filters.get("{{name}}");
-                predicates.add(cb.like(cb.lower(root.get("{{name}}")), "%" + value.toLowerCase() + "%"));
-            }
-            // IN pour String: key '{{name}}_in' = "val1,val2,..."
-            if (filters.containsKey("{{name}}_in")) {
-                java.util.List<String> values = Arrays.stream(filters.get("{{name}}_in").split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .map(String::toLowerCase)
-                        .collect(Collectors.toList());
-                if (!values.isEmpty()) {
-                    predicates.add(cb.lower(root.get("{{name}}")).in(values));
-                }
-            }
-            {{~else if (eq type "Long")}}
-            if (filters.containsKey("{{name}}")) {
-                try {
-                    Long value = Long.parseLong(filters.get("{{name}}"));
-                    predicates.add(cb.equal(root.get("{{name}}"), value));
-                } catch (NumberFormatException ignored) {}
-            }
-            // GREATER_THAN: '{{name}}_gt'
-            if (filters.containsKey("{{name}}_gt")) {
-                try {
-                    Long value = Long.parseLong(filters.get("{{name}}_gt"));
-                    predicates.add(cb.greaterThan(root.get("{{name}}"), value));
-                } catch (NumberFormatException ignored) {}
-            }
-            // LESS_THAN: '{{name}}_lt'
-            if (filters.containsKey("{{name}}_lt")) {
-                try {
-                    Long value = Long.parseLong(filters.get("{{name}}_lt"));
-                    predicates.add(cb.lessThan(root.get("{{name}}"), value));
-                } catch (NumberFormatException ignored) {}
-            }
-            // BETWEEN: '{{name}}_between' = "start,end"
-            if (filters.containsKey("{{name}}_between")) {
-                String raw = filters.get("{{name}}_between");
-                String[] parts = raw.split(",");
-                if (parts.length == 2) {
-                    try {
-                        Long start = Long.parseLong(parts[0].trim());
-                        Long end = Long.parseLong(parts[1].trim());
-                        predicates.add(cb.between(root.get("{{name}}"), start, end));
-                    } catch (NumberFormatException ignored) {}
-                }
-            }
-            // IN: '{{name}}_in' = "1,2,3"
-            if (filters.containsKey("{{name}}_in")) {
-                java.util.List<Long> values = Arrays.stream(filters.get("{{name}}_in").split(","))
-                        .map(String::trim)
-                        .map(s -> {
-                            try { return Long.parseLong(s); } catch (Exception e) { return null; }
-                        })
-                        .filter(v -> v != null)
-                        .collect(Collectors.toList());
-                if (!values.isEmpty()) {
-                    predicates.add(root.get("{{name}}").in(values));
-                }
-            }
-            {{~else if (eq type "Integer")}}
-            if (filters.containsKey("{{name}}")) {
-                try {
-                    Integer value = Integer.parseInt(filters.get("{{name}}"));
-                    predicates.add(cb.equal(root.get("{{name}}"), value));
-                } catch (NumberFormatException ignored) {}
-            }
-            if (filters.containsKey("{{name}}_gt")) {
-                try {
-                    Integer value = Integer.parseInt(filters.get("{{name}}_gt"));
-                    predicates.add(cb.greaterThan(root.get("{{name}}"), value));
-                } catch (NumberFormatException ignored) {}
-            }
-            if (filters.containsKey("{{name}}_lt")) {
-                try {
-                    Integer value = Integer.parseInt(filters.get("{{name}}_lt"));
-                    predicates.add(cb.lessThan(root.get("{{name}}"), value));
-                } catch (NumberFormatException ignored) {}
-            }
-            if (filters.containsKey("{{name}}_between")) {
-                String raw = filters.get("{{name}}_between");
-                String[] parts = raw.split(",");
-                if (parts.length == 2) {
-                    try {
-                        Integer start = Integer.parseInt(parts[0].trim());
-                        Integer end = Integer.parseInt(parts[1].trim());
-                        predicates.add(cb.between(root.get("{{name}}"), start, end));
-                    } catch (NumberFormatException ignored) {}
-                }
-            }
-            if (filters.containsKey("{{name}}_in")) {
-                java.util.List<Integer> values = Arrays.stream(filters.get("{{name}}_in").split(","))
-                        .map(String::trim)
-                        .map(s -> {
-                            try { return Integer.parseInt(s); } catch (Exception e) { return null; }
-                        })
-                        .filter(v -> v != null)
-                        .collect(Collectors.toList());
-                if (!values.isEmpty()) {
-                    predicates.add(root.get("{{name}}").in(values));
-                }
-            }
-            {{~else if (eq type "Double")}}
-            if (filters.containsKey("{{name}}")) {
-                try {
-                    Double value = Double.parseDouble(filters.get("{{name}}"));
-                    predicates.add(cb.equal(root.get("{{name}}"), value));
-                } catch (NumberFormatException ignored) {}
-            }
-            if (filters.containsKey("{{name}}_gt")) {
-                try {
-                    Double value = Double.parseDouble(filters.get("{{name}}_gt"));
-                    predicates.add(cb.greaterThan(root.get("{{name}}"), value));
-                } catch (NumberFormatException ignored) {}
-            }
-            if (filters.containsKey("{{name}}_lt")) {
-                try {
-                    Double value = Double.parseDouble(filters.get("{{name}}_lt"));
-                    predicates.add(cb.lessThan(root.get("{{name}}"), value));
-                } catch (NumberFormatException ignored) {}
-            }
-            if (filters.containsKey("{{name}}_between")) {
-                String raw = filters.get("{{name}}_between");
-                String[] parts = raw.split(",");
-                if (parts.length == 2) {
-                    try {
-                        Double start = Double.parseDouble(parts[0].trim());
-                        Double end = Double.parseDouble(parts[1].trim());
-                        predicates.add(cb.between(root.get("{{name}}"), start, end));
-                    } catch (NumberFormatException ignored) {}
-                }
-            }
-            if (filters.containsKey("{{name}}_in")) {
-                java.util.List<Double> values = Arrays.stream(filters.get("{{name}}_in").split(","))
-                        .map(String::trim)
-                        .map(s -> {
-                            try { return Double.parseDouble(s); } catch (Exception e) { return null; }
-                        })
-                        .filter(v -> v != null)
-                        .collect(Collectors.toList());
-                if (!values.isEmpty()) {
-                    predicates.add(root.get("{{name}}").in(values));
-                }
-            }
-            {{~else if (eq type "Boolean")}}
-            if (filters.containsKey("{{name}}")) {
-                Boolean value = Boolean.parseBoolean(filters.get("{{name}}"));
-                predicates.add(cb.equal(root.get("{{name}}"), value));
-            }
-            {{~else if (eq type "Date")}}
-            if (filters.containsKey("{{name}}")) {
-                String raw = filters.get("{{name}}");
-                try {
-                    Date value = parseDateFlexible(raw);
-                    // Si la valeur ressemble à une date seule (YYYY-MM-DD), filtrer sur toute la journée
-                    if (raw.length() <= 10) {
-                        Date start = startOfDay(value);
-                        Date end = endOfDay(value);
-                        predicates.add(cb.between(root.get("{{name}}"), start, end));
-                    } else {
-                        predicates.add(cb.equal(root.get("{{name}}"), value));
-                    }
-                } catch (ParseException ignored) {}
-            }
-            if (filters.containsKey("{{name}}_gt")) {
-                try {
-                    Date value = parseDateFlexible(filters.get("{{name}}_gt"));
-                    predicates.add(cb.greaterThan(root.get("{{name}}"), value));
-                } catch (ParseException ignored) {}
-            }
-            if (filters.containsKey("{{name}}_lt")) {
-                try {
-                    Date value = parseDateFlexible(filters.get("{{name}}_lt"));
-                    predicates.add(cb.lessThan(root.get("{{name}}"), value));
-                } catch (ParseException ignored) {}
-            }
-            if (filters.containsKey("{{name}}_between")) {
-                String raw = filters.get("{{name}}_between");
-                String[] parts = raw.split(",");
-                if (parts.length == 2) {
-                    try {
-                        Date start = parseDateFlexible(parts[0].trim());
-                        Date end = parseDateFlexible(parts[1].trim());
-                        predicates.add(cb.between(root.get("{{name}}"), start, end));
-                    } catch (ParseException ignored) {}
-                }
-            }
-            if (filters.containsKey("{{name}}_in")) {
-                java.util.List<Date> values = Arrays.stream(filters.get("{{name}}_in").split(","))
-                        .map(String::trim)
-                        .map(s -> {
-                            try { return parseDateFlexible(s); } catch (Exception e) { return null; }
-                        })
-                        .filter(v -> v != null)
-                        .collect(Collectors.toList());
-                if (!values.isEmpty()) {
-                    predicates.add(root.get("{{name}}").in(values));
-                }
-            }
-            {{/if}}
-            {{~/each}}
-
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-
-        return {{entityNameLowercase}}Repository.findAll(spec, pageable);
-    }
-    
-    {{#if hasDate}}
-    // --- Helpers Date ---
-    private Date parseDateFlexible(String input) throws ParseException {
-        String[] patterns = new String[] {
-                "yyyy-MM-dd",
-                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-                "yyyy-MM-dd'T'HH:mm:ssXXX",
-                "yyyy-MM-dd'T'HH:mm:ss",
-                "yyyy-MM-dd HH:mm:ss"
-        };
-        ParseException last = null;
-        for (String p : patterns) {
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat(p);
-                sdf.setLenient(false);
-                return sdf.parse(input);
-            } catch (ParseException ex) {
-                last = ex;
-            }
-        }
-        throw last != null ? last : new ParseException("Unparseable date: " + input, 0);
+        return super.search({{entityName}}.class, filters, pageable);
     }
 
-    private Date startOfDay(Date d) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(d);
-        c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        return c.getTime();
-    }
-
-    private Date endOfDay(Date d) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(d);
-        c.set(Calendar.HOUR_OF_DAY, 23);
-        c.set(Calendar.MINUTE, 59);
-        c.set(Calendar.SECOND, 59);
-        c.set(Calendar.MILLISECOND, 999);
-        return c.getTime();
-    }
-    {{/if}}
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<{{entityName}}> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        {{entityName}} entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        {{~#each relationships}}
-        {{~#if (eq relationType "OneToMany")}}
-        if (entity.get{{capitalize name}}() != null) {
-            for (var child : entity.get{{capitalize name}}()) {
-                {{~#if mappedBy}}
-                // retirer la référence inverse
-                child.set{{capitalize mappedBy}}(null);
-                {{~/if}}
-            }
-            entity.get{{capitalize name}}().clear();
-        }
-        {{/if}}
-        {{~/each}}
-    // --- Dissocier ManyToMany ---
-        {{~#each relationships}}
-        {{~#if (eq relationType "ManyToMany")}}
-        if (entity.get{{capitalize name}}() != null) {
-            for ({{type}} item : new ArrayList<>(entity.get{{capitalize name}}())) {
-                {{#if inverseField}}
-                item.get{{capitalize inverseField}}().remove(entity); // retire côté inverse
-                {{~/if}}
-            }
-            entity.get{{capitalize name}}().clear(); // puis vide côté courant
-        }
-        {{/if}}
-        {{~/each}}
-    // --- Dissocier OneToOne ---
-        {{~#each relationships}}
-        {{~#if (eq relationType "OneToOne")}}
-        if (entity.get{{capitalize name}}() != null) {
-            entity.get{{capitalize name}}().set{{capitalize inverseField}}(null);
-            entity.set{{capitalize name}}(null);
-        }
-        {{/if}}
-        {{~/each}}
-    // --- Dissocier ManyToOne ---
-        {{~#each relationships}}
-        {{~#if (eq relationType "ManyToOne")}}
-        if (entity.get{{capitalize name}}() != null) {
-            entity.set{{capitalize name}}(null);
-        }
-        {{/if}}
-        {{~/each}}
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<{{entityName}}> saveAll(List<{{entityName}}> {{entityNameLowercase}}List) {
-
-        return {{entityNameLowercase}}Repository.saveAll({{entityNameLowercase}}List);
+        return super.saveAll({{entityNameLowercase}}List);
     }
 
 }

@@ -1,42 +1,50 @@
 package com.example.modules.project_management.controller;
 
 import com.example.modules.project_management.dto.InvoiceDto;
+import com.example.modules.project_management.dtosimple.InvoiceSimpleDto;
 import com.example.modules.project_management.model.Invoice;
 import com.example.modules.project_management.mapper.InvoiceMapper;
 import com.example.modules.project_management.service.InvoiceService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Invoice entities.
+ */
 @RestController
 @RequestMapping("/api/invoices")
-public class InvoiceController {
-
-    private final InvoiceService invoiceService;
-    private final InvoiceMapper invoiceMapper;
+public class InvoiceController extends BaseController<Invoice, InvoiceDto, InvoiceSimpleDto> {
 
     public InvoiceController(InvoiceService invoiceService,
                                     InvoiceMapper invoiceMapper) {
-        this.invoiceService = invoiceService;
-        this.invoiceMapper = invoiceMapper;
+        super(invoiceService, invoiceMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<InvoiceDto>> getAllInvoices() {
-        List<Invoice> entities = invoiceService.findAll();
-        return ResponseEntity.ok(invoiceMapper.toDtoList(entities));
+    public ResponseEntity<Page<InvoiceDto>> getAllInvoices(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<InvoiceDto>> searchInvoices(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Invoice.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<InvoiceDto> getInvoiceById(@PathVariable Long id) {
-        return invoiceService.findById(id)
-                .map(invoiceMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class InvoiceController {
             @Valid @RequestBody InvoiceDto invoiceDto,
             UriComponentsBuilder uriBuilder) {
 
-        Invoice entity = invoiceMapper.toEntity(invoiceDto);
-        Invoice saved = invoiceService.save(entity);
+        Invoice entity = mapper.toEntity(invoiceDto);
+        Invoice saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/invoices/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/invoices/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(invoiceMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class InvoiceController {
             @Valid @RequestBody List<InvoiceDto> invoiceDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Invoice> entities = invoiceMapper.toEntityList(invoiceDtoList);
-        List<Invoice> savedEntities = invoiceService.saveAll(entities);
+        List<Invoice> entities = mapper.toEntityList(invoiceDtoList);
+        List<Invoice> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/invoices").build().toUri();
 
-        return ResponseEntity.created(location).body(invoiceMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class InvoiceController {
             @PathVariable Long id,
             @Valid @RequestBody InvoiceDto invoiceDto) {
 
-
-        Invoice entityToUpdate = invoiceMapper.toEntity(invoiceDto);
-        Invoice updatedEntity = invoiceService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(invoiceMapper.toDto(updatedEntity));
+        Invoice entityToUpdate = mapper.toEntity(invoiceDto);
+        Invoice updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {
-        boolean deleted = invoiceService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

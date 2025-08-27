@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.UserMessageDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.UserMessageSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.UserMessage;
 import com.example.modules.entertainment_ecosystem.mapper.UserMessageMapper;
 import com.example.modules.entertainment_ecosystem.service.UserMessageService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing UserMessage entities.
+ */
 @RestController
 @RequestMapping("/api/usermessages")
-public class UserMessageController {
-
-    private final UserMessageService usermessageService;
-    private final UserMessageMapper usermessageMapper;
+public class UserMessageController extends BaseController<UserMessage, UserMessageDto, UserMessageSimpleDto> {
 
     public UserMessageController(UserMessageService usermessageService,
                                     UserMessageMapper usermessageMapper) {
-        this.usermessageService = usermessageService;
-        this.usermessageMapper = usermessageMapper;
+        super(usermessageService, usermessageMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserMessageDto>> getAllUserMessages() {
-        List<UserMessage> entities = usermessageService.findAll();
-        return ResponseEntity.ok(usermessageMapper.toDtoList(entities));
+    public ResponseEntity<Page<UserMessageDto>> getAllUserMessages(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserMessageDto>> searchUserMessages(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(UserMessage.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserMessageDto> getUserMessageById(@PathVariable Long id) {
-        return usermessageService.findById(id)
-                .map(usermessageMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class UserMessageController {
             @Valid @RequestBody UserMessageDto usermessageDto,
             UriComponentsBuilder uriBuilder) {
 
-        UserMessage entity = usermessageMapper.toEntity(usermessageDto);
-        UserMessage saved = usermessageService.save(entity);
+        UserMessage entity = mapper.toEntity(usermessageDto);
+        UserMessage saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/usermessages/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/usermessages/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(usermessageMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class UserMessageController {
             @Valid @RequestBody List<UserMessageDto> usermessageDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<UserMessage> entities = usermessageMapper.toEntityList(usermessageDtoList);
-        List<UserMessage> savedEntities = usermessageService.saveAll(entities);
+        List<UserMessage> entities = mapper.toEntityList(usermessageDtoList);
+        List<UserMessage> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/usermessages").build().toUri();
 
-        return ResponseEntity.created(location).body(usermessageMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class UserMessageController {
             @PathVariable Long id,
             @Valid @RequestBody UserMessageDto usermessageDto) {
 
-
-        UserMessage entityToUpdate = usermessageMapper.toEntity(usermessageDto);
-        UserMessage updatedEntity = usermessageService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(usermessageMapper.toDto(updatedEntity));
+        UserMessage entityToUpdate = mapper.toEntity(usermessageDto);
+        UserMessage updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserMessage(@PathVariable Long id) {
-        boolean deleted = usermessageService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -3,57 +3,87 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.Task;
 import com.example.modules.project_management.repository.TaskRepository;
+
 import com.example.modules.project_management.model.Project;
 import com.example.modules.project_management.repository.ProjectRepository;
+
 import com.example.modules.project_management.model.TeamMember;
 import com.example.modules.project_management.repository.TeamMemberRepository;
+
 import com.example.modules.project_management.model.Subtask;
 import com.example.modules.project_management.repository.SubtaskRepository;
+
 import com.example.modules.project_management.model.Comment;
 import com.example.modules.project_management.repository.CommentRepository;
+
 import com.example.modules.project_management.model.Tag;
 import com.example.modules.project_management.repository.TagRepository;
+
 import com.example.modules.project_management.model.Attachment;
 import com.example.modules.project_management.repository.AttachmentRepository;
+
 import com.example.modules.project_management.model.TimeLog;
 import com.example.modules.project_management.repository.TimeLogRepository;
+
 import com.example.modules.project_management.model.Milestone;
 import com.example.modules.project_management.repository.MilestoneRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService extends BaseService<Task> {
 
     protected final TaskRepository taskRepository;
-    private final ProjectRepository projectRepository;
-    private final TeamMemberRepository assigneeRepository;
-    private final SubtaskRepository subtasksRepository;
-    private final CommentRepository commentsRepository;
-    private final TagRepository tagsRepository;
-    private final AttachmentRepository attachmentsRepository;
-    private final TimeLogRepository logRepository;
-    private final MilestoneRepository milestoneRepository;
+    
+    protected final ProjectRepository projectRepository;
+    
+    protected final TeamMemberRepository assigneeRepository;
+    
+    protected final SubtaskRepository subtasksRepository;
+    
+    protected final CommentRepository commentsRepository;
+    
+    protected final TagRepository tagsRepository;
+    
+    protected final AttachmentRepository attachmentsRepository;
+    
+    protected final TimeLogRepository logRepository;
+    
+    protected final MilestoneRepository milestoneRepository;
+    
 
     public TaskService(TaskRepository repository, ProjectRepository projectRepository, TeamMemberRepository assigneeRepository, SubtaskRepository subtasksRepository, CommentRepository commentsRepository, TagRepository tagsRepository, AttachmentRepository attachmentsRepository, TimeLogRepository logRepository, MilestoneRepository milestoneRepository)
     {
         super(repository);
         this.taskRepository = repository;
+        
         this.projectRepository = projectRepository;
+        
         this.assigneeRepository = assigneeRepository;
+        
         this.subtasksRepository = subtasksRepository;
+        
         this.commentsRepository = commentsRepository;
+        
         this.tagsRepository = tagsRepository;
+        
         this.attachmentsRepository = attachmentsRepository;
+        
         this.logRepository = logRepository;
+        
         this.milestoneRepository = milestoneRepository;
+        
     }
 
+    @Transactional
     @Override
     public Task save(Task task) {
     // ---------- OneToMany ----------
@@ -195,7 +225,8 @@ public class TaskService extends BaseService<Task> {
     return taskRepository.save(task);
 }
 
-
+    @Transactional
+    @Override
     public Task update(Long id, Task taskRequest) {
         Task existing = taskRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Task not found"));
@@ -244,7 +275,7 @@ public class TaskService extends BaseService<Task> {
             existing.setMilestone(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         if (taskRequest.getTags() != null) {
             existing.getTags().clear();
 
@@ -335,75 +366,25 @@ public class TaskService extends BaseService<Task> {
     // ---------- Relations OneToOne ----------
     return taskRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Task> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Task> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Task.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Task> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Task entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getSubtasks() != null) {
-            for (var child : entity.getSubtasks()) {
-                // retirer la référence inverse
-                child.setParentTask(null);
-            }
-            entity.getSubtasks().clear();
-        }
-        
-        if (entity.getComments() != null) {
-            for (var child : entity.getComments()) {
-                // retirer la référence inverse
-                child.setTask(null);
-            }
-            entity.getComments().clear();
-        }
-        
-        if (entity.getAttachments() != null) {
-            for (var child : entity.getAttachments()) {
-                // retirer la référence inverse
-                child.setTask(null);
-            }
-            entity.getAttachments().clear();
-        }
-        
-        if (entity.getLog() != null) {
-            for (var child : entity.getLog()) {
-                // retirer la référence inverse
-                child.setTask(null);
-            }
-            entity.getLog().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-        if (entity.getTags() != null) {
-            for (Tag item : new ArrayList<>(entity.getTags())) {
-                
-                item.getTasks().remove(entity); // retire côté inverse
-            }
-            entity.getTags().clear(); // puis vide côté courant
-        }
-        
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getProject() != null) {
-            entity.setProject(null);
-        }
-        
-        if (entity.getAssignee() != null) {
-            entity.setAssignee(null);
-        }
-        
-        if (entity.getMilestone() != null) {
-            entity.setMilestone(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Task> saveAll(List<Task> taskList) {
-
-        return taskRepository.saveAll(taskList);
+        return super.saveAll(taskList);
     }
 
 }

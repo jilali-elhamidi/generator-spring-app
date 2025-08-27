@@ -3,30 +3,12 @@ package com.example.modules.{{module}}.mapper;
 import com.example.modules.{{module}}.model.{{entityName}};
 import com.example.modules.{{module}}.dto.{{entityName}}Dto;
 import com.example.modules.{{module}}.dtosimple.{{entityName}}SimpleDto;
-import org.mapstruct.InheritInverseConfiguration;
+import com.example.core.mapper.BaseMapper;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-import org.mapstruct.MappingTarget;
-import java.util.List;
 
-
+/**
+ * 
+ */
 @Mapper(componentModel = "spring")
-public interface {{entityName}}Mapper {
-
-    {{entityName}}Mapper INSTANCE = Mappers.getMapper({{entityName}}Mapper.class);
-
-    {{entityName}}Dto toDto({{entityName}} {{entityNameLowercase}});
-
-    {{entityName}}SimpleDto toSimpleDto({{entityName}} {{entityNameLowercase}});
-
-    @InheritInverseConfiguration
-    {{entityName}} toEntity({{entityName}}Dto {{entityNameLowercase}}Dto);
-
-    List<{{entityName}}Dto> toDtoList(List<{{entityName}}> {{entityNameLowercase}}List);
-
-    List<{{entityName}}> toEntityList(List<{{entityName}}Dto> {{entityNameLowercase}}DtoList);
-
-    void updateEntityFromDto({{entityName}}Dto dto, @MappingTarget {{entityName}} entity);
-
+public interface {{entityName}}Mapper extends BaseMapper<{{entityName}}, {{entityName}}Dto, {{entityName}}SimpleDto> {
 }

@@ -3,53 +3,80 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.Project;
 import com.example.modules.project_management.repository.ProjectRepository;
+
 import com.example.modules.project_management.model.Task;
 import com.example.modules.project_management.repository.TaskRepository;
+
 import com.example.modules.project_management.model.TeamMember;
 import com.example.modules.project_management.repository.TeamMemberRepository;
+
 import com.example.modules.project_management.model.TeamMember;
 import com.example.modules.project_management.repository.TeamMemberRepository;
+
 import com.example.modules.project_management.model.Document;
 import com.example.modules.project_management.repository.DocumentRepository;
+
 import com.example.modules.project_management.model.Milestone;
 import com.example.modules.project_management.repository.MilestoneRepository;
+
 import com.example.modules.project_management.model.Client;
 import com.example.modules.project_management.repository.ClientRepository;
+
 import com.example.modules.project_management.model.Team;
 import com.example.modules.project_management.repository.TeamRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectService extends BaseService<Project> {
 
     protected final ProjectRepository projectRepository;
-    private final TaskRepository tasksRepository;
-    private final TeamMemberRepository teamMembersRepository;
-    private final TeamMemberRepository projectManagerRepository;
-    private final DocumentRepository documentsRepository;
-    private final MilestoneRepository milestonesRepository;
-    private final ClientRepository clientRepository;
-    private final TeamRepository teamRepository;
+    
+    protected final TaskRepository tasksRepository;
+    
+    protected final TeamMemberRepository teamMembersRepository;
+    
+    protected final TeamMemberRepository projectManagerRepository;
+    
+    protected final DocumentRepository documentsRepository;
+    
+    protected final MilestoneRepository milestonesRepository;
+    
+    protected final ClientRepository clientRepository;
+    
+    protected final TeamRepository teamRepository;
+    
 
     public ProjectService(ProjectRepository repository, TaskRepository tasksRepository, TeamMemberRepository teamMembersRepository, TeamMemberRepository projectManagerRepository, DocumentRepository documentsRepository, MilestoneRepository milestonesRepository, ClientRepository clientRepository, TeamRepository teamRepository)
     {
         super(repository);
         this.projectRepository = repository;
+        
         this.tasksRepository = tasksRepository;
+        
         this.teamMembersRepository = teamMembersRepository;
+        
         this.projectManagerRepository = projectManagerRepository;
+        
         this.documentsRepository = documentsRepository;
+        
         this.milestonesRepository = milestonesRepository;
+        
         this.clientRepository = clientRepository;
+        
         this.teamRepository = teamRepository;
+        
     }
 
+    @Transactional
     @Override
     public Project save(Project project) {
     // ---------- OneToMany ----------
@@ -174,7 +201,8 @@ public class ProjectService extends BaseService<Project> {
     return projectRepository.save(project);
 }
 
-
+    @Transactional
+    @Override
     public Project update(Long id, Project projectRequest) {
         Project existing = projectRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Project not found"));
@@ -223,7 +251,7 @@ public class ProjectService extends BaseService<Project> {
             existing.setTeam(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         if (projectRequest.getTeamMembers() != null) {
             existing.getTeamMembers().clear();
 
@@ -297,67 +325,25 @@ public class ProjectService extends BaseService<Project> {
     // ---------- Relations OneToOne ----------
     return projectRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Project> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Project> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Project.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Project> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Project entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getTasks() != null) {
-            for (var child : entity.getTasks()) {
-                // retirer la référence inverse
-                child.setProject(null);
-            }
-            entity.getTasks().clear();
-        }
-        
-        if (entity.getDocuments() != null) {
-            for (var child : entity.getDocuments()) {
-                // retirer la référence inverse
-                child.setProject(null);
-            }
-            entity.getDocuments().clear();
-        }
-        
-        if (entity.getMilestones() != null) {
-            for (var child : entity.getMilestones()) {
-                // retirer la référence inverse
-                child.setProject(null);
-            }
-            entity.getMilestones().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-        if (entity.getTeamMembers() != null) {
-            for (TeamMember item : new ArrayList<>(entity.getTeamMembers())) {
-                
-                item.getProjects().remove(entity); // retire côté inverse
-            }
-            entity.getTeamMembers().clear(); // puis vide côté courant
-        }
-        
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getProjectManager() != null) {
-            entity.setProjectManager(null);
-        }
-        
-        if (entity.getClient() != null) {
-            entity.setClient(null);
-        }
-        
-        if (entity.getTeam() != null) {
-            entity.setTeam(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Project> saveAll(List<Project> projectList) {
-
-        return projectRepository.saveAll(projectList);
+        return super.saveAll(projectList);
     }
 
 }

@@ -1,42 +1,50 @@
 package com.example.modules.healthcare_management.controller;
 
 import com.example.modules.healthcare_management.dto.ReimbursementDto;
+import com.example.modules.healthcare_management.dtosimple.ReimbursementSimpleDto;
 import com.example.modules.healthcare_management.model.Reimbursement;
 import com.example.modules.healthcare_management.mapper.ReimbursementMapper;
 import com.example.modules.healthcare_management.service.ReimbursementService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Reimbursement entities.
+ */
 @RestController
 @RequestMapping("/api/reimbursements")
-public class ReimbursementController {
-
-    private final ReimbursementService reimbursementService;
-    private final ReimbursementMapper reimbursementMapper;
+public class ReimbursementController extends BaseController<Reimbursement, ReimbursementDto, ReimbursementSimpleDto> {
 
     public ReimbursementController(ReimbursementService reimbursementService,
                                     ReimbursementMapper reimbursementMapper) {
-        this.reimbursementService = reimbursementService;
-        this.reimbursementMapper = reimbursementMapper;
+        super(reimbursementService, reimbursementMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<ReimbursementDto>> getAllReimbursements() {
-        List<Reimbursement> entities = reimbursementService.findAll();
-        return ResponseEntity.ok(reimbursementMapper.toDtoList(entities));
+    public ResponseEntity<Page<ReimbursementDto>> getAllReimbursements(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ReimbursementDto>> searchReimbursements(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Reimbursement.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ReimbursementDto> getReimbursementById(@PathVariable Long id) {
-        return reimbursementService.findById(id)
-                .map(reimbursementMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class ReimbursementController {
             @Valid @RequestBody ReimbursementDto reimbursementDto,
             UriComponentsBuilder uriBuilder) {
 
-        Reimbursement entity = reimbursementMapper.toEntity(reimbursementDto);
-        Reimbursement saved = reimbursementService.save(entity);
+        Reimbursement entity = mapper.toEntity(reimbursementDto);
+        Reimbursement saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/reimbursements/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/reimbursements/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(reimbursementMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class ReimbursementController {
             @Valid @RequestBody List<ReimbursementDto> reimbursementDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Reimbursement> entities = reimbursementMapper.toEntityList(reimbursementDtoList);
-        List<Reimbursement> savedEntities = reimbursementService.saveAll(entities);
+        List<Reimbursement> entities = mapper.toEntityList(reimbursementDtoList);
+        List<Reimbursement> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/reimbursements").build().toUri();
 
-        return ResponseEntity.created(location).body(reimbursementMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class ReimbursementController {
             @PathVariable Long id,
             @Valid @RequestBody ReimbursementDto reimbursementDto) {
 
-
-        Reimbursement entityToUpdate = reimbursementMapper.toEntity(reimbursementDto);
-        Reimbursement updatedEntity = reimbursementService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(reimbursementMapper.toDto(updatedEntity));
+        Reimbursement entityToUpdate = mapper.toEntity(reimbursementDto);
+        Reimbursement updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReimbursement(@PathVariable Long id) {
-        boolean deleted = reimbursementService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

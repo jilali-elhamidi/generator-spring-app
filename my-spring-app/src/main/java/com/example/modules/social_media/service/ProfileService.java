@@ -3,61 +3,94 @@ package com.example.modules.social_media.service;
 import com.example.core.service.BaseService;
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.repository.ProfileRepository;
+
 import com.example.modules.social_media.model.Post;
 import com.example.modules.social_media.repository.PostRepository;
+
 import com.example.modules.social_media.model.Comment;
 import com.example.modules.social_media.repository.CommentRepository;
+
 import com.example.modules.social_media.model.Message;
 import com.example.modules.social_media.repository.MessageRepository;
+
 import com.example.modules.social_media.model.Message;
 import com.example.modules.social_media.repository.MessageRepository;
+
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.repository.ProfileRepository;
+
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.repository.ProfileRepository;
+
 import com.example.modules.social_media.model.Role;
 import com.example.modules.social_media.repository.RoleRepository;
+
 import com.example.modules.social_media.model.Group;
 import com.example.modules.social_media.repository.GroupRepository;
+
 import com.example.modules.social_media.model.Notification;
 import com.example.modules.social_media.repository.NotificationRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class ProfileService extends BaseService<Profile> {
 
     protected final ProfileRepository profileRepository;
-    private final PostRepository postsRepository;
-    private final CommentRepository commentsRepository;
-    private final MessageRepository receivedMessagesRepository;
-    private final MessageRepository sentMessagesRepository;
-    private final ProfileRepository followersRepository;
-    private final ProfileRepository followingRepository;
-    private final RoleRepository rolesRepository;
-    private final GroupRepository groupsRepository;
-    private final NotificationRepository notificationsRepository;
+    
+    protected final PostRepository postsRepository;
+    
+    protected final CommentRepository commentsRepository;
+    
+    protected final MessageRepository receivedMessagesRepository;
+    
+    protected final MessageRepository sentMessagesRepository;
+    
+    protected final ProfileRepository followersRepository;
+    
+    protected final ProfileRepository followingRepository;
+    
+    protected final RoleRepository rolesRepository;
+    
+    protected final GroupRepository groupsRepository;
+    
+    protected final NotificationRepository notificationsRepository;
+    
 
     public ProfileService(ProfileRepository repository, PostRepository postsRepository, CommentRepository commentsRepository, MessageRepository receivedMessagesRepository, MessageRepository sentMessagesRepository, ProfileRepository followersRepository, ProfileRepository followingRepository, RoleRepository rolesRepository, GroupRepository groupsRepository, NotificationRepository notificationsRepository)
     {
         super(repository);
         this.profileRepository = repository;
+        
         this.postsRepository = postsRepository;
+        
         this.commentsRepository = commentsRepository;
+        
         this.receivedMessagesRepository = receivedMessagesRepository;
+        
         this.sentMessagesRepository = sentMessagesRepository;
+        
         this.followersRepository = followersRepository;
+        
         this.followingRepository = followingRepository;
+        
         this.rolesRepository = rolesRepository;
+        
         this.groupsRepository = groupsRepository;
+        
         this.notificationsRepository = notificationsRepository;
+        
     }
 
+    @Transactional
     @Override
     public Profile save(Profile profile) {
     // ---------- OneToMany ----------
@@ -240,7 +273,8 @@ public class ProfileService extends BaseService<Profile> {
     return profileRepository.save(profile);
 }
 
-
+    @Transactional
+    @Override
     public Profile update(Long id, Profile profileRequest) {
         Profile existing = profileRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Profile not found"));
@@ -253,7 +287,7 @@ public class ProfileService extends BaseService<Profile> {
         existing.setRegistrationDate(profileRequest.getRegistrationDate());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         if (profileRequest.getFollowers() != null) {
             existing.getFollowers().clear();
 
@@ -415,95 +449,25 @@ public class ProfileService extends BaseService<Profile> {
     // ---------- Relations OneToOne ----------
     return profileRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Profile> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Profile> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Profile.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Profile> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Profile entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getPosts() != null) {
-            for (var child : entity.getPosts()) {
-                // retirer la référence inverse
-                child.setAuthor(null);
-            }
-            entity.getPosts().clear();
-        }
-        
-        if (entity.getComments() != null) {
-            for (var child : entity.getComments()) {
-                // retirer la référence inverse
-                child.setAuthor(null);
-            }
-            entity.getComments().clear();
-        }
-        
-        if (entity.getReceivedMessages() != null) {
-            for (var child : entity.getReceivedMessages()) {
-                // retirer la référence inverse
-                child.setRecipient(null);
-            }
-            entity.getReceivedMessages().clear();
-        }
-        
-        if (entity.getSentMessages() != null) {
-            for (var child : entity.getSentMessages()) {
-                // retirer la référence inverse
-                child.setSender(null);
-            }
-            entity.getSentMessages().clear();
-        }
-        
-        if (entity.getNotifications() != null) {
-            for (var child : entity.getNotifications()) {
-                // retirer la référence inverse
-                child.setRecipient(null);
-            }
-            entity.getNotifications().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-        if (entity.getFollowers() != null) {
-            for (Profile item : new ArrayList<>(entity.getFollowers())) {
-                
-                item.getFollowing().remove(entity); // retire côté inverse
-            }
-            entity.getFollowers().clear(); // puis vide côté courant
-        }
-        
-        if (entity.getFollowing() != null) {
-            for (Profile item : new ArrayList<>(entity.getFollowing())) {
-                
-                item.getFollowers().remove(entity); // retire côté inverse
-            }
-            entity.getFollowing().clear(); // puis vide côté courant
-        }
-        
-        if (entity.getRoles() != null) {
-            for (Role item : new ArrayList<>(entity.getRoles())) {
-                
-                item.getProfiles().remove(entity); // retire côté inverse
-            }
-            entity.getRoles().clear(); // puis vide côté courant
-        }
-        
-        if (entity.getGroups() != null) {
-            for (Group item : new ArrayList<>(entity.getGroups())) {
-                
-                item.getMembers().remove(entity); // retire côté inverse
-            }
-            entity.getGroups().clear(); // puis vide côté courant
-        }
-        
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Profile> saveAll(List<Profile> profileList) {
-
-        return profileRepository.saveAll(profileList);
+        return super.saveAll(profileList);
     }
 
 }

@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.MovieFestivalDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.MovieFestivalSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.MovieFestival;
 import com.example.modules.entertainment_ecosystem.mapper.MovieFestivalMapper;
 import com.example.modules.entertainment_ecosystem.service.MovieFestivalService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing MovieFestival entities.
+ */
 @RestController
 @RequestMapping("/api/moviefestivals")
-public class MovieFestivalController {
-
-    private final MovieFestivalService moviefestivalService;
-    private final MovieFestivalMapper moviefestivalMapper;
+public class MovieFestivalController extends BaseController<MovieFestival, MovieFestivalDto, MovieFestivalSimpleDto> {
 
     public MovieFestivalController(MovieFestivalService moviefestivalService,
                                     MovieFestivalMapper moviefestivalMapper) {
-        this.moviefestivalService = moviefestivalService;
-        this.moviefestivalMapper = moviefestivalMapper;
+        super(moviefestivalService, moviefestivalMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<MovieFestivalDto>> getAllMovieFestivals() {
-        List<MovieFestival> entities = moviefestivalService.findAll();
-        return ResponseEntity.ok(moviefestivalMapper.toDtoList(entities));
+    public ResponseEntity<Page<MovieFestivalDto>> getAllMovieFestivals(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<MovieFestivalDto>> searchMovieFestivals(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(MovieFestival.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MovieFestivalDto> getMovieFestivalById(@PathVariable Long id) {
-        return moviefestivalService.findById(id)
-                .map(moviefestivalMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class MovieFestivalController {
             @Valid @RequestBody MovieFestivalDto moviefestivalDto,
             UriComponentsBuilder uriBuilder) {
 
-        MovieFestival entity = moviefestivalMapper.toEntity(moviefestivalDto);
-        MovieFestival saved = moviefestivalService.save(entity);
+        MovieFestival entity = mapper.toEntity(moviefestivalDto);
+        MovieFestival saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/moviefestivals/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/moviefestivals/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(moviefestivalMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class MovieFestivalController {
             @Valid @RequestBody List<MovieFestivalDto> moviefestivalDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<MovieFestival> entities = moviefestivalMapper.toEntityList(moviefestivalDtoList);
-        List<MovieFestival> savedEntities = moviefestivalService.saveAll(entities);
+        List<MovieFestival> entities = mapper.toEntityList(moviefestivalDtoList);
+        List<MovieFestival> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/moviefestivals").build().toUri();
 
-        return ResponseEntity.created(location).body(moviefestivalMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class MovieFestivalController {
             @PathVariable Long id,
             @Valid @RequestBody MovieFestivalDto moviefestivalDto) {
 
-
-        MovieFestival entityToUpdate = moviefestivalMapper.toEntity(moviefestivalDto);
-        MovieFestival updatedEntity = moviefestivalService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(moviefestivalMapper.toDto(updatedEntity));
+        MovieFestival entityToUpdate = mapper.toEntity(moviefestivalDto);
+        MovieFestival updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMovieFestival(@PathVariable Long id) {
-        boolean deleted = moviefestivalService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

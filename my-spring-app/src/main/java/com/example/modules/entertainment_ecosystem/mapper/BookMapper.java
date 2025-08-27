@@ -3,30 +3,12 @@ package com.example.modules.entertainment_ecosystem.mapper;
 import com.example.modules.entertainment_ecosystem.model.Book;
 import com.example.modules.entertainment_ecosystem.dto.BookDto;
 import com.example.modules.entertainment_ecosystem.dtosimple.BookSimpleDto;
-import org.mapstruct.InheritInverseConfiguration;
+import com.example.core.mapper.BaseMapper;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-import org.mapstruct.MappingTarget;
-import java.util.List;
 
-
+/**
+ * 
+ */
 @Mapper(componentModel = "spring")
-public interface BookMapper {
-
-    BookMapper INSTANCE = Mappers.getMapper(BookMapper.class);
-
-    BookDto toDto(Book book);
-
-    BookSimpleDto toSimpleDto(Book book);
-
-    @InheritInverseConfiguration
-    Book toEntity(BookDto bookDto);
-
-    List<BookDto> toDtoList(List<Book> bookList);
-
-    List<Book> toEntityList(List<BookDto> bookDtoList);
-
-    void updateEntityFromDto(BookDto dto, @MappingTarget Book entity);
-
+public interface BookMapper extends BaseMapper<Book, BookDto, BookSimpleDto> {
 }

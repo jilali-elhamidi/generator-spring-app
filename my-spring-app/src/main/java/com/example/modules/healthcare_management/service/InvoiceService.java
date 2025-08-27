@@ -3,33 +3,45 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Invoice;
 import com.example.modules.healthcare_management.repository.InvoiceRepository;
+
 import com.example.modules.healthcare_management.model.Patient;
 import com.example.modules.healthcare_management.repository.PatientRepository;
+
 import com.example.modules.healthcare_management.model.Reimbursement;
 import com.example.modules.healthcare_management.repository.ReimbursementRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class InvoiceService extends BaseService<Invoice> {
 
     protected final InvoiceRepository invoiceRepository;
-    private final PatientRepository patientRepository;
-    private final ReimbursementRepository ReimbursementsRepository;
+    
+    protected final PatientRepository patientRepository;
+    
+    protected final ReimbursementRepository ReimbursementsRepository;
+    
 
     public InvoiceService(InvoiceRepository repository, PatientRepository patientRepository, ReimbursementRepository ReimbursementsRepository)
     {
         super(repository);
         this.invoiceRepository = repository;
+        
         this.patientRepository = patientRepository;
+        
         this.ReimbursementsRepository = ReimbursementsRepository;
+        
     }
 
+    @Transactional
     @Override
     public Invoice save(Invoice invoice) {
     // ---------- OneToMany ----------
@@ -70,7 +82,8 @@ public class InvoiceService extends BaseService<Invoice> {
     return invoiceRepository.save(invoice);
 }
 
-
+    @Transactional
+    @Override
     public Invoice update(Long id, Invoice invoiceRequest) {
         Invoice existing = invoiceRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Invoice not found"));
@@ -93,7 +106,7 @@ public class InvoiceService extends BaseService<Invoice> {
             existing.setPatient(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getReimbursements().clear();
 
@@ -115,35 +128,25 @@ public class InvoiceService extends BaseService<Invoice> {
     // ---------- Relations OneToOne ----------
     return invoiceRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Invoice> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Invoice> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Invoice.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Invoice> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Invoice entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getReimbursements() != null) {
-            for (var child : entity.getReimbursements()) {
-                // retirer la référence inverse
-                child.setInvoice(null);
-            }
-            entity.getReimbursements().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getPatient() != null) {
-            entity.setPatient(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Invoice> saveAll(List<Invoice> invoiceList) {
-
-        return invoiceRepository.saveAll(invoiceList);
+        return super.saveAll(invoiceList);
     }
 
 }

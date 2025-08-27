@@ -3,30 +3,12 @@ package com.example.modules.healthcare_management.mapper;
 import com.example.modules.healthcare_management.model.Prescription;
 import com.example.modules.healthcare_management.dto.PrescriptionDto;
 import com.example.modules.healthcare_management.dtosimple.PrescriptionSimpleDto;
-import org.mapstruct.InheritInverseConfiguration;
+import com.example.core.mapper.BaseMapper;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-import org.mapstruct.MappingTarget;
-import java.util.List;
 
-
+/**
+ * 
+ */
 @Mapper(componentModel = "spring")
-public interface PrescriptionMapper {
-
-    PrescriptionMapper INSTANCE = Mappers.getMapper(PrescriptionMapper.class);
-
-    PrescriptionDto toDto(Prescription prescription);
-
-    PrescriptionSimpleDto toSimpleDto(Prescription prescription);
-
-    @InheritInverseConfiguration
-    Prescription toEntity(PrescriptionDto prescriptionDto);
-
-    List<PrescriptionDto> toDtoList(List<Prescription> prescriptionList);
-
-    List<Prescription> toEntityList(List<PrescriptionDto> prescriptionDtoList);
-
-    void updateEntityFromDto(PrescriptionDto dto, @MappingTarget Prescription entity);
-
+public interface PrescriptionMapper extends BaseMapper<Prescription, PrescriptionDto, PrescriptionSimpleDto> {
 }

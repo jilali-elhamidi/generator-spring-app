@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.MusicTrackDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.MusicTrackSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.MusicTrack;
 import com.example.modules.entertainment_ecosystem.mapper.MusicTrackMapper;
 import com.example.modules.entertainment_ecosystem.service.MusicTrackService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing MusicTrack entities.
+ */
 @RestController
 @RequestMapping("/api/musictracks")
-public class MusicTrackController {
-
-    private final MusicTrackService musictrackService;
-    private final MusicTrackMapper musictrackMapper;
+public class MusicTrackController extends BaseController<MusicTrack, MusicTrackDto, MusicTrackSimpleDto> {
 
     public MusicTrackController(MusicTrackService musictrackService,
                                     MusicTrackMapper musictrackMapper) {
-        this.musictrackService = musictrackService;
-        this.musictrackMapper = musictrackMapper;
+        super(musictrackService, musictrackMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<MusicTrackDto>> getAllMusicTracks() {
-        List<MusicTrack> entities = musictrackService.findAll();
-        return ResponseEntity.ok(musictrackMapper.toDtoList(entities));
+    public ResponseEntity<Page<MusicTrackDto>> getAllMusicTracks(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<MusicTrackDto>> searchMusicTracks(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(MusicTrack.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MusicTrackDto> getMusicTrackById(@PathVariable Long id) {
-        return musictrackService.findById(id)
-                .map(musictrackMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class MusicTrackController {
             @Valid @RequestBody MusicTrackDto musictrackDto,
             UriComponentsBuilder uriBuilder) {
 
-        MusicTrack entity = musictrackMapper.toEntity(musictrackDto);
-        MusicTrack saved = musictrackService.save(entity);
+        MusicTrack entity = mapper.toEntity(musictrackDto);
+        MusicTrack saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/musictracks/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/musictracks/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(musictrackMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class MusicTrackController {
             @Valid @RequestBody List<MusicTrackDto> musictrackDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<MusicTrack> entities = musictrackMapper.toEntityList(musictrackDtoList);
-        List<MusicTrack> savedEntities = musictrackService.saveAll(entities);
+        List<MusicTrack> entities = mapper.toEntityList(musictrackDtoList);
+        List<MusicTrack> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/musictracks").build().toUri();
 
-        return ResponseEntity.created(location).body(musictrackMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class MusicTrackController {
             @PathVariable Long id,
             @Valid @RequestBody MusicTrackDto musictrackDto) {
 
-
-        MusicTrack entityToUpdate = musictrackMapper.toEntity(musictrackDto);
-        MusicTrack updatedEntity = musictrackService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(musictrackMapper.toDto(updatedEntity));
+        MusicTrack entityToUpdate = mapper.toEntity(musictrackDto);
+        MusicTrack updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMusicTrack(@PathVariable Long id) {
-        boolean deleted = musictrackService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

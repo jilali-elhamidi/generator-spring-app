@@ -1,42 +1,50 @@
 package com.example.modules.elearning.controller;
 
 import com.example.modules.elearning.dto.CourseDto;
+import com.example.modules.elearning.dtosimple.CourseSimpleDto;
 import com.example.modules.elearning.model.Course;
 import com.example.modules.elearning.mapper.CourseMapper;
 import com.example.modules.elearning.service.CourseService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Course entities.
+ */
 @RestController
 @RequestMapping("/api/courses")
-public class CourseController {
-
-    private final CourseService courseService;
-    private final CourseMapper courseMapper;
+public class CourseController extends BaseController<Course, CourseDto, CourseSimpleDto> {
 
     public CourseController(CourseService courseService,
                                     CourseMapper courseMapper) {
-        this.courseService = courseService;
-        this.courseMapper = courseMapper;
+        super(courseService, courseMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseDto>> getAllCourses() {
-        List<Course> entities = courseService.findAll();
-        return ResponseEntity.ok(courseMapper.toDtoList(entities));
+    public ResponseEntity<Page<CourseDto>> getAllCourses(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<CourseDto>> searchCourses(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Course.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CourseDto> getCourseById(@PathVariable Long id) {
-        return courseService.findById(id)
-                .map(courseMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class CourseController {
             @Valid @RequestBody CourseDto courseDto,
             UriComponentsBuilder uriBuilder) {
 
-        Course entity = courseMapper.toEntity(courseDto);
-        Course saved = courseService.save(entity);
+        Course entity = mapper.toEntity(courseDto);
+        Course saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/courses/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/courses/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(courseMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class CourseController {
             @Valid @RequestBody List<CourseDto> courseDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Course> entities = courseMapper.toEntityList(courseDtoList);
-        List<Course> savedEntities = courseService.saveAll(entities);
+        List<Course> entities = mapper.toEntityList(courseDtoList);
+        List<Course> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/courses").build().toUri();
 
-        return ResponseEntity.created(location).body(courseMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class CourseController {
             @PathVariable Long id,
             @Valid @RequestBody CourseDto courseDto) {
 
-
-        Course entityToUpdate = courseMapper.toEntity(courseDto);
-        Course updatedEntity = courseService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(courseMapper.toDto(updatedEntity));
+        Course entityToUpdate = mapper.toEntity(courseDto);
+        Course updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
-        boolean deleted = courseService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.UserAchievementDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.UserAchievementSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.UserAchievement;
 import com.example.modules.entertainment_ecosystem.mapper.UserAchievementMapper;
 import com.example.modules.entertainment_ecosystem.service.UserAchievementService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing UserAchievement entities.
+ */
 @RestController
 @RequestMapping("/api/userachievements")
-public class UserAchievementController {
-
-    private final UserAchievementService userachievementService;
-    private final UserAchievementMapper userachievementMapper;
+public class UserAchievementController extends BaseController<UserAchievement, UserAchievementDto, UserAchievementSimpleDto> {
 
     public UserAchievementController(UserAchievementService userachievementService,
                                     UserAchievementMapper userachievementMapper) {
-        this.userachievementService = userachievementService;
-        this.userachievementMapper = userachievementMapper;
+        super(userachievementService, userachievementMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserAchievementDto>> getAllUserAchievements() {
-        List<UserAchievement> entities = userachievementService.findAll();
-        return ResponseEntity.ok(userachievementMapper.toDtoList(entities));
+    public ResponseEntity<Page<UserAchievementDto>> getAllUserAchievements(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserAchievementDto>> searchUserAchievements(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(UserAchievement.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserAchievementDto> getUserAchievementById(@PathVariable Long id) {
-        return userachievementService.findById(id)
-                .map(userachievementMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class UserAchievementController {
             @Valid @RequestBody UserAchievementDto userachievementDto,
             UriComponentsBuilder uriBuilder) {
 
-        UserAchievement entity = userachievementMapper.toEntity(userachievementDto);
-        UserAchievement saved = userachievementService.save(entity);
+        UserAchievement entity = mapper.toEntity(userachievementDto);
+        UserAchievement saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/userachievements/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/userachievements/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(userachievementMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class UserAchievementController {
             @Valid @RequestBody List<UserAchievementDto> userachievementDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<UserAchievement> entities = userachievementMapper.toEntityList(userachievementDtoList);
-        List<UserAchievement> savedEntities = userachievementService.saveAll(entities);
+        List<UserAchievement> entities = mapper.toEntityList(userachievementDtoList);
+        List<UserAchievement> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/userachievements").build().toUri();
 
-        return ResponseEntity.created(location).body(userachievementMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class UserAchievementController {
             @PathVariable Long id,
             @Valid @RequestBody UserAchievementDto userachievementDto) {
 
-
-        UserAchievement entityToUpdate = userachievementMapper.toEntity(userachievementDto);
-        UserAchievement updatedEntity = userachievementService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(userachievementMapper.toDto(updatedEntity));
+        UserAchievement entityToUpdate = mapper.toEntity(userachievementDto);
+        UserAchievement updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserAchievement(@PathVariable Long id) {
-        boolean deleted = userachievementService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

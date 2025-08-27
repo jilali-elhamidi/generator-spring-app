@@ -3,29 +3,38 @@ package com.example.modules.elearning.service;
 import com.example.core.service.BaseService;
 import com.example.modules.elearning.model.Instructor;
 import com.example.modules.elearning.repository.InstructorRepository;
+
 import com.example.modules.elearning.model.Course;
 import com.example.modules.elearning.repository.CourseRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class InstructorService extends BaseService<Instructor> {
 
     protected final InstructorRepository instructorRepository;
-    private final CourseRepository coursesRepository;
+    
+    protected final CourseRepository coursesRepository;
+    
 
     public InstructorService(InstructorRepository repository, CourseRepository coursesRepository)
     {
         super(repository);
         this.instructorRepository = repository;
+        
         this.coursesRepository = coursesRepository;
+        
     }
 
+    @Transactional
     @Override
     public Instructor save(Instructor instructor) {
     // ---------- OneToMany ----------
@@ -52,7 +61,8 @@ public class InstructorService extends BaseService<Instructor> {
     return instructorRepository.save(instructor);
 }
 
-
+    @Transactional
+    @Override
     public Instructor update(Long id, Instructor instructorRequest) {
         Instructor existing = instructorRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Instructor not found"));
@@ -65,7 +75,7 @@ public class InstructorService extends BaseService<Instructor> {
         existing.setUpdatedAt(instructorRequest.getUpdatedAt());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getCourses().clear();
 
@@ -87,31 +97,25 @@ public class InstructorService extends BaseService<Instructor> {
     // ---------- Relations OneToOne ----------
     return instructorRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Instructor> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Instructor> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Instructor.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Instructor> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Instructor entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getCourses() != null) {
-            for (var child : entity.getCourses()) {
-                // retirer la référence inverse
-                child.setInstructor(null);
-            }
-            entity.getCourses().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Instructor> saveAll(List<Instructor> instructorList) {
-
-        return instructorRepository.saveAll(instructorList);
+        return super.saveAll(instructorList);
     }
 
 }

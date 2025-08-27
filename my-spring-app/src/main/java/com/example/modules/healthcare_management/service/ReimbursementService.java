@@ -3,29 +3,38 @@ package com.example.modules.healthcare_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.healthcare_management.model.Reimbursement;
 import com.example.modules.healthcare_management.repository.ReimbursementRepository;
+
 import com.example.modules.healthcare_management.model.Invoice;
 import com.example.modules.healthcare_management.repository.InvoiceRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class ReimbursementService extends BaseService<Reimbursement> {
 
     protected final ReimbursementRepository reimbursementRepository;
-    private final InvoiceRepository invoiceRepository;
+    
+    protected final InvoiceRepository invoiceRepository;
+    
 
     public ReimbursementService(ReimbursementRepository repository, InvoiceRepository invoiceRepository)
     {
         super(repository);
         this.reimbursementRepository = repository;
+        
         this.invoiceRepository = invoiceRepository;
+        
     }
 
+    @Transactional
     @Override
     public Reimbursement save(Reimbursement reimbursement) {
     // ---------- OneToMany ----------
@@ -49,7 +58,8 @@ public class ReimbursementService extends BaseService<Reimbursement> {
     return reimbursementRepository.save(reimbursement);
 }
 
-
+    @Transactional
+    @Override
     public Reimbursement update(Long id, Reimbursement reimbursementRequest) {
         Reimbursement existing = reimbursementRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Reimbursement not found"));
@@ -72,32 +82,30 @@ public class ReimbursementService extends BaseService<Reimbursement> {
             existing.setInvoice(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return reimbursementRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Reimbursement> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Reimbursement> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Reimbursement.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Reimbursement> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Reimbursement entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getInvoice() != null) {
-            entity.setInvoice(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Reimbursement> saveAll(List<Reimbursement> reimbursementList) {
-
-        return reimbursementRepository.saveAll(reimbursementList);
+        return super.saveAll(reimbursementList);
     }
 
 }

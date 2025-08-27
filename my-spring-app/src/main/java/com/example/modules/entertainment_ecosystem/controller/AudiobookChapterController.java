@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.AudiobookChapterDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.AudiobookChapterSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.AudiobookChapter;
 import com.example.modules.entertainment_ecosystem.mapper.AudiobookChapterMapper;
 import com.example.modules.entertainment_ecosystem.service.AudiobookChapterService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing AudiobookChapter entities.
+ */
 @RestController
 @RequestMapping("/api/audiobookchapters")
-public class AudiobookChapterController {
-
-    private final AudiobookChapterService audiobookchapterService;
-    private final AudiobookChapterMapper audiobookchapterMapper;
+public class AudiobookChapterController extends BaseController<AudiobookChapter, AudiobookChapterDto, AudiobookChapterSimpleDto> {
 
     public AudiobookChapterController(AudiobookChapterService audiobookchapterService,
                                     AudiobookChapterMapper audiobookchapterMapper) {
-        this.audiobookchapterService = audiobookchapterService;
-        this.audiobookchapterMapper = audiobookchapterMapper;
+        super(audiobookchapterService, audiobookchapterMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<AudiobookChapterDto>> getAllAudiobookChapters() {
-        List<AudiobookChapter> entities = audiobookchapterService.findAll();
-        return ResponseEntity.ok(audiobookchapterMapper.toDtoList(entities));
+    public ResponseEntity<Page<AudiobookChapterDto>> getAllAudiobookChapters(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<AudiobookChapterDto>> searchAudiobookChapters(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(AudiobookChapter.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AudiobookChapterDto> getAudiobookChapterById(@PathVariable Long id) {
-        return audiobookchapterService.findById(id)
-                .map(audiobookchapterMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class AudiobookChapterController {
             @Valid @RequestBody AudiobookChapterDto audiobookchapterDto,
             UriComponentsBuilder uriBuilder) {
 
-        AudiobookChapter entity = audiobookchapterMapper.toEntity(audiobookchapterDto);
-        AudiobookChapter saved = audiobookchapterService.save(entity);
+        AudiobookChapter entity = mapper.toEntity(audiobookchapterDto);
+        AudiobookChapter saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/audiobookchapters/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/audiobookchapters/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(audiobookchapterMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class AudiobookChapterController {
             @Valid @RequestBody List<AudiobookChapterDto> audiobookchapterDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<AudiobookChapter> entities = audiobookchapterMapper.toEntityList(audiobookchapterDtoList);
-        List<AudiobookChapter> savedEntities = audiobookchapterService.saveAll(entities);
+        List<AudiobookChapter> entities = mapper.toEntityList(audiobookchapterDtoList);
+        List<AudiobookChapter> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/audiobookchapters").build().toUri();
 
-        return ResponseEntity.created(location).body(audiobookchapterMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class AudiobookChapterController {
             @PathVariable Long id,
             @Valid @RequestBody AudiobookChapterDto audiobookchapterDto) {
 
-
-        AudiobookChapter entityToUpdate = audiobookchapterMapper.toEntity(audiobookchapterDto);
-        AudiobookChapter updatedEntity = audiobookchapterService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(audiobookchapterMapper.toDto(updatedEntity));
+        AudiobookChapter entityToUpdate = mapper.toEntity(audiobookchapterDto);
+        AudiobookChapter updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAudiobookChapter(@PathVariable Long id) {
-        boolean deleted = audiobookchapterService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

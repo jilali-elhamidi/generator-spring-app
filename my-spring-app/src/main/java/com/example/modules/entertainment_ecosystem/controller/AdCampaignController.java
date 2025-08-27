@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.AdCampaignDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.AdCampaignSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.AdCampaign;
 import com.example.modules.entertainment_ecosystem.mapper.AdCampaignMapper;
 import com.example.modules.entertainment_ecosystem.service.AdCampaignService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing AdCampaign entities.
+ */
 @RestController
 @RequestMapping("/api/adcampaigns")
-public class AdCampaignController {
-
-    private final AdCampaignService adcampaignService;
-    private final AdCampaignMapper adcampaignMapper;
+public class AdCampaignController extends BaseController<AdCampaign, AdCampaignDto, AdCampaignSimpleDto> {
 
     public AdCampaignController(AdCampaignService adcampaignService,
                                     AdCampaignMapper adcampaignMapper) {
-        this.adcampaignService = adcampaignService;
-        this.adcampaignMapper = adcampaignMapper;
+        super(adcampaignService, adcampaignMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<AdCampaignDto>> getAllAdCampaigns() {
-        List<AdCampaign> entities = adcampaignService.findAll();
-        return ResponseEntity.ok(adcampaignMapper.toDtoList(entities));
+    public ResponseEntity<Page<AdCampaignDto>> getAllAdCampaigns(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<AdCampaignDto>> searchAdCampaigns(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(AdCampaign.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AdCampaignDto> getAdCampaignById(@PathVariable Long id) {
-        return adcampaignService.findById(id)
-                .map(adcampaignMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class AdCampaignController {
             @Valid @RequestBody AdCampaignDto adcampaignDto,
             UriComponentsBuilder uriBuilder) {
 
-        AdCampaign entity = adcampaignMapper.toEntity(adcampaignDto);
-        AdCampaign saved = adcampaignService.save(entity);
+        AdCampaign entity = mapper.toEntity(adcampaignDto);
+        AdCampaign saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/adcampaigns/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/adcampaigns/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(adcampaignMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class AdCampaignController {
             @Valid @RequestBody List<AdCampaignDto> adcampaignDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<AdCampaign> entities = adcampaignMapper.toEntityList(adcampaignDtoList);
-        List<AdCampaign> savedEntities = adcampaignService.saveAll(entities);
+        List<AdCampaign> entities = mapper.toEntityList(adcampaignDtoList);
+        List<AdCampaign> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/adcampaigns").build().toUri();
 
-        return ResponseEntity.created(location).body(adcampaignMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class AdCampaignController {
             @PathVariable Long id,
             @Valid @RequestBody AdCampaignDto adcampaignDto) {
 
-
-        AdCampaign entityToUpdate = adcampaignMapper.toEntity(adcampaignDto);
-        AdCampaign updatedEntity = adcampaignService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(adcampaignMapper.toDto(updatedEntity));
+        AdCampaign entityToUpdate = mapper.toEntity(adcampaignDto);
+        AdCampaign updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAdCampaign(@PathVariable Long id) {
-        boolean deleted = adcampaignService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

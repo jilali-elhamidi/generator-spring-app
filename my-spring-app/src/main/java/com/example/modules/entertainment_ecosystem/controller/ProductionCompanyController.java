@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.ProductionCompanyDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.ProductionCompanySimpleDto;
 import com.example.modules.entertainment_ecosystem.model.ProductionCompany;
 import com.example.modules.entertainment_ecosystem.mapper.ProductionCompanyMapper;
 import com.example.modules.entertainment_ecosystem.service.ProductionCompanyService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing ProductionCompany entities.
+ */
 @RestController
 @RequestMapping("/api/productioncompanys")
-public class ProductionCompanyController {
-
-    private final ProductionCompanyService productioncompanyService;
-    private final ProductionCompanyMapper productioncompanyMapper;
+public class ProductionCompanyController extends BaseController<ProductionCompany, ProductionCompanyDto, ProductionCompanySimpleDto> {
 
     public ProductionCompanyController(ProductionCompanyService productioncompanyService,
                                     ProductionCompanyMapper productioncompanyMapper) {
-        this.productioncompanyService = productioncompanyService;
-        this.productioncompanyMapper = productioncompanyMapper;
+        super(productioncompanyService, productioncompanyMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductionCompanyDto>> getAllProductionCompanys() {
-        List<ProductionCompany> entities = productioncompanyService.findAll();
-        return ResponseEntity.ok(productioncompanyMapper.toDtoList(entities));
+    public ResponseEntity<Page<ProductionCompanyDto>> getAllProductionCompanys(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProductionCompanyDto>> searchProductionCompanys(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(ProductionCompany.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductionCompanyDto> getProductionCompanyById(@PathVariable Long id) {
-        return productioncompanyService.findById(id)
-                .map(productioncompanyMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class ProductionCompanyController {
             @Valid @RequestBody ProductionCompanyDto productioncompanyDto,
             UriComponentsBuilder uriBuilder) {
 
-        ProductionCompany entity = productioncompanyMapper.toEntity(productioncompanyDto);
-        ProductionCompany saved = productioncompanyService.save(entity);
+        ProductionCompany entity = mapper.toEntity(productioncompanyDto);
+        ProductionCompany saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/productioncompanys/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/productioncompanys/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(productioncompanyMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class ProductionCompanyController {
             @Valid @RequestBody List<ProductionCompanyDto> productioncompanyDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<ProductionCompany> entities = productioncompanyMapper.toEntityList(productioncompanyDtoList);
-        List<ProductionCompany> savedEntities = productioncompanyService.saveAll(entities);
+        List<ProductionCompany> entities = mapper.toEntityList(productioncompanyDtoList);
+        List<ProductionCompany> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/productioncompanys").build().toUri();
 
-        return ResponseEntity.created(location).body(productioncompanyMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class ProductionCompanyController {
             @PathVariable Long id,
             @Valid @RequestBody ProductionCompanyDto productioncompanyDto) {
 
-
-        ProductionCompany entityToUpdate = productioncompanyMapper.toEntity(productioncompanyDto);
-        ProductionCompany updatedEntity = productioncompanyService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(productioncompanyMapper.toDto(updatedEntity));
+        ProductionCompany entityToUpdate = mapper.toEntity(productioncompanyDto);
+        ProductionCompany updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProductionCompany(@PathVariable Long id) {
-        boolean deleted = productioncompanyService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

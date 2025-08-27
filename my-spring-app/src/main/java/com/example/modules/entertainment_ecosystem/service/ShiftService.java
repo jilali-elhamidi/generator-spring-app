@@ -1,0 +1,111 @@
+package com.example.modules.entertainment_ecosystem.service;
+
+import com.example.core.service.BaseService;
+import com.example.modules.entertainment_ecosystem.model.Shift;
+import com.example.modules.entertainment_ecosystem.repository.ShiftRepository;
+
+import com.example.modules.entertainment_ecosystem.model.Employee;
+import com.example.modules.entertainment_ecosystem.repository.EmployeeRepository;
+
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+@Service
+public class ShiftService extends BaseService<Shift> {
+
+    protected final ShiftRepository shiftRepository;
+    
+    protected final EmployeeRepository employeeRepository;
+    
+
+    public ShiftService(ShiftRepository repository, EmployeeRepository employeeRepository)
+    {
+        super(repository);
+        this.shiftRepository = repository;
+        
+        this.employeeRepository = employeeRepository;
+        
+    }
+
+    @Transactional
+    @Override
+    public Shift save(Shift shift) {
+    // ---------- OneToMany ----------
+    // ---------- ManyToMany ----------
+    // ---------- ManyToOne ----------
+        if (shift.getEmployee() != null) {
+            if (shift.getEmployee().getId() != null) {
+                Employee existingEmployee = employeeRepository.findById(
+                    shift.getEmployee().getId()
+                ).orElseThrow(() -> new RuntimeException("Employee not found with id "
+                    + shift.getEmployee().getId()));
+                shift.setEmployee(existingEmployee);
+            } else {
+                // Nouvel objet ManyToOne → on le sauvegarde
+                Employee newEmployee = employeeRepository.save(shift.getEmployee());
+                shift.setEmployee(newEmployee);
+            }
+        }
+        
+    // ---------- OneToOne ----------
+    return shiftRepository.save(shift);
+}
+
+    @Transactional
+    @Override
+    public Shift update(Long id, Shift shiftRequest) {
+        Shift existing = shiftRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Shift not found"));
+
+    // Copier les champs simples
+        existing.setShiftDate(shiftRequest.getShiftDate());
+        existing.setStartTime(shiftRequest.getStartTime());
+        existing.setEndTime(shiftRequest.getEndTime());
+
+    // ---------- Relations ManyToOne ----------
+        if (shiftRequest.getEmployee() != null &&
+            shiftRequest.getEmployee().getId() != null) {
+
+            Employee existingEmployee = employeeRepository.findById(
+                shiftRequest.getEmployee().getId()
+            ).orElseThrow(() -> new RuntimeException("Employee not found"));
+
+            existing.setEmployee(existingEmployee);
+        } else {
+            existing.setEmployee(null);
+        }
+        
+    // ---------- Relations ManyToMany ----------
+    // ---------- Relations OneToMany ----------
+    // ---------- Relations OneToOne ----------
+    return shiftRepository.save(existing);
+}
+
+    // Pagination simple
+    public Page<Shift> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Shift> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Shift.class, filters, pageable);
+    }
+
+    @Transactional
+    public boolean deleteById(Long id) {
+        return super.deleteById(id);
+    }
+
+    @Transactional
+    public List<Shift> saveAll(List<Shift> shiftList) {
+        return super.saveAll(shiftList);
+    }
+
+}

@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.EmployeeRoleDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.EmployeeRoleSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.EmployeeRole;
 import com.example.modules.entertainment_ecosystem.mapper.EmployeeRoleMapper;
 import com.example.modules.entertainment_ecosystem.service.EmployeeRoleService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing EmployeeRole entities.
+ */
 @RestController
 @RequestMapping("/api/employeeroles")
-public class EmployeeRoleController {
-
-    private final EmployeeRoleService employeeroleService;
-    private final EmployeeRoleMapper employeeroleMapper;
+public class EmployeeRoleController extends BaseController<EmployeeRole, EmployeeRoleDto, EmployeeRoleSimpleDto> {
 
     public EmployeeRoleController(EmployeeRoleService employeeroleService,
                                     EmployeeRoleMapper employeeroleMapper) {
-        this.employeeroleService = employeeroleService;
-        this.employeeroleMapper = employeeroleMapper;
+        super(employeeroleService, employeeroleMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<EmployeeRoleDto>> getAllEmployeeRoles() {
-        List<EmployeeRole> entities = employeeroleService.findAll();
-        return ResponseEntity.ok(employeeroleMapper.toDtoList(entities));
+    public ResponseEntity<Page<EmployeeRoleDto>> getAllEmployeeRoles(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<EmployeeRoleDto>> searchEmployeeRoles(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(EmployeeRole.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeRoleDto> getEmployeeRoleById(@PathVariable Long id) {
-        return employeeroleService.findById(id)
-                .map(employeeroleMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class EmployeeRoleController {
             @Valid @RequestBody EmployeeRoleDto employeeroleDto,
             UriComponentsBuilder uriBuilder) {
 
-        EmployeeRole entity = employeeroleMapper.toEntity(employeeroleDto);
-        EmployeeRole saved = employeeroleService.save(entity);
+        EmployeeRole entity = mapper.toEntity(employeeroleDto);
+        EmployeeRole saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/employeeroles/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/employeeroles/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(employeeroleMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class EmployeeRoleController {
             @Valid @RequestBody List<EmployeeRoleDto> employeeroleDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<EmployeeRole> entities = employeeroleMapper.toEntityList(employeeroleDtoList);
-        List<EmployeeRole> savedEntities = employeeroleService.saveAll(entities);
+        List<EmployeeRole> entities = mapper.toEntityList(employeeroleDtoList);
+        List<EmployeeRole> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/employeeroles").build().toUri();
 
-        return ResponseEntity.created(location).body(employeeroleMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class EmployeeRoleController {
             @PathVariable Long id,
             @Valid @RequestBody EmployeeRoleDto employeeroleDto) {
 
-
-        EmployeeRole entityToUpdate = employeeroleMapper.toEntity(employeeroleDto);
-        EmployeeRole updatedEntity = employeeroleService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(employeeroleMapper.toDto(updatedEntity));
+        EmployeeRole entityToUpdate = mapper.toEntity(employeeroleDto);
+        EmployeeRole updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmployeeRole(@PathVariable Long id) {
-        boolean deleted = employeeroleService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

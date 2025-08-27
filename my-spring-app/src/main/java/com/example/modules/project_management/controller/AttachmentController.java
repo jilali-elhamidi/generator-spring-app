@@ -1,42 +1,50 @@
 package com.example.modules.project_management.controller;
 
 import com.example.modules.project_management.dto.AttachmentDto;
+import com.example.modules.project_management.dtosimple.AttachmentSimpleDto;
 import com.example.modules.project_management.model.Attachment;
 import com.example.modules.project_management.mapper.AttachmentMapper;
 import com.example.modules.project_management.service.AttachmentService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Attachment entities.
+ */
 @RestController
 @RequestMapping("/api/attachments")
-public class AttachmentController {
-
-    private final AttachmentService attachmentService;
-    private final AttachmentMapper attachmentMapper;
+public class AttachmentController extends BaseController<Attachment, AttachmentDto, AttachmentSimpleDto> {
 
     public AttachmentController(AttachmentService attachmentService,
                                     AttachmentMapper attachmentMapper) {
-        this.attachmentService = attachmentService;
-        this.attachmentMapper = attachmentMapper;
+        super(attachmentService, attachmentMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<AttachmentDto>> getAllAttachments() {
-        List<Attachment> entities = attachmentService.findAll();
-        return ResponseEntity.ok(attachmentMapper.toDtoList(entities));
+    public ResponseEntity<Page<AttachmentDto>> getAllAttachments(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<AttachmentDto>> searchAttachments(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Attachment.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AttachmentDto> getAttachmentById(@PathVariable Long id) {
-        return attachmentService.findById(id)
-                .map(attachmentMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class AttachmentController {
             @Valid @RequestBody AttachmentDto attachmentDto,
             UriComponentsBuilder uriBuilder) {
 
-        Attachment entity = attachmentMapper.toEntity(attachmentDto);
-        Attachment saved = attachmentService.save(entity);
+        Attachment entity = mapper.toEntity(attachmentDto);
+        Attachment saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/attachments/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/attachments/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(attachmentMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class AttachmentController {
             @Valid @RequestBody List<AttachmentDto> attachmentDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Attachment> entities = attachmentMapper.toEntityList(attachmentDtoList);
-        List<Attachment> savedEntities = attachmentService.saveAll(entities);
+        List<Attachment> entities = mapper.toEntityList(attachmentDtoList);
+        List<Attachment> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/attachments").build().toUri();
 
-        return ResponseEntity.created(location).body(attachmentMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class AttachmentController {
             @PathVariable Long id,
             @Valid @RequestBody AttachmentDto attachmentDto) {
 
-
-        Attachment entityToUpdate = attachmentMapper.toEntity(attachmentDto);
-        Attachment updatedEntity = attachmentService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(attachmentMapper.toDto(updatedEntity));
+        Attachment entityToUpdate = mapper.toEntity(attachmentDto);
+        Attachment updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAttachment(@PathVariable Long id) {
-        boolean deleted = attachmentService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

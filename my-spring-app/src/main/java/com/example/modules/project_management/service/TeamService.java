@@ -3,37 +3,52 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.Team;
 import com.example.modules.project_management.repository.TeamRepository;
+
 import com.example.modules.project_management.model.TeamMember;
 import com.example.modules.project_management.repository.TeamMemberRepository;
+
 import com.example.modules.project_management.model.TeamMember;
 import com.example.modules.project_management.repository.TeamMemberRepository;
+
 import com.example.modules.project_management.model.Project;
 import com.example.modules.project_management.repository.ProjectRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class TeamService extends BaseService<Team> {
 
     protected final TeamRepository teamRepository;
-    private final TeamMemberRepository membersRepository;
-    private final TeamMemberRepository teamLeadRepository;
-    private final ProjectRepository teamProjectsRepository;
+    
+    protected final TeamMemberRepository membersRepository;
+    
+    protected final TeamMemberRepository teamLeadRepository;
+    
+    protected final ProjectRepository teamProjectsRepository;
+    
 
     public TeamService(TeamRepository repository, TeamMemberRepository membersRepository, TeamMemberRepository teamLeadRepository, ProjectRepository teamProjectsRepository)
     {
         super(repository);
         this.teamRepository = repository;
+        
         this.membersRepository = membersRepository;
+        
         this.teamLeadRepository = teamLeadRepository;
+        
         this.teamProjectsRepository = teamProjectsRepository;
+        
     }
 
+    @Transactional
     @Override
     public Team save(Team team) {
     // ---------- OneToMany ----------
@@ -92,7 +107,8 @@ public class TeamService extends BaseService<Team> {
     return teamRepository.save(team);
 }
 
-
+    @Transactional
+    @Override
     public Team update(Long id, Team teamRequest) {
         Team existing = teamRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Team not found"));
@@ -102,7 +118,7 @@ public class TeamService extends BaseService<Team> {
         existing.setMotto(teamRequest.getMotto());
 
     // ---------- Relations ManyToOne ----------
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
         existing.getMembers().clear();
 
@@ -150,44 +166,25 @@ public class TeamService extends BaseService<Team> {
     
     return teamRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Team> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Team> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Team.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Team> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Team entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getMembers() != null) {
-            for (var child : entity.getMembers()) {
-                // retirer la référence inverse
-                child.setTeam(null);
-            }
-            entity.getMembers().clear();
-        }
-        
-        if (entity.getTeamProjects() != null) {
-            for (var child : entity.getTeamProjects()) {
-                // retirer la référence inverse
-                child.setTeam(null);
-            }
-            entity.getTeamProjects().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-        if (entity.getTeamLead() != null) {
-            entity.getTeamLead().setManagedTeam(null);
-            entity.setTeamLead(null);
-        }
-        
-    // --- Dissocier ManyToOne ---
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Team> saveAll(List<Team> teamList) {
-
-        return teamRepository.saveAll(teamList);
+        return super.saveAll(teamList);
     }
 
 }

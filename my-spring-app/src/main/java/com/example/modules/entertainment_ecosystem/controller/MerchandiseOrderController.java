@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.MerchandiseOrderDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.MerchandiseOrderSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.MerchandiseOrder;
 import com.example.modules.entertainment_ecosystem.mapper.MerchandiseOrderMapper;
 import com.example.modules.entertainment_ecosystem.service.MerchandiseOrderService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing MerchandiseOrder entities.
+ */
 @RestController
 @RequestMapping("/api/merchandiseorders")
-public class MerchandiseOrderController {
-
-    private final MerchandiseOrderService merchandiseorderService;
-    private final MerchandiseOrderMapper merchandiseorderMapper;
+public class MerchandiseOrderController extends BaseController<MerchandiseOrder, MerchandiseOrderDto, MerchandiseOrderSimpleDto> {
 
     public MerchandiseOrderController(MerchandiseOrderService merchandiseorderService,
                                     MerchandiseOrderMapper merchandiseorderMapper) {
-        this.merchandiseorderService = merchandiseorderService;
-        this.merchandiseorderMapper = merchandiseorderMapper;
+        super(merchandiseorderService, merchandiseorderMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<MerchandiseOrderDto>> getAllMerchandiseOrders() {
-        List<MerchandiseOrder> entities = merchandiseorderService.findAll();
-        return ResponseEntity.ok(merchandiseorderMapper.toDtoList(entities));
+    public ResponseEntity<Page<MerchandiseOrderDto>> getAllMerchandiseOrders(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<MerchandiseOrderDto>> searchMerchandiseOrders(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(MerchandiseOrder.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MerchandiseOrderDto> getMerchandiseOrderById(@PathVariable Long id) {
-        return merchandiseorderService.findById(id)
-                .map(merchandiseorderMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class MerchandiseOrderController {
             @Valid @RequestBody MerchandiseOrderDto merchandiseorderDto,
             UriComponentsBuilder uriBuilder) {
 
-        MerchandiseOrder entity = merchandiseorderMapper.toEntity(merchandiseorderDto);
-        MerchandiseOrder saved = merchandiseorderService.save(entity);
+        MerchandiseOrder entity = mapper.toEntity(merchandiseorderDto);
+        MerchandiseOrder saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/merchandiseorders/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/merchandiseorders/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(merchandiseorderMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class MerchandiseOrderController {
             @Valid @RequestBody List<MerchandiseOrderDto> merchandiseorderDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<MerchandiseOrder> entities = merchandiseorderMapper.toEntityList(merchandiseorderDtoList);
-        List<MerchandiseOrder> savedEntities = merchandiseorderService.saveAll(entities);
+        List<MerchandiseOrder> entities = mapper.toEntityList(merchandiseorderDtoList);
+        List<MerchandiseOrder> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/merchandiseorders").build().toUri();
 
-        return ResponseEntity.created(location).body(merchandiseorderMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class MerchandiseOrderController {
             @PathVariable Long id,
             @Valid @RequestBody MerchandiseOrderDto merchandiseorderDto) {
 
-
-        MerchandiseOrder entityToUpdate = merchandiseorderMapper.toEntity(merchandiseorderDto);
-        MerchandiseOrder updatedEntity = merchandiseorderService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(merchandiseorderMapper.toDto(updatedEntity));
+        MerchandiseOrder entityToUpdate = mapper.toEntity(merchandiseorderDto);
+        MerchandiseOrder updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMerchandiseOrder(@PathVariable Long id) {
-        boolean deleted = merchandiseorderService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

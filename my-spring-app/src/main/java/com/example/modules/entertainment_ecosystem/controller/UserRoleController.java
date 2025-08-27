@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.UserRoleDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.UserRoleSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.UserRole;
 import com.example.modules.entertainment_ecosystem.mapper.UserRoleMapper;
 import com.example.modules.entertainment_ecosystem.service.UserRoleService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing UserRole entities.
+ */
 @RestController
 @RequestMapping("/api/userroles")
-public class UserRoleController {
-
-    private final UserRoleService userroleService;
-    private final UserRoleMapper userroleMapper;
+public class UserRoleController extends BaseController<UserRole, UserRoleDto, UserRoleSimpleDto> {
 
     public UserRoleController(UserRoleService userroleService,
                                     UserRoleMapper userroleMapper) {
-        this.userroleService = userroleService;
-        this.userroleMapper = userroleMapper;
+        super(userroleService, userroleMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserRoleDto>> getAllUserRoles() {
-        List<UserRole> entities = userroleService.findAll();
-        return ResponseEntity.ok(userroleMapper.toDtoList(entities));
+    public ResponseEntity<Page<UserRoleDto>> getAllUserRoles(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserRoleDto>> searchUserRoles(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(UserRole.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserRoleDto> getUserRoleById(@PathVariable Long id) {
-        return userroleService.findById(id)
-                .map(userroleMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class UserRoleController {
             @Valid @RequestBody UserRoleDto userroleDto,
             UriComponentsBuilder uriBuilder) {
 
-        UserRole entity = userroleMapper.toEntity(userroleDto);
-        UserRole saved = userroleService.save(entity);
+        UserRole entity = mapper.toEntity(userroleDto);
+        UserRole saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/userroles/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/userroles/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(userroleMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class UserRoleController {
             @Valid @RequestBody List<UserRoleDto> userroleDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<UserRole> entities = userroleMapper.toEntityList(userroleDtoList);
-        List<UserRole> savedEntities = userroleService.saveAll(entities);
+        List<UserRole> entities = mapper.toEntityList(userroleDtoList);
+        List<UserRole> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/userroles").build().toUri();
 
-        return ResponseEntity.created(location).body(userroleMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class UserRoleController {
             @PathVariable Long id,
             @Valid @RequestBody UserRoleDto userroleDto) {
 
-
-        UserRole entityToUpdate = userroleMapper.toEntity(userroleDto);
-        UserRole updatedEntity = userroleService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(userroleMapper.toDto(updatedEntity));
+        UserRole entityToUpdate = mapper.toEntity(userroleDto);
+        UserRole updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserRole(@PathVariable Long id) {
-        boolean deleted = userroleService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

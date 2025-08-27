@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.EpisodeCreditDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.EpisodeCreditSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.EpisodeCredit;
 import com.example.modules.entertainment_ecosystem.mapper.EpisodeCreditMapper;
 import com.example.modules.entertainment_ecosystem.service.EpisodeCreditService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing EpisodeCredit entities.
+ */
 @RestController
 @RequestMapping("/api/episodecredits")
-public class EpisodeCreditController {
-
-    private final EpisodeCreditService episodecreditService;
-    private final EpisodeCreditMapper episodecreditMapper;
+public class EpisodeCreditController extends BaseController<EpisodeCredit, EpisodeCreditDto, EpisodeCreditSimpleDto> {
 
     public EpisodeCreditController(EpisodeCreditService episodecreditService,
                                     EpisodeCreditMapper episodecreditMapper) {
-        this.episodecreditService = episodecreditService;
-        this.episodecreditMapper = episodecreditMapper;
+        super(episodecreditService, episodecreditMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<EpisodeCreditDto>> getAllEpisodeCredits() {
-        List<EpisodeCredit> entities = episodecreditService.findAll();
-        return ResponseEntity.ok(episodecreditMapper.toDtoList(entities));
+    public ResponseEntity<Page<EpisodeCreditDto>> getAllEpisodeCredits(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<EpisodeCreditDto>> searchEpisodeCredits(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(EpisodeCredit.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EpisodeCreditDto> getEpisodeCreditById(@PathVariable Long id) {
-        return episodecreditService.findById(id)
-                .map(episodecreditMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class EpisodeCreditController {
             @Valid @RequestBody EpisodeCreditDto episodecreditDto,
             UriComponentsBuilder uriBuilder) {
 
-        EpisodeCredit entity = episodecreditMapper.toEntity(episodecreditDto);
-        EpisodeCredit saved = episodecreditService.save(entity);
+        EpisodeCredit entity = mapper.toEntity(episodecreditDto);
+        EpisodeCredit saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/episodecredits/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/episodecredits/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(episodecreditMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class EpisodeCreditController {
             @Valid @RequestBody List<EpisodeCreditDto> episodecreditDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<EpisodeCredit> entities = episodecreditMapper.toEntityList(episodecreditDtoList);
-        List<EpisodeCredit> savedEntities = episodecreditService.saveAll(entities);
+        List<EpisodeCredit> entities = mapper.toEntityList(episodecreditDtoList);
+        List<EpisodeCredit> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/episodecredits").build().toUri();
 
-        return ResponseEntity.created(location).body(episodecreditMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class EpisodeCreditController {
             @PathVariable Long id,
             @Valid @RequestBody EpisodeCreditDto episodecreditDto) {
 
-
-        EpisodeCredit entityToUpdate = episodecreditMapper.toEntity(episodecreditDto);
-        EpisodeCredit updatedEntity = episodecreditService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(episodecreditMapper.toDto(updatedEntity));
+        EpisodeCredit entityToUpdate = mapper.toEntity(episodecreditDto);
+        EpisodeCredit updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEpisodeCredit(@PathVariable Long id) {
-        boolean deleted = episodecreditService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

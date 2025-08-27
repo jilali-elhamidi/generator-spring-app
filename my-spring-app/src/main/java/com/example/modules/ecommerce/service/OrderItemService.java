@@ -3,33 +3,45 @@ package com.example.modules.ecommerce.service;
 import com.example.core.service.BaseService;
 import com.example.modules.ecommerce.model.OrderItem;
 import com.example.modules.ecommerce.repository.OrderItemRepository;
+
 import com.example.modules.ecommerce.model.Product;
 import com.example.modules.ecommerce.repository.ProductRepository;
+
 import com.example.modules.ecommerce.model.Order;
 import com.example.modules.ecommerce.repository.OrderRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderItemService extends BaseService<OrderItem> {
 
     protected final OrderItemRepository orderitemRepository;
-    private final ProductRepository productRepository;
-    private final OrderRepository orderRepository;
+    
+    protected final ProductRepository productRepository;
+    
+    protected final OrderRepository orderRepository;
+    
 
     public OrderItemService(OrderItemRepository repository, ProductRepository productRepository, OrderRepository orderRepository)
     {
         super(repository);
         this.orderitemRepository = repository;
+        
         this.productRepository = productRepository;
+        
         this.orderRepository = orderRepository;
+        
     }
 
+    @Transactional
     @Override
     public OrderItem save(OrderItem orderitem) {
     // ---------- OneToMany ----------
@@ -67,7 +79,8 @@ public class OrderItemService extends BaseService<OrderItem> {
     return orderitemRepository.save(orderitem);
 }
 
-
+    @Transactional
+    @Override
     public OrderItem update(Long id, OrderItem orderitemRequest) {
         OrderItem existing = orderitemRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("OrderItem not found"));
@@ -101,36 +114,30 @@ public class OrderItemService extends BaseService<OrderItem> {
             existing.setOrder(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return orderitemRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<OrderItem> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<OrderItem> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(OrderItem.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<OrderItem> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        OrderItem entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getProduct() != null) {
-            entity.setProduct(null);
-        }
-        
-        if (entity.getOrder() != null) {
-            entity.setOrder(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<OrderItem> saveAll(List<OrderItem> orderitemList) {
-
-        return orderitemRepository.saveAll(orderitemList);
+        return super.saveAll(orderitemList);
     }
 
 }

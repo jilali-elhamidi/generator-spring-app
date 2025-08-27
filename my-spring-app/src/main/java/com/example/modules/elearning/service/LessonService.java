@@ -3,29 +3,38 @@ package com.example.modules.elearning.service;
 import com.example.core.service.BaseService;
 import com.example.modules.elearning.model.Lesson;
 import com.example.modules.elearning.repository.LessonRepository;
+
 import com.example.modules.elearning.model.Course;
 import com.example.modules.elearning.repository.CourseRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class LessonService extends BaseService<Lesson> {
 
     protected final LessonRepository lessonRepository;
-    private final CourseRepository courseRepository;
+    
+    protected final CourseRepository courseRepository;
+    
 
     public LessonService(LessonRepository repository, CourseRepository courseRepository)
     {
         super(repository);
         this.lessonRepository = repository;
+        
         this.courseRepository = courseRepository;
+        
     }
 
+    @Transactional
     @Override
     public Lesson save(Lesson lesson) {
     // ---------- OneToMany ----------
@@ -49,7 +58,8 @@ public class LessonService extends BaseService<Lesson> {
     return lessonRepository.save(lesson);
 }
 
-
+    @Transactional
+    @Override
     public Lesson update(Long id, Lesson lessonRequest) {
         Lesson existing = lessonRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Lesson not found"));
@@ -73,32 +83,30 @@ public class LessonService extends BaseService<Lesson> {
             existing.setCourse(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return lessonRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Lesson> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Lesson> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Lesson.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Lesson> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Lesson entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getCourse() != null) {
-            entity.setCourse(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Lesson> saveAll(List<Lesson> lessonList) {
-
-        return lessonRepository.saveAll(lessonList);
+        return super.saveAll(lessonList);
     }
 
 }

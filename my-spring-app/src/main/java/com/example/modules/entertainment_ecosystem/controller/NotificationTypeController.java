@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.NotificationTypeDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.NotificationTypeSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.NotificationType;
 import com.example.modules.entertainment_ecosystem.mapper.NotificationTypeMapper;
 import com.example.modules.entertainment_ecosystem.service.NotificationTypeService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing NotificationType entities.
+ */
 @RestController
 @RequestMapping("/api/notificationtypes")
-public class NotificationTypeController {
-
-    private final NotificationTypeService notificationtypeService;
-    private final NotificationTypeMapper notificationtypeMapper;
+public class NotificationTypeController extends BaseController<NotificationType, NotificationTypeDto, NotificationTypeSimpleDto> {
 
     public NotificationTypeController(NotificationTypeService notificationtypeService,
                                     NotificationTypeMapper notificationtypeMapper) {
-        this.notificationtypeService = notificationtypeService;
-        this.notificationtypeMapper = notificationtypeMapper;
+        super(notificationtypeService, notificationtypeMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificationTypeDto>> getAllNotificationTypes() {
-        List<NotificationType> entities = notificationtypeService.findAll();
-        return ResponseEntity.ok(notificationtypeMapper.toDtoList(entities));
+    public ResponseEntity<Page<NotificationTypeDto>> getAllNotificationTypes(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<NotificationTypeDto>> searchNotificationTypes(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(NotificationType.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<NotificationTypeDto> getNotificationTypeById(@PathVariable Long id) {
-        return notificationtypeService.findById(id)
-                .map(notificationtypeMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class NotificationTypeController {
             @Valid @RequestBody NotificationTypeDto notificationtypeDto,
             UriComponentsBuilder uriBuilder) {
 
-        NotificationType entity = notificationtypeMapper.toEntity(notificationtypeDto);
-        NotificationType saved = notificationtypeService.save(entity);
+        NotificationType entity = mapper.toEntity(notificationtypeDto);
+        NotificationType saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/notificationtypes/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/notificationtypes/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(notificationtypeMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class NotificationTypeController {
             @Valid @RequestBody List<NotificationTypeDto> notificationtypeDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<NotificationType> entities = notificationtypeMapper.toEntityList(notificationtypeDtoList);
-        List<NotificationType> savedEntities = notificationtypeService.saveAll(entities);
+        List<NotificationType> entities = mapper.toEntityList(notificationtypeDtoList);
+        List<NotificationType> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/notificationtypes").build().toUri();
 
-        return ResponseEntity.created(location).body(notificationtypeMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class NotificationTypeController {
             @PathVariable Long id,
             @Valid @RequestBody NotificationTypeDto notificationtypeDto) {
 
-
-        NotificationType entityToUpdate = notificationtypeMapper.toEntity(notificationtypeDto);
-        NotificationType updatedEntity = notificationtypeService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(notificationtypeMapper.toDto(updatedEntity));
+        NotificationType entityToUpdate = mapper.toEntity(notificationtypeDto);
+        NotificationType updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotificationType(@PathVariable Long id) {
-        boolean deleted = notificationtypeService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.UserConnectionDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.UserConnectionSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.UserConnection;
 import com.example.modules.entertainment_ecosystem.mapper.UserConnectionMapper;
 import com.example.modules.entertainment_ecosystem.service.UserConnectionService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing UserConnection entities.
+ */
 @RestController
 @RequestMapping("/api/userconnections")
-public class UserConnectionController {
-
-    private final UserConnectionService userconnectionService;
-    private final UserConnectionMapper userconnectionMapper;
+public class UserConnectionController extends BaseController<UserConnection, UserConnectionDto, UserConnectionSimpleDto> {
 
     public UserConnectionController(UserConnectionService userconnectionService,
                                     UserConnectionMapper userconnectionMapper) {
-        this.userconnectionService = userconnectionService;
-        this.userconnectionMapper = userconnectionMapper;
+        super(userconnectionService, userconnectionMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserConnectionDto>> getAllUserConnections() {
-        List<UserConnection> entities = userconnectionService.findAll();
-        return ResponseEntity.ok(userconnectionMapper.toDtoList(entities));
+    public ResponseEntity<Page<UserConnectionDto>> getAllUserConnections(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserConnectionDto>> searchUserConnections(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(UserConnection.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserConnectionDto> getUserConnectionById(@PathVariable Long id) {
-        return userconnectionService.findById(id)
-                .map(userconnectionMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class UserConnectionController {
             @Valid @RequestBody UserConnectionDto userconnectionDto,
             UriComponentsBuilder uriBuilder) {
 
-        UserConnection entity = userconnectionMapper.toEntity(userconnectionDto);
-        UserConnection saved = userconnectionService.save(entity);
+        UserConnection entity = mapper.toEntity(userconnectionDto);
+        UserConnection saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/userconnections/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/userconnections/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(userconnectionMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class UserConnectionController {
             @Valid @RequestBody List<UserConnectionDto> userconnectionDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<UserConnection> entities = userconnectionMapper.toEntityList(userconnectionDtoList);
-        List<UserConnection> savedEntities = userconnectionService.saveAll(entities);
+        List<UserConnection> entities = mapper.toEntityList(userconnectionDtoList);
+        List<UserConnection> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/userconnections").build().toUri();
 
-        return ResponseEntity.created(location).body(userconnectionMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class UserConnectionController {
             @PathVariable Long id,
             @Valid @RequestBody UserConnectionDto userconnectionDto) {
 
-
-        UserConnection entityToUpdate = userconnectionMapper.toEntity(userconnectionDto);
-        UserConnection updatedEntity = userconnectionService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(userconnectionMapper.toDto(updatedEntity));
+        UserConnection entityToUpdate = mapper.toEntity(userconnectionDto);
+        UserConnection updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserConnection(@PathVariable Long id) {
-        boolean deleted = userconnectionService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

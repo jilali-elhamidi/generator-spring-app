@@ -1,42 +1,50 @@
 package com.example.modules.project_management.controller;
 
 import com.example.modules.project_management.dto.DocumentDto;
+import com.example.modules.project_management.dtosimple.DocumentSimpleDto;
 import com.example.modules.project_management.model.Document;
 import com.example.modules.project_management.mapper.DocumentMapper;
 import com.example.modules.project_management.service.DocumentService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Document entities.
+ */
 @RestController
 @RequestMapping("/api/documents")
-public class DocumentController {
-
-    private final DocumentService documentService;
-    private final DocumentMapper documentMapper;
+public class DocumentController extends BaseController<Document, DocumentDto, DocumentSimpleDto> {
 
     public DocumentController(DocumentService documentService,
                                     DocumentMapper documentMapper) {
-        this.documentService = documentService;
-        this.documentMapper = documentMapper;
+        super(documentService, documentMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<DocumentDto>> getAllDocuments() {
-        List<Document> entities = documentService.findAll();
-        return ResponseEntity.ok(documentMapper.toDtoList(entities));
+    public ResponseEntity<Page<DocumentDto>> getAllDocuments(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<DocumentDto>> searchDocuments(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Document.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DocumentDto> getDocumentById(@PathVariable Long id) {
-        return documentService.findById(id)
-                .map(documentMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class DocumentController {
             @Valid @RequestBody DocumentDto documentDto,
             UriComponentsBuilder uriBuilder) {
 
-        Document entity = documentMapper.toEntity(documentDto);
-        Document saved = documentService.save(entity);
+        Document entity = mapper.toEntity(documentDto);
+        Document saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/documents/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/documents/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(documentMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class DocumentController {
             @Valid @RequestBody List<DocumentDto> documentDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Document> entities = documentMapper.toEntityList(documentDtoList);
-        List<Document> savedEntities = documentService.saveAll(entities);
+        List<Document> entities = mapper.toEntityList(documentDtoList);
+        List<Document> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/documents").build().toUri();
 
-        return ResponseEntity.created(location).body(documentMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class DocumentController {
             @PathVariable Long id,
             @Valid @RequestBody DocumentDto documentDto) {
 
-
-        Document entityToUpdate = documentMapper.toEntity(documentDto);
-        Document updatedEntity = documentService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(documentMapper.toDto(updatedEntity));
+        Document entityToUpdate = mapper.toEntity(documentDto);
+        Document updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
-        boolean deleted = documentService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

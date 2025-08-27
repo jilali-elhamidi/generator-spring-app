@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.UserLoyaltyProgramDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.UserLoyaltyProgramSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.UserLoyaltyProgram;
 import com.example.modules.entertainment_ecosystem.mapper.UserLoyaltyProgramMapper;
 import com.example.modules.entertainment_ecosystem.service.UserLoyaltyProgramService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing UserLoyaltyProgram entities.
+ */
 @RestController
 @RequestMapping("/api/userloyaltyprograms")
-public class UserLoyaltyProgramController {
-
-    private final UserLoyaltyProgramService userloyaltyprogramService;
-    private final UserLoyaltyProgramMapper userloyaltyprogramMapper;
+public class UserLoyaltyProgramController extends BaseController<UserLoyaltyProgram, UserLoyaltyProgramDto, UserLoyaltyProgramSimpleDto> {
 
     public UserLoyaltyProgramController(UserLoyaltyProgramService userloyaltyprogramService,
                                     UserLoyaltyProgramMapper userloyaltyprogramMapper) {
-        this.userloyaltyprogramService = userloyaltyprogramService;
-        this.userloyaltyprogramMapper = userloyaltyprogramMapper;
+        super(userloyaltyprogramService, userloyaltyprogramMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserLoyaltyProgramDto>> getAllUserLoyaltyPrograms() {
-        List<UserLoyaltyProgram> entities = userloyaltyprogramService.findAll();
-        return ResponseEntity.ok(userloyaltyprogramMapper.toDtoList(entities));
+    public ResponseEntity<Page<UserLoyaltyProgramDto>> getAllUserLoyaltyPrograms(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserLoyaltyProgramDto>> searchUserLoyaltyPrograms(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(UserLoyaltyProgram.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserLoyaltyProgramDto> getUserLoyaltyProgramById(@PathVariable Long id) {
-        return userloyaltyprogramService.findById(id)
-                .map(userloyaltyprogramMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class UserLoyaltyProgramController {
             @Valid @RequestBody UserLoyaltyProgramDto userloyaltyprogramDto,
             UriComponentsBuilder uriBuilder) {
 
-        UserLoyaltyProgram entity = userloyaltyprogramMapper.toEntity(userloyaltyprogramDto);
-        UserLoyaltyProgram saved = userloyaltyprogramService.save(entity);
+        UserLoyaltyProgram entity = mapper.toEntity(userloyaltyprogramDto);
+        UserLoyaltyProgram saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/userloyaltyprograms/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/userloyaltyprograms/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(userloyaltyprogramMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class UserLoyaltyProgramController {
             @Valid @RequestBody List<UserLoyaltyProgramDto> userloyaltyprogramDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<UserLoyaltyProgram> entities = userloyaltyprogramMapper.toEntityList(userloyaltyprogramDtoList);
-        List<UserLoyaltyProgram> savedEntities = userloyaltyprogramService.saveAll(entities);
+        List<UserLoyaltyProgram> entities = mapper.toEntityList(userloyaltyprogramDtoList);
+        List<UserLoyaltyProgram> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/userloyaltyprograms").build().toUri();
 
-        return ResponseEntity.created(location).body(userloyaltyprogramMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class UserLoyaltyProgramController {
             @PathVariable Long id,
             @Valid @RequestBody UserLoyaltyProgramDto userloyaltyprogramDto) {
 
-
-        UserLoyaltyProgram entityToUpdate = userloyaltyprogramMapper.toEntity(userloyaltyprogramDto);
-        UserLoyaltyProgram updatedEntity = userloyaltyprogramService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(userloyaltyprogramMapper.toDto(updatedEntity));
+        UserLoyaltyProgram entityToUpdate = mapper.toEntity(userloyaltyprogramDto);
+        UserLoyaltyProgram updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserLoyaltyProgram(@PathVariable Long id) {
-        boolean deleted = userloyaltyprogramService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.ForumThreadTagDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.ForumThreadTagSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.ForumThreadTag;
 import com.example.modules.entertainment_ecosystem.mapper.ForumThreadTagMapper;
 import com.example.modules.entertainment_ecosystem.service.ForumThreadTagService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing ForumThreadTag entities.
+ */
 @RestController
 @RequestMapping("/api/forumthreadtags")
-public class ForumThreadTagController {
-
-    private final ForumThreadTagService forumthreadtagService;
-    private final ForumThreadTagMapper forumthreadtagMapper;
+public class ForumThreadTagController extends BaseController<ForumThreadTag, ForumThreadTagDto, ForumThreadTagSimpleDto> {
 
     public ForumThreadTagController(ForumThreadTagService forumthreadtagService,
                                     ForumThreadTagMapper forumthreadtagMapper) {
-        this.forumthreadtagService = forumthreadtagService;
-        this.forumthreadtagMapper = forumthreadtagMapper;
+        super(forumthreadtagService, forumthreadtagMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<ForumThreadTagDto>> getAllForumThreadTags() {
-        List<ForumThreadTag> entities = forumthreadtagService.findAll();
-        return ResponseEntity.ok(forumthreadtagMapper.toDtoList(entities));
+    public ResponseEntity<Page<ForumThreadTagDto>> getAllForumThreadTags(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ForumThreadTagDto>> searchForumThreadTags(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(ForumThreadTag.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ForumThreadTagDto> getForumThreadTagById(@PathVariable Long id) {
-        return forumthreadtagService.findById(id)
-                .map(forumthreadtagMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class ForumThreadTagController {
             @Valid @RequestBody ForumThreadTagDto forumthreadtagDto,
             UriComponentsBuilder uriBuilder) {
 
-        ForumThreadTag entity = forumthreadtagMapper.toEntity(forumthreadtagDto);
-        ForumThreadTag saved = forumthreadtagService.save(entity);
+        ForumThreadTag entity = mapper.toEntity(forumthreadtagDto);
+        ForumThreadTag saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/forumthreadtags/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/forumthreadtags/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(forumthreadtagMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class ForumThreadTagController {
             @Valid @RequestBody List<ForumThreadTagDto> forumthreadtagDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<ForumThreadTag> entities = forumthreadtagMapper.toEntityList(forumthreadtagDtoList);
-        List<ForumThreadTag> savedEntities = forumthreadtagService.saveAll(entities);
+        List<ForumThreadTag> entities = mapper.toEntityList(forumthreadtagDtoList);
+        List<ForumThreadTag> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/forumthreadtags").build().toUri();
 
-        return ResponseEntity.created(location).body(forumthreadtagMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class ForumThreadTagController {
             @PathVariable Long id,
             @Valid @RequestBody ForumThreadTagDto forumthreadtagDto) {
 
-
-        ForumThreadTag entityToUpdate = forumthreadtagMapper.toEntity(forumthreadtagDto);
-        ForumThreadTag updatedEntity = forumthreadtagService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(forumthreadtagMapper.toDto(updatedEntity));
+        ForumThreadTag entityToUpdate = mapper.toEntity(forumthreadtagDto);
+        ForumThreadTag updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteForumThreadTag(@PathVariable Long id) {
-        boolean deleted = forumthreadtagService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

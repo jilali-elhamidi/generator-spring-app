@@ -3,37 +3,52 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.Document;
 import com.example.modules.project_management.repository.DocumentRepository;
+
 import com.example.modules.project_management.model.Project;
 import com.example.modules.project_management.repository.ProjectRepository;
+
 import com.example.modules.project_management.model.TeamMember;
 import com.example.modules.project_management.repository.TeamMemberRepository;
+
 import com.example.modules.project_management.model.DocumentType;
 import com.example.modules.project_management.repository.DocumentTypeRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class DocumentService extends BaseService<Document> {
 
     protected final DocumentRepository documentRepository;
-    private final ProjectRepository projectRepository;
-    private final TeamMemberRepository uploadedByRepository;
-    private final DocumentTypeRepository typeRepository;
+    
+    protected final ProjectRepository projectRepository;
+    
+    protected final TeamMemberRepository uploadedByRepository;
+    
+    protected final DocumentTypeRepository typeRepository;
+    
 
     public DocumentService(DocumentRepository repository, ProjectRepository projectRepository, TeamMemberRepository uploadedByRepository, DocumentTypeRepository typeRepository)
     {
         super(repository);
         this.documentRepository = repository;
+        
         this.projectRepository = projectRepository;
+        
         this.uploadedByRepository = uploadedByRepository;
+        
         this.typeRepository = typeRepository;
+        
     }
 
+    @Transactional
     @Override
     public Document save(Document document) {
     // ---------- OneToMany ----------
@@ -85,7 +100,8 @@ public class DocumentService extends BaseService<Document> {
     return documentRepository.save(document);
 }
 
-
+    @Transactional
+    @Override
     public Document update(Long id, Document documentRequest) {
         Document existing = documentRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Document not found"));
@@ -132,40 +148,30 @@ public class DocumentService extends BaseService<Document> {
             existing.setType(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return documentRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Document> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Document> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Document.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Document> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Document entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getProject() != null) {
-            entity.setProject(null);
-        }
-        
-        if (entity.getUploadedBy() != null) {
-            entity.setUploadedBy(null);
-        }
-        
-        if (entity.getType() != null) {
-            entity.setType(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Document> saveAll(List<Document> documentList) {
-
-        return documentRepository.saveAll(documentList);
+        return super.saveAll(documentList);
     }
 
 }

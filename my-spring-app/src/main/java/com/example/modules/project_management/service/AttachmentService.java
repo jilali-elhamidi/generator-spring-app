@@ -3,33 +3,45 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.Attachment;
 import com.example.modules.project_management.repository.AttachmentRepository;
+
 import com.example.modules.project_management.model.Task;
 import com.example.modules.project_management.repository.TaskRepository;
+
 import com.example.modules.project_management.model.TeamMember;
 import com.example.modules.project_management.repository.TeamMemberRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class AttachmentService extends BaseService<Attachment> {
 
     protected final AttachmentRepository attachmentRepository;
-    private final TaskRepository taskRepository;
-    private final TeamMemberRepository uploadedByRepository;
+    
+    protected final TaskRepository taskRepository;
+    
+    protected final TeamMemberRepository uploadedByRepository;
+    
 
     public AttachmentService(AttachmentRepository repository, TaskRepository taskRepository, TeamMemberRepository uploadedByRepository)
     {
         super(repository);
         this.attachmentRepository = repository;
+        
         this.taskRepository = taskRepository;
+        
         this.uploadedByRepository = uploadedByRepository;
+        
     }
 
+    @Transactional
     @Override
     public Attachment save(Attachment attachment) {
     // ---------- OneToMany ----------
@@ -67,7 +79,8 @@ public class AttachmentService extends BaseService<Attachment> {
     return attachmentRepository.save(attachment);
 }
 
-
+    @Transactional
+    @Override
     public Attachment update(Long id, Attachment attachmentRequest) {
         Attachment existing = attachmentRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Attachment not found"));
@@ -102,36 +115,30 @@ public class AttachmentService extends BaseService<Attachment> {
             existing.setUploadedBy(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return attachmentRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Attachment> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Attachment> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Attachment.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Attachment> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Attachment entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getTask() != null) {
-            entity.setTask(null);
-        }
-        
-        if (entity.getUploadedBy() != null) {
-            entity.setUploadedBy(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Attachment> saveAll(List<Attachment> attachmentList) {
-
-        return attachmentRepository.saveAll(attachmentList);
+        return super.saveAll(attachmentList);
     }
 
 }

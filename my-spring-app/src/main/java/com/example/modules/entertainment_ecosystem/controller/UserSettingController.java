@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.UserSettingDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.UserSettingSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.UserSetting;
 import com.example.modules.entertainment_ecosystem.mapper.UserSettingMapper;
 import com.example.modules.entertainment_ecosystem.service.UserSettingService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing UserSetting entities.
+ */
 @RestController
 @RequestMapping("/api/usersettings")
-public class UserSettingController {
-
-    private final UserSettingService usersettingService;
-    private final UserSettingMapper usersettingMapper;
+public class UserSettingController extends BaseController<UserSetting, UserSettingDto, UserSettingSimpleDto> {
 
     public UserSettingController(UserSettingService usersettingService,
                                     UserSettingMapper usersettingMapper) {
-        this.usersettingService = usersettingService;
-        this.usersettingMapper = usersettingMapper;
+        super(usersettingService, usersettingMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<UserSettingDto>> getAllUserSettings() {
-        List<UserSetting> entities = usersettingService.findAll();
-        return ResponseEntity.ok(usersettingMapper.toDtoList(entities));
+    public ResponseEntity<Page<UserSettingDto>> getAllUserSettings(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserSettingDto>> searchUserSettings(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(UserSetting.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserSettingDto> getUserSettingById(@PathVariable Long id) {
-        return usersettingService.findById(id)
-                .map(usersettingMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class UserSettingController {
             @Valid @RequestBody UserSettingDto usersettingDto,
             UriComponentsBuilder uriBuilder) {
 
-        UserSetting entity = usersettingMapper.toEntity(usersettingDto);
-        UserSetting saved = usersettingService.save(entity);
+        UserSetting entity = mapper.toEntity(usersettingDto);
+        UserSetting saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/usersettings/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/usersettings/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(usersettingMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class UserSettingController {
             @Valid @RequestBody List<UserSettingDto> usersettingDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<UserSetting> entities = usersettingMapper.toEntityList(usersettingDtoList);
-        List<UserSetting> savedEntities = usersettingService.saveAll(entities);
+        List<UserSetting> entities = mapper.toEntityList(usersettingDtoList);
+        List<UserSetting> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/usersettings").build().toUri();
 
-        return ResponseEntity.created(location).body(usersettingMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class UserSettingController {
             @PathVariable Long id,
             @Valid @RequestBody UserSettingDto usersettingDto) {
 
-
-        UserSetting entityToUpdate = usersettingMapper.toEntity(usersettingDto);
-        UserSetting updatedEntity = usersettingService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(usersettingMapper.toDto(updatedEntity));
+        UserSetting entityToUpdate = mapper.toEntity(usersettingDto);
+        UserSetting updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserSetting(@PathVariable Long id) {
-        boolean deleted = usersettingService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

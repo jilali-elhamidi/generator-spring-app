@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.TransactionDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.TransactionSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.Transaction;
 import com.example.modules.entertainment_ecosystem.mapper.TransactionMapper;
 import com.example.modules.entertainment_ecosystem.service.TransactionService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Transaction entities.
+ */
 @RestController
 @RequestMapping("/api/transactions")
-public class TransactionController {
-
-    private final TransactionService transactionService;
-    private final TransactionMapper transactionMapper;
+public class TransactionController extends BaseController<Transaction, TransactionDto, TransactionSimpleDto> {
 
     public TransactionController(TransactionService transactionService,
                                     TransactionMapper transactionMapper) {
-        this.transactionService = transactionService;
-        this.transactionMapper = transactionMapper;
+        super(transactionService, transactionMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<TransactionDto>> getAllTransactions() {
-        List<Transaction> entities = transactionService.findAll();
-        return ResponseEntity.ok(transactionMapper.toDtoList(entities));
+    public ResponseEntity<Page<TransactionDto>> getAllTransactions(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<TransactionDto>> searchTransactions(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Transaction.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TransactionDto> getTransactionById(@PathVariable Long id) {
-        return transactionService.findById(id)
-                .map(transactionMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class TransactionController {
             @Valid @RequestBody TransactionDto transactionDto,
             UriComponentsBuilder uriBuilder) {
 
-        Transaction entity = transactionMapper.toEntity(transactionDto);
-        Transaction saved = transactionService.save(entity);
+        Transaction entity = mapper.toEntity(transactionDto);
+        Transaction saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/transactions/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/transactions/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(transactionMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class TransactionController {
             @Valid @RequestBody List<TransactionDto> transactionDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Transaction> entities = transactionMapper.toEntityList(transactionDtoList);
-        List<Transaction> savedEntities = transactionService.saveAll(entities);
+        List<Transaction> entities = mapper.toEntityList(transactionDtoList);
+        List<Transaction> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/transactions").build().toUri();
 
-        return ResponseEntity.created(location).body(transactionMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class TransactionController {
             @PathVariable Long id,
             @Valid @RequestBody TransactionDto transactionDto) {
 
-
-        Transaction entityToUpdate = transactionMapper.toEntity(transactionDto);
-        Transaction updatedEntity = transactionService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(transactionMapper.toDto(updatedEntity));
+        Transaction entityToUpdate = mapper.toEntity(transactionDto);
+        Transaction updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
-        boolean deleted = transactionService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

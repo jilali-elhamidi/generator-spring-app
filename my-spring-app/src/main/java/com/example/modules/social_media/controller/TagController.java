@@ -1,42 +1,50 @@
 package com.example.modules.social_media.controller;
 
 import com.example.modules.social_media.dto.TagDto;
+import com.example.modules.social_media.dtosimple.TagSimpleDto;
 import com.example.modules.social_media.model.Tag;
 import com.example.modules.social_media.mapper.TagMapper;
 import com.example.modules.social_media.service.TagService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Tag entities.
+ */
 @RestController
 @RequestMapping("/api/tags")
-public class TagController {
-
-    private final TagService tagService;
-    private final TagMapper tagMapper;
+public class TagController extends BaseController<Tag, TagDto, TagSimpleDto> {
 
     public TagController(TagService tagService,
                                     TagMapper tagMapper) {
-        this.tagService = tagService;
-        this.tagMapper = tagMapper;
+        super(tagService, tagMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<TagDto>> getAllTags() {
-        List<Tag> entities = tagService.findAll();
-        return ResponseEntity.ok(tagMapper.toDtoList(entities));
+    public ResponseEntity<Page<TagDto>> getAllTags(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<TagDto>> searchTags(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Tag.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TagDto> getTagById(@PathVariable Long id) {
-        return tagService.findById(id)
-                .map(tagMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class TagController {
             @Valid @RequestBody TagDto tagDto,
             UriComponentsBuilder uriBuilder) {
 
-        Tag entity = tagMapper.toEntity(tagDto);
-        Tag saved = tagService.save(entity);
+        Tag entity = mapper.toEntity(tagDto);
+        Tag saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/tags/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/tags/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(tagMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class TagController {
             @Valid @RequestBody List<TagDto> tagDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Tag> entities = tagMapper.toEntityList(tagDtoList);
-        List<Tag> savedEntities = tagService.saveAll(entities);
+        List<Tag> entities = mapper.toEntityList(tagDtoList);
+        List<Tag> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/tags").build().toUri();
 
-        return ResponseEntity.created(location).body(tagMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class TagController {
             @PathVariable Long id,
             @Valid @RequestBody TagDto tagDto) {
 
-
-        Tag entityToUpdate = tagMapper.toEntity(tagDto);
-        Tag updatedEntity = tagService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(tagMapper.toDto(updatedEntity));
+        Tag entityToUpdate = mapper.toEntity(tagDto);
+        Tag updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
-        boolean deleted = tagService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

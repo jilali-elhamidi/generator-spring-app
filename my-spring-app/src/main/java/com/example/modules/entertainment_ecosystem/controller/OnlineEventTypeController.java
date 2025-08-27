@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.OnlineEventTypeDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.OnlineEventTypeSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.OnlineEventType;
 import com.example.modules.entertainment_ecosystem.mapper.OnlineEventTypeMapper;
 import com.example.modules.entertainment_ecosystem.service.OnlineEventTypeService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing OnlineEventType entities.
+ */
 @RestController
 @RequestMapping("/api/onlineeventtypes")
-public class OnlineEventTypeController {
-
-    private final OnlineEventTypeService onlineeventtypeService;
-    private final OnlineEventTypeMapper onlineeventtypeMapper;
+public class OnlineEventTypeController extends BaseController<OnlineEventType, OnlineEventTypeDto, OnlineEventTypeSimpleDto> {
 
     public OnlineEventTypeController(OnlineEventTypeService onlineeventtypeService,
                                     OnlineEventTypeMapper onlineeventtypeMapper) {
-        this.onlineeventtypeService = onlineeventtypeService;
-        this.onlineeventtypeMapper = onlineeventtypeMapper;
+        super(onlineeventtypeService, onlineeventtypeMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<OnlineEventTypeDto>> getAllOnlineEventTypes() {
-        List<OnlineEventType> entities = onlineeventtypeService.findAll();
-        return ResponseEntity.ok(onlineeventtypeMapper.toDtoList(entities));
+    public ResponseEntity<Page<OnlineEventTypeDto>> getAllOnlineEventTypes(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<OnlineEventTypeDto>> searchOnlineEventTypes(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(OnlineEventType.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OnlineEventTypeDto> getOnlineEventTypeById(@PathVariable Long id) {
-        return onlineeventtypeService.findById(id)
-                .map(onlineeventtypeMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class OnlineEventTypeController {
             @Valid @RequestBody OnlineEventTypeDto onlineeventtypeDto,
             UriComponentsBuilder uriBuilder) {
 
-        OnlineEventType entity = onlineeventtypeMapper.toEntity(onlineeventtypeDto);
-        OnlineEventType saved = onlineeventtypeService.save(entity);
+        OnlineEventType entity = mapper.toEntity(onlineeventtypeDto);
+        OnlineEventType saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/onlineeventtypes/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/onlineeventtypes/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(onlineeventtypeMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class OnlineEventTypeController {
             @Valid @RequestBody List<OnlineEventTypeDto> onlineeventtypeDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<OnlineEventType> entities = onlineeventtypeMapper.toEntityList(onlineeventtypeDtoList);
-        List<OnlineEventType> savedEntities = onlineeventtypeService.saveAll(entities);
+        List<OnlineEventType> entities = mapper.toEntityList(onlineeventtypeDtoList);
+        List<OnlineEventType> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/onlineeventtypes").build().toUri();
 
-        return ResponseEntity.created(location).body(onlineeventtypeMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class OnlineEventTypeController {
             @PathVariable Long id,
             @Valid @RequestBody OnlineEventTypeDto onlineeventtypeDto) {
 
-
-        OnlineEventType entityToUpdate = onlineeventtypeMapper.toEntity(onlineeventtypeDto);
-        OnlineEventType updatedEntity = onlineeventtypeService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(onlineeventtypeMapper.toDto(updatedEntity));
+        OnlineEventType entityToUpdate = mapper.toEntity(onlineeventtypeDto);
+        OnlineEventType updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOnlineEventType(@PathVariable Long id) {
-        boolean deleted = onlineeventtypeService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

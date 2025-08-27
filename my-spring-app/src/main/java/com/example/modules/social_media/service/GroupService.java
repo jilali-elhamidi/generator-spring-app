@@ -3,37 +3,52 @@ package com.example.modules.social_media.service;
 import com.example.core.service.BaseService;
 import com.example.modules.social_media.model.Group;
 import com.example.modules.social_media.repository.GroupRepository;
-import com.example.modules.social_media.model.Profile;
-import com.example.modules.social_media.repository.ProfileRepository;
-import com.example.modules.social_media.model.Post;
-import com.example.modules.social_media.repository.PostRepository;
+
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.repository.ProfileRepository;
 
+import com.example.modules.social_media.model.Post;
+import com.example.modules.social_media.repository.PostRepository;
+
+import com.example.modules.social_media.model.Profile;
+import com.example.modules.social_media.repository.ProfileRepository;
+
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupService extends BaseService<Group> {
 
     protected final GroupRepository groupRepository;
-    private final ProfileRepository membersRepository;
-    private final PostRepository postsRepository;
-    private final ProfileRepository ownerRepository;
+    
+    protected final ProfileRepository membersRepository;
+    
+    protected final PostRepository postsRepository;
+    
+    protected final ProfileRepository ownerRepository;
+    
 
     public GroupService(GroupRepository repository, ProfileRepository membersRepository, PostRepository postsRepository, ProfileRepository ownerRepository)
     {
         super(repository);
         this.groupRepository = repository;
+        
         this.membersRepository = membersRepository;
+        
         this.postsRepository = postsRepository;
+        
         this.ownerRepository = ownerRepository;
+        
     }
 
+    @Transactional
     @Override
     public Group save(Group group) {
     // ---------- OneToMany ----------
@@ -96,7 +111,8 @@ public class GroupService extends BaseService<Group> {
     return groupRepository.save(group);
 }
 
-
+    @Transactional
+    @Override
     public Group update(Long id, Group groupRequest) {
         Group existing = groupRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Group not found"));
@@ -118,7 +134,7 @@ public class GroupService extends BaseService<Group> {
             existing.setOwner(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         if (groupRequest.getMembers() != null) {
             existing.getMembers().clear();
 
@@ -158,43 +174,25 @@ public class GroupService extends BaseService<Group> {
     // ---------- Relations OneToOne ----------
     return groupRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Group> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Group> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Group.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Group> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Group entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getPosts() != null) {
-            for (var child : entity.getPosts()) {
-                // retirer la référence inverse
-                child.setGroup(null);
-            }
-            entity.getPosts().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-        if (entity.getMembers() != null) {
-            for (Profile item : new ArrayList<>(entity.getMembers())) {
-                
-                item.getGroups().remove(entity); // retire côté inverse
-            }
-            entity.getMembers().clear(); // puis vide côté courant
-        }
-        
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getOwner() != null) {
-            entity.setOwner(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Group> saveAll(List<Group> groupList) {
-
-        return groupRepository.saveAll(groupList);
+        return super.saveAll(groupList);
     }
 
 }

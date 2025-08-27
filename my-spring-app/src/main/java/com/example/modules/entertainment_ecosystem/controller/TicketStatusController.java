@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.TicketStatusDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.TicketStatusSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.TicketStatus;
 import com.example.modules.entertainment_ecosystem.mapper.TicketStatusMapper;
 import com.example.modules.entertainment_ecosystem.service.TicketStatusService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing TicketStatus entities.
+ */
 @RestController
 @RequestMapping("/api/ticketstatuss")
-public class TicketStatusController {
-
-    private final TicketStatusService ticketstatusService;
-    private final TicketStatusMapper ticketstatusMapper;
+public class TicketStatusController extends BaseController<TicketStatus, TicketStatusDto, TicketStatusSimpleDto> {
 
     public TicketStatusController(TicketStatusService ticketstatusService,
                                     TicketStatusMapper ticketstatusMapper) {
-        this.ticketstatusService = ticketstatusService;
-        this.ticketstatusMapper = ticketstatusMapper;
+        super(ticketstatusService, ticketstatusMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<TicketStatusDto>> getAllTicketStatuss() {
-        List<TicketStatus> entities = ticketstatusService.findAll();
-        return ResponseEntity.ok(ticketstatusMapper.toDtoList(entities));
+    public ResponseEntity<Page<TicketStatusDto>> getAllTicketStatuss(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<TicketStatusDto>> searchTicketStatuss(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(TicketStatus.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TicketStatusDto> getTicketStatusById(@PathVariable Long id) {
-        return ticketstatusService.findById(id)
-                .map(ticketstatusMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class TicketStatusController {
             @Valid @RequestBody TicketStatusDto ticketstatusDto,
             UriComponentsBuilder uriBuilder) {
 
-        TicketStatus entity = ticketstatusMapper.toEntity(ticketstatusDto);
-        TicketStatus saved = ticketstatusService.save(entity);
+        TicketStatus entity = mapper.toEntity(ticketstatusDto);
+        TicketStatus saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/ticketstatuss/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/ticketstatuss/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(ticketstatusMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class TicketStatusController {
             @Valid @RequestBody List<TicketStatusDto> ticketstatusDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<TicketStatus> entities = ticketstatusMapper.toEntityList(ticketstatusDtoList);
-        List<TicketStatus> savedEntities = ticketstatusService.saveAll(entities);
+        List<TicketStatus> entities = mapper.toEntityList(ticketstatusDtoList);
+        List<TicketStatus> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/ticketstatuss").build().toUri();
 
-        return ResponseEntity.created(location).body(ticketstatusMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class TicketStatusController {
             @PathVariable Long id,
             @Valid @RequestBody TicketStatusDto ticketstatusDto) {
 
-
-        TicketStatus entityToUpdate = ticketstatusMapper.toEntity(ticketstatusDto);
-        TicketStatus updatedEntity = ticketstatusService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(ticketstatusMapper.toDto(updatedEntity));
+        TicketStatus entityToUpdate = mapper.toEntity(ticketstatusDto);
+        TicketStatus updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTicketStatus(@PathVariable Long id) {
-        boolean deleted = ticketstatusService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

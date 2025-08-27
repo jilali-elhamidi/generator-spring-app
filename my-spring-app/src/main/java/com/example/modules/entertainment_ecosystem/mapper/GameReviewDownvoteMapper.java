@@ -3,30 +3,12 @@ package com.example.modules.entertainment_ecosystem.mapper;
 import com.example.modules.entertainment_ecosystem.model.GameReviewDownvote;
 import com.example.modules.entertainment_ecosystem.dto.GameReviewDownvoteDto;
 import com.example.modules.entertainment_ecosystem.dtosimple.GameReviewDownvoteSimpleDto;
-import org.mapstruct.InheritInverseConfiguration;
+import com.example.core.mapper.BaseMapper;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-import org.mapstruct.MappingTarget;
-import java.util.List;
 
-
+/**
+ * 
+ */
 @Mapper(componentModel = "spring")
-public interface GameReviewDownvoteMapper {
-
-    GameReviewDownvoteMapper INSTANCE = Mappers.getMapper(GameReviewDownvoteMapper.class);
-
-    GameReviewDownvoteDto toDto(GameReviewDownvote gamereviewdownvote);
-
-    GameReviewDownvoteSimpleDto toSimpleDto(GameReviewDownvote gamereviewdownvote);
-
-    @InheritInverseConfiguration
-    GameReviewDownvote toEntity(GameReviewDownvoteDto gamereviewdownvoteDto);
-
-    List<GameReviewDownvoteDto> toDtoList(List<GameReviewDownvote> gamereviewdownvoteList);
-
-    List<GameReviewDownvote> toEntityList(List<GameReviewDownvoteDto> gamereviewdownvoteDtoList);
-
-    void updateEntityFromDto(GameReviewDownvoteDto dto, @MappingTarget GameReviewDownvote entity);
-
+public interface GameReviewDownvoteMapper extends BaseMapper<GameReviewDownvote, GameReviewDownvoteDto, GameReviewDownvoteSimpleDto> {
 }

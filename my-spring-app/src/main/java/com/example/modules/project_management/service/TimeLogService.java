@@ -3,33 +3,45 @@ package com.example.modules.project_management.service;
 import com.example.core.service.BaseService;
 import com.example.modules.project_management.model.TimeLog;
 import com.example.modules.project_management.repository.TimeLogRepository;
+
 import com.example.modules.project_management.model.Task;
 import com.example.modules.project_management.repository.TaskRepository;
+
 import com.example.modules.project_management.model.TeamMember;
 import com.example.modules.project_management.repository.TeamMemberRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class TimeLogService extends BaseService<TimeLog> {
 
     protected final TimeLogRepository timelogRepository;
-    private final TaskRepository taskRepository;
-    private final TeamMemberRepository userRepository;
+    
+    protected final TaskRepository taskRepository;
+    
+    protected final TeamMemberRepository userRepository;
+    
 
     public TimeLogService(TimeLogRepository repository, TaskRepository taskRepository, TeamMemberRepository userRepository)
     {
         super(repository);
         this.timelogRepository = repository;
+        
         this.taskRepository = taskRepository;
+        
         this.userRepository = userRepository;
+        
     }
 
+    @Transactional
     @Override
     public TimeLog save(TimeLog timelog) {
     // ---------- OneToMany ----------
@@ -67,7 +79,8 @@ public class TimeLogService extends BaseService<TimeLog> {
     return timelogRepository.save(timelog);
 }
 
-
+    @Transactional
+    @Override
     public TimeLog update(Long id, TimeLog timelogRequest) {
         TimeLog existing = timelogRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("TimeLog not found"));
@@ -102,36 +115,30 @@ public class TimeLogService extends BaseService<TimeLog> {
             existing.setUser(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
     // ---------- Relations OneToMany ----------
     // ---------- Relations OneToOne ----------
     return timelogRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<TimeLog> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<TimeLog> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(TimeLog.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<TimeLog> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        TimeLog entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-    // --- Dissocier ManyToMany ---
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getTask() != null) {
-            entity.setTask(null);
-        }
-        
-        if (entity.getUser() != null) {
-            entity.setUser(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<TimeLog> saveAll(List<TimeLog> timelogList) {
-
-        return timelogRepository.saveAll(timelogList);
+        return super.saveAll(timelogList);
     }
 
 }

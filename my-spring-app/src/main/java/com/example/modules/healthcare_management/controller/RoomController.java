@@ -1,42 +1,50 @@
 package com.example.modules.healthcare_management.controller;
 
 import com.example.modules.healthcare_management.dto.RoomDto;
+import com.example.modules.healthcare_management.dtosimple.RoomSimpleDto;
 import com.example.modules.healthcare_management.model.Room;
 import com.example.modules.healthcare_management.mapper.RoomMapper;
 import com.example.modules.healthcare_management.service.RoomService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Room entities.
+ */
 @RestController
 @RequestMapping("/api/rooms")
-public class RoomController {
-
-    private final RoomService roomService;
-    private final RoomMapper roomMapper;
+public class RoomController extends BaseController<Room, RoomDto, RoomSimpleDto> {
 
     public RoomController(RoomService roomService,
                                     RoomMapper roomMapper) {
-        this.roomService = roomService;
-        this.roomMapper = roomMapper;
+        super(roomService, roomMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<RoomDto>> getAllRooms() {
-        List<Room> entities = roomService.findAll();
-        return ResponseEntity.ok(roomMapper.toDtoList(entities));
+    public ResponseEntity<Page<RoomDto>> getAllRooms(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<RoomDto>> searchRooms(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Room.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RoomDto> getRoomById(@PathVariable Long id) {
-        return roomService.findById(id)
-                .map(roomMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class RoomController {
             @Valid @RequestBody RoomDto roomDto,
             UriComponentsBuilder uriBuilder) {
 
-        Room entity = roomMapper.toEntity(roomDto);
-        Room saved = roomService.save(entity);
+        Room entity = mapper.toEntity(roomDto);
+        Room saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/rooms/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/rooms/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(roomMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class RoomController {
             @Valid @RequestBody List<RoomDto> roomDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Room> entities = roomMapper.toEntityList(roomDtoList);
-        List<Room> savedEntities = roomService.saveAll(entities);
+        List<Room> entities = mapper.toEntityList(roomDtoList);
+        List<Room> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/rooms").build().toUri();
 
-        return ResponseEntity.created(location).body(roomMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class RoomController {
             @PathVariable Long id,
             @Valid @RequestBody RoomDto roomDto) {
 
-
-        Room entityToUpdate = roomMapper.toEntity(roomDto);
-        Room updatedEntity = roomService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(roomMapper.toDto(updatedEntity));
+        Room entityToUpdate = mapper.toEntity(roomDto);
+        Room updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
-        boolean deleted = roomService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

@@ -3,30 +3,12 @@ package com.example.modules.project_management.mapper;
 import com.example.modules.project_management.model.Comment;
 import com.example.modules.project_management.dto.CommentDto;
 import com.example.modules.project_management.dtosimple.CommentSimpleDto;
-import org.mapstruct.InheritInverseConfiguration;
+import com.example.core.mapper.BaseMapper;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-import org.mapstruct.MappingTarget;
-import java.util.List;
 
-
+/**
+ * 
+ */
 @Mapper(componentModel = "spring")
-public interface CommentMapper {
-
-    CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
-
-    CommentDto toDto(Comment comment);
-
-    CommentSimpleDto toSimpleDto(Comment comment);
-
-    @InheritInverseConfiguration
-    Comment toEntity(CommentDto commentDto);
-
-    List<CommentDto> toDtoList(List<Comment> commentList);
-
-    List<Comment> toEntityList(List<CommentDto> commentDtoList);
-
-    void updateEntityFromDto(CommentDto dto, @MappingTarget Comment entity);
-
+public interface CommentMapper extends BaseMapper<Comment, CommentDto, CommentSimpleDto> {
 }

@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.SubscriptionFeatureDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.SubscriptionFeatureSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.SubscriptionFeature;
 import com.example.modules.entertainment_ecosystem.mapper.SubscriptionFeatureMapper;
 import com.example.modules.entertainment_ecosystem.service.SubscriptionFeatureService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing SubscriptionFeature entities.
+ */
 @RestController
 @RequestMapping("/api/subscriptionfeatures")
-public class SubscriptionFeatureController {
-
-    private final SubscriptionFeatureService subscriptionfeatureService;
-    private final SubscriptionFeatureMapper subscriptionfeatureMapper;
+public class SubscriptionFeatureController extends BaseController<SubscriptionFeature, SubscriptionFeatureDto, SubscriptionFeatureSimpleDto> {
 
     public SubscriptionFeatureController(SubscriptionFeatureService subscriptionfeatureService,
                                     SubscriptionFeatureMapper subscriptionfeatureMapper) {
-        this.subscriptionfeatureService = subscriptionfeatureService;
-        this.subscriptionfeatureMapper = subscriptionfeatureMapper;
+        super(subscriptionfeatureService, subscriptionfeatureMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<SubscriptionFeatureDto>> getAllSubscriptionFeatures() {
-        List<SubscriptionFeature> entities = subscriptionfeatureService.findAll();
-        return ResponseEntity.ok(subscriptionfeatureMapper.toDtoList(entities));
+    public ResponseEntity<Page<SubscriptionFeatureDto>> getAllSubscriptionFeatures(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<SubscriptionFeatureDto>> searchSubscriptionFeatures(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(SubscriptionFeature.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SubscriptionFeatureDto> getSubscriptionFeatureById(@PathVariable Long id) {
-        return subscriptionfeatureService.findById(id)
-                .map(subscriptionfeatureMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class SubscriptionFeatureController {
             @Valid @RequestBody SubscriptionFeatureDto subscriptionfeatureDto,
             UriComponentsBuilder uriBuilder) {
 
-        SubscriptionFeature entity = subscriptionfeatureMapper.toEntity(subscriptionfeatureDto);
-        SubscriptionFeature saved = subscriptionfeatureService.save(entity);
+        SubscriptionFeature entity = mapper.toEntity(subscriptionfeatureDto);
+        SubscriptionFeature saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/subscriptionfeatures/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/subscriptionfeatures/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(subscriptionfeatureMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class SubscriptionFeatureController {
             @Valid @RequestBody List<SubscriptionFeatureDto> subscriptionfeatureDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<SubscriptionFeature> entities = subscriptionfeatureMapper.toEntityList(subscriptionfeatureDtoList);
-        List<SubscriptionFeature> savedEntities = subscriptionfeatureService.saveAll(entities);
+        List<SubscriptionFeature> entities = mapper.toEntityList(subscriptionfeatureDtoList);
+        List<SubscriptionFeature> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/subscriptionfeatures").build().toUri();
 
-        return ResponseEntity.created(location).body(subscriptionfeatureMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class SubscriptionFeatureController {
             @PathVariable Long id,
             @Valid @RequestBody SubscriptionFeatureDto subscriptionfeatureDto) {
 
-
-        SubscriptionFeature entityToUpdate = subscriptionfeatureMapper.toEntity(subscriptionfeatureDto);
-        SubscriptionFeature updatedEntity = subscriptionfeatureService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(subscriptionfeatureMapper.toDto(updatedEntity));
+        SubscriptionFeature entityToUpdate = mapper.toEntity(subscriptionfeatureDto);
+        SubscriptionFeature updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSubscriptionFeature(@PathVariable Long id) {
-        boolean deleted = subscriptionfeatureService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

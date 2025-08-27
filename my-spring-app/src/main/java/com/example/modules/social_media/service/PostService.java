@@ -3,45 +3,66 @@ package com.example.modules.social_media.service;
 import com.example.core.service.BaseService;
 import com.example.modules.social_media.model.Post;
 import com.example.modules.social_media.repository.PostRepository;
+
 import com.example.modules.social_media.model.Profile;
 import com.example.modules.social_media.repository.ProfileRepository;
+
 import com.example.modules.social_media.model.Comment;
 import com.example.modules.social_media.repository.CommentRepository;
+
 import com.example.modules.social_media.model.Tag;
 import com.example.modules.social_media.repository.TagRepository;
+
 import com.example.modules.social_media.model.MediaFile;
 import com.example.modules.social_media.repository.MediaFileRepository;
+
 import com.example.modules.social_media.model.Group;
 import com.example.modules.social_media.repository.GroupRepository;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService extends BaseService<Post> {
 
     protected final PostRepository postRepository;
-    private final ProfileRepository authorRepository;
-    private final CommentRepository commentsRepository;
-    private final TagRepository tagsRepository;
-    private final MediaFileRepository mediaRepository;
-    private final GroupRepository groupRepository;
+    
+    protected final ProfileRepository authorRepository;
+    
+    protected final CommentRepository commentsRepository;
+    
+    protected final TagRepository tagsRepository;
+    
+    protected final MediaFileRepository mediaRepository;
+    
+    protected final GroupRepository groupRepository;
+    
 
     public PostService(PostRepository repository, ProfileRepository authorRepository, CommentRepository commentsRepository, TagRepository tagsRepository, MediaFileRepository mediaRepository, GroupRepository groupRepository)
     {
         super(repository);
         this.postRepository = repository;
+        
         this.authorRepository = authorRepository;
+        
         this.commentsRepository = commentsRepository;
+        
         this.tagsRepository = tagsRepository;
+        
         this.mediaRepository = mediaRepository;
+        
         this.groupRepository = groupRepository;
+        
     }
 
+    @Transactional
     @Override
     public Post save(Post post) {
     // ---------- OneToMany ----------
@@ -135,7 +156,8 @@ public class PostService extends BaseService<Post> {
     return postRepository.save(post);
 }
 
-
+    @Transactional
+    @Override
     public Post update(Long id, Post postRequest) {
         Post existing = postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -169,7 +191,7 @@ public class PostService extends BaseService<Post> {
             existing.setGroup(null);
         }
         
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         if (postRequest.getTags() != null) {
             existing.getTags().clear();
 
@@ -226,55 +248,25 @@ public class PostService extends BaseService<Post> {
     // ---------- Relations OneToOne ----------
     return postRepository.save(existing);
 }
+
+    // Pagination simple
+    public Page<Post> findAll(Pageable pageable) {
+        return super.findAll(pageable);
+    }
+
+    // Recherche dynamique déléguée au BaseService (Specifications + pagination)
+    public Page<Post> search(Map<String, String> filters, Pageable pageable) {
+        return super.search(Post.class, filters, pageable);
+    }
+
     @Transactional
     public boolean deleteById(Long id) {
-        Optional<Post> entityOpt = repository.findById(id);
-        if (entityOpt.isEmpty()) return false;
-
-        Post entity = entityOpt.get();
-    // --- Dissocier OneToMany ---
-        if (entity.getComments() != null) {
-            for (var child : entity.getComments()) {
-                // retirer la référence inverse
-                child.setPost(null);
-            }
-            entity.getComments().clear();
-        }
-        
-        if (entity.getMedia() != null) {
-            for (var child : entity.getMedia()) {
-                // retirer la référence inverse
-                child.setPost(null);
-            }
-            entity.getMedia().clear();
-        }
-        
-    // --- Dissocier ManyToMany ---
-        if (entity.getTags() != null) {
-            for (Tag item : new ArrayList<>(entity.getTags())) {
-                
-                item.getPosts().remove(entity); // retire côté inverse
-            }
-            entity.getTags().clear(); // puis vide côté courant
-        }
-        
-    // --- Dissocier OneToOne ---
-    // --- Dissocier ManyToOne ---
-        if (entity.getAuthor() != null) {
-            entity.setAuthor(null);
-        }
-        
-        if (entity.getGroup() != null) {
-            entity.setGroup(null);
-        }
-        
-        repository.delete(entity);
-        return true;
+        return super.deleteById(id);
     }
+
     @Transactional
     public List<Post> saveAll(List<Post> postList) {
-
-        return postRepository.saveAll(postList);
+        return super.saveAll(postList);
     }
 
 }

@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.BookSeriesDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.BookSeriesSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.BookSeries;
 import com.example.modules.entertainment_ecosystem.mapper.BookSeriesMapper;
 import com.example.modules.entertainment_ecosystem.service.BookSeriesService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing BookSeries entities.
+ */
 @RestController
 @RequestMapping("/api/bookseriess")
-public class BookSeriesController {
-
-    private final BookSeriesService bookseriesService;
-    private final BookSeriesMapper bookseriesMapper;
+public class BookSeriesController extends BaseController<BookSeries, BookSeriesDto, BookSeriesSimpleDto> {
 
     public BookSeriesController(BookSeriesService bookseriesService,
                                     BookSeriesMapper bookseriesMapper) {
-        this.bookseriesService = bookseriesService;
-        this.bookseriesMapper = bookseriesMapper;
+        super(bookseriesService, bookseriesMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<BookSeriesDto>> getAllBookSeriess() {
-        List<BookSeries> entities = bookseriesService.findAll();
-        return ResponseEntity.ok(bookseriesMapper.toDtoList(entities));
+    public ResponseEntity<Page<BookSeriesDto>> getAllBookSeriess(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<BookSeriesDto>> searchBookSeriess(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(BookSeries.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<BookSeriesDto> getBookSeriesById(@PathVariable Long id) {
-        return bookseriesService.findById(id)
-                .map(bookseriesMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class BookSeriesController {
             @Valid @RequestBody BookSeriesDto bookseriesDto,
             UriComponentsBuilder uriBuilder) {
 
-        BookSeries entity = bookseriesMapper.toEntity(bookseriesDto);
-        BookSeries saved = bookseriesService.save(entity);
+        BookSeries entity = mapper.toEntity(bookseriesDto);
+        BookSeries saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/bookseriess/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/bookseriess/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(bookseriesMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class BookSeriesController {
             @Valid @RequestBody List<BookSeriesDto> bookseriesDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<BookSeries> entities = bookseriesMapper.toEntityList(bookseriesDtoList);
-        List<BookSeries> savedEntities = bookseriesService.saveAll(entities);
+        List<BookSeries> entities = mapper.toEntityList(bookseriesDtoList);
+        List<BookSeries> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/bookseriess").build().toUri();
 
-        return ResponseEntity.created(location).body(bookseriesMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class BookSeriesController {
             @PathVariable Long id,
             @Valid @RequestBody BookSeriesDto bookseriesDto) {
 
-
-        BookSeries entityToUpdate = bookseriesMapper.toEntity(bookseriesDto);
-        BookSeries updatedEntity = bookseriesService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(bookseriesMapper.toDto(updatedEntity));
+        BookSeries entityToUpdate = mapper.toEntity(bookseriesDto);
+        BookSeries updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBookSeries(@PathVariable Long id) {
-        boolean deleted = bookseriesService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

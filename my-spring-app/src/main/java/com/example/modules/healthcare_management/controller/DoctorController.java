@@ -1,42 +1,50 @@
 package com.example.modules.healthcare_management.controller;
 
 import com.example.modules.healthcare_management.dto.DoctorDto;
+import com.example.modules.healthcare_management.dtosimple.DoctorSimpleDto;
 import com.example.modules.healthcare_management.model.Doctor;
 import com.example.modules.healthcare_management.mapper.DoctorMapper;
 import com.example.modules.healthcare_management.service.DoctorService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing Doctor entities.
+ */
 @RestController
 @RequestMapping("/api/doctors")
-public class DoctorController {
-
-    private final DoctorService doctorService;
-    private final DoctorMapper doctorMapper;
+public class DoctorController extends BaseController<Doctor, DoctorDto, DoctorSimpleDto> {
 
     public DoctorController(DoctorService doctorService,
                                     DoctorMapper doctorMapper) {
-        this.doctorService = doctorService;
-        this.doctorMapper = doctorMapper;
+        super(doctorService, doctorMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<DoctorDto>> getAllDoctors() {
-        List<Doctor> entities = doctorService.findAll();
-        return ResponseEntity.ok(doctorMapper.toDtoList(entities));
+    public ResponseEntity<Page<DoctorDto>> getAllDoctors(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<DoctorDto>> searchDoctors(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(Doctor.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DoctorDto> getDoctorById(@PathVariable Long id) {
-        return doctorService.findById(id)
-                .map(doctorMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class DoctorController {
             @Valid @RequestBody DoctorDto doctorDto,
             UriComponentsBuilder uriBuilder) {
 
-        Doctor entity = doctorMapper.toEntity(doctorDto);
-        Doctor saved = doctorService.save(entity);
+        Doctor entity = mapper.toEntity(doctorDto);
+        Doctor saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/doctors/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/doctors/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(doctorMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class DoctorController {
             @Valid @RequestBody List<DoctorDto> doctorDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<Doctor> entities = doctorMapper.toEntityList(doctorDtoList);
-        List<Doctor> savedEntities = doctorService.saveAll(entities);
+        List<Doctor> entities = mapper.toEntityList(doctorDtoList);
+        List<Doctor> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/doctors").build().toUri();
 
-        return ResponseEntity.created(location).body(doctorMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class DoctorController {
             @PathVariable Long id,
             @Valid @RequestBody DoctorDto doctorDto) {
 
-
-        Doctor entityToUpdate = doctorMapper.toEntity(doctorDto);
-        Doctor updatedEntity = doctorService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(doctorMapper.toDto(updatedEntity));
+        Doctor entityToUpdate = mapper.toEntity(doctorDto);
+        Doctor updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
-        boolean deleted = doctorService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

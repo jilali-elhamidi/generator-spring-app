@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.PaymentMethodDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.PaymentMethodSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.PaymentMethod;
 import com.example.modules.entertainment_ecosystem.mapper.PaymentMethodMapper;
 import com.example.modules.entertainment_ecosystem.service.PaymentMethodService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing PaymentMethod entities.
+ */
 @RestController
 @RequestMapping("/api/paymentmethods")
-public class PaymentMethodController {
-
-    private final PaymentMethodService paymentmethodService;
-    private final PaymentMethodMapper paymentmethodMapper;
+public class PaymentMethodController extends BaseController<PaymentMethod, PaymentMethodDto, PaymentMethodSimpleDto> {
 
     public PaymentMethodController(PaymentMethodService paymentmethodService,
                                     PaymentMethodMapper paymentmethodMapper) {
-        this.paymentmethodService = paymentmethodService;
-        this.paymentmethodMapper = paymentmethodMapper;
+        super(paymentmethodService, paymentmethodMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<PaymentMethodDto>> getAllPaymentMethods() {
-        List<PaymentMethod> entities = paymentmethodService.findAll();
-        return ResponseEntity.ok(paymentmethodMapper.toDtoList(entities));
+    public ResponseEntity<Page<PaymentMethodDto>> getAllPaymentMethods(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PaymentMethodDto>> searchPaymentMethods(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(PaymentMethod.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PaymentMethodDto> getPaymentMethodById(@PathVariable Long id) {
-        return paymentmethodService.findById(id)
-                .map(paymentmethodMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class PaymentMethodController {
             @Valid @RequestBody PaymentMethodDto paymentmethodDto,
             UriComponentsBuilder uriBuilder) {
 
-        PaymentMethod entity = paymentmethodMapper.toEntity(paymentmethodDto);
-        PaymentMethod saved = paymentmethodService.save(entity);
+        PaymentMethod entity = mapper.toEntity(paymentmethodDto);
+        PaymentMethod saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/paymentmethods/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/paymentmethods/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(paymentmethodMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class PaymentMethodController {
             @Valid @RequestBody List<PaymentMethodDto> paymentmethodDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<PaymentMethod> entities = paymentmethodMapper.toEntityList(paymentmethodDtoList);
-        List<PaymentMethod> savedEntities = paymentmethodService.saveAll(entities);
+        List<PaymentMethod> entities = mapper.toEntityList(paymentmethodDtoList);
+        List<PaymentMethod> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/paymentmethods").build().toUri();
 
-        return ResponseEntity.created(location).body(paymentmethodMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class PaymentMethodController {
             @PathVariable Long id,
             @Valid @RequestBody PaymentMethodDto paymentmethodDto) {
 
-
-        PaymentMethod entityToUpdate = paymentmethodMapper.toEntity(paymentmethodDto);
-        PaymentMethod updatedEntity = paymentmethodService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(paymentmethodMapper.toDto(updatedEntity));
+        PaymentMethod entityToUpdate = mapper.toEntity(paymentmethodDto);
+        PaymentMethod updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePaymentMethod(@PathVariable Long id) {
-        boolean deleted = paymentmethodService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }

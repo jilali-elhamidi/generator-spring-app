@@ -1,42 +1,50 @@
 package com.example.modules.entertainment_ecosystem.controller;
 
 import com.example.modules.entertainment_ecosystem.dto.MusicVideoDto;
+import com.example.modules.entertainment_ecosystem.dtosimple.MusicVideoSimpleDto;
 import com.example.modules.entertainment_ecosystem.model.MusicVideo;
 import com.example.modules.entertainment_ecosystem.mapper.MusicVideoMapper;
 import com.example.modules.entertainment_ecosystem.service.MusicVideoService;
+import com.example.core.controller.BaseController;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller for managing MusicVideo entities.
+ */
 @RestController
 @RequestMapping("/api/musicvideos")
-public class MusicVideoController {
-
-    private final MusicVideoService musicvideoService;
-    private final MusicVideoMapper musicvideoMapper;
+public class MusicVideoController extends BaseController<MusicVideo, MusicVideoDto, MusicVideoSimpleDto> {
 
     public MusicVideoController(MusicVideoService musicvideoService,
                                     MusicVideoMapper musicvideoMapper) {
-        this.musicvideoService = musicvideoService;
-        this.musicvideoMapper = musicvideoMapper;
+        super(musicvideoService, musicvideoMapper);
     }
 
     @GetMapping
-    public ResponseEntity<List<MusicVideoDto>> getAllMusicVideos() {
-        List<MusicVideo> entities = musicvideoService.findAll();
-        return ResponseEntity.ok(musicvideoMapper.toDtoList(entities));
+    public ResponseEntity<Page<MusicVideoDto>> getAllMusicVideos(Pageable pageable) {
+        return doGetAll(pageable);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<MusicVideoDto>> searchMusicVideos(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        return doSearch(MusicVideo.class, filters, pageable);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MusicVideoDto> getMusicVideoById(@PathVariable Long id) {
-        return musicvideoService.findById(id)
-                .map(musicvideoMapper::toDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return doGetById(id);
     }
 
     @PostMapping
@@ -44,15 +52,15 @@ public class MusicVideoController {
             @Valid @RequestBody MusicVideoDto musicvideoDto,
             UriComponentsBuilder uriBuilder) {
 
-        MusicVideo entity = musicvideoMapper.toEntity(musicvideoDto);
-        MusicVideo saved = musicvideoService.save(entity);
+        MusicVideo entity = mapper.toEntity(musicvideoDto);
+        MusicVideo saved = service.save(entity);
 
         URI location = uriBuilder
-                                .path("/api/musicvideos/{id}")
-                                .buildAndExpand(saved.getId())
-                                .toUri();
+                .path("/api/musicvideos/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
 
-        return ResponseEntity.created(location).body(musicvideoMapper.toDto(saved));
+        return ResponseEntity.created(location).body(mapper.toDto(saved));
     }
 
     @PostMapping("/batch")
@@ -60,12 +68,12 @@ public class MusicVideoController {
             @Valid @RequestBody List<MusicVideoDto> musicvideoDtoList,
             UriComponentsBuilder uriBuilder) {
 
-        List<MusicVideo> entities = musicvideoMapper.toEntityList(musicvideoDtoList);
-        List<MusicVideo> savedEntities = musicvideoService.saveAll(entities);
+        List<MusicVideo> entities = mapper.toEntityList(musicvideoDtoList);
+        List<MusicVideo> savedEntities = service.saveAll(entities);
 
         URI location = uriBuilder.path("/api/musicvideos").build().toUri();
 
-        return ResponseEntity.created(location).body(musicvideoMapper.toDtoList(savedEntities));
+        return ResponseEntity.created(location).body(mapper.toDtoList(savedEntities));
     }
 
     @PutMapping("/{id}")
@@ -73,21 +81,13 @@ public class MusicVideoController {
             @PathVariable Long id,
             @Valid @RequestBody MusicVideoDto musicvideoDto) {
 
-
-        MusicVideo entityToUpdate = musicvideoMapper.toEntity(musicvideoDto);
-        MusicVideo updatedEntity = musicvideoService.update(id, entityToUpdate);
-
-        return ResponseEntity.ok(musicvideoMapper.toDto(updatedEntity));
+        MusicVideo entityToUpdate = mapper.toEntity(musicvideoDto);
+        MusicVideo updatedEntity = service.update(id, entityToUpdate);
+        return ResponseEntity.ok(mapper.toDto(updatedEntity));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMusicVideo(@PathVariable Long id) {
-        boolean deleted = musicvideoService.deleteById(id);
-
-        if (!deleted) {
-        return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        return doDelete(id);
     }
 }
