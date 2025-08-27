@@ -10,10 +10,18 @@ import com.example.modules.{{../module}}.repository.{{type}}Repository;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Date;
 
 @Service
 public class {{entityName}}Service extends BaseService<{{entityName}}> {
@@ -149,7 +157,7 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
         }
         {{/if}}
         {{~/each}}
-    // ---------- Relations ManyToOne ----------
+    // ---------- Relations ManyToMany ----------
         {{~#each relationships}}
         {{~#if (eq relationType "ManyToMany")}}
         if ({{entityNameLowercase}}Request.get{{capitalize name}}() != null) {
@@ -211,6 +219,65 @@ public class {{entityName}}Service extends BaseService<{{entityName}}> {
     {{~/each}}
     return {{entityNameLowercase}}Repository.save(existing);
 }
+    
+    // Pagination simple
+    public Page<{{entityName}}> findAll(Pageable pageable) {
+        return {{entityNameLowercase}}Repository.findAll(pageable);
+    }
+
+    // Recherche dynamique par Specifications + pagination
+    public Page<{{entityName}}> search(Map<String, String> filters, Pageable pageable) {
+        Specification<{{entityName}}> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Champs simples générés
+            {{~#each fields}}
+            {{~#if (eq type "String")}}
+            if (filters.containsKey("{{name}}")) {
+                String value = filters.get("{{name}}");
+                predicates.add(cb.like(cb.lower(root.get("{{name}}")), "%" + value.toLowerCase() + "%"));
+            }
+            {{~else if (eq type "Long")}}
+            if (filters.containsKey("{{name}}")) {
+                try {
+                    Long value = Long.parseLong(filters.get("{{name}}"));
+                    predicates.add(cb.equal(root.get("{{name}}"), value));
+                } catch (NumberFormatException ignored) {}
+            }
+            {{~else if (eq type "Integer")}}
+            if (filters.containsKey("{{name}}")) {
+                try {
+                    Integer value = Integer.parseInt(filters.get("{{name}}"));
+                    predicates.add(cb.equal(root.get("{{name}}"), value));
+                } catch (NumberFormatException ignored) {}
+            }
+            {{~else if (eq type "Double")}}
+            if (filters.containsKey("{{name}}")) {
+                try {
+                    Double value = Double.parseDouble(filters.get("{{name}}"));
+                    predicates.add(cb.equal(root.get("{{name}}"), value));
+                } catch (NumberFormatException ignored) {}
+            }
+            {{~else if (eq type "Boolean")}}
+            if (filters.containsKey("{{name}}")) {
+                Boolean value = Boolean.parseBoolean(filters.get("{{name}}"));
+                predicates.add(cb.equal(root.get("{{name}}"), value));
+            }
+            {{~else if (eq type "Date")}}
+            if (filters.containsKey("{{name}}")) {
+                try {
+                    Date value = new SimpleDateFormat("yyyy-MM-dd").parse(filters.get("{{name}}"));
+                    predicates.add(cb.equal(root.get("{{name}}"), value));
+                } catch (ParseException ignored) {}
+            }
+            {{/if}}
+            {{~/each}}
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return {{entityNameLowercase}}Repository.findAll(spec, pageable);
+    }
     @Transactional
     public boolean deleteById(Long id) {
         Optional<{{entityName}}> entityOpt = repository.findById(id);

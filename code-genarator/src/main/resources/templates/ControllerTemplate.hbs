@@ -6,11 +6,15 @@ import com.example.modules.{{module}}.mapper.{{entityName}}Mapper;
 import com.example.modules.{{module}}.service.{{entityName}}Service;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/{{entityNameLowercase}}s")
@@ -26,9 +30,18 @@ public class {{entityName}}Controller {
     }
 
     @GetMapping
-    public ResponseEntity<List<{{entityName}}Dto>> getAll{{entityName}}s() {
-        List<{{entityName}}> entities = {{entityNameLowercase}}Service.findAll();
-        return ResponseEntity.ok({{entityNameLowercase}}Mapper.toDtoList(entities));
+    public ResponseEntity<Page<{{entityName}}Dto>> getAll{{entityName}}s(Pageable pageable) {
+        Page<{{entityName}}> page = {{entityNameLowercase}}Service.findAll(pageable);
+        return ResponseEntity.ok(page.map({{entityNameLowercase}}Mapper::toDto));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<{{entityName}}Dto>> search{{entityName}}s(
+            @RequestParam Map<String, String> filters,
+            Pageable pageable
+    ) {
+        Page<{{entityName}}> page = {{entityNameLowercase}}Service.search(filters, pageable);
+        return ResponseEntity.ok(page.map({{entityNameLowercase}}Mapper::toDto));
     }
 
     @GetMapping("/{id}")
